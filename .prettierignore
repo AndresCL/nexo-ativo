@@ -1,0 +1,11 @@
+node_modules
+.next
+.next-dev
+funcoes/node_modules
+funcoes/dist
+coverage
+playwright-report
+test-results
+package-lock.json
+funcoes/package-lock.json
+

@@ -1,0 +1,38 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "solicitacoes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "situacao", "order": "ASCENDING" },
+        { "fieldPath": "criadoEm", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "solicitacoes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "profissionalId", "order": "ASCENDING" },
+        { "fieldPath": "situacao", "order": "ASCENDING" },
+        { "fieldPath": "criadoEm", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cobrancas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "organizacaoId", "order": "ASCENDING" },
+        { "fieldPath": "criadoEm", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "assinaturas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "situacao", "order": "ASCENDING" },
+        { "fieldPath": "atualizadoEm", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

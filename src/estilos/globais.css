@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+@theme {
+  --font-editorial: "Cormorant Variable", Georgia, "Times New Roman", serif;
+  --font-interface:
+    "Plus Jakarta Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --color-mineral-950: #0f1110;
+  --color-mineral-900: #171a18;
+  --color-mineral-800: #242926;
+  --color-mineral-700: #383f3b;
+  --color-mineral-500: #69726c;
+  --color-mineral-300: #b8b3a8;
+  --color-marfim-50: #faf8f4;
+  --color-marfim-100: #f5f2eb;
+  --color-marfim-200: #ebe5d9;
+  --color-marfim-300: #dcd3c2;
+  --color-destaque-dourado: #c8b28a;
+  --color-destaque-terraco: #9e5a3c;
+  --color-alerta-erro: #b42318;
+  --color-alerta-sucesso: #166534;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-interface);
+    background-color: var(--color-marfim-50);
+    color: var(--color-mineral-950);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-mineral-950);
+    outline-offset: 2px;
+  }
+}
+
+.fundo-painel {
+  background-color: #ffffff;
+  background-image: radial-gradient(ellipse at top right, #eaf2fa 0%, #f5f9fd 35%, #ffffff 75%);
+}
+
+.fundo-menu-painel {
+  background-color: #f8fbfe;
+  background-image: linear-gradient(180deg, #f2f7fc 0%, #fafcfe 65%, #ffffff 100%);
+}
+
+@keyframes surgirOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes recolherOverlay {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes deslizarEntradaDireita {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes deslizarSaidaDireita {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes deslizarEntradaEsquerda {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes deslizarSaidaEsquerda {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes deslizarEntradaBaixo {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes deslizarSaidaBaixo {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.animacao-overlay-dialogo[data-state="open"] {
+  animation: surgirOverlay 280ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animacao-overlay-dialogo[data-state="closed"] {
+  animation: recolherOverlay 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animacao-gaveta-direita[data-state="open"] {
+  animation: deslizarEntradaDireita 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animacao-gaveta-direita[data-state="closed"] {
+  animation: deslizarSaidaDireita 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animacao-gaveta-esquerda[data-state="open"] {
+  animation: deslizarEntradaEsquerda 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animacao-gaveta-esquerda[data-state="closed"] {
+  animation: deslizarSaidaEsquerda 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animacao-painel-responsivo[data-state="open"] {
+  animation: deslizarEntradaBaixo 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animacao-painel-responsivo[data-state="closed"] {
+  animation: deslizarSaidaBaixo 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (min-width: 640px) {
+  .animacao-painel-responsivo[data-state="open"] {
+    animation: deslizarEntradaDireita 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animacao-painel-responsivo[data-state="closed"] {
+    animation: deslizarSaidaDireita 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+}
+
+.painel-vidro-editorial-escuro {
+  background-color: var(--editorial-fundo, rgba(15, 17, 16, 0.85)) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.painel-vidro-editorial-claro {
+  background-color: var(--editorial-fundo, rgba(247, 244, 238, 0.85)) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+@keyframes progressoInfinitoHorizontal {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(35%) scaleX(0.7);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animacao-progresso-horizontal {
+  animation: progressoInfinitoHorizontal 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes surgirSuaveUi {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animacao-suave-entrada {
+  animation: surgirSuaveUi 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

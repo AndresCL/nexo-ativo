@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="ceuCrepusculo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#171b19" />
+      <stop offset="48%" stop-color="#28231d" />
+      <stop offset="100%" stop-color="#0d100f" />
+    </linearGradient>
+    <radialGradient id="feixeSolar" cx="68%" cy="32%" r="58%">
+      <stop offset="0%" stop-color="#e3c99f" stop-opacity="0.46" />
+      <stop offset="45%" stop-color="#a8845c" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#0f1110" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="paredeTravertino" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4b4237" />
+      <stop offset="100%" stop-color="#1e1b18" />
+    </linearGradient>
+    <linearGradient id="espelhoAgua" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#121514" />
+      <stop offset="55%" stop-color="#352d24" />
+      <stop offset="100%" stop-color="#101312" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1200" fill="url(#ceuCrepusculo)" />
+  <rect width="1920" height="1200" fill="url(#feixeSolar)" />
+  <polygon points="0,180 760,90 760,930 0,1040" fill="url(#paredeTravertino)" opacity="0.72" />
+  <polygon points="940,140 1620,240 1620,880 940,860" fill="#2d2721" opacity="0.78" />
+  <polygon points="1060,210 1440,265 1440,860 1060,855" fill="#d8be96" opacity="0.18" />
+  <polygon points="1060,855 1580,1200 620,1200 760,930" fill="#dfcaa6" opacity="0.14" />
+  <rect x="0" y="880" width="1920" height="320" fill="url(#espelhoAgua)" />
+  <line x1="760" y1="90" x2="760" y2="930" stroke="#e4cfb0" stroke-opacity="0.22" stroke-width="2" />
+  <line x1="1060" y1="210" x2="1060" y2="855" stroke="#e4cfb0" stroke-opacity="0.28" stroke-width="1.5" />
+  <line x1="0" y1="880" x2="1920" y2="880" stroke="#d9c8a9" stroke-opacity="0.2" stroke-width="1" />
+</svg>
+

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="areiaQuente" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dfd7c8" />
+      <stop offset="100%" stop-color="#c3b6a0" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#areiaQuente)" />
+  <rect x="260" y="210" width="1080" height="780" fill="#ebe5d9" />
+  <rect x="380" y="310" width="380" height="580" fill="#2c2925" opacity="0.86" />
+  <rect x="810" y="310" width="410" height="270" fill="#8f785d" opacity="0.65" />
+  <rect x="810" y="615" width="410" height="275" fill="#cbc0ad" />
+  <line x1="810" y1="615" x2="1220" y2="890" stroke="#2c2925" stroke-opacity="0.25" stroke-width="1.5" />
+</svg>
+

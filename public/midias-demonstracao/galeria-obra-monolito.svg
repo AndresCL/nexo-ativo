@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="linhoGaleria" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8e1d3" />
+      <stop offset="100%" stop-color="#cfc4b0" />
+    </linearGradient>
+    <linearGradient id="sombraPedra" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4a453e" />
+      <stop offset="100%" stop-color="#22201c" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#linhoGaleria)" />
+  <polygon points="920,0 1600,0 1600,1200 620,1200" fill="#dcd2bf" />
+  <rect x="470" y="190" width="660" height="820" fill="#ded6c6" stroke="#b9ad97" stroke-width="2" />
+  <polygon points="590,890 790,310 1010,890" fill="url(#sombraPedra)" opacity="0.88" />
+  <circle cx="930" cy="420" r="88" fill="#b6936b" opacity="0.58" />
+  <line x1="340" y1="890" x2="1260" y2="890" stroke="#57534d" stroke-opacity="0.35" stroke-width="1.5" />
+</svg>
+

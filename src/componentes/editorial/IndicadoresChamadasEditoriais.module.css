@@ -1,0 +1,43 @@
+.ponto {
+  position: relative;
+  display: block;
+  width: 10px;
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--editorial-texto-secundario);
+  opacity: 0.5;
+  transition:
+    color 180ms,
+    opacity 180ms;
+}
+
+.ativo {
+  color: var(--editorial-destaque);
+  opacity: 1;
+}
+
+.preenchimento {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  transform-origin: left center;
+  animation: preencherChamada linear both;
+}
+
+@keyframes preencherChamada {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preenchimento {
+    animation: none;
+    transform: scaleX(1);
+  }
+}

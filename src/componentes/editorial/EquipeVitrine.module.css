@@ -1,0 +1,81 @@
+.avatar {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.movimento {
+  display: inline-flex;
+}
+
+.grupo[data-apresentacao-liberada="false"] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .acao {
+    transition:
+      background-color var(--equipe-tempo-interacao) ease,
+      transform var(--equipe-tempo-interacao) ease;
+  }
+
+  .acao:active {
+    transform: scale(0.99);
+  }
+
+  .seta,
+  .foto {
+    transition:
+      transform var(--equipe-tempo-interacao) ease,
+      opacity var(--equipe-tempo-interacao) ease;
+  }
+
+  .acao:focus-visible .seta {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  .grupo[data-entrada-iniciada="true"] .avatar {
+    animation: entrarAvatarEquipe var(--equipe-tempo-entrada) var(--equipe-curva-entrada) both;
+    animation-delay: var(--equipe-atraso, 0ms);
+  }
+
+  .grupo[data-movimento-ativo="false"] .avatar {
+    animation-play-state: paused;
+  }
+
+  .movimento {
+    transform: translateY(0) scale(1);
+    transition: transform var(--equipe-tempo-troca) ease-in-out;
+  }
+
+  .movimento[data-em-movimento="true"] {
+    transform: translateY(-5px) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .acao:hover .seta {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  .avatar:hover {
+    z-index: 1;
+  }
+
+  .avatar:hover .foto {
+    transform: translateY(-2px) scale(1.04);
+  }
+}
+
+@keyframes entrarAvatarEquipe {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

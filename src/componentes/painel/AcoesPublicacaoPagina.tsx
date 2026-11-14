@@ -1,0 +1,74 @@
+"use client";
+
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { ExternalLink, Globe, Save } from "lucide-react";
+import type { ControlePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
+import { Botao } from "@/componentes/interface/Botao";
+
+export function AcoesPublicacaoPagina({
+  controle,
+  identificadorPublico,
+  exibirSalvarRascunho = false,
+  publicacaoBloqueada = false,
+  orientacao,
+  children,
+}: {
+  readonly controle: ControlePublicacaoPagina;
+  readonly identificadorPublico: string;
+  readonly exibirSalvarRascunho?: boolean;
+  readonly publicacaoBloqueada?: boolean;
+  readonly orientacao?: string;
+  readonly children?: ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {controle.versaoPublicada !== null ? (
+          <Botao variante="fantasma" tamanho="compacto" comoFilho>
+            <Link href={`/${identificadorPublico}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              Ver página pública
+            </Link>
+          </Botao>
+        ) : null}
+        {children}
+        {exibirSalvarRascunho ? (
+          <Botao
+            variante="operacional_secundario"
+            tamanho="compacto"
+            className="rounded-lg border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100"
+            disabled={!controle.podeSalvar}
+            carregando={controle.salvando}
+            textoCarregando="Salvando..."
+            onClick={() => void controle.salvarRascunho()}
+          >
+            <Save className="h-4 w-4" aria-hidden="true" />
+            Salvar rascunho
+          </Botao>
+        ) : null}
+        <Botao
+          tamanho="compacto"
+          className="rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+          disabled={!controle.podePublicar || publicacaoBloqueada}
+          carregando={controle.publicando}
+          textoCarregando={
+            controle.salvandoParaPublicar ? "Salvando e publicando..." : "Publicando..."
+          }
+          onClick={() => void controle.publicarPagina()}
+        >
+          <Globe className="h-4 w-4" aria-hidden="true" />
+          Publicar página
+        </Botao>
+      </div>
+      {controle.mensagemEstado ? (
+        <p aria-live="polite" className="text-[11px] text-mineral-500">
+          {controle.mensagemEstado}
+        </p>
+      ) : null}
+      {orientacao ? (
+        <p className="max-w-md text-[11px] leading-relaxed text-mineral-500">{orientacao}</p>
+      ) : null}
+    </div>
+  );
+}

@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function podeGerenciarMidiaOrganizacao(organizacaoId) {
+      return estaAutenticado()
+        && firestore.exists(/databases/(default)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid)).data.situacao == 'ativo'
+        && (firestore.get(/databases/(default)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid)).data.papel in ['proprietario', 'administrador']);
+    }
+
+    function ehImagemPermitida() {
+      return request.resource != null
+        && request.resource.size <= 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|avif)');
+    }
+
+    function ehVideoPermitido() {
+      return request.resource != null
+        && request.resource.size <= 25 * 1024 * 1024
+        && request.resource.contentType.matches('video/(mp4|webm)');
+    }
+
+    match /organizacoes/{organizacaoId}/imagens/{nomeArquivo} {
+      allow read: if true;
+      allow write: if podeGerenciarMidiaOrganizacao(organizacaoId)
+        && (request.resource == null || ehImagemPermitida());
+    }
+
+    match /organizacoes/{organizacaoId}/videos/{nomeArquivo} {
+      allow read: if true;
+      allow write: if podeGerenciarMidiaOrganizacao(organizacaoId)
+        && (request.resource == null || ehVideoPermitido());
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

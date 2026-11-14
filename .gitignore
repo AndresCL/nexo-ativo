@@ -1,0 +1,40 @@
+# Dependências
+node_modules/
+funcoes/node_modules/
+**/node_modules
+
+# Compilação Next.js e Cloud Functions
+.next/
+.next-dev/
+out/
+build/
+funcoes/dist/
+
+# Variáveis de ambiente secretas e locais
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+funcoes/.secret.local
+
+# Logs e cache Firebase Emulator Suite
+.firebase/
+firebase-debug.log
+firestore-debug.log
+pubsub-debug.log
+ui-debug.log
+database-debug.log
+storage-debug.log
+dados-emulador/
+
+# Testes e cobertura
+coverage/
+playwright-report/
+test-results/
+
+# Sistema operacional e editores
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+

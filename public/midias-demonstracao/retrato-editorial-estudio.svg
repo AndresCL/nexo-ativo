@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="fundoEstudio" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2a1f1b" />
+      <stop offset="55%" stop-color="#1d1613" />
+      <stop offset="100%" stop-color="#120e0c" />
+    </linearGradient>
+    <radialGradient id="luzChaveRetrato" cx="50%" cy="28%" r="44%">
+      <stop offset="0%" stop-color="#ecc7aa" stop-opacity="0.52" />
+      <stop offset="48%" stop-color="#8c6249" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#181210" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="alfaiataria" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3c2e28" />
+      <stop offset="100%" stop-color="#191311" />
+    </linearGradient>
+  </defs>
+  <rect width="1440" height="1800" fill="url(#fundoEstudio)" />
+  <rect width="1440" height="1800" fill="url(#luzChaveRetrato)" />
+  <circle cx="720" cy="490" r="250" fill="#dcb292" opacity="0.11" />
+  <ellipse cx="720" cy="470" rx="122" ry="154" fill="#8b6550" opacity="0.55" />
+  <path d="M598 440 C610 300, 835 300, 844 445 C825 385, 625 385, 598 440 Z" fill="#2c201b" opacity="0.82" />
+  <rect x="676" y="602" width="88" height="86" rx="34" fill="#7c5946" opacity="0.52" />
+  <path d="M405 1240 C435 785, 560 675, 720 675 C880 675, 1005 785, 1035 1240 L1085 1800 L355 1800 Z" fill="url(#alfaiataria)" />
+  <path d="M645 680 L720 935 L795 680" fill="none" stroke="#e4bfa4" stroke-opacity="0.32" stroke-width="2.5" />
+</svg>
+

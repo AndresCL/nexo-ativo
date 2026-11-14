@@ -1,0 +1,14 @@
+# Configuração do Firebase App Hosting (Next.js sobre Cloud Run)
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: NEXT_PUBLIC_USAR_EMULADORES
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME

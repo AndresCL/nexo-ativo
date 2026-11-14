@@ -1,0 +1,233 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function ehProprioUsuario(usuarioId) {
+      return estaAutenticado() && request.auth.uid == usuarioId;
+    }
+
+    function ehFundador() {
+      return estaAutenticado() && request.auth.token.papelPlataforma == 'fundador';
+    }
+
+    function caminhoMembroOrganizacao(organizacaoId) {
+      return /databases/$(database)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid);
+    }
+
+    function ehMembroAtivo(organizacaoId) {
+      return estaAutenticado()
+        && exists(caminhoMembroOrganizacao(organizacaoId))
+        && get(caminhoMembroOrganizacao(organizacaoId)).data.situacao == 'ativo';
+    }
+
+    function possuiPapelNaOrganizacao(organizacaoId, papeisPermitidos) {
+      return ehMembroAtivo(organizacaoId)
+        && (get(caminhoMembroOrganizacao(organizacaoId)).data.papel in papeisPermitidos);
+    }
+
+    function mantemOrganizacaoCorreta(organizacaoId) {
+      return request.resource.data.organizacaoId == organizacaoId;
+    }
+
+    function paginaPublicadaEstaAtiva(organizacaoId) {
+      return exists(/databases/$(database)/documents/paginasPublicadas/$(organizacaoId))
+        && get(/databases/$(database)/documents/paginasPublicadas/$(organizacaoId)).data.publicado == true
+        && get(/databases/$(database)/documents/paginasPublicadas/$(organizacaoId)).data.paginaAtiva == true;
+    }
+
+    // 1. Perfil básico do usuário e índice espelho de vínculos
+    match /usuarios/{usuarioId} {
+      allow read: if ehProprioUsuario(usuarioId) || ehFundador();
+      allow create: if ehProprioUsuario(usuarioId)
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'nome', 'fotoUrl', 'atualizadoEmIso'])
+        && request.resource.data.uid == usuarioId;
+      allow update: if ehProprioUsuario(usuarioId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid', 'email']);
+      allow delete: if false;
+
+      match /vinculosOrganizacao/{organizacaoId} {
+        allow read: if ehProprioUsuario(usuarioId) || ehFundador();
+        allow write: if false;
+      }
+    }
+
+    // 2. Índice transacional de slugs públicos (somente leitura unitária pública)
+    match /identificadoresPublicos/{identificador} {
+      allow get: if true;
+      allow list: if ehFundador();
+      allow write: if false;
+    }
+
+    // 3. Dados privados e rascunhos multi-tenant por organização
+    match /organizacoes/{organizacaoId} {
+      allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+      allow create, delete: if false;
+      allow update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'id',
+          'identificadorPublico',
+          'situacao',
+          'perfilPublicidade',
+          'resumoDireitosPlano',
+          'criadoEmIso'
+        ]);
+
+      match /membros/{membroId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow write: if false;
+      }
+
+      match /configuracaoPagina/{documentoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+          && mantemOrganizacaoCorreta(organizacaoId);
+        allow delete: if false;
+      }
+
+      match /profissionais/{profissionalId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+          && mantemOrganizacaoCorreta(organizacaoId);
+        allow delete: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']);
+      }
+
+      match /servicos/{servicoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+          && mantemOrganizacaoCorreta(organizacaoId);
+        allow delete: if false;
+      }
+
+      match /produtos/{produtoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+          && mantemOrganizacaoCorreta(organizacaoId);
+        allow delete: if false;
+      }
+
+      match /projetosPortfolio/{projetoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+          && mantemOrganizacaoCorreta(organizacaoId);
+        allow delete: if false;
+      }
+
+      match /microfluxos/{microfluxoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+          && mantemOrganizacaoCorreta(organizacaoId)
+          && (!request.resource.data.keys().hasAny(['versaoPublicada'])
+              || (resource != null && request.resource.data.versaoPublicada == resource.data.versaoPublicada));
+        allow delete: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']);
+
+        match /versoes/{numeroVersao} {
+          allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+          allow write: if false;
+        }
+      }
+
+      match /solicitacoes/{solicitacaoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, delete: if false;
+        allow update: if ehMembroAtivo(organizacaoId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'situacao',
+            'profissionalId',
+            'observacoesInternas',
+            'atualizadoEmIso'
+          ]);
+      }
+
+      match /configuracoes/email {
+        allow read: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador();
+        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+          && mantemOrganizacaoCorreta(organizacaoId)
+          && !request.resource.data.keys().hasAny(['enviosNoMesAtual']);
+        allow delete: if false;
+      }
+
+      match /metricasDiarias/{dataIso} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow write: if false;
+      }
+
+      match /historicoPublicacoes/{versaoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow write: if false;
+      }
+    }
+
+    // 4. Projeção pública estável (estritamente separada de rascunhos privados)
+    match /paginasPublicadas/{organizacaoId} {
+      allow read: if (resource != null && resource.data.publicado == true && resource.data.paginaAtiva == true)
+        || ehMembroAtivo(organizacaoId)
+        || ehFundador();
+      allow write: if false;
+
+      match /{colecaoPublicada}/{itemId} {
+        allow read: if (
+            colecaoPublicada in [
+              'profissionaisPublicados',
+              'servicosPublicados',
+              'produtosPublicados',
+              'projetosPublicados',
+              'microfluxosPublicados'
+            ]
+            && paginaPublicadaEstaAtiva(organizacaoId)
+            && resource != null
+            && resource.data.ativo == true
+          )
+          || ehMembroAtivo(organizacaoId)
+          || ehFundador();
+        allow write: if false;
+      }
+    }
+
+    // 5. Catálogo de planos e biblioteca de modelos
+    match /planosAssinatura/{planoId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /modelosMicrofluxo/{modeloId} {
+      allow read: if estaAutenticado();
+      allow write: if false;
+    }
+
+    // 6. Coleções financeiras, operacionais e auditoria (exclusivas do Fundador / Backend)
+    match /assinaturas/{assinaturaId} {
+      allow read: if ehFundador();
+      allow write: if false;
+    }
+
+    match /cobrancas/{cobrancaId} {
+      allow read: if ehFundador();
+      allow write: if false;
+    }
+
+    match /eventosWebhookAsaas/{eventoId} {
+      allow read: if ehFundador();
+      allow write: if false;
+    }
+
+    match /enviosEmail/{envioId} {
+      allow read: if ehFundador();
+      allow write: if false;
+    }
+
+    match /registrosAuditoria/{registroId} {
+      allow read: if ehFundador();
+      allow write: if false;
+    }
+
+    // Negação explícita para qualquer outro caminho não mapeado
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
