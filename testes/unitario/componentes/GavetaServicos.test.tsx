@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GavetaEditorialPublica } from "@/componentes/editorial/GavetaEditorialPublica";
 import {
@@ -62,7 +62,7 @@ function montar(semServicos = false) {
 
 describe("Gaveta de serviços", () => {
   it("mostra somente serviços mesmo com produtos no acervo e preserva a solicitação contextual", () => {
-    const solicitar = montar();
+    montar();
     const painel = screen.getByRole("dialog");
     expect(within(painel).getByRole("heading", { name: "Serviços" })).toBeInTheDocument();
     expect(within(painel).getByText("Serviço exclusivo")).toBeInTheDocument();

@@ -21,13 +21,11 @@ import {
 import { servicoCatalogoConteudoCliente } from "@/infraestrutura/painel/servicoCatalogoConteudoCliente";
 import { Botao } from "@/componentes/interface/Botao";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
-import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
 import { EditorListaImagensCatalogo } from "./EditorListaImagensCatalogo";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
-import { CampoUploadMidiaStorage } from "@/componentes/painel/editor/CampoUploadMidiaStorage";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvisoRecursoRestrito } from "@/componentes/painel/AvisosPublicidade";
-import { usarPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
+import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { CabecalhoPublicacaoRapidaAcervo } from "./CabecalhoPublicacaoRapidaAcervo";
 
 const DISPONIBILIDADES = {
@@ -85,7 +83,7 @@ export function GerenciadorCatalogoPainel({
   const [nomeProduto, setNomeProduto] = useState("");
   const [categoriaProduto, setCategoriaProduto] = useState("");
   const [resumoProduto, setResumoProduto] = useState("");
-  const politicaPublicidade = usarPoliticaPublicidade();
+  const politicaPublicidade = usePoliticaPublicidade();
   const [precoProdutoTexto, setPrecoProdutoTexto] = useState("");
   const [disponibilidadeProduto, setDisponibilidadeProduto] =
     useState<DisponibilidadeProdutoCatalogo>("disponivel");

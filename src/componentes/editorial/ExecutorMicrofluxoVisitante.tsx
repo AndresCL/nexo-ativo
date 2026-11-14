@@ -346,13 +346,6 @@ export function ExecutorMicrofluxoVisitante({
     setEstado(retrocederEtapaExecucaoMicrofluxo(estado));
   }
 
-  function agendarAvancoComFeedback(estadoAtualizado: EstadoExecucaoMicrofluxo) {
-    limparAutoTransicaoPendente();
-    timerAutoTransicaoRef.current = setTimeout(() => {
-      tentarAvancar(estadoAtualizado);
-    }, 320);
-  }
-
   function selecionarOpcaoUnica(opcaoId: string) {
     if (!estado) {
       return;

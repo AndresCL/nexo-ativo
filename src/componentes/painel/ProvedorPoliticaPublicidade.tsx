@@ -26,6 +26,6 @@ export function ProvedorPoliticaPublicidade({
 }
 
 /** Fora do provedor (ex.: testes isolados), aplica o perfil padrão sem restrições. */
-export function usarPoliticaPublicidade(): PoliticaPublicidade {
+export function usePoliticaPublicidade(): PoliticaPublicidade {
   return useContext(ContextoPoliticaPublicidade);
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import Imagem from "next/image";
-
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
@@ -9,7 +7,6 @@ import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import { useRef, useState, type FormEvent } from "react";
 import {
   Check,
-  ChevronDown,
   Edit3,
   Eye,
   EyeOff,
@@ -26,15 +23,12 @@ import {
   type MidiaItemCatalogo,
   type ProjetoPortfolio,
 } from "@/dominio/entidades/catalogoConteudo";
-import type { CoordenadasPontoFocal } from "@/dominio/entidades/paginaPublicada";
 import { servicoCatalogoConteudoCliente } from "@/infraestrutura/painel/servicoCatalogoConteudoCliente";
 import { Botao } from "@/componentes/interface/Botao";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
 import { EditorListaImagensCatalogo } from "./EditorListaImagensCatalogo";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
-import { CampoUploadMidiaStorage } from "@/componentes/painel/editor/CampoUploadMidiaStorage";
-import { SeletorPontoFocalMidia } from "@/componentes/painel/editor/SeletorPontoFocalMidia";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvisosPublicidade } from "@/componentes/painel/AvisosPublicidade";
 import { CabecalhoPublicacaoRapidaAcervo } from "./CabecalhoPublicacaoRapidaAcervo";
@@ -587,33 +581,6 @@ export function GerenciadorPortfolioPainel({
           )}
         </section>
       </div>
-    </div>
-  );
-}
-
-function CapaProjeto({ projeto }: { readonly projeto: ProjetoPortfolio }) {
-  const [falhou, setFalhou] = useState(false);
-  return (
-    <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden border-b border-marfim-100 bg-gradient-to-br from-indigo-50 via-marfim-50 to-white">
-      {projeto.urlImagemCapa && !falhou ? (
-        <Imagem
-          src={projeto.urlImagemCapa}
-          alt={projeto.textoAlternativoCapa || projeto.titulo}
-          fill
-          unoptimized
-          sizes="(min-width: 1536px) 320px, (min-width: 1280px) 600px, (min-width: 640px) 50vw, 100vw"
-          className="object-cover"
-          style={{
-            objectPosition: `${projeto.pontoFocalCapa.xPercentual}% ${projeto.pontoFocalCapa.yPercentual}%`,
-          }}
-          onError={() => setFalhou(true)}
-        />
-      ) : (
-        <div className="flex flex-col items-center gap-2 text-indigo-300">
-          <Images className="h-8 w-8" aria-hidden="true" />
-          <span className="text-[11px] text-mineral-500">Imagem indisponível</span>
-        </div>
-      )}
     </div>
   );
 }

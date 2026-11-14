@@ -2,7 +2,7 @@
 
 import { TriangleAlert } from "lucide-react";
 import type { AvisoPublicidade } from "@/dominio/publicidade/tiposPerfilPublicidade";
-import { usarPoliticaPublicidade } from "./ProvedorPoliticaPublicidade";
+import { usePoliticaPublicidade } from "./ProvedorPoliticaPublicidade";
 
 /** Exibe os avisos do perfil de publicidade para a área indicada, quando houver. */
 export function AvisosPublicidade({
@@ -10,7 +10,7 @@ export function AvisosPublicidade({
 }: {
   readonly areas: readonly AvisoPublicidade["area"][];
 }) {
-  const politica = usarPoliticaPublicidade();
+  const politica = usePoliticaPublicidade();
   const avisos = politica.avisos().filter((aviso) => areas.includes(aviso.area));
 
   if (avisos.length === 0) {
@@ -34,7 +34,7 @@ export function AvisosPublicidade({
 
 /** Aviso padronizado de recurso indisponível no perfil de publicidade da organização. */
 export function AvisoRecursoRestrito({ mensagem }: { readonly mensagem: string }) {
-  const politica = usarPoliticaPublicidade();
+  const politica = usePoliticaPublicidade();
 
   return (
     <div

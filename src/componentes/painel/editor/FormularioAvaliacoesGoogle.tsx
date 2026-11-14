@@ -10,7 +10,7 @@ import { useEstadoEditorAparencia } from "@/estados/estadoEditorAparencia";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { Botao } from "@/componentes/interface/Botao";
 import { AvisoRecursoRestrito } from "@/componentes/painel/AvisosPublicidade";
-import { usarPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
+import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { SeletorEstabelecimentoGoogle } from "./SeletorEstabelecimentoGoogle";
 
 export function FormularioAvaliacoesGoogle({
@@ -18,7 +18,7 @@ export function FormularioAvaliacoesGoogle({
 }: {
   readonly somenteLeitura?: boolean;
 }) {
-  const politicaPublicidade = usarPoliticaPublicidade();
+  const politicaPublicidade = usePoliticaPublicidade();
   const organizacaoId = useEstadoEditorAparencia((estado) => estado.rascunho.organizacaoId);
   const configuracao =
     useEstadoEditorAparencia((estado) => estado.rascunho.avaliacoesGoogle) ??

@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
-import { ArrowRight, ArrowUpRight, Clock, MessageCircle } from "lucide-react";
+import { ArrowUpRight, Clock, MessageCircle } from "lucide-react";
 import {
   formatarApresentacaoPrecoItem,
   obterListaImagensMidia,
@@ -11,14 +10,12 @@ import {
   type ProfissionalEquipe,
 } from "@/dominio/entidades/catalogoConteudo";
 import {
-  deveIgnorarOtimizadorImagem,
   obterDescritorPaletaEditorial,
   obterDescritorTipografiaEditorial,
   type ConteudoPaginaPublicada,
 } from "@/dominio/entidades/paginaPublicada";
 import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numeroWhatsappInternacional";
 import type { ContextoOrigemMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
-import { PontoFocalMidia } from "@/dominio/objetos-valor/pontoFocalMidia";
 import { TransicaoAlternancia } from "@/componentes/interface/TransicaoAlternancia";
 import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
 import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
@@ -53,8 +50,8 @@ export function GavetaEditorialPublica({
   tituloPersonalizado,
   pagina,
   acervo,
-  aoSolicitarExperiencia,
-  consultorPadraoId,
+  aoSolicitarExperiencia: _aoSolicitarExperiencia,
+  consultorPadraoId: _consultorPadraoId,
   aoAbrirCartao,
 }: PropriedadesGavetaEditorialPublica) {
   const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
@@ -166,11 +163,6 @@ export function GavetaEditorialPublica({
               </p>
             ) : (
               acervo.projetosPortfolio.map((projeto) => {
-                const posicao = PontoFocalMidia.criar(
-                  projeto.pontoFocalCapa.xPercentual,
-                  projeto.pontoFocalCapa.yPercentual,
-                ).gerarPosicaoObjetoCss();
-
                 return (
                   <article
                     key={projeto.id}

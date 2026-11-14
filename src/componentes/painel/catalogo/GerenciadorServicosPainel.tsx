@@ -2,10 +2,6 @@
 
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 
-import Imagem from "next/image";
-import { CampoUploadMidiaStorage } from "@/componentes/painel/editor/CampoUploadMidiaStorage";
-import { deveIgnorarOtimizadorImagem } from "@/dominio/entidades/paginaPublicada";
-
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import { useRef, useState, type FormEvent } from "react";
@@ -38,7 +34,7 @@ import { EditorListaImagensCatalogo } from "./EditorListaImagensCatalogo";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvisoRecursoRestrito } from "@/componentes/painel/AvisosPublicidade";
-import { usarPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
+import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { CabecalhoPublicacaoRapidaAcervo } from "./CabecalhoPublicacaoRapidaAcervo";
 
 function gerarIdServico(): string {
@@ -64,7 +60,7 @@ export function GerenciadorServicosPainel({
   podePublicarPagina,
   servicoCatalogo = servicoCatalogoConteudoCliente,
 }: PropriedadesGerenciadorServicosPainel) {
-  const politicaPublicidade = usarPoliticaPublicidade();
+  const politicaPublicidade = usePoliticaPublicidade();
   const [servicos, setServicos] = useState<readonly ServicoOrganizacao[]>(servicosIniciais);
 
   const [busca, setBusca] = useState("");
@@ -639,27 +635,6 @@ export function GerenciadorServicosPainel({
           )}
         </section>
       </div>
-    </div>
-  );
-}
-
-function FotoServico({ servico }: { readonly servico: ServicoOrganizacao }) {
-  const [falhou, setFalhou] = useState(false);
-  if (!servico.urlImagemOpcional || falhou) return null;
-  return (
-    <div className="relative aspect-[16/7] overflow-hidden bg-sky-50">
-      <Imagem
-        src={servico.urlImagemOpcional}
-        alt={servico.nome}
-        fill
-        sizes="(min-width: 1280px) 600px, 100vw"
-        unoptimized={deveIgnorarOtimizadorImagem(servico.urlImagemOpcional)}
-        className="object-cover"
-        style={{
-          objectPosition: `${servico.pontoFocalImagem?.xPercentual ?? 50}% ${servico.pontoFocalImagem?.yPercentual ?? 50}%`,
-        }}
-        onError={() => setFalhou(true)}
-      />
     </div>
   );
 }

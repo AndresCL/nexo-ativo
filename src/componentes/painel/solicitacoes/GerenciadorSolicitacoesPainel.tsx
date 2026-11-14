@@ -4,7 +4,6 @@ import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import { useMemo, useRef, useState } from "react";
 import {
-  AlertTriangle,
   Award,
   CheckCircle2,
   Clock,
@@ -28,7 +27,6 @@ import type {
 import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
 import {
   construirUrlAvaliacaoGoogle,
-  construirUrlLocalGoogle,
 } from "@/dominio/entidades/avaliacoesGoogle";
 import {
   DESCRITORES_SITUACAO_SOLICITACAO,

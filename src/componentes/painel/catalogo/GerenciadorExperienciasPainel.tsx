@@ -1,7 +1,7 @@
 "use client";
 
 import { AvisoRecursoRestrito } from "@/componentes/painel/AvisosPublicidade";
-import { usarPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
+import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { copiarTextoComAviso } from "@/componentes/interface/notificacoes/copiarTextoComAviso";
 import { construirCaminhoExperiencia } from "@/dominio/microfluxos/conclusaoMicrofluxo";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
@@ -177,7 +177,7 @@ export function GerenciadorExperienciasPainel({
   podePublicarPagina,
   servicoCatalogo = servicoCatalogoConteudoCliente,
 }: PropriedadesGerenciadorExperienciasPainel) {
-  const politicaPublicidade = usarPoliticaPublicidade();
+  const politicaPublicidade = usePoliticaPublicidade();
   const [microfluxos, setMicrofluxos] = useState<readonly DefinicaoMicrofluxo[]>(() =>
     ordenarMicrofluxosPorPrioridadeEOrdem(microfluxosIniciais),
   );
