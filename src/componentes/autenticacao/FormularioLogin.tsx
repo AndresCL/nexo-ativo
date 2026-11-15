@@ -12,6 +12,7 @@ import type { PortaAutenticacaoCliente } from "@/aplicacao/portas/portasAutentic
 import { servicoAutenticacaoCliente } from "@/infraestrutura/firebase/servicoAutenticacaoCliente";
 import { esquemaEntrarComEmail, type DadosEntrarComEmail } from "@/validacoes/esquemasAutenticacao";
 import { Botao } from "@/componentes/interface/Botao";
+import { IconeGoogle } from "@/componentes/interface/IconeGoogle";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 
 export interface PropriedadesFormularioLogin {
@@ -77,6 +78,7 @@ export function FormularioLogin({
         disabled={isSubmitting}
         onClick={iniciarLoginComGoogle}
       >
+        <IconeGoogle />
         Continuar com Google
       </Botao>
 

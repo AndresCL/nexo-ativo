@@ -13,7 +13,7 @@ export default async function PaginaCriarConta() {
   return (
     <CartaoSuperficie preenchimento="amplo">
       <p className="text-xs tracking-[0.18em] text-mineral-500 uppercase">Nova presença digital</p>
-      <h1 className="mt-2 font-editorial text-3xl text-mineral-950">Criar sua conta</h1>
+      <h1 className="mt-2 text-2xl font-bold tracking-tight text-mineral-950">Criar sua conta</h1>
       <p className="mt-1.5 mb-6 text-xs leading-relaxed text-mineral-700">
         Comece configurando sua identidade editorial no seu ritmo e publique quando desejar.
       </p>

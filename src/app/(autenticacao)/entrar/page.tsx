@@ -13,7 +13,7 @@ export default async function PaginaEntrar() {
   return (
     <CartaoSuperficie preenchimento="amplo">
       <p className="text-xs tracking-[0.18em] text-mineral-500 uppercase">Acesso do assinante</p>
-      <h1 className="mt-2 font-editorial text-3xl text-mineral-950">Entrar na sua conta</h1>
+      <h1 className="mt-2 text-2xl font-bold tracking-tight text-mineral-950">Entrar na sua conta</h1>
       <p className="mt-1.5 mb-6 text-xs leading-relaxed text-mineral-700">
         Gerencie sua página editorial, portfólio, experiências e solicitações recebidas.
       </p>

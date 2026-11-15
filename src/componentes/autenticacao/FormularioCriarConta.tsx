@@ -15,6 +15,7 @@ import {
   type DadosCriarContaEmail,
 } from "@/validacoes/esquemasAutenticacao";
 import { Botao } from "@/componentes/interface/Botao";
+import { IconeGoogle } from "@/componentes/interface/IconeGoogle";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 
 export interface PropriedadesFormularioCriarConta {
@@ -86,6 +87,7 @@ export function FormularioCriarConta({
         disabled={isSubmitting}
         onClick={cadastrarComGoogle}
       >
+        <IconeGoogle />
         Criar conta com Google
       </Botao>
 

@@ -20,6 +20,7 @@ import {
 import type { ReactNode } from "react";
 import { useEstadoInterfacePainel } from "@/estados/estadoInterfacePainel";
 import { BotaoEncerrarSessao } from "@/componentes/autenticacao/BotaoEncerrarSessao";
+import { LogoNexoAtivo } from "@/componentes/interface/LogoNexoAtivo";
 import { Botao } from "@/componentes/interface/Botao";
 import { TransicaoPaginaPainel } from "@/componentes/interface/TransicaoPaginaPainel";
 
@@ -153,8 +154,8 @@ export function EstruturaNavegacaoPainel({
     <div className="fundo-painel flex min-h-dvh flex-col lg:flex-row">
       <header className="fundo-menu-painel flex items-center justify-between border-b border-slate-200/60 px-4 py-3 lg:hidden">
         <div>
-          <Link href="/painel" className="text-xl font-bold tracking-tight text-mineral-950">
-            Fluxo
+          <Link href="/painel" className="text-mineral-950">
+            <LogoNexoAtivo tamanho="compacto" />
           </Link>
           {nomeOrganizacaoAtiva ? (
             <p className="text-xs text-mineral-500">{nomeOrganizacaoAtiva}</p>
@@ -217,8 +218,8 @@ export function EstruturaNavegacaoPainel({
       <aside className="fundo-menu-painel hidden w-64 shrink-0 flex-col gap-4 border-r border-slate-200/60 p-6 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:overflow-y-auto lg:overscroll-contain">
         <div className="flex flex-col gap-8">
           <div>
-            <Link href="/painel" className="text-2xl font-bold tracking-tight text-mineral-950">
-              Fluxo
+            <Link href="/painel" className="inline-block text-mineral-950">
+              <LogoNexoAtivo tamanho="padrao" />
             </Link>
             <p className="mt-0.5 truncate text-xs font-medium text-mineral-700">
               {nomeOrganizacaoAtiva ?? "Configuração inicial"}
