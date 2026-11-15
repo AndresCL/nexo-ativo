@@ -32,9 +32,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "scripts/**/*.ts",
-    "testes/**/*.ts",
-    "testes/**/*.tsx",
     ".next-dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "funcoes"]
+  "exclude": ["node_modules", "funcoes", "testes"]
 }
