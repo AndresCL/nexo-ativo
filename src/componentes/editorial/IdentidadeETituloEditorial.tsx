@@ -42,7 +42,7 @@ export function CabecalhoMarcaDiscreta({
   return (
     <header
       className={combinarClasses(
-        "pt-2.5 flex flex-col gap-1.5",
+        "pt-10 flex flex-col gap-1.5",
         alinhamento
           ? "w-full"
           : alinharCentroNoMobile
@@ -68,7 +68,7 @@ export function CabecalhoMarcaDiscreta({
                 width={255}
                 height={58}
                 unoptimized={deveIgnorarOtimizadorImagem(identidade.urlLogotipoOpcional)}
-                className="h-8 max-h-10 w-auto max-w-[140px] object-contain sm:h-12 sm:max-h-13 sm:max-w-[255px]"
+                className="h-12 max-h-14 w-auto max-w-[140px] object-contain sm:h-12 sm:max-h-14 sm:max-w-[255px]"
                 priority
               />
             </div>
@@ -76,8 +76,8 @@ export function CabecalhoMarcaDiscreta({
         </div>
 
         {identidade.urlLogotipoOpcional &&
-        (identidade.mostrarNomeExibicao ?? true) &&
-        identidade.nomeExibicao ? (
+          (identidade.mostrarNomeExibicao ?? true) &&
+          identidade.nomeExibicao ? (
           <div
             aria-hidden="true"
             className="h-6 w-px bg-current/25 shrink-0 sm:h-7"
@@ -85,7 +85,7 @@ export function CabecalhoMarcaDiscreta({
         ) : null}
 
         {(identidade.mostrarNomeExibicao ?? true) ||
-        ((identidade.mostrarSubtituloCurto ?? true) && identidade.subtituloCurto) ? (
+          ((identidade.mostrarSubtituloCurto ?? true) && identidade.subtituloCurto) ? (
           <div
             className={combinarClasses(
               "flex flex-col text-left",

@@ -83,6 +83,7 @@ export function ComposicaoRetratoEditorial({
           <TransicaoEditorial atrasoSegundos={0.12} className="mt-7 @5xl:col-span-5 @5xl:mt-0">
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
+              espacamentoAcoes={pagina.espacamentoAcoes}
               previaEquipe={previaEquipe}
               videosYoutube={videosYoutube}
               modoExibicaoVideos={modoExibicaoVideos}

@@ -65,7 +65,7 @@ export function SecaoColecaoAcervoHome({
           <button
             type="button"
             onClick={() => aoAbrirGavetaDetalhe?.(tipo)}
-            className="text-xs font-medium text-[var(--editorial-destaque)] hover:underline"
+            className="text-xs font-medium text-[var(--editorial-texto-secundario)] hover:underline cursor-pointer"
           >
             Ver todos
           </button>

@@ -120,7 +120,7 @@ export function GavetaEditorialPublica({
                       <span className="rounded-full bg-current/8 px-2.5 py-0.5 text-[11px] font-medium tracking-[0.12em] text-[var(--editorial-texto-secundario)] uppercase">
                         {produto.categoria}
                       </span>
-                      <span className="text-xs font-semibold text-[var(--editorial-destaque)]">
+                      <span className="text-xs font-semibold text-[var(--editorial-texto-secundario)]">
                         {formatarApresentacaoPrecoItem({
                           centavos: produto.precoCentavos,
                           rotuloOpcional: produto.rotuloPrecoOpcional,

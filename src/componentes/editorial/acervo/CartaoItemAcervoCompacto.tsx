@@ -84,7 +84,7 @@ export function CartaoItemAcervoCompacto({
           </div>
 
           <div className="mt-2.5 pt-0.5">
-            <span className="text-xs font-bold tracking-tight text-[var(--editorial-destaque)]">
+            <span className="text-xs font-bold tracking-tight text-[var(--editorial-texto-secundario)]">
               {rotuloPreco}
             </span>
           </div>

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { ChevronRight, Sparkles } from "lucide-react";
 import {
   obterAcoesPrincipaisVisiveis,
+  type EspacamentoAcoesHome,
   type IdentificadorPaletaEditorial,
   type ItemAcaoHome,
   type TipoIconeAcaoHome,
@@ -23,6 +24,7 @@ import { SecaoColecaoAcervoHome } from "./acervo/SecaoColecaoAcervoHome";
 
 export interface PropriedadesNavegacaoAcoesHome {
   readonly acoes: readonly ItemAcaoHome[];
+  readonly espacamentoAcoes?: EspacamentoAcoesHome;
   readonly paletaId: IdentificadorPaletaEditorial;
   readonly aoAcionarItem?: ManipuladorAcaoHome;
   readonly aoSelecionarItemAcervo?: (tipo: "produtos" | "servicos", itemId: string) => void;
@@ -124,6 +126,7 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
  */
 export function NavegacaoAcoesHome({
   acoes,
+  espacamentoAcoes = "padrao",
   paletaId: _paletaId,
   aoAcionarItem,
   aoSelecionarItemAcervo,
@@ -150,12 +153,20 @@ export function NavegacaoAcoesHome({
     return null;
   }
 
+  const classeGap =
+    espacamentoAcoes === "medio"
+      ? "gap-4"
+      : espacamentoAcoes === "amplo"
+        ? "gap-6"
+        : "gap-2.5"; // "compacto" ou padrão (o tamanho original do produto)
+
   return (
     <nav
       aria-label="Ações principais"
       data-testid="navegacao-acoes-home"
       className={combinarClasses(
-        "mx-auto flex w-full max-w-sm flex-col items-center gap-2.5 @5xl:mx-0 @5xl:ml-auto @5xl:max-w-xs @5xl:items-end",
+        "mx-auto flex w-full max-w-sm flex-col items-center @5xl:mx-0 @5xl:ml-auto @5xl:max-w-xs @5xl:items-end",
+        classeGap,
         className,
         !temAcaoDesktop && "@5xl:hidden",
       )}

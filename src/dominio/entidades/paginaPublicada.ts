@@ -57,6 +57,8 @@ export type IntensidadeVeloEscuro = "nenhum" | "suave" | "equilibrado" | "intens
 
 export type TipoEfeitoCantosEditorial = "nenhum" | "dots" | "grade";
 
+export type EspacamentoAcoesHome = "compacto" | "medio" | "amplo";
+
 export interface CoordenadasPontoFocal {
   readonly xPercentual: number;
   readonly yPercentual: number;
@@ -154,6 +156,7 @@ export interface ConteudoPaginaPublicada extends ConjuntoChamadasEditoriais {
   readonly versaoPublicada: number;
   readonly atualizadoEmIso: string;
   readonly composicaoVisual: TipoComposicaoEditorial;
+  readonly espacamentoAcoes?: EspacamentoAcoesHome;
   readonly paletaId: IdentificadorPaletaEditorial;
   readonly corPersonalizadaHex?: string;
   readonly customizacaoTokens?: CustomizacaoTokensEditorial;

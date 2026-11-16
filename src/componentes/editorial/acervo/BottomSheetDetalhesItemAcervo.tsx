@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, type CSSProperties } from "react";
+import { useRef, useState, useEffect, type CSSProperties } from "react";
 import * as DialogoPrimitivo from "@radix-ui/react-dialog";
-import { motion, useMotionValue, useTransform } from "motion/react";
+import { motion, useMotionValue, useTransform, animate } from "motion/react";
 import { X, MessageCircle, Sparkles, Clock } from "lucide-react";
 import {
   formatarApresentacaoPrecoItem,
@@ -47,6 +47,29 @@ export function BottomSheetDetalhesItemAcervo({
   const containerRef = useRef<HTMLDivElement>(null);
   const dragY = useMotionValue(0);
   const opacidadeHandle = useTransform(dragY, [0, 100], [1, 0.5]);
+  const [fechandoPorGesto, setFechandoPorGesto] = useState(false);
+
+  useEffect(() => {
+    if (aberto) {
+      dragY.set(0);
+      setFechandoPorGesto(false);
+    }
+  }, [aberto, dragY]);
+
+  function fecharComAnimacao() {
+    if (fechandoPorGesto) return;
+    setFechandoPorGesto(true);
+    const alturaPainel = containerRef.current?.offsetHeight ?? window.innerHeight;
+    void animate(dragY, alturaPainel, {
+      type: "spring",
+      damping: 30,
+      stiffness: 300,
+      mass: 0.8,
+      onComplete: () => {
+        aoFechar();
+      },
+    });
+  }
 
   if (!item) return null;
 
@@ -142,17 +165,27 @@ export function BottomSheetDetalhesItemAcervo({
         >
           <motion.div
             ref={containerRef}
+            initial={{ y: "100%" }}
+            animate={{ y: fechandoPorGesto ? (containerRef.current?.offsetHeight ?? 600) : 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 280 }}
             style={{ y: dragY }}
             drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.65 }}
+            dragConstraints={{ top: 0 }}
+            dragElastic={{ top: 0.05, bottom: 0.6 }}
             onDragEnd={(_evento, info) => {
               if (info.offset.y > 90 || info.velocity.y > 350) {
-                aoFechar();
+                fecharComAnimacao();
+              } else {
+                void animate(dragY, 0, {
+                  type: "spring",
+                  damping: 25,
+                  stiffness: 300,
+                });
               }
             }}
             className={combinarClasses(
-              "animacao-painel-responsivo fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t shadow-2xl sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-full sm:w-[28rem] sm:rounded-none sm:border-l sm:border-t-0 font-sans",
+              "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t shadow-2xl sm:animacao-painel-responsivo sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-full sm:w-[28rem] sm:rounded-none sm:border-l sm:border-t-0 font-sans",
               paleta.temaEscuro
                 ? "border-white/15 bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]"
                 : "border-black/10 bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]",
@@ -205,7 +238,7 @@ export function BottomSheetDetalhesItemAcervo({
                     <div />
                   )}
 
-                  <span className="text-base font-bold text-[var(--editorial-destaque)] sm:text-lg">
+                  <span className="text-base font-bold text-[var(--editorial-texto-secundario)] sm:text-lg">
                     {rotuloPreco}
                   </span>
                 </div>

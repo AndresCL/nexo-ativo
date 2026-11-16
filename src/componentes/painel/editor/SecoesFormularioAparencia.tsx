@@ -10,6 +10,7 @@ import {
   type IdentificadorTipografiaEditorial,
 } from "@/dominio/entidades/composicaoEditorial";
 import {
+  type EspacamentoAcoesHome,
   type IntensidadeVeloEscuro,
   type TipoEfeitoCantosEditorial,
   type TipoRedeSocial,
@@ -170,6 +171,75 @@ export function SecoesFormularioAparencia({
                       <p className="mt-2 text-[11px] text-mineral-500">
                         Ideal para: {item.segmentosRecomendados.join(" · ")}
                       </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </CartaoSuperficie>
+
+            <CartaoSuperficie className="space-y-4 rounded-2xl border-marfim-200 bg-gradient-to-b from-indigo-50/20 via-white to-white p-5 shadow-xs sm:p-6">
+              <div>
+                <h2 className="text-base font-semibold text-mineral-950">Espaçamento entre experiências</h2>
+                <p className="mt-0.5 text-xs text-mineral-600">
+                  Controla o respiro vertical entre os botões de experiências na vitrine pública.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                {[
+                  {
+                    codigo: "compacto" as const,
+                    nome: "Compacto",
+                    resumo: "Espaçamento enxuto (10px, o atual), ideal para 4+ experiências na tela.",
+                    classeVisual: "gap-1",
+                  },
+                  {
+                    codigo: "medio" as const,
+                    nome: "Médio",
+                    resumo: "Espaçamento equilibrado (16px), visual arejado e toque confortável.",
+                    classeVisual: "gap-2.5",
+                  },
+                  {
+                    codigo: "amplo" as const,
+                    nome: "Amplo",
+                    resumo: "Maior respiro (24px), destaque marcante para cada ação.",
+                    classeVisual: "gap-4",
+                  },
+                ].map((opcao) => {
+                  const valorAtual = rascunho.espacamentoAcoes ?? "compacto";
+                  const ativo = valorAtual === opcao.codigo;
+                  return (
+                    <button
+                      key={opcao.codigo}
+                      type="button"
+                      disabled={somenteLeitura}
+                      aria-pressed={ativo}
+                      onClick={() => alterarEstiloVisual({ espacamentoAcoes: opcao.codigo })}
+                      className={combinarClasses(
+                        "flex flex-col justify-between rounded-xl border p-3.5 text-left transition-colors cursor-pointer disabled:opacity-60",
+                        ativo
+                          ? "border-indigo-300 bg-indigo-50/60 ring-1 ring-indigo-200"
+                          : "border-marfim-200 bg-white hover:border-indigo-200 hover:bg-indigo-50/20",
+                      )}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-mineral-950">{opcao.nome}</span>
+                          {ativo ? (
+                            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-800">
+                              Ativo
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-[11px] leading-relaxed text-mineral-600">{opcao.resumo}</p>
+                      </div>
+
+                      {/* Prévia gráfica ilustrativa do espaçamento */}
+                      <div className={combinarClasses("mt-3 flex w-full flex-col rounded-lg bg-marfim-100/70 p-2", opcao.classeVisual)}>
+                        <div className="h-2 w-full rounded-sm bg-mineral-300/80" />
+                        <div className="h-2 w-full rounded-sm bg-mineral-300/80" />
+                        <div className="h-2 w-full rounded-sm bg-mineral-300/80" />
+                      </div>
                     </button>
                   );
                 })}

@@ -182,6 +182,7 @@ export function ComposicaoGaleriaEditorial({
 
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
+              espacamentoAcoes={pagina.espacamentoAcoes}
               previaEquipe={previaEquipe}
               videosYoutube={videosYoutube}
               modoExibicaoVideos={modoExibicaoVideos}

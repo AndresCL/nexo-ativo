@@ -79,7 +79,7 @@ export function ComposicaoImersiva({
           />
         </TransicaoEditorial>
 
-        <div aria-hidden="true" className="min-h-6 flex-1 @5xl:hidden sm:min-h-12" />
+        <div aria-hidden="true" className="min-h-10 flex-1 @5xl:hidden sm:min-h-12" />
 
         <div className="grid items-center gap-5 @5xl:flex-1 @5xl:content-center @5xl:grid-cols-12 @5xl:gap-x-12 @5xl:gap-y-4 @5xl:py-4">
           <TransicaoEditorial atrasoSegundos={0.06} className="@5xl:col-span-7">
@@ -94,6 +94,7 @@ export function ComposicaoImersiva({
           <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5">
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
+              espacamentoAcoes={pagina.espacamentoAcoes}
               previaEquipe={previaEquipe}
               videosYoutube={videosYoutube}
               modoExibicaoVideos={modoExibicaoVideos}

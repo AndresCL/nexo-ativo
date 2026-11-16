@@ -15,6 +15,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
   avaliacoesGoogle: esquemaConfiguracaoAvaliacoesGoogle.optional(),
   organizacaoId: z.string().min(1),
   composicaoVisual: z.enum(["imersivo", "retrato_editorial", "galeria_editorial"]),
+  espacamentoAcoes: z.enum(["compacto", "medio", "amplo"]).optional(),
   paletaId: z.enum([
     "noite_mineral",
     "marfim_editorial",

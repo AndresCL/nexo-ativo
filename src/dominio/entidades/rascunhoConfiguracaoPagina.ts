@@ -13,6 +13,7 @@ import {
   type ConteudoPaginaPublicada,
   type CustomizacaoTokensEditorial,
   type DestaqueObraGaleria,
+  type EspacamentoAcoesHome,
   type IdentidadeMarcaEditorial,
   type IdentificadorPaletaEditorial,
   type IdentificadorTipografiaEditorial,
@@ -39,6 +40,7 @@ export interface RascunhoConfiguracaoPagina extends ConjuntoChamadasEditoriais {
   readonly avaliacoesGoogle?: ConfiguracaoAvaliacoesGoogle;
   readonly organizacaoId: string;
   readonly composicaoVisual: TipoComposicaoEditorial;
+  readonly espacamentoAcoes?: EspacamentoAcoesHome;
   readonly paletaId: IdentificadorPaletaEditorial;
   readonly corPersonalizadaHex?: string;
   readonly customizacaoTokens?: CustomizacaoTokensEditorial;
@@ -199,9 +201,17 @@ export function hidratarRascunhoConfiguracaoPagina(
 
   const seoBruto = ehObjetoSimples(dadosBrutos.seo) ? dadosBrutos.seo : {};
 
+  const espacamentoAcoes =
+    dadosBrutos.espacamentoAcoes === "compacto" ||
+    dadosBrutos.espacamentoAcoes === "medio" ||
+    dadosBrutos.espacamentoAcoes === "amplo"
+      ? dadosBrutos.espacamentoAcoes
+      : fallback.espacamentoAcoes;
+
   return {
     organizacaoId: fallback.organizacaoId,
     composicaoVisual,
+    ...(espacamentoAcoes ? { espacamentoAcoes } : {}),
     paletaId,
     ...(corPersonalizadaHex ? { corPersonalizadaHex } : {}),
     ...(customizacaoTokens ? { customizacaoTokens } : {}),
@@ -404,6 +414,7 @@ export function converterRascunhoParaConteudoPublicado(
     versaoPublicada: opcoes.versaoPublicada,
     atualizadoEmIso: opcoes.publicadoEmIso ?? rascunho.atualizadoEmIso,
     composicaoVisual: rascunho.composicaoVisual,
+    ...(rascunho.espacamentoAcoes ? { espacamentoAcoes: rascunho.espacamentoAcoes } : {}),
     paletaId: rascunho.paletaId,
     ...(rascunho.corPersonalizadaHex ? { corPersonalizadaHex: rascunho.corPersonalizadaHex } : {}),
     ...(rascunho.customizacaoTokens ? { customizacaoTokens: rascunho.customizacaoTokens } : {}),

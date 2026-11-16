@@ -8,6 +8,7 @@ import type {
   CoordenadasPontoFocal,
   CustomizacaoTokensEditorial,
   DestaqueObraGaleria,
+  EspacamentoAcoesHome,
   IdentidadeMarcaEditorial,
   IdentificadorPaletaEditorial,
   IdentificadorTipografiaEditorial,
@@ -41,6 +42,7 @@ export interface EstadoEditorAparencia {
   definirAbaAtiva: (aba: AbaEditorAparencia) => void;
   alterarEstiloVisual: (parcial: {
     readonly composicaoVisual?: TipoComposicaoEditorial;
+    readonly espacamentoAcoes?: EspacamentoAcoesHome;
     readonly paletaId?: IdentificadorPaletaEditorial;
     readonly corPersonalizadaHex?: string;
     readonly customizacaoTokens?: CustomizacaoTokensEditorial | null;
@@ -110,6 +112,7 @@ function criarStoreEditorAparencia(dadosIniciais?: DadosIniciaisEditorAparencia)
         rascunho: {
           ...estado.rascunho,
           ...(parcial.composicaoVisual ? { composicaoVisual: parcial.composicaoVisual } : {}),
+          ...(parcial.espacamentoAcoes ? { espacamentoAcoes: parcial.espacamentoAcoes } : {}),
           ...(parcial.paletaId ? { paletaId: parcial.paletaId } : {}),
           ...(parcial.corPersonalizadaHex !== undefined
             ? { corPersonalizadaHex: parcial.corPersonalizadaHex || undefined }
