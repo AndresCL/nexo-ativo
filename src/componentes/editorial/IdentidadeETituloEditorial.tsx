@@ -22,28 +22,40 @@ export function CabecalhoMarcaDiscreta({
 }: PropriedadesCabecalhoMarcaDiscreta) {
   const tipografia = obterDescritorTipografiaEditorial(tipografiaId);
 
+  const exibirNome = (identidade.mostrarNomeExibicao ?? true) && Boolean(identidade.nomeExibicao);
+  const exibirSubtitulo =
+    (identidade.mostrarSubtituloCurto ?? true) && Boolean(identidade.subtituloCurto);
+  const exibirTexto = exibirNome || exibirSubtitulo;
+  const alinhamento = identidade.alinhamentoCabecalho;
+
+  const classeAlinhamentoContainer =
+    alinhamento === "centro"
+      ? "w-full justify-center text-center"
+      : alinhamento === "direita"
+        ? "w-full justify-end text-right"
+        : alinhamento === "esquerda"
+          ? "w-full justify-start text-left"
+          : alinharCentroNoMobile
+            ? "w-full justify-center @5xl:w-auto @5xl:justify-start @5xl:gap-3"
+            : "justify-start gap-3";
+
   return (
     <header
       className={combinarClasses(
         "pt-2.5 flex flex-col gap-1.5",
-        alinharCentroNoMobile
-          ? "w-full items-center justify-center text-center @5xl:flex-row @5xl:items-baseline @5xl:justify-between @5xl:text-left"
-          : "items-start text-left @5xl:flex-row @5xl:items-baseline @5xl:justify-between",
+        alinhamento
+          ? "w-full"
+          : alinharCentroNoMobile
+            ? "w-full items-center justify-center text-center @5xl:flex-row @5xl:items-baseline @5xl:justify-between @5xl:text-left"
+            : "items-start text-left @5xl:flex-row @5xl:items-baseline @5xl:justify-between",
         className,
       )}
     >
-      <div
-        className={combinarClasses(
-          "flex items-center",
-          alinharCentroNoMobile
-            ? "w-full justify-center @5xl:w-auto @5xl:justify-start @5xl:gap-3"
-            : "justify-start gap-3",
-        )}
-      >
+      <div className={combinarClasses("flex items-center gap-3", classeAlinhamentoContainer)}>
         <div
           className={combinarClasses(
             "flex items-center",
-            alinharCentroNoMobile
+            !alinhamento && alinharCentroNoMobile && exibirTexto
               ? "flex-1 justify-end pr-2.5 sm:pr-3 @5xl:flex-initial @5xl:justify-start @5xl:p-0"
               : "justify-start",
           )}
@@ -63,35 +75,42 @@ export function CabecalhoMarcaDiscreta({
           ) : null}
         </div>
 
-        {identidade.urlLogotipoOpcional && identidade.nomeExibicao ? (
+        {identidade.urlLogotipoOpcional &&
+        (identidade.mostrarNomeExibicao ?? true) &&
+        identidade.nomeExibicao ? (
           <div
             aria-hidden="true"
             className="h-6 w-px bg-current/25 shrink-0 sm:h-7"
           />
         ) : null}
 
-        <div
-          className={combinarClasses(
-            "flex flex-col text-left",
-            alinharCentroNoMobile
-              ? "flex-1 justify-center pl-2.5 sm:pl-3 @5xl:flex-initial @5xl:justify-start @5xl:p-0"
-              : "justify-start",
-          )}
-        >
-          <p
+        {(identidade.mostrarNomeExibicao ?? true) ||
+        ((identidade.mostrarSubtituloCurto ?? true) && identidade.subtituloCurto) ? (
+          <div
             className={combinarClasses(
-              "text-base leading-tight font-medium text-[var(--editorial-texto)] sm:text-lg @5xl:text-xl",
-              tipografia.classeTitulo,
+              "flex flex-col text-left",
+              alinharCentroNoMobile
+                ? "flex-1 justify-center pl-2.5 sm:pl-3 @5xl:flex-initial @5xl:justify-start @5xl:p-0"
+                : "justify-start",
             )}
           >
-            {identidade.nomeExibicao}
-          </p>
-          {identidade.subtituloCurto ? (
-            <p className="mt-0.5 text-[10px] font-medium tracking-[0.14em] text-[var(--editorial-texto)]/80 uppercase sm:text-[11px]">
-              {identidade.subtituloCurto}
-            </p>
-          ) : null}
-        </div>
+            {(identidade.mostrarNomeExibicao ?? true) ? (
+              <p
+                className={combinarClasses(
+                  "text-base leading-tight font-medium text-[var(--editorial-texto)] sm:text-lg @5xl:text-xl",
+                  tipografia.classeTitulo,
+                )}
+              >
+                {identidade.nomeExibicao}
+              </p>
+            ) : null}
+            {(identidade.mostrarSubtituloCurto ?? true) && identidade.subtituloCurto ? (
+              <p className="mt-0.5 text-[10px] font-medium tracking-[0.14em] text-[var(--editorial-texto)]/80 uppercase sm:text-[11px]">
+                {identidade.subtituloCurto}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </header>
   );

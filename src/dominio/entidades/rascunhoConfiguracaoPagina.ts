@@ -208,8 +208,19 @@ export function hidratarRascunhoConfiguracaoPagina(
     tipografiaId,
     identidade: {
       nomeExibicao,
+      ...(typeof identidadeBruta.mostrarNomeExibicao === "boolean"
+        ? { mostrarNomeExibicao: identidadeBruta.mostrarNomeExibicao }
+        : {}),
       ...(typeof identidadeBruta.subtituloCurto === "string" && identidadeBruta.subtituloCurto
         ? { subtituloCurto: identidadeBruta.subtituloCurto }
+        : {}),
+      ...(typeof identidadeBruta.mostrarSubtituloCurto === "boolean"
+        ? { mostrarSubtituloCurto: identidadeBruta.mostrarSubtituloCurto }
+        : {}),
+      ...(identidadeBruta.alinhamentoCabecalho === "esquerda" ||
+      identidadeBruta.alinhamentoCabecalho === "centro" ||
+      identidadeBruta.alinhamentoCabecalho === "direita"
+        ? { alinhamentoCabecalho: identidadeBruta.alinhamentoCabecalho }
         : {}),
       ...(typeof identidadeBruta.urlLogotipoOpcional === "string" &&
       identidadeBruta.urlLogotipoOpcional
@@ -274,7 +285,12 @@ export function hidratarRascunhoConfiguracaoPagina(
       dadosBrutos.chamadasEditoriaisAdicionais,
     ),
     midiaFundo: {
-      tipo: midiaBruta.tipo === "video" ? "video" : "imagem",
+      tipo:
+        midiaBruta.tipo === "degradado"
+          ? "degradado"
+          : midiaBruta.tipo === "video"
+            ? "video"
+            : "imagem",
       urlPrincipal:
         typeof midiaBruta.urlPrincipal === "string" && midiaBruta.urlPrincipal.trim()
           ? midiaBruta.urlPrincipal
@@ -284,6 +300,18 @@ export function hidratarRascunhoConfiguracaoPagina(
         : {}),
       ...(typeof midiaBruta.urlPosterVideo === "string" && midiaBruta.urlPosterVideo
         ? { urlPosterVideo: midiaBruta.urlPosterVideo }
+        : {}),
+      ...(midiaBruta.degradadoOpcional && typeof midiaBruta.degradadoOpcional === "object"
+        ? {
+            degradadoOpcional: {
+              corInicial: String((midiaBruta.degradadoOpcional as Record<string, unknown>).corInicial || "#0f172a"),
+              corFinal: String((midiaBruta.degradadoOpcional as Record<string, unknown>).corFinal || "#312e81"),
+              anguloGraus:
+                typeof (midiaBruta.degradadoOpcional as Record<string, unknown>).anguloGraus === "number"
+                  ? Number((midiaBruta.degradadoOpcional as Record<string, unknown>).anguloGraus)
+                  : 135,
+            },
+          }
         : {}),
       textoAlternativo:
         typeof midiaBruta.textoAlternativo === "string" && midiaBruta.textoAlternativo.trim()
@@ -306,6 +334,7 @@ export function hidratarRascunhoConfiguracaoPagina(
           }
         : {}),
       intensidadeVeloEscuro:
+        midiaBruta.intensidadeVeloEscuro === "nenhum" ||
         midiaBruta.intensidadeVeloEscuro === "suave" ||
         midiaBruta.intensidadeVeloEscuro === "equilibrado" ||
         midiaBruta.intensidadeVeloEscuro === "intenso"
@@ -315,6 +344,9 @@ export function hidratarRascunhoConfiguracaoPagina(
         midiaBruta.efeitoCantos === "dots" || midiaBruta.efeitoCantos === "grade"
           ? midiaBruta.efeitoCantos
           : "nenhum",
+      ...(typeof midiaBruta.opacidadeDotsCantos === "number"
+        ? { opacidadeDotsCantos: Math.max(0, Math.min(100, midiaBruta.opacidadeDotsCantos)) }
+        : {}),
     },
     ...(dadosBrutos.avaliacoesGoogle !== undefined
       ? { avaliacoesGoogle: hidratarConfiguracaoAvaliacoesGoogle(dadosBrutos.avaliacoesGoogle) }
@@ -429,14 +461,14 @@ export function avaliarProntidaoPublicacaoPagina(
     }
   });
 
-  if (!rascunho.midiaFundo.urlPrincipal.trim()) {
+  if (rascunho.midiaFundo.tipo !== "degradado" && !rascunho.midiaFundo.urlPrincipal.trim()) {
     pendencias.push({
       codigo: "MIDIA_PRINCIPAL_AUSENTE",
       mensagem: "Selecione ou envie uma fotografia ou vídeo principal de fundo.",
     });
   }
 
-  if (rascunho.midiaFundo.textoAlternativo.trim().length < 3) {
+  if (rascunho.midiaFundo.tipo !== "degradado" && rascunho.midiaFundo.textoAlternativo.trim().length < 3) {
     pendencias.push({
       codigo: "TEXTO_ALTERNATIVO_AUSENTE",
       mensagem: "Descreva brevemente a mídia principal para acessibilidade (texto alternativo).",

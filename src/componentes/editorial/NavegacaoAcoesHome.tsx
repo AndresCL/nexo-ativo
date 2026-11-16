@@ -15,13 +15,24 @@ import {
   obterVisibilidadeEquipe,
 } from "@/dominio/editorial/posicionamentoEquipeVitrine";
 import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
+import type { ModoExibicaoVideos, VideoYoutubeItem } from "@/dominio/objetos-valor/videoYoutube";
+import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 import { AcaoEquipeVitrine, type ManipuladorAcaoHome } from "./AcaoEquipeVitrine";
+import { SecaoVideosYoutube } from "./SecaoVideosYoutube";
+import { SecaoColecaoAcervoHome } from "./acervo/SecaoColecaoAcervoHome";
 
 export interface PropriedadesNavegacaoAcoesHome {
   readonly acoes: readonly ItemAcaoHome[];
   readonly paletaId: IdentificadorPaletaEditorial;
   readonly aoAcionarItem?: ManipuladorAcaoHome;
+  readonly aoSelecionarItemAcervo?: (tipo: "produtos" | "servicos", itemId: string) => void;
   readonly previaEquipe?: PreviaEquipeVitrine;
+  readonly videosYoutube?: readonly VideoYoutubeItem[];
+  readonly modoExibicaoVideos?: ModoExibicaoVideos;
+  readonly autoplayVideos?: boolean;
+  readonly ocultarTituloVideos?: boolean;
+  readonly produtos?: readonly ProdutoCatalogo[];
+  readonly servicos?: readonly ServicoOrganizacao[];
   readonly className?: string;
 }
 
@@ -46,6 +57,12 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
   }
   if (acao.tipoDestino === "telefone") {
     return MAPA_ICONES_POR_ID["telefone"]?.componente({
+      className: "h-4 w-4 shrink-0",
+      "aria-hidden": true,
+    });
+  }
+  if (acao.tipoDestino === "secao_produtos") {
+    return MAPA_ICONES_POR_ID["produtos"]?.componente({
       className: "h-4 w-4 shrink-0",
       "aria-hidden": true,
     });
@@ -109,8 +126,15 @@ export function NavegacaoAcoesHome({
   acoes,
   paletaId: _paletaId,
   aoAcionarItem,
+  aoSelecionarItemAcervo,
   className,
   previaEquipe,
+  videosYoutube = [],
+  modoExibicaoVideos = "carrossel",
+  autoplayVideos = false,
+  ocultarTituloVideos = false,
+  produtos = [],
+  servicos = [],
 }: PropriedadesNavegacaoAcoesHome) {
   const acoesVisiveis = obterAcoesPrincipaisVisiveis(acoes).filter(
     (acao) => !ehAcaoEquipe(acao) || previaEquipe?.total !== 0,
@@ -176,26 +200,80 @@ export function NavegacaoAcoesHome({
             />
           );
         }
+        if (acao.tipoDestino === "secao_produtos") {
+          const modo = acao.modoExibicaoColecao ?? "modal_gaveta";
+          if (modo !== "modal_gaveta") {
+            return (
+              <SecaoColecaoAcervoHome
+                key={acao.id}
+                tipo="produtos"
+                tituloSecao={acao.tituloSecao || acao.rotulo}
+                modo={modo}
+                produtos={produtos}
+                aoAbrirGavetaDetalhe={(tipoItem, itemId) => {
+                  if (itemId && aoSelecionarItemAcervo) {
+                    aoSelecionarItemAcervo(tipoItem, itemId);
+                  } else {
+                    aoAcionarItem?.(acao);
+                  }
+                }}
+              />
+            );
+          }
+        }
+        if (acao.tipoDestino === "secao_servicos") {
+          const modo = acao.modoExibicaoColecao ?? "modal_gaveta";
+          if (modo !== "modal_gaveta") {
+            return (
+              <SecaoColecaoAcervoHome
+                key={acao.id}
+                tipo="servicos"
+                tituloSecao={acao.tituloSecao || acao.rotulo}
+                modo={modo}
+                servicos={servicos}
+                aoAbrirGavetaDetalhe={(tipoItem, itemId) => {
+                  if (itemId && aoSelecionarItemAcervo) {
+                    aoSelecionarItemAcervo(tipoItem, itemId);
+                  } else {
+                    aoAcionarItem?.(acao);
+                  }
+                }}
+              />
+            );
+          }
+        }
+        if (acao.tipoDestino === "secao_videos") {
+          if (videosYoutube.length === 0) return null;
+          return (
+            <SecaoVideosYoutube
+              key={acao.id}
+              videos={videosYoutube}
+              modoExibicao={modoExibicaoVideos}
+              autoplay={autoplayVideos}
+              tituloSecao={ocultarTituloVideos ? undefined : acao.tituloSecao || acao.rotulo}
+            />
+          );
+        }
         const externo = ehDestinoExterno(acao.destino);
 
         const classesBaseItem = combinarClasses(
-          "group flex min-h-13 w-full items-center justify-between gap-3 rounded-xl px-5 py-3 text-left transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--editorial-texto)] hover:scale-[1.01]",
+          "group flex w-full items-center justify-between gap-3 px-5 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--editorial-texto)] hover:scale-[1.01]",
           ehDestaque
-            ? "border border-[var(--editorial-borda)] bg-[var(--editorial-cta-fundo)] text-[var(--editorial-cta-texto)] shadow-lg shadow-black/20 hover:opacity-95"
-            : "border border-[var(--editorial-borda)] bg-[var(--editorial-secundario-fundo)] text-[var(--editorial-secundario-texto)] shadow-md backdrop-blur-md hover:border-white/40",
+            ? "h-12 min-h-12 py-2 rounded-full bg-[var(--editorial-cta-fundo)] text-[var(--editorial-cta-texto)] shadow-lg shadow-black/20 hover:opacity-95 justify-center"
+            : "min-h-13 py-3 rounded-xl bg-[var(--editorial-secundario-fundo)] text-[var(--editorial-secundario-texto)] shadow-md backdrop-blur-md",
         );
 
         const iconeItem = renderizarIconeAcao(acao);
 
         const conteudoInterno = (
           <>
-            <div className="flex items-center gap-3">
+            <div className={combinarClasses("flex items-center gap-3", ehDestaque ? "justify-center" : "")}>
               {iconeItem ? (
                 <div
                   className={combinarClasses(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110",
                     ehDestaque
-                      ? "bg-white/15 text-current"
+                      ? "bg-white/15 text-current rounded-full"
                       : "bg-black/5 text-current dark:bg-white/10",
                   )}
                 >
@@ -203,52 +281,71 @@ export function NavegacaoAcoesHome({
                 </div>
               ) : null}
 
-              <span className="flex flex-col items-start">
-                <span className="text-sm font-medium tracking-wide">{acao.rotulo}</span>
-                {acao.subtituloDiscreto ? (
-                  <span
-                    className={combinarClasses(
-                      "mt-0.5 text-[11px]",
-                      ehDestaque ? "opacity-78" : "text-[var(--editorial-texto-secundario)]",
-                    )}
-                  >
-                    {acao.subtituloDiscreto}
-                  </span>
-                ) : null}
-              </span>
+              {ehDestaque ? (
+                <span className="text-sm font-semibold tracking-wide truncate">{acao.rotulo}</span>
+              ) : (
+                <span className="flex flex-col items-start">
+                  <span className="text-sm font-medium tracking-wide">{acao.rotulo}</span>
+                  {acao.subtituloDiscreto ? (
+                    <span className="mt-0.5 text-[11px] text-[var(--editorial-texto-secundario)]">
+                      {acao.subtituloDiscreto}
+                    </span>
+                  ) : null}
+                </span>
+              )}
             </div>
 
-            <ChevronRight
-              aria-hidden="true"
-              className="h-5 w-5 shrink-0 opacity-70 transition-transform duration-200 group-hover:translate-x-1 group-hover:opacity-100"
-            />
+            {!ehDestaque ? (
+              <ChevronRight
+                aria-hidden="true"
+                className="h-5 w-5 shrink-0 opacity-70 transition-transform duration-200 group-hover:translate-x-1 group-hover:opacity-100"
+              />
+            ) : null}
           </>
         );
 
-        if (aoAcionarItem) {
-          return (
-            <button
-              key={acao.id}
-              type="button"
-              data-acao-home-id={acao.id}
-              onClick={(evento) => aoAcionarItem(acao, evento.currentTarget)}
-              className={classesBaseItem}
-            >
-              {conteudoInterno}
-            </button>
-          );
-        }
+        const temBordaAnimada = ehDestaque && acao.animarBordaDestaque === true;
 
-        return (
+        const elementoBotao = aoAcionarItem ? (
+          <button
+            type="button"
+            data-acao-home-id={acao.id}
+            onClick={(evento) => aoAcionarItem(acao, evento.currentTarget)}
+            className={combinarClasses(classesBaseItem, temBordaAnimada ? "relative z-10 !border-transparent" : undefined)}
+          >
+            {conteudoInterno}
+          </button>
+        ) : (
           <a
-            key={acao.id}
             href={acao.destino}
             {...(externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            className={classesBaseItem}
+            className={combinarClasses(classesBaseItem, temBordaAnimada ? "relative z-10 !border-transparent" : undefined)}
           >
             {conteudoInterno}
           </a>
         );
+
+        const elementoPrincipalComBorda = temBordaAnimada ? (
+          <div className="animacao-brilho-borda-container w-full rounded-full">
+            <div className="animacao-brilho-borda-feixe" aria-hidden="true" />
+            {elementoBotao}
+          </div>
+        ) : (
+          elementoBotao
+        );
+
+        if (ehDestaque && acao.subtituloDiscreto) {
+          return (
+            <div key={acao.id} className="flex w-full flex-col items-center gap-1.5">
+              {elementoPrincipalComBorda}
+              <p className="text-center text-xs font-medium text-[var(--editorial-texto-secundario)] opacity-80 px-2">
+                {acao.subtituloDiscreto}
+              </p>
+            </div>
+          );
+        }
+
+        return <div key={acao.id} className="w-full">{elementoPrincipalComBorda}</div>;
       })}
     </nav>
   );

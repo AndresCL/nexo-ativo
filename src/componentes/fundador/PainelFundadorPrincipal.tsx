@@ -488,8 +488,8 @@ export function PainelFundadorPrincipal({
                     className="mt-1 w-full rounded-md border border-marfim-300 p-2 text-xs"
                   >
                     <option value="avaliacao_inicial">Avaliação Inicial</option>
-                    <option value="pro">Pro (R$ 97/mês)</option>
-                    <option value="equipe">Equipe (R$ 197/mês)</option>
+                    <option value="pro">Pro (R$ 87/mês)</option>
+                    <option value="equipe">Equipe (R$ 87/mês)</option>
                     <option value="personalizado">Personalizado</option>
                   </select>
                 </div>

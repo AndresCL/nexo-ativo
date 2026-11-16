@@ -53,7 +53,7 @@ describe("Visão geral do painel", () => {
     const atalhos = screen.getByRole("region", { name: "Organize sua vitrine" });
     for (const rota of [
       "aparencia",
-      "catalogo",
+      "produtos",
       "servicos",
       "portfolio",
       "equipe",

@@ -15,11 +15,13 @@ import { copiarTextoComAviso } from "@/componentes/interface/notificacoes/copiar
 import type {
   CanalOrigemTrafego,
   MetricaCanalOrigem,
+  MetricaQrCode,
 } from "@/dominio/analytics/tiposMetricasAgregadas";
 import { CORES_METRICAS_DESEMPENHO } from "./coresMetricasDesempenho";
 
 export interface PropriedadesGraficoCanaisOrigem {
   readonly canais: readonly MetricaCanalOrigem[];
+  readonly qrCodes?: readonly MetricaQrCode[];
   readonly identificadorOrganizacao?: string;
 }
 
@@ -44,6 +46,12 @@ const CONFIG_CANAIS: Readonly<Record<CanalOrigemTrafego, ConfiguracaoCanalVisual
     fundoAcento: "#E0E7FF",
     corAcento: CORES_METRICAS_DESEMPENHO.visualizacoes.principal,
     parametroUrl: "?origem=cartao_equipe",
+  },
+  qrcode: {
+    icone: QrCode,
+    fundoAcento: "#FEF3C7",
+    corAcento: "#B45309",
+    parametroUrl: "?utm_source=qrcode",
   },
   whatsapp: {
     icone: MessageCircle,
@@ -75,6 +83,7 @@ const CONFIG_CANAIS: Readonly<Record<CanalOrigemTrafego, ConfiguracaoCanalVisual
 
 export function GraficoCanaisOrigem({
   canais,
+  qrCodes = [],
   identificadorOrganizacao,
 }: PropriedadesGraficoCanaisOrigem) {
   const totalVisitas = canais.reduce((acc, c) => acc + c.visualizacoes, 0);

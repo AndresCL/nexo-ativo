@@ -40,6 +40,7 @@ export interface PortaProvedorAsaas {
   criarCobrancaAvulsaImplantacao(
     parametros: ParametrosCriarCobrancaImplantacaoAsaas,
   ): Promise<RespostaCriacaoCobrancaAvulsaAsaas>;
+  cancelarAssinatura(assinaturaAsaasId: string): Promise<void>;
 }
 
 export interface OpcoesAdaptadorAsaas {
@@ -192,6 +193,24 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
       urlFaturaOuCheckout: dados.invoiceUrl,
       situacao: dados.status,
     };
+  }
+
+  public async cancelarAssinatura(assinaturaAsaasId: string): Promise<void> {
+    if (!this.chaveApi) {
+      return;
+    }
+
+    const resposta = await this.funcaoFetch(`${this.urlBase}/subscriptions/${assinaturaAsaasId}`, {
+      method: "DELETE",
+      headers: {
+        access_token: this.chaveApi,
+      },
+    });
+
+    if (!resposta.ok) {
+      const detalhe = await resposta.text();
+      throw new Error(`Falha ao cancelar assinatura no Asaas: ${detalhe}`);
+    }
   }
 }
 

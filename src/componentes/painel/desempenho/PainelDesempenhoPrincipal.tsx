@@ -23,6 +23,7 @@ import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { TooltipInformativo } from "@/componentes/interface/TooltipInformativo";
 import { EstatisticasExperiencias } from "./EstatisticasExperiencias";
+import { EstatisticasQrCodes } from "./EstatisticasQrCodes";
 import { GraficoTemporalInterativo } from "./GraficoTemporalInterativo";
 import { DiagramaFunilInterativo } from "./DiagramaFunilInterativo";
 import { GraficoCanaisOrigem } from "./GraficoCanaisOrigem";
@@ -432,6 +433,7 @@ export function PainelDesempenhoPrincipal({
         {/* Canais de Origem e Aquisição */}
         <GraficoCanaisOrigem
           canais={metricasAtivas.metricasPorCanal}
+          qrCodes={metricasAtivas.metricasPorQrCode}
           identificadorOrganizacao={organizacao.identificadorPublico}
         />
       </section>
@@ -445,6 +447,8 @@ export function PainelDesempenhoPrincipal({
             : historicoDoMes
         }
       />
+
+      <EstatisticasQrCodes qrCodes={metricasAtivas.metricasPorQrCode} />
 
       {/* Performance dos Membros da Equipe & Cartões VIP */}
       <section aria-labelledby="titulo-performance-equipe" className="space-y-4">

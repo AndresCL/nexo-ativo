@@ -13,6 +13,7 @@ export interface PortaAssinaturasPainelCliente {
   criarAssinatura(
     dados: DadosSolicitacaoCriarAssinatura,
   ): Promise<ResultadoCriacaoAssinaturaCliente>;
+  cancelarAssinatura(organizacaoId: string): Promise<void>;
 }
 
 export class ServicoAssinaturasPainelCliente implements PortaAssinaturasPainelCliente {
@@ -27,6 +28,15 @@ export class ServicoAssinaturasPainelCliente implements PortaAssinaturasPainelCl
 
     const resposta = await chamada(dados);
     return resposta.data;
+  }
+
+  public async cancelarAssinatura(organizacaoId: string): Promise<void> {
+    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const chamada = httpsCallable<{ readonly organizacaoId: string }, unknown>(
+      funcoesRemotas,
+      "cancelarAssinaturaAsaas",
+    );
+    await chamada({ organizacaoId });
   }
 }
 

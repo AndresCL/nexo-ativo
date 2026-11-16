@@ -163,15 +163,23 @@ export function CartaoDigitalProfissionalPublico({
     if (ultimaVisualizacaoRegistrada.current === chaveVisualizacao) return;
     ultimaVisualizacaoRegistrada.current = chaveVisualizacao;
 
+    const params = new URLSearchParams(window.location.search);
+    const qrCodeOrigem =
+      params.get("utm_source") === "qrcode"
+        ? (params.get("utm_content") ?? `profissional_${profissional.identificadorCartao}`)
+        : undefined;
+
     gravarAtribuicaoOrigem(paginaOrganizacao.organizacaoId, {
       canalOrigem: "cartao_equipe",
       cartaoProfissionalId: profissional.id,
+      ...(qrCodeOrigem ? { qrCodeOrigem } : {}),
     });
 
     void servicoTelemetriaAnonimaPadrao.registrarEvento({
       organizacaoId: paginaOrganizacao.organizacaoId,
       tipoEvento: "visualizacao_cartao",
       canalOrigem: "cartao_equipe",
+      ...(qrCodeOrigem ? { qrCodeOrigem } : {}),
       cartaoProfissionalId: profissional.id,
       cartaoProfissionalNome: profissional.nomeCompleto,
       profissionalId: profissional.id,
@@ -348,6 +356,13 @@ export function CartaoDigitalProfissionalPublico({
         profissionalNome: profissional.nomeCompleto,
       });
       window.open(urlWhatsappLimpa!, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (acao.tipoDestino === "secao_produtos" || acao.destino === "#produtos") {
+      setMicrofluxoAtivo(null);
+      setTituloSecaoAberta(acao.tituloSecao);
+      setSecaoAberta("produtos");
       return;
     }
 

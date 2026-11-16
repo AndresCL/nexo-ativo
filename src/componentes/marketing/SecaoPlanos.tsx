@@ -9,32 +9,21 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
  * Seção de planos com transparência de valores e recursos inclusos.
  */
 export function SecaoPlanos() {
-  const valorPlanoPro = ValorMonetarioCentavos.deCentavos(9700).formatarMoedaBrasileira();
-  const valorPlanoEquipe = ValorMonetarioCentavos.deCentavos(19700).formatarMoedaBrasileira();
+  const valorPlanoUnico = ValorMonetarioCentavos.deCentavos(8700).formatarMoedaBrasileira();
 
   const planos = [
     {
-      nome: "Pro",
-      descricao: "Para profissionais autônomos, especialistas e marcas pessoais.",
-      valor: valorPlanoPro,
-      destaque: false,
+      nome: "Completo",
+      descricao: "Tudo incluso para autônomos, clínicas, escritórios e operações comerciais.",
+      valor: valorPlanoUnico,
+      destaque: true,
       itens: [
         "Vitrine digital completa (Desktop e Mobile)",
         "Catálogo de serviços e portfólio completo",
         "Microfluxos comerciais interativos",
         "Painel de solicitações e métricas",
-      ],
-    },
-    {
-      nome: "Equipe",
-      descricao: "Para clínicas, escritórios, estúdios e operações comerciais.",
-      valor: valorPlanoEquipe,
-      destaque: true,
-      itens: [
-        "Tudo do plano Pro",
         "Múltiplos membros e cartões profissionais",
         "Gestão centralizada de marca e vitrine",
-        "Acompanhamento de solicitações em equipe",
       ],
     },
   ] as const;
@@ -61,7 +50,7 @@ export function SecaoPlanos() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <div className="mx-auto mt-10 max-w-xl">
           {planos.map((plano) => (
             <CartaoSuperficie
               key={plano.nome}

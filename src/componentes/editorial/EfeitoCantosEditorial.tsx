@@ -5,6 +5,7 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 export interface PropriedadesEfeitoCantosEditorial {
   readonly tipo?: TipoEfeitoCantosEditorial;
   readonly temaEscuro?: boolean;
+  readonly opacidadePercentual?: number;
   readonly className?: string;
 }
 
@@ -24,6 +25,7 @@ interface ConfiguracaoEstiloCanto {
 export function EfeitoCantosEditorial({
   tipo = "nenhum",
   temaEscuro = true,
+  opacidadePercentual = 20,
   className,
 }: PropriedadesEfeitoCantosEditorial) {
   if (tipo !== "dots" && tipo !== "grade") {
@@ -34,8 +36,9 @@ export function EfeitoCantosEditorial({
     <div
       data-testid="efeito-cantos-dots"
       aria-hidden="true"
+      style={{ opacity: Math.max(0.05, Math.min(1, opacidadePercentual / 100)) }}
       className={combinarClasses(
-        "pointer-events-none absolute inset-0 z-[2] overflow-hidden select-none",
+        "pointer-events-none absolute inset-0 z-[2] overflow-hidden select-none transition-opacity duration-150",
         className,
       )}
     >
@@ -44,63 +47,66 @@ export function EfeitoCantosEditorial({
   );
 }
 
-function MatrizDotsQuatroCantos({ temaEscuro }: { readonly temaEscuro: boolean }) {
-  // Pontos calibrados com textura translúcida hiper-discreta (20% de opacidade)
-  const corPonto = temaEscuro ? "rgba(255, 255, 255, 0.20)" : "rgba(10, 12, 11, 0.18)";
+function MatrizDotsQuatroCantos({
+  temaEscuro,
+}: {
+  readonly temaEscuro: boolean;
+}) {
+  const corPonto = temaEscuro ? "#ffffff" : "#0a0c0b";
 
   const cantos: readonly {
     readonly id: string;
     readonly config: ConfiguracaoEstiloCanto;
   }[] = [
-    {
-      id: "superior-esquerdo",
-      config: {
-        posicaoClasse: "top-0 left-0",
-        estiloContainer: {
-          backgroundImage: `radial-gradient(circle, ${corPonto} 1.5px, transparent 1.5px)`,
-          backgroundSize: "20px 20px",
-          WebkitMaskImage: "radial-gradient(circle at 0% 0%, black 20%, transparent 80%)",
-          maskImage: "radial-gradient(circle at 0% 0%, black 20%, transparent 80%)",
+      {
+        id: "superior-esquerdo",
+        config: {
+          posicaoClasse: "top-0 left-0",
+          estiloContainer: {
+            backgroundImage: `radial-gradient(circle, ${corPonto} 1px, transparent 1px)`,
+            backgroundSize: "16px 16px",
+            WebkitMaskImage: "radial-gradient(circle at 0% 0%, black 30%, transparent 80%)",
+            maskImage: "radial-gradient(circle at 0% 0%, black 30%, transparent 80%)",
+          },
         },
       },
-    },
-    {
-      id: "superior-direito",
-      config: {
-        posicaoClasse: "top-0 right-0",
-        estiloContainer: {
-          backgroundImage: `radial-gradient(circle, ${corPonto} 1.5px, transparent 1.5px)`,
-          backgroundSize: "20px 20px",
-          WebkitMaskImage: "radial-gradient(circle at 100% 0%, black 20%, transparent 80%)",
-          maskImage: "radial-gradient(circle at 100% 0%, black 20%, transparent 80%)",
+      {
+        id: "superior-direito",
+        config: {
+          posicaoClasse: "top-0 right-0",
+          estiloContainer: {
+            backgroundImage: `radial-gradient(circle, ${corPonto} 1px, transparent 1px)`,
+            backgroundSize: "16px 16px",
+            WebkitMaskImage: "radial-gradient(circle at 100% 0%, black 30%, transparent 80%)",
+            maskImage: "radial-gradient(circle at 100% 0%, black 30%, transparent 80%)",
+          },
         },
       },
-    },
-    {
-      id: "inferior-esquerdo",
-      config: {
-        posicaoClasse: "bottom-0 left-0",
-        estiloContainer: {
-          backgroundImage: `radial-gradient(circle, ${corPonto} 1.5px, transparent 1.5px)`,
-          backgroundSize: "20px 20px",
-          WebkitMaskImage: "radial-gradient(circle at 0% 100%, black 20%, transparent 80%)",
-          maskImage: "radial-gradient(circle at 0% 100%, black 20%, transparent 80%)",
+      {
+        id: "inferior-esquerdo",
+        config: {
+          posicaoClasse: "bottom-0 left-0",
+          estiloContainer: {
+            backgroundImage: `radial-gradient(circle, ${corPonto} 1px, transparent 1px)`,
+            backgroundSize: "16px 16px",
+            WebkitMaskImage: "radial-gradient(circle at 0% 100%, black 30%, transparent 80%)",
+            maskImage: "radial-gradient(circle at 0% 100%, black 30%, transparent 80%)",
+          },
         },
       },
-    },
-    {
-      id: "inferior-direito",
-      config: {
-        posicaoClasse: "bottom-0 right-0",
-        estiloContainer: {
-          backgroundImage: `radial-gradient(circle, ${corPonto} 1.5px, transparent 1.5px)`,
-          backgroundSize: "20px 20px",
-          WebkitMaskImage: "radial-gradient(circle at 100% 100%, black 20%, transparent 80%)",
-          maskImage: "radial-gradient(circle at 100% 100%, black 20%, transparent 80%)",
+      {
+        id: "inferior-direito",
+        config: {
+          posicaoClasse: "bottom-0 right-0",
+          estiloContainer: {
+            backgroundImage: `radial-gradient(circle, ${corPonto} 1px, transparent 1px)`,
+            backgroundSize: "16px 16px",
+            WebkitMaskImage: "radial-gradient(circle at 100% 100%, black 30%, transparent 80%)",
+            maskImage: "radial-gradient(circle at 100% 100%, black 30%, transparent 80%)",
+          },
         },
       },
-    },
-  ];
+    ];
 
   return (
     <>
@@ -108,7 +114,7 @@ function MatrizDotsQuatroCantos({ temaEscuro }: { readonly temaEscuro: boolean }
         <div
           key={id}
           className={combinarClasses(
-            "absolute h-60 w-60 @3xl:h-80 @3xl:w-80",
+            "absolute h-36 w-36 @3xl:h-48 @3xl:w-48",
             config.posicaoClasse,
           )}
         >

@@ -1,6 +1,7 @@
 "use client";
 
 import { BlocosConteudoEditorial } from "@/componentes/editorial/ConteudoEtapaLivreVisitante";
+import { MolduraSmartphone } from "@/componentes/editorial/MolduraSmartphone";
 import { EditorComposicaoEtapa } from "./EditorComposicaoEtapa";
 import { useState } from "react";
 import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
@@ -54,7 +55,6 @@ export function EditorConclusaoMicrofluxo({
   permiteFinanceiro,
   aoAlterar,
 }: Propriedades) {
-  const [previaCelular, setPreviaCelular] = useState(true);
   const config = fluxo.conclusao;
   const campos = listarCamposResumoConclusao(fluxo).filter(
     (item) =>
@@ -416,16 +416,8 @@ export function EditorConclusaoMicrofluxo({
       </fieldset>
       {config ? (
         <div className="space-y-3 border-t pt-4">
-          <button
-            type="button"
-            className="text-xs underline"
-            onClick={() => setPreviaCelular(!previaCelular)}
-          >
-            Prévia: {previaCelular ? "celular" : "desktop"}
-          </button>
-          <div
-            className={`mx-auto w-full space-y-4 rounded-lg border p-5 ${previaCelular ? "max-w-sm" : "max-w-2xl"}`}
-          >
+          <p className="text-xs font-medium text-mineral-500">Prévia: celular</p>
+          <MolduraSmartphone classNameFundo="rounded-xl" classNameMoldura="bg-white p-5 space-y-4">
             <h4 className="text-center text-xl">
               {fluxo.mensagemConfirmacaoTitulo || "Experiência concluída"}
             </h4>
@@ -453,7 +445,7 @@ export function EditorConclusaoMicrofluxo({
                 {acao.rotulo}
               </div>
             ))}
-          </div>
+          </MolduraSmartphone>
           <p className="text-xs text-mineral-500">
             Prévia ilustrativa. A vitrine aplica o tema publicado e omite respostas ausentes.
           </p>

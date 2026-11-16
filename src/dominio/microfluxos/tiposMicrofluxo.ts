@@ -136,9 +136,11 @@ export interface EtapaMicrofluxo {
 export type TipoAcaoVitrine =
   | "microfluxo"
   | "link_externo"
+  | "secao_produtos"
   | "secao_servicos"
   | "secao_portfolio"
   | "secao_equipe"
+  | "secao_videos"
   | "whatsapp"
   | "telefone";
 
@@ -177,6 +179,12 @@ export interface DefinicaoMicrofluxo {
   readonly conclusao?: ConfiguracaoConclusaoMicrofluxo;
   readonly posicionamentoEquipe?: PosicionamentoEquipeVitrine;
   readonly limiteAvataresEquipe?: number | null;
+  readonly modoExibicaoColecao?: "modal_gaveta" | "carrossel" | "grade_2_colunas";
+  readonly configuracaoCtaAcervo?: {
+    readonly tipoAcao: "whatsapp" | "microfluxo";
+    readonly rotuloBotao?: string;
+    readonly microfluxoId?: string;
+  };
   readonly id: string;
   readonly organizacaoId: string;
   readonly tipoAcao?: TipoAcaoVitrine;
@@ -202,6 +210,7 @@ export interface DefinicaoMicrofluxo {
   readonly tituloSecao?: string;
   readonly iconeBotaoHome?: string;
   readonly destaquePrimarioHome?: boolean;
+  readonly animarBordaDestaque?: boolean;
   readonly ordemHome?: number;
 }
 

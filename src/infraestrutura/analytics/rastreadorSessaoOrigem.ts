@@ -3,6 +3,7 @@ import type { CanalOrigemTrafego } from "@/dominio/analytics/tiposMetricasAgrega
 export interface AtribuicaoOrigemSessao {
   readonly canalOrigem: CanalOrigemTrafego;
   readonly cartaoProfissionalId?: string;
+  readonly qrCodeOrigem?: string;
 }
 
 const CHAVE_STORAGE_PREFIXO = "fluxo_atribuicao_origem_";
@@ -21,19 +22,7 @@ export function obterOuDetectarOrigemSessao(organizacaoId: string): AtribuicaoOr
 
   const entradaPermalink = /^#experiencia=e-[a-zA-Z0-9_-]+(?:\?|$)/.test(window.location.hash);
 
-  try {
-    const gravado = window.sessionStorage.getItem(chave);
-    if (gravado) {
-      const parsed = JSON.parse(gravado) as AtribuicaoOrigemSessao;
-      if (parsed && parsed.canalOrigem && !entradaPermalink) {
-        return parsed;
-      }
-    }
-  } catch {
-    // sessionStorage indisponível ou bloqueado
-  }
-
-  // 1. Analisa parâmetros da URL e Hash
+  // 1. Analisa parâmetros da URL e Hash (sempre têm prioridade sobre a sessionStorage)
   const searchParams = new URLSearchParams(window.location.search);
   const hash = window.location.hash || "";
   const hashParams = hash.includes("?")
@@ -52,11 +41,27 @@ export function obterOuDetectarOrigemSessao(organizacaoId: string): AtribuicaoOr
     searchParams.get("vendedor") ??
     hashParams?.get("vendedor");
 
+  if (!entradaPermalink && !origemParam && !consultorParam) {
+    try {
+      const gravado = window.sessionStorage.getItem(chave);
+      if (gravado) {
+        const parsed = JSON.parse(gravado) as AtribuicaoOrigemSessao;
+        if (parsed && parsed.canalOrigem) {
+          return parsed;
+        }
+      }
+    } catch {
+      // sessionStorage indisponível ou bloqueado
+    }
+  }
+
   let canal: CanalOrigemTrafego = "direto";
   const cartaoId: string | undefined =
     consultorParam && /^[a-zA-Z0-9_-]{1,120}$/.test(consultorParam) ? consultorParam : undefined;
 
-  if (entradaPermalink || origemParam === "permalink") {
+  if (origemParam === "qrcode" || origemParam?.toLowerCase() === "qr") {
+    canal = "qrcode";
+  } else if (entradaPermalink || origemParam === "permalink") {
     canal = "permalink";
   } else if (origemParam === "cartao_equipe" || consultorParam) {
     canal = "cartao_equipe";
@@ -90,9 +95,17 @@ export function obterOuDetectarOrigemSessao(organizacaoId: string): AtribuicaoOr
     }
   }
 
+  const qrCodeContent =
+    canal === "qrcode"
+      ? (searchParams.get("utm_content") ?? hashParams?.get("utm_content") ?? "vitrine")
+      : undefined;
+
   const resultado: AtribuicaoOrigemSessao = {
     canalOrigem: canal,
     ...(cartaoId ? { cartaoProfissionalId: cartaoId } : {}),
+    ...(qrCodeContent && /^[a-zA-Z0-9_-]{1,120}$/.test(qrCodeContent)
+      ? { qrCodeOrigem: qrCodeContent }
+      : {}),
   };
 
   try {

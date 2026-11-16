@@ -52,6 +52,7 @@ import { CanvasEditorVisualFluxos } from "../microfluxos/CanvasEditorVisualFluxo
 import { SeletorIconeAcaoPopover } from "../editor/SeletorIconeAcaoPopover";
 import { TituloExperienciaEditavel } from "./TituloExperienciaEditavel";
 import { ConfiguracaoEquipeVitrine } from "./ConfiguracaoEquipeVitrine";
+import { OpcaoOcultarTituloVideosExperiencia } from "./OpcaoOcultarTituloVideosExperiencia";
 
 const DESCRITORES_TIPO_ACAO: Record<TipoAcaoVitrine, { rotulo: string; iconeBadge: string }> = {
   microfluxo: {
@@ -61,6 +62,10 @@ const DESCRITORES_TIPO_ACAO: Record<TipoAcaoVitrine, { rotulo: string; iconeBadg
   link_externo: {
     rotulo: "Link externo",
     iconeBadge: "Link",
+  },
+  secao_produtos: {
+    rotulo: "Produtos",
+    iconeBadge: "Produtos",
   },
   secao_servicos: {
     rotulo: "Serviços",
@@ -73,6 +78,10 @@ const DESCRITORES_TIPO_ACAO: Record<TipoAcaoVitrine, { rotulo: string; iconeBadg
   secao_equipe: {
     rotulo: "Equipe",
     iconeBadge: "Equipe",
+  },
+  secao_videos: {
+    rotulo: "Vídeos do YouTube",
+    iconeBadge: "Vídeos",
   },
   whatsapp: {
     rotulo: "WhatsApp",
@@ -761,6 +770,25 @@ export function GerenciadorExperienciasPainel({
                     <option value="destaque">Em destaque</option>
                   </select>
                 </label>
+
+                {fluxoAtual.destaquePrimarioHome ? (
+                  <label className="flex cursor-pointer items-center gap-2 pb-2 text-xs font-medium text-mineral-800">
+                    <input
+                      type="checkbox"
+                      disabled={!podeAlterar}
+                      checked={Boolean(fluxoAtual.animarBordaDestaque)}
+                      onChange={(e) => {
+                        const marcado = e.target.checked;
+                        atualizarFluxoSelecionado((f) => ({
+                          ...f,
+                          animarBordaDestaque: marcado,
+                        }));
+                      }}
+                      className="h-4 w-4 rounded border-marfim-300 accent-mineral-900"
+                    />
+                    <span>Brilho na borda</span>
+                  </label>
+                ) : null}
                 <details key={fluxoAtual.id} className="relative">
                   <summary
                     aria-label="Mais opções da experiência"
@@ -822,6 +850,9 @@ export function GerenciadorExperienciasPainel({
                       </option>
                     ))}
                 </select>
+                {fluxoAtual.tipoAcao === "secao_videos" ? (
+                  <OpcaoOcultarTituloVideosExperiencia organizacaoId={organizacaoId} />
+                ) : null}
               </div>
 
               <div>
@@ -859,6 +890,160 @@ export function GerenciadorExperienciasPainel({
               </div>
             </div>
 
+            {fluxoAtual.tipoAcao === "secao_produtos" || fluxoAtual.tipoAcao === "secao_servicos" ? (
+              <>
+                <div className="rounded-xl border border-marfim-200 bg-white p-3.5 space-y-2">
+                  <label className="block text-[11px] font-semibold text-mineral-700 uppercase tracking-wider">
+                    Modo de Exibição na Vitrine
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      { id: "carrossel", rotulo: "Carrossel Swipe", desc: "Deslize horizontal moderno com evidência" },
+                      { id: "grade_2_colunas", rotulo: "2 por Linha (Grid)", desc: "Grade de 2 colunas direto na Home" },
+                      { id: "modal_gaveta", rotulo: "Gaveta / Modal", desc: "Botão na Home abrindo painel completo" },
+                    ].map((opcao) => {
+                      const selecionado = (fluxoAtual.modoExibicaoColecao ?? "modal_gaveta") === opcao.id;
+                      return (
+                        <button
+                          key={opcao.id}
+                          type="button"
+                          disabled={!podeAlterar}
+                          onClick={() =>
+                            atualizarFluxoSelecionado((atual) => ({
+                              ...atual,
+                              modoExibicaoColecao: opcao.id as "modal_gaveta" | "carrossel" | "grade_2_colunas",
+                            }))
+                          }
+                          className={combinarClasses(
+                            "flex flex-col text-left p-2.5 rounded-lg border transition text-xs cursor-pointer",
+                            selecionado
+                              ? "border-indigo-600 bg-indigo-50/50 text-indigo-950 font-medium ring-1 ring-indigo-500"
+                              : "border-marfim-200 hover:bg-marfim-50 text-mineral-700",
+                          )}
+                        >
+                          <span className="font-semibold text-mineral-900">{opcao.rotulo}</span>
+                          <span className="text-[10px] text-mineral-500 mt-0.5">{opcao.desc}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-marfim-200 bg-white p-3.5 space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-mineral-700 uppercase tracking-wider">
+                      Ação Principal nos Detalhes do Item (CTA)
+                    </label>
+                    <p className="text-[11px] text-mineral-500 mt-0.5">
+                      Define o que acontece quando o visitante toca no botão de ação dentro dos detalhes de um item.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      { id: "whatsapp", rotulo: "WhatsApp Direto", desc: "Abre conversa já com o nome do item" },
+                      { id: "microfluxo", rotulo: "Iniciar Outra Experiência", desc: "Abre percurso (simulação, agendamento, etc.)" },
+                    ].map((opcao) => {
+                      const tipoCtaAtual = fluxoAtual.configuracaoCtaAcervo?.tipoAcao ?? "whatsapp";
+                      const selecionado = tipoCtaAtual === opcao.id;
+                      return (
+                        <button
+                          key={opcao.id}
+                          type="button"
+                          disabled={!podeAlterar}
+                          onClick={() =>
+                            atualizarFluxoSelecionado((atual) => ({
+                              ...atual,
+                              configuracaoCtaAcervo: {
+                                ...(atual.configuracaoCtaAcervo ?? { tipoAcao: "whatsapp" }),
+                                tipoAcao: opcao.id as "whatsapp" | "microfluxo",
+                              },
+                            }))
+                          }
+                          className={combinarClasses(
+                            "flex flex-col text-left p-2.5 rounded-lg border transition text-xs cursor-pointer",
+                            selecionado
+                              ? "border-emerald-600 bg-emerald-50/50 text-emerald-950 font-medium ring-1 ring-emerald-500"
+                              : "border-marfim-200 hover:bg-marfim-50 text-mineral-700",
+                          )}
+                        >
+                          <span className="font-semibold text-mineral-900">{opcao.rotulo}</span>
+                          <span className="text-[10px] text-mineral-500 mt-0.5">{opcao.desc}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {fluxoAtual.configuracaoCtaAcervo?.tipoAcao === "microfluxo" ? (
+                    <div>
+                      <label
+                        htmlFor="seletor-experiencia-cta"
+                        className="block text-[11px] font-semibold text-mineral-700 uppercase tracking-wider"
+                      >
+                        Experiência Vinculada
+                      </label>
+                      <select
+                        id="seletor-experiencia-cta"
+                        disabled={!podeAlterar}
+                        value={fluxoAtual.configuracaoCtaAcervo?.microfluxoId ?? ""}
+                        onChange={(e) =>
+                          atualizarFluxoSelecionado((atual) => ({
+                            ...atual,
+                            configuracaoCtaAcervo: {
+                              tipoAcao: "microfluxo",
+                              rotuloBotao: atual.configuracaoCtaAcervo?.rotuloBotao,
+                              microfluxoId: e.target.value,
+                            },
+                          }))
+                        }
+                        className="mt-1 w-full rounded-lg border border-marfim-200 bg-white px-2.5 py-1.5 text-xs text-mineral-950 focus:border-indigo-400 focus:outline-none"
+                      >
+                        <option value="">Selecione a experiência a ser iniciada...</option>
+                        {microfluxos
+                          .filter((m) => m.id !== fluxoAtual.id && m.tipoAcao === "microfluxo")
+                          .map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.titulo}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  ) : null}
+
+                  <div>
+                    <label
+                      htmlFor="rotulo-personalizado-cta"
+                      className="block text-[11px] font-semibold text-mineral-700 uppercase tracking-wider"
+                    >
+                      Texto do Botão (Opcional)
+                    </label>
+                    <input
+                      id="rotulo-personalizado-cta"
+                      type="text"
+                      disabled={!podeAlterar}
+                      maxLength={50}
+                      value={fluxoAtual.configuracaoCtaAcervo?.rotuloBotao ?? ""}
+                      placeholder={
+                        fluxoAtual.configuracaoCtaAcervo?.tipoAcao === "microfluxo"
+                          ? "Ex.: Simular financiamento deste item"
+                          : "Ex.: Tenho interesse neste item"
+                      }
+                      onChange={(e) =>
+                        atualizarFluxoSelecionado((atual) => ({
+                          ...atual,
+                          configuracaoCtaAcervo: {
+                            tipoAcao: atual.configuracaoCtaAcervo?.tipoAcao ?? "whatsapp",
+                            microfluxoId: atual.configuracaoCtaAcervo?.microfluxoId,
+                            rotuloBotao: e.target.value,
+                          },
+                        }))
+                      }
+                      className="mt-1 w-full rounded-lg border border-marfim-200 bg-white px-2.5 py-1.5 text-xs text-mineral-950 placeholder:text-mineral-400 focus:border-indigo-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : null}
             {fluxoAtual.tipoAcao?.startsWith("secao_") ? (
               <CampoFormulario
                 rotulo="Título da seção (opcional)"
@@ -867,11 +1052,13 @@ export function GerenciadorExperienciasPainel({
                 value={fluxoAtual.tituloSecao ?? ""}
                 disabled={!podeAlterar}
                 placeholder={
-                  fluxoAtual.tipoAcao === "secao_portfolio"
-                    ? "Ex.: Nossos projetos"
-                    : fluxoAtual.tipoAcao === "secao_servicos"
-                      ? "Ex.: Como podemos ajudar"
-                      : "Ex.: Conheça os especialistas"
+                  fluxoAtual.tipoAcao === "secao_produtos"
+                    ? "Ex.: Nossos produtos"
+                    : fluxoAtual.tipoAcao === "secao_portfolio"
+                      ? "Ex.: Nossos projetos"
+                      : fluxoAtual.tipoAcao === "secao_servicos"
+                        ? "Ex.: Como podemos ajudar"
+                        : "Ex.: Conheça os especialistas"
                 }
                 onChange={(evento) =>
                   atualizarFluxoSelecionado((atual) => ({

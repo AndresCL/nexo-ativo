@@ -12,8 +12,10 @@ import {
   Menu,
   Package,
   Palette,
+  QrCode,
   Settings,
   Users,
+  Video,
   Wrench,
   X,
 } from "lucide-react";
@@ -49,8 +51,8 @@ const ITENS_MENU_PAINEL: readonly ItemNavegacaoPainel[] = [
     icone: <Palette className="h-4 w-4" aria-hidden="true" />,
   },
   {
-    rotulo: "Catálogo",
-    caminho: "/painel/catalogo",
+    rotulo: "Produtos",
+    caminho: "/painel/produtos",
     icone: <Package className="h-4 w-4" aria-hidden="true" />,
   },
   {
@@ -62,6 +64,11 @@ const ITENS_MENU_PAINEL: readonly ItemNavegacaoPainel[] = [
     rotulo: "Portfólio",
     caminho: "/painel/portfolio",
     icone: <FolderKanban className="h-4 w-4" aria-hidden="true" />,
+  },
+  {
+    rotulo: "Vídeos",
+    caminho: "/painel/videos",
+    icone: <Video className="h-4 w-4" aria-hidden="true" />,
   },
   {
     rotulo: "Equipe e cartões",
@@ -82,6 +89,11 @@ const ITENS_MENU_PAINEL: readonly ItemNavegacaoPainel[] = [
     rotulo: "Desempenho",
     caminho: "/painel/desempenho",
     icone: <BarChart3 className="h-4 w-4" aria-hidden="true" />,
+  },
+  {
+    rotulo: "QR Codes",
+    caminho: "/painel/qr-codes",
+    icone: <QrCode className="h-4 w-4" aria-hidden="true" />,
   },
   {
     rotulo: "Plano e faturamento",

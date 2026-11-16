@@ -6,7 +6,6 @@ import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
 import { CamadaMidiaImersiva } from "./CamadaMidiaImersiva";
 import type { PropriedadesComposicaoEditorial } from "./ComposicaoImersiva";
 import { CabecalhoMarcaDiscreta } from "./IdentidadeETituloEditorial";
-import { CarrosselChamadasEditoriais } from "./CarrosselChamadasEditoriais";
 import { NavegacaoAcoesHome } from "./NavegacaoAcoesHome";
 import { RodapeEditorial } from "./RodapeEditorial";
 import { BlocoEquipeAposHero } from "./BlocoEquipeAposHero";
@@ -23,6 +22,13 @@ export function ComposicaoRetratoEditorial({
   alturaContidaPrevia = false,
   complementoChamada,
   previaEquipe,
+  videosYoutube,
+  modoExibicaoVideos,
+  autoplayVideos,
+  ocultarTituloVideos,
+  produtos,
+  servicos,
+  aoSelecionarItemAcervo,
 }: PropriedadesComposicaoEditorial) {
   const variaveisPaleta = gerarVariaveisCssPaletaEditorial(
     pagina.paletaId,
@@ -33,6 +39,7 @@ export function ComposicaoRetratoEditorial({
   return (
     <section
       data-composicao="retrato_editorial"
+      suppressHydrationWarning
       aria-label={`Retrato editorial de ${pagina.identidade.nomeExibicao}`}
       style={variaveisPaleta}
       className={combinarClasses(
@@ -64,12 +71,6 @@ export function ComposicaoRetratoEditorial({
 
         <div className="border-t border-white/14 pt-4 sm:pt-6 @5xl:grid @5xl:grid-cols-12 @5xl:items-end @5xl:gap-12 @5xl:pt-8">
           <TransicaoEditorial atrasoSegundos={0.06} className="@5xl:col-span-7">
-            <CarrosselChamadasEditoriais
-              conjunto={pagina}
-              tipografiaId={pagina.tipografiaId}
-              escala="compacta"
-              aoAcionarItem={aoAcionarItem}
-            />
             {complementoChamada}
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}
@@ -83,8 +84,15 @@ export function ComposicaoRetratoEditorial({
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
               previaEquipe={previaEquipe}
+              videosYoutube={videosYoutube}
+              modoExibicaoVideos={modoExibicaoVideos}
+              autoplayVideos={autoplayVideos}
+              ocultarTituloVideos={ocultarTituloVideos}
+              produtos={produtos}
+              servicos={servicos}
               paletaId={pagina.paletaId}
               aoAcionarItem={aoAcionarItem}
+              aoSelecionarItemAcervo={aoSelecionarItemAcervo}
             />
           </TransicaoEditorial>
         </div>

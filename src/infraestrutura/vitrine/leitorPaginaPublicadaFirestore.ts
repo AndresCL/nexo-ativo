@@ -77,6 +77,7 @@ async function consultarVitrineCompletaDiretoNoFirestore(
           snapProjetos,
           snapProfissionais,
           snapMicrofluxos,
+          docVideos,
         ] = await Promise.all([
           referenciaPublicada.get(),
           bancoDadosAdmin.collection("organizacoes").doc(organizacaoId).get(),
@@ -85,6 +86,12 @@ async function consultarVitrineCompletaDiretoNoFirestore(
           referenciaPublicada.collection("projetosPublicados").get(),
           referenciaPublicada.collection("profissionaisPublicados").get(),
           referenciaPublicada.collection("microfluxosPublicados").get(),
+          bancoDadosAdmin
+            .collection("organizacoes")
+            .doc(organizacaoId)
+            .collection("configuracoes")
+            .doc("videos")
+            .get(),
         ]);
 
         if (documentoPublicado.exists && documentoOrganizacao.data()?.situacao === "ativa") {
@@ -126,6 +133,11 @@ async function consultarVitrineCompletaDiretoNoFirestore(
                   ),
                   profissionais,
                   microfluxos,
+                  videos: Array.isArray(docVideos.data()?.videos) ? docVideos.data()?.videos : [],
+                  modoExibicaoVideos:
+                    docVideos.data()?.modoExibicaoVideos === "fila" ? "fila" : "carrossel",
+                  autoplayVideos: Boolean(docVideos.data()?.autoplayVideos),
+                  ocultarTituloVideos: Boolean(docVideos.data()?.ocultarTituloVideos),
                 },
               },
             );

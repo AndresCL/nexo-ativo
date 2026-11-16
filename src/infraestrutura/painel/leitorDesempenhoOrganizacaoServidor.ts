@@ -156,6 +156,14 @@ function reconstruirMetricasDiariasDeDocFirestore(
     cliquesWhatsapp: Number(dados.cliquesWhatsapp || 0),
     cliquesLigacao: Number(dados.cliquesLigacao || 0),
     ...(Object.keys(porCanal).length > 0 ? { porCanal } : {}),
+    ...(dados.porQrCode
+      ? {
+          porQrCode: dados.porQrCode as Record<
+            string,
+            { visualizacoes?: number; aberturasFluxo?: number; contatosWhatsapp?: number }
+          >,
+        }
+      : {}),
     ...(Object.keys(porCartao).length > 0 ? { porCartao } : {}),
     ...(Object.keys(porMicrofluxo).length > 0 ? { porMicrofluxo } : {}),
     ...(Object.keys(porProfissional).length > 0 ? { porProfissional } : {}),

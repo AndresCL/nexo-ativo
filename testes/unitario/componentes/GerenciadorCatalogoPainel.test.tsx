@@ -85,7 +85,7 @@ describe("Catálogo do painel", () => {
   it("edita com foco no formulário, preserva a foto e o ponto focal e publica", async () => {
     const { salvarProduto, publicarPagina } = montar();
     fireEvent.click(screen.getByRole("button", { name: "Editar Porsche 911" }));
-    const nome = screen.getByLabelText(/Nome do veículo ou produto/);
+    const nome = screen.getByLabelText(/Nome do produto/);
     expect(nome).toHaveFocus();
     expect(nome).toHaveValue("Porsche 911");
     fireEvent.change(nome, { target: { value: "Porsche 911 GTS" } });
@@ -120,7 +120,7 @@ describe("Catálogo do painel", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Salvar alterações" })).toBeEnabled(),
     );
-    expect(screen.getByLabelText(/Nome do veículo ou produto/)).toHaveValue("Porsche 911");
+    expect(screen.getByLabelText(/Nome do produto/)).toHaveValue("Porsche 911");
   });
 
   it("mantém as permissões de edição e publicação", () => {
@@ -129,14 +129,14 @@ describe("Catálogo do painel", () => {
     expect(screen.getByRole("button", { name: "Ocultar Porsche 911" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Publicar página" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Adicionar ao catálogo" })).toBeDisabled();
-    expect(screen.getByLabelText(/Nome do veículo ou produto/)).toBeDisabled();
+    expect(screen.getByLabelText(/Nome do produto/)).toBeDisabled();
     expect(screen.getByRole("searchbox")).toBeEnabled();
   });
   it("salva todos os campos do item e remove opcionais quando são limpos", async () => {
     const { salvarProduto } = montar();
     fireEvent.click(screen.getByRole("button", { name: "Editar Porsche 911" }));
     for (const [rotulo, valor] of [
-      [/Nome do veículo ou produto/, "BMW M4"],
+      [/Nome do produto/, "BMW M4"],
       [/Categoria ou linha/, "Cupês"],
       [/Descrição editorial/, "Veículo revisado e com garantia"],
       [/^Preço/, "123.456,78"],

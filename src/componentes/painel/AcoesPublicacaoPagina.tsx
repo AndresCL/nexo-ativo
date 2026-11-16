@@ -24,14 +24,6 @@ export function AcoesPublicacaoPagina({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
-        {controle.versaoPublicada !== null ? (
-          <Botao variante="fantasma" tamanho="compacto" comoFilho>
-            <Link href={`/${identificadorPublico}`} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4" aria-hidden="true" />
-              Ver página pública
-            </Link>
-          </Botao>
-        ) : null}
         {children}
         {exibirSalvarRascunho ? (
           <Botao

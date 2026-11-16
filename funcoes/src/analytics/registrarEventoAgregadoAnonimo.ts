@@ -30,6 +30,7 @@ export async function executarRegistroEventoAgregadoAnonimo(
     organizacaoId,
     tipoEvento,
     canalOrigem,
+    qrCodeOrigem,
     cartaoProfissionalId,
     cartaoProfissionalNome,
     acaoHomeId,
@@ -70,6 +71,26 @@ export async function executarRegistroEventoAgregadoAnonimo(
     payloadAtualizacao.porCanal = {
       [canalOrigem]: dadosCanal,
     };
+  }
+
+  // Atribuição granular por QR Code (vitrine, profissional_<slug>, fluxo_<id>)
+  if (qrCodeOrigem) {
+    const seguroQr = qrCodeOrigem.replace(/[./#$\[\]]/g, "_");
+    const dadosQr: Record<string, unknown> = {};
+    if (tipoEvento === "visualizacao_vitrine" || tipoEvento === "visualizacao_cartao") {
+      dadosQr.visualizacoes = FieldValue.increment(1);
+    } else if (tipoEvento === "abertura_microfluxo") {
+      dadosQr.aberturasFluxo = FieldValue.increment(1);
+    } else if (tipoEvento === "conclusao_microfluxo") {
+      dadosQr.conclusoesFluxo = FieldValue.increment(1);
+    } else if (tipoEvento === "clique_whatsapp") {
+      dadosQr.contatosWhatsapp = FieldValue.increment(1);
+    }
+    if (Object.keys(dadosQr).length > 0) {
+      payloadAtualizacao.porQrCode = {
+        [seguroQr]: dadosQr,
+      };
+    }
   }
 
   // Atribuição de Cartão VIP de Colaborador

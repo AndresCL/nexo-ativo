@@ -47,6 +47,7 @@ export type EventoWebhookAsaas =
   | "PAYMENT_CHECKOUT_VIEWED"
   | "SUBSCRIPTION_CREATED"
   | "SUBSCRIPTION_UPDATED"
+  | "SUBSCRIPTION_INACTIVATED"
   | "SUBSCRIPTION_DELETED"
   | "SUBSCRIPTION_SPLIT_DISABLED";
 
@@ -82,7 +83,7 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
     nome: "Pro",
     descricao:
       "Para profissionais autônomos e estúdios que exigem presença digital editorial autoral e conversão de excelência.",
-    mensalidadeCentavos: 9700, // R$ 97/mês
+    mensalidadeCentavos: 8700, // R$ 87/mês
     limiteProfissionaisAtivos: 1,
     limiteEnviosEmailMensal: 100,
     valorImplantacaoAssistidaCentavos: 29700, // R$ 297 opcional
@@ -99,7 +100,7 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
     nome: "Equipe",
     descricao:
       "Para escritórios, ateliês e bancas com múltiplos especialistas que demandam presença unificada e cartões individuais.",
-    mensalidadeCentavos: 19700, // R$ 197/mês
+    mensalidadeCentavos: 8700, // R$ 87/mês
     limiteProfissionaisAtivos: 5,
     limiteEnviosEmailMensal: 300,
     valorImplantacaoAssistidaCentavos: 59700, // R$ 597 opcional

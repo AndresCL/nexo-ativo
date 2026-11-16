@@ -220,43 +220,6 @@ export function EstatisticasExperiencias({
       </div>
 
       <div className="space-y-5 rounded-2xl border border-sky-100 bg-gradient-to-b from-sky-50/50 to-white p-4 shadow-xs sm:p-6">
-        {/* Chips de seleção das experiências */}
-        <div className="space-y-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-mineral-500">
-            Experiências ativas no comparativo ({resumoAtivo.quantidade} selecionada{resumoAtivo.quantidade > 1 ? "s" : ""})
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {itens.map((item) => {
-              const ativa = selecionadas.has(item.id);
-              const cor = mapaCores.get(item.id);
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => alternarExperiencia(item.id)}
-                  aria-pressed={ativa}
-                  className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${ativa
-                      ? `${cor?.fundoBadge ?? "bg-sky-50 text-sky-800 border-sky-300"} shadow-xs ring-1 ring-black/5`
-                      : "border-slate-200 bg-white text-mineral-600 hover:bg-slate-50 hover:text-mineral-900 opacity-60"
-                    }`}
-                >
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: ativa ? cor?.borda : "#94a3b8" }}
-                    aria-hidden="true"
-                  />
-                  <span className="max-w-[200px] truncate sm:max-w-[320px]">{item.titulo}</span>
-                  {ativa ? (
-                    <CheckSquare className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
-                  ) : (
-                    <Square className="h-3.5 w-3.5 opacity-40" aria-hidden="true" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Cards de Resumo Consolidado para a seleção atual */}
         <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[

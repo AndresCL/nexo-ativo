@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { setGlobalOptions } from "firebase-functions/v2";
+import { defineSecret } from "firebase-functions/params";
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { exigirPrivilegioFundador } from "../../src/dominio/permissoes/autorizadorOrganizacao";
 import { ValorMonetarioCentavos } from "../../src/dominio/objetos-valor/valorMonetarioCentavos";
@@ -14,6 +15,7 @@ import { executarPublicacaoPaginaEditorial } from "./casos-de-uso/publicarPagina
 import { atribuirPrivilegioFundadorAuditado } from "./casos-de-uso/provisionarFundadorPlataforma";
 import { executarRegistroSolicitacaoVisitante } from "./casos-de-uso/registrarSolicitacaoVisitanteTransacional";
 import { executarCriacaoAssinaturaAsaas } from "./casos-de-uso/criarAssinaturaOrganizacaoAsaas";
+import { executarCancelamentoAssinaturaAsaas } from "./casos-de-uso/cancelarAssinaturaOrganizacaoAsaas";
 import { executarProcessamentoWebhookAsaasTransacional } from "./casos-de-uso/processarWebhookAsaasTransacional";
 import { executarAlteracaoSituacaoOrganizacaoFundador } from "./casos-de-uso/atualizarSituacaoOrganizacaoFundador";
 import { executarAjustePlanoOrganizacaoFundador } from "./casos-de-uso/ajustarPlanoOrganizacaoFundador";
@@ -32,7 +34,7 @@ setGlobalOptions({
 });
 
 export const verificarSaudePlataforma = onRequest({ cors: false }, (_requisicao, resposta) => {
-  const mensalidadePlanoPro = ValorMonetarioCentavos.deCentavos(9700);
+  const mensalidadePlanoPro = ValorMonetarioCentavos.deCentavos(8700);
 
   resposta.status(200).json({
     situacao: "operacional",
@@ -63,14 +65,19 @@ export const publicarPaginaEditorial = onCall(async (requisicao) => {
   }
 });
 
-export const registrarSolicitacaoVisitante = onCall(async (requisicao) => {
-  try {
-    const { bancoDados } = obterAdminFuncoes();
-    return await executarRegistroSolicitacaoVisitante(bancoDados, requisicao.data);
-  } catch (erro) {
-    throw converterErroParaHttpsError(erro);
+const chaveResend = defineSecret("RESEND_API_KEY");
+
+export const registrarSolicitacaoVisitante = onCall(
+  { secrets: [chaveResend] },
+  async (requisicao) => {
+    try {
+      const { bancoDados } = obterAdminFuncoes();
+      return await executarRegistroSolicitacaoVisitante(bancoDados, requisicao.data);
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
+    }
   }
-});
+);
 
 export const criarAssinaturaAsaas = onCall(async (requisicao) => {
   try {
@@ -83,6 +90,22 @@ export const criarAssinaturaAsaas = onCall(async (requisicao) => {
       );
     }
     return await executarCriacaoAssinaturaAsaas(bancoDados, usuario, requisicao.data);
+  } catch (erro) {
+    throw converterErroParaHttpsError(erro);
+  }
+});
+
+export const cancelarAssinaturaAsaas = onCall(async (requisicao) => {
+  try {
+    const { bancoDados } = obterAdminFuncoes();
+    const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+    if (!usuario) {
+      throw new HttpsError(
+        "unauthenticated",
+        "Você precisa estar autenticado para cancelar a assinatura.",
+      );
+    }
+    return await executarCancelamentoAssinaturaAsaas(bancoDados, usuario, requisicao.data);
   } catch (erro) {
     throw converterErroParaHttpsError(erro);
   }

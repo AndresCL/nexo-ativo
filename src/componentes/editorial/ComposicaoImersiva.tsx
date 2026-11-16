@@ -8,19 +8,27 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
 import { CamadaMidiaImersiva } from "./CamadaMidiaImersiva";
 import { CabecalhoMarcaDiscreta } from "./IdentidadeETituloEditorial";
-import { CarrosselChamadasEditoriais } from "./CarrosselChamadasEditoriais";
 import { NavegacaoAcoesHome } from "./NavegacaoAcoesHome";
 import { RodapeEditorial } from "./RodapeEditorial";
 import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 import type { ManipuladorAcaoHome } from "./AcaoEquipeVitrine";
 import { BlocoEquipeAposHero } from "./BlocoEquipeAposHero";
+import type { ModoExibicaoVideos, VideoYoutubeItem } from "@/dominio/objetos-valor/videoYoutube";
+import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 
 export interface PropriedadesComposicaoEditorial {
   readonly complementoChamada?: ReactNode;
   readonly pagina: ConteudoPaginaPublicada;
   readonly modoMobileForcado?: boolean;
   readonly aoAcionarItem?: ManipuladorAcaoHome;
+  readonly aoSelecionarItemAcervo?: (tipo: "produtos" | "servicos", itemId: string) => void;
   readonly previaEquipe?: PreviaEquipeVitrine;
+  readonly videosYoutube?: readonly VideoYoutubeItem[];
+  readonly modoExibicaoVideos?: ModoExibicaoVideos;
+  readonly autoplayVideos?: boolean;
+  readonly ocultarTituloVideos?: boolean;
+  readonly produtos?: readonly ProdutoCatalogo[];
+  readonly servicos?: readonly ServicoOrganizacao[];
   readonly alturaContidaPrevia?: boolean;
 }
 
@@ -28,9 +36,16 @@ export function ComposicaoImersiva({
   pagina,
   modoMobileForcado = false,
   aoAcionarItem,
+  aoSelecionarItemAcervo,
   alturaContidaPrevia = false,
   complementoChamada,
   previaEquipe,
+  videosYoutube,
+  modoExibicaoVideos,
+  autoplayVideos,
+  ocultarTituloVideos,
+  produtos,
+  servicos,
 }: PropriedadesComposicaoEditorial) {
   const variaveisPaleta = gerarVariaveisCssPaletaEditorial(
     pagina.paletaId,
@@ -41,6 +56,7 @@ export function ComposicaoImersiva({
   return (
     <section
       data-composicao="imersivo"
+      suppressHydrationWarning
       aria-label={`Apresentação editorial de ${pagina.identidade.nomeExibicao}`}
       style={variaveisPaleta}
       className={combinarClasses(
@@ -67,11 +83,6 @@ export function ComposicaoImersiva({
 
         <div className="grid items-center gap-5 @5xl:flex-1 @5xl:content-center @5xl:grid-cols-12 @5xl:gap-x-12 @5xl:gap-y-4 @5xl:py-4">
           <TransicaoEditorial atrasoSegundos={0.06} className="@5xl:col-span-7">
-            <CarrosselChamadasEditoriais
-              conjunto={pagina}
-              tipografiaId={pagina.tipografiaId}
-              aoAcionarItem={aoAcionarItem}
-            />
             {complementoChamada}
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}
@@ -84,8 +95,15 @@ export function ComposicaoImersiva({
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
               previaEquipe={previaEquipe}
+              videosYoutube={videosYoutube}
+              modoExibicaoVideos={modoExibicaoVideos}
+              autoplayVideos={autoplayVideos}
+              ocultarTituloVideos={ocultarTituloVideos}
+              produtos={produtos}
+              servicos={servicos}
               paletaId={pagina.paletaId}
               aoAcionarItem={aoAcionarItem}
+              aoSelecionarItemAcervo={aoSelecionarItemAcervo}
               className="@5xl:max-w-sm"
             />
           </TransicaoEditorial>

@@ -35,9 +35,9 @@ const ATALHOS = [
     cor: "bg-indigo-100 text-indigo-700",
   },
   {
-    titulo: "Catálogo",
-    descricao: "Produtos, veículos e disponibilidade.",
-    caminho: "/painel/catalogo",
+    titulo: "Produtos",
+    descricao: "Cadastre produtos, estoque e disponibilidade.",
+    caminho: "/painel/produtos",
     icone: Package,
     cor: "bg-sky-100 text-sky-700",
   },
@@ -164,7 +164,7 @@ export function VisaoGeralPainel({
           {
             titulo: "Plano atual",
             valor: resumoPlano
-              ? CATALOGO_PLANOS_FLUXO[resumoPlano.planoCodigo].nome
+              ? (CATALOGO_PLANOS_FLUXO[resumoPlano.planoCodigo]?.nome ?? "Não disponível")
               : "Não disponível",
             apoio: "Plano e faturamento na assinatura",
             icone: CreditCard,

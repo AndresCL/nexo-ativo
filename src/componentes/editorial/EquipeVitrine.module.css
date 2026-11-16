@@ -43,15 +43,6 @@
   .grupo[data-movimento-ativo="false"] .avatar {
     animation-play-state: paused;
   }
-
-  .movimento {
-    transform: translateY(0) scale(1);
-    transition: transform var(--equipe-tempo-troca) ease-in-out;
-  }
-
-  .movimento[data-em-movimento="true"] {
-    transform: translateY(-5px) scale(1.06);
-  }
 }
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {

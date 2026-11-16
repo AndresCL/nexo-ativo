@@ -1,5 +1,7 @@
 "use client";
 
+import { construirCssDegradadoEditorial } from "@/dominio/objetos-valor/degradadoEditorial";
+
 import Image from "next/image";
 import { useState, type CSSProperties } from "react";
 import {
@@ -13,7 +15,6 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
 import type { PropriedadesComposicaoEditorial } from "./ComposicaoImersiva";
 import { CabecalhoMarcaDiscreta } from "./IdentidadeETituloEditorial";
-import { CarrosselChamadasEditoriais } from "./CarrosselChamadasEditoriais";
 import { NavegacaoAcoesHome } from "./NavegacaoAcoesHome";
 import { RodapeEditorial } from "./RodapeEditorial";
 import { BlocoEquipeAposHero } from "./BlocoEquipeAposHero";
@@ -50,6 +51,13 @@ export function ComposicaoGaleriaEditorial({
   alturaContidaPrevia = false,
   complementoChamada,
   previaEquipe,
+  videosYoutube,
+  modoExibicaoVideos,
+  autoplayVideos,
+  ocultarTituloVideos,
+  produtos,
+  servicos,
+  aoSelecionarItemAcervo,
 }: PropriedadesComposicaoEditorial) {
   const variaveisPaleta = gerarVariaveisCssPaletaEditorial(
     pagina.paletaId,
@@ -91,16 +99,27 @@ export function ComposicaoGaleriaEditorial({
           <TransicaoEditorial atrasoSegundos={0.05} className="@5xl:col-span-7">
             <figure className="overflow-hidden rounded-xs border border-current/12 bg-[var(--editorial-superficie)] p-3 @3xl:p-5">
               <div className="relative aspect-[4/3] w-full overflow-hidden">
-                <Image
-                  src={obraAtiva.urlImagem}
-                  alt={obraAtiva.textoAlternativo}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 58vw"
-                  unoptimized={deveIgnorarOtimizadorImagem(obraAtiva.urlImagem)}
-                  className="object-cover transition-opacity duration-300"
-                  style={{ objectPosition: posicaoObraCss }}
-                />
+                {pagina.midiaFundo.tipo === "degradado" ? (
+                  <div
+                    className="h-full w-full"
+                    style={{
+                      background: construirCssDegradadoEditorial(
+                        pagina.midiaFundo.degradadoOpcional,
+                      ),
+                    }}
+                  />
+                ) : (
+                  <Image
+                    src={obraAtiva.urlImagem}
+                    alt={obraAtiva.textoAlternativo}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 58vw"
+                    unoptimized={deveIgnorarOtimizadorImagem(obraAtiva.urlImagem)}
+                    className="object-cover transition-opacity duration-300"
+                    style={{ objectPosition: posicaoObraCss }}
+                  />
+                )}
               </div>
 
               <figcaption className="mt-3 flex flex-wrap items-baseline justify-between gap-2 text-xs">
@@ -154,12 +173,6 @@ export function ComposicaoGaleriaEditorial({
             atrasoSegundos={0.1}
             className="flex flex-col justify-between gap-7 @5xl:col-span-5"
           >
-            <CarrosselChamadasEditoriais
-              conjunto={pagina}
-              tipografiaId={pagina.tipografiaId}
-              escala="compacta"
-              aoAcionarItem={aoAcionarItem}
-            />
             {complementoChamada}
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}
@@ -170,8 +183,15 @@ export function ComposicaoGaleriaEditorial({
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
               previaEquipe={previaEquipe}
+              videosYoutube={videosYoutube}
+              modoExibicaoVideos={modoExibicaoVideos}
+              autoplayVideos={autoplayVideos}
+              ocultarTituloVideos={ocultarTituloVideos}
+              produtos={produtos}
+              servicos={servicos}
               paletaId={pagina.paletaId}
               aoAcionarItem={aoAcionarItem}
+              aoSelecionarItemAcervo={aoSelecionarItemAcervo}
             />
 
             <div className="flex justify-center @5xl:justify-end">

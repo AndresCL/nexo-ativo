@@ -5,6 +5,10 @@ import {
 import type { ConteudoPaginaPublicada } from "@/dominio/entidades/paginaPublicada";
 import { criarColecaoMicrofluxosPadraoParaTestes } from "./geradoresMicrofluxoTeste";
 import { CHAMADAS_EDITORIAIS_GARAGE88 } from "./chamadasEditoriaisGarage88";
+import {
+  ACERVO_MAPLE_BEAR_CABO_FRIO,
+  VITRINE_MAPLE_BEAR_CABO_FRIO,
+} from "./dadosMapleBearCaboFrio";
 
 /**
  * Exemplares editoriais completos para demonstração e conferência local em desenvolvimento
@@ -303,6 +307,7 @@ export const CATALOGO_DEMONSTRACOES_EDITORIAIS: Readonly<Record<string, Conteudo
         indexavel: true,
       },
     },
+    "maplebear-cabofrio": VITRINE_MAPLE_BEAR_CABO_FRIO,
   };
 
 export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublicoVitrine>> = {
@@ -1036,6 +1041,7 @@ export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublic
       },
     ],
   },
+  "maplebear-cabofrio": ACERVO_MAPLE_BEAR_CABO_FRIO,
 };
 
 export function buscarDemonstracaoEditorialPorSlug(

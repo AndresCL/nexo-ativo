@@ -22,8 +22,9 @@ import { TransicaoAlternancia } from "@/componentes/interface/TransicaoAlternanc
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { CampoUploadMidiaStorage } from "./CampoUploadMidiaStorage";
 import { SeletorPontoFocalMidia } from "./SeletorPontoFocalMidia";
+import { SeletorDegradadoMidia } from "./SeletorDegradadoMidia";
+import { DEGRADADO_EDITORIAL_PADRAO } from "@/dominio/objetos-valor/degradadoEditorial";
 import { FormularioAvaliacoesGoogle } from "./FormularioAvaliacoesGoogle";
-import { FormularioChamadasEditoriais } from "./FormularioChamadasEditoriais";
 
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 
@@ -35,47 +36,47 @@ const ABAS_EDITOR: readonly {
   readonly ativa: string;
   readonly cor: string;
 }[] = [
-  {
-    id: "estilo",
-    rotulo: "1. Estilo e cores",
-    descricao: "Composição e paleta",
-    icone: Palette,
-    ativa: "border-indigo-200 bg-indigo-50 text-indigo-900",
-    cor: "bg-indigo-100 text-indigo-700",
-  },
-  {
-    id: "identidade",
-    rotulo: "2. Identidade e texto",
-    descricao: "Sua marca e mensagem",
-    icone: Type,
-    ativa: "border-sky-200 bg-sky-50 text-sky-900",
-    cor: "bg-sky-100 text-sky-700",
-  },
-  {
-    id: "midia",
-    rotulo: "3. Mídia e foco",
-    descricao: "Fotos e vídeos",
-    icone: Image,
-    ativa: "border-violet-200 bg-violet-50 text-violet-900",
-    cor: "bg-violet-100 text-violet-700",
-  },
-  {
-    id: "acoes",
-    rotulo: "4. Redes sociais",
-    descricao: "Seus canais de contato",
-    icone: Share2,
-    ativa: "border-sky-200 bg-sky-50 text-sky-900",
-    cor: "bg-sky-100 text-sky-700",
-  },
-  {
-    id: "galeria_seo",
-    rotulo: "5. Google e SEO",
-    descricao: "Busca e avaliações",
-    icone: Search,
-    ativa: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    cor: "bg-emerald-100 text-emerald-700",
-  },
-];
+    {
+      id: "estilo",
+      rotulo: "1. Estilo e cores",
+      descricao: "Composição e paleta",
+      icone: Palette,
+      ativa: "border-indigo-200 bg-indigo-50 text-indigo-900",
+      cor: "bg-indigo-100 text-indigo-700",
+    },
+    {
+      id: "identidade",
+      rotulo: "2. Identidade e texto",
+      descricao: "Sua marca e mensagem",
+      icone: Type,
+      ativa: "border-sky-200 bg-sky-50 text-sky-900",
+      cor: "bg-sky-100 text-sky-700",
+    },
+    {
+      id: "midia",
+      rotulo: "3. Mídia e foco",
+      descricao: "Fotos e vídeos",
+      icone: Image,
+      ativa: "border-violet-200 bg-violet-50 text-violet-900",
+      cor: "bg-violet-100 text-violet-700",
+    },
+    {
+      id: "acoes",
+      rotulo: "4. Redes sociais",
+      descricao: "Seus canais de contato",
+      icone: Share2,
+      ativa: "border-sky-200 bg-sky-50 text-sky-900",
+      cor: "bg-sky-100 text-sky-700",
+    },
+    {
+      id: "galeria_seo",
+      rotulo: "5. Google e SEO",
+      descricao: "Busca e avaliações",
+      icone: Search,
+      ativa: "border-emerald-200 bg-emerald-50 text-emerald-900",
+      cor: "bg-emerald-100 text-emerald-700",
+    },
+  ];
 
 const OPCOES_REDE_SOCIAL: readonly { readonly valor: TipoRedeSocial; readonly nome: string }[] = [
   { valor: "instagram", nome: "Instagram" },
@@ -296,7 +297,7 @@ export function SecoesFormularioAparencia({
                       </p>
                     </div>
                     {rascunho.customizacaoTokens &&
-                    Object.keys(rascunho.customizacaoTokens).length > 0 ? (
+                      Object.keys(rascunho.customizacaoTokens).length > 0 ? (
                       <button
                         type="button"
                         disabled={somenteLeitura}
@@ -480,25 +481,102 @@ export function SecoesFormularioAparencia({
                 </p>
               </div>
 
-              <CampoFormulario
-                rotulo="Nome de exibição"
-                required
-                disabled={somenteLeitura}
-                value={rascunho.identidade.nomeExibicao}
-                onChange={(evento) => atualizarIdentidade({ nomeExibicao: evento.target.value })}
-                placeholder="Ex.: Estúdio Alvorada ou Dra. Helena Vasconcelos"
-              />
+              <div className="space-y-2">
+                <CampoFormulario
+                  rotulo="Nome de exibição"
+                  required
+                  disabled={somenteLeitura}
+                  value={rascunho.identidade.nomeExibicao}
+                  onChange={(evento) => atualizarIdentidade({ nomeExibicao: evento.target.value })}
+                  placeholder="Ex.: Estúdio Alvorada ou Dra. Helena Vasconcelos"
+                />
+                <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-mineral-700">
+                  <input
+                    type="checkbox"
+                    disabled={somenteLeitura}
+                    checked={rascunho.identidade.mostrarNomeExibicao ?? true}
+                    onChange={(evento) =>
+                      atualizarIdentidade({ mostrarNomeExibicao: evento.target.checked })
+                    }
+                    className="h-4 w-4 rounded border-marfim-300 text-mineral-950 focus:ring-mineral-900"
+                  />
+                  Mostrar nome da marca na vitrine
+                </label>
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <CampoFormulario
-                  rotulo="Especialidade ou subtítulo curto"
-                  disabled={somenteLeitura}
-                  value={rascunho.identidade.subtituloCurto ?? ""}
-                  onChange={(evento) =>
-                    atualizarIdentidade({ subtituloCurto: evento.target.value })
-                  }
-                  placeholder="Ex.: Arquitetura Residencial"
-                />
+                <div className="space-y-2">
+                  <CampoFormulario
+                    rotulo="Especialidade ou subtítulo curto"
+                    disabled={somenteLeitura}
+                    value={rascunho.identidade.subtituloCurto ?? ""}
+                    onChange={(evento) =>
+                      atualizarIdentidade({ subtituloCurto: evento.target.value })
+                    }
+                    placeholder="Ex.: Arquitetura Residencial"
+                  />
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-mineral-700">
+                    <input
+                      type="checkbox"
+                      disabled={somenteLeitura}
+                      checked={rascunho.identidade.mostrarSubtituloCurto ?? true}
+                      onChange={(evento) =>
+                        atualizarIdentidade({ mostrarSubtituloCurto: evento.target.checked })
+                      }
+                      className="h-4 w-4 rounded border-marfim-300 text-mineral-950 focus:ring-mineral-900"
+                    />
+                    Mostrar especialidade ou subtítulo na vitrine
+                  </label>
+                </div>
+
+                <div className="space-y-4 sm:col-span-2">
+                  <CampoUploadMidiaStorage
+                    organizacaoId={rascunho.organizacaoId}
+                    rotulo="Logotipo opcional"
+                    textoAuxiliar="Se preferir assinatura tipográfica limpa, deixe este campo em branco."
+                    categoria="imagem"
+                    valorUrl={rascunho.identidade.urlLogotipoOpcional ?? ""}
+                    desabilitado={somenteLeitura}
+                    servicoUpload={servicoUpload}
+                    aoAlterarUrl={(novaUrl) =>
+                      atualizarIdentidade({ urlLogotipoOpcional: novaUrl || undefined })
+                    }
+                  />
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-medium text-mineral-800">
+                      Alinhamento no topo da vitrine
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(
+                        [
+                          { valor: "esquerda", rotulo: "Esquerda" },
+                          { valor: "centro", rotulo: "Centro" },
+                          { valor: "direita", rotulo: "Direita" },
+                        ] as const
+                      ).map((opcao) => {
+                        const ativo =
+                          (rascunho.identidade.alinhamentoCabecalho ?? "esquerda") === opcao.valor;
+                        return (
+                          <button
+                            key={opcao.valor}
+                            type="button"
+                            disabled={somenteLeitura}
+                            onClick={() =>
+                              atualizarIdentidade({ alinhamentoCabecalho: opcao.valor })
+                            }
+                            className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${ativo
+                                ? "border-mineral-950 bg-mineral-950 text-white"
+                                : "border-marfim-300 bg-white text-mineral-700 hover:bg-marfim-50"
+                              }`}
+                          >
+                            {opcao.rotulo}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
 
                 <CampoFormulario
                   rotulo="Cidade e estado ou endereço"
@@ -576,26 +654,6 @@ export function SecoesFormularioAparencia({
                 }
                 placeholder="Ex.: OAB/SP 000.000"
               />
-
-              <CampoUploadMidiaStorage
-                organizacaoId={rascunho.organizacaoId}
-                rotulo="Logotipo opcional"
-                textoAuxiliar="Se preferir assinatura tipográfica limpa, deixe este campo em branco."
-                categoria="imagem"
-                valorUrl={rascunho.identidade.urlLogotipoOpcional ?? ""}
-                desabilitado={somenteLeitura}
-                servicoUpload={servicoUpload}
-                aoAlterarUrl={(novaUrl) =>
-                  atualizarIdentidade({ urlLogotipoOpcional: novaUrl || undefined })
-                }
-              />
-            </CartaoSuperficie>
-
-            <CartaoSuperficie className="space-y-5 rounded-2xl border-marfim-200 bg-white p-5 shadow-xs sm:p-6">
-              <FormularioChamadasEditoriais
-                somenteLeitura={somenteLeitura}
-                microfluxos={microfluxos}
-              />
             </CartaoSuperficie>
           </div>
         ) : null}
@@ -649,8 +707,36 @@ export function SecoesFormularioAparencia({
                   >
                     Vídeo silencioso
                   </button>
+                  <button
+                    type="button"
+                    disabled={somenteLeitura}
+                    aria-pressed={rascunho.midiaFundo.tipo === "degradado"}
+                    onClick={() =>
+                      atualizarMidiaFundo({
+                        tipo: "degradado",
+                        degradadoOpcional:
+                          rascunho.midiaFundo.degradadoOpcional ?? DEGRADADO_EDITORIAL_PADRAO,
+                      })
+                    }
+                    className={combinarClasses(
+                      "min-h-9 rounded-xs px-3 py-1 text-xs font-medium transition-colors",
+                      rascunho.midiaFundo.tipo === "degradado"
+                        ? "bg-indigo-50 text-indigo-900"
+                        : "text-mineral-700 hover:text-mineral-950",
+                    )}
+                  >
+                    Degradado
+                  </button>
                 </div>
               </div>
+
+              {rascunho.midiaFundo.tipo === "degradado" ? (
+                <SeletorDegradadoMidia
+                  valor={rascunho.midiaFundo.degradadoOpcional}
+                  somenteLeitura={somenteLeitura}
+                  aoAlterar={(degradadoOpcional) => atualizarMidiaFundo({ degradadoOpcional })}
+                />
+              ) : null}
 
               {rascunho.midiaFundo.tipo === "imagem" ? (
                 <>
@@ -679,7 +765,7 @@ export function SecoesFormularioAparencia({
                     }
                   />
                 </>
-              ) : (
+              ) : rascunho.midiaFundo.tipo === "video" ? (
                 <>
                   <CampoUploadMidiaStorage
                     organizacaoId={rascunho.organizacaoId}
@@ -707,26 +793,29 @@ export function SecoesFormularioAparencia({
                     }
                   />
                 </>
-              )}
+              ) : null}
 
-              <CampoFormulario
-                rotulo="Descrição da imagem para acessibilidade (texto alternativo)"
-                required
-                disabled={somenteLeitura}
-                value={rascunho.midiaFundo.textoAlternativo}
-                onChange={(evento) =>
-                  atualizarMidiaFundo({ textoAlternativo: evento.target.value })
-                }
-                placeholder="Ex.: Sala iluminada por luz natural com mobiliário em madeira"
-              />
+              {rascunho.midiaFundo.tipo !== "degradado" ? (
+                <CampoFormulario
+                  rotulo="Descrição da imagem para acessibilidade (texto alternativo)"
+                  required
+                  disabled={somenteLeitura}
+                  value={rascunho.midiaFundo.textoAlternativo}
+                  onChange={(evento) =>
+                    atualizarMidiaFundo({ textoAlternativo: evento.target.value })
+                  }
+                  placeholder="Ex.: Sala iluminada por luz natural com mobiliário em madeira"
+                />
+              ) : null}
 
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-mineral-900">
                   Contraste do véu sobre a fotografia
                 </p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {(
                     [
+                      { valor: "nenhum", nome: "Nenhum" },
                       { valor: "suave", nome: "Suave" },
                       { valor: "equilibrado", nome: "Equilibrado" },
                       { valor: "intenso", nome: "Intenso" },
@@ -789,16 +878,47 @@ export function SecoesFormularioAparencia({
                     );
                   })}
                 </div>
+
+                {rascunho.midiaFundo.efeitoCantos === "dots" ? (
+                  <div className="mt-3 rounded-lg border border-marfim-200 bg-marfim-50/60 p-3">
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <label
+                        htmlFor="opacidade-dots-cantos"
+                        className="text-xs font-medium text-mineral-800"
+                      >
+                        Opacidade dos dots
+                      </label>
+                      <span className="font-mono text-xs font-semibold text-mineral-900">
+                        {rascunho.midiaFundo.opacidadeDotsCantos ?? 20}%
+                      </span>
+                    </div>
+                    <input
+                      id="opacidade-dots-cantos"
+                      type="range"
+                      min={5}
+                      max={100}
+                      step={5}
+                      disabled={somenteLeitura}
+                      value={rascunho.midiaFundo.opacidadeDotsCantos ?? 20}
+                      onChange={(e) =>
+                        atualizarMidiaFundo({ opacidadeDotsCantos: Number(e.target.value) })
+                      }
+                      className="h-2 w-full cursor-pointer accent-indigo-600"
+                    />
+                  </div>
+                ) : null}
               </div>
 
-              <SeletorPontoFocalMidia
-                urlImagemVisualizacao={urlVisualizacaoPontoFocal}
-                textoAlternativo={rascunho.midiaFundo.textoAlternativo}
-                pontoFocalDesktop={rascunho.midiaFundo.pontoFocalDesktop}
-                pontoFocalMobile={rascunho.midiaFundo.pontoFocalMobile}
-                desabilitado={somenteLeitura}
-                aoAlterarPontoFocal={definirPontoFocalMidia}
-              />
+              {rascunho.midiaFundo.tipo === "imagem" ? (
+                <SeletorPontoFocalMidia
+                  urlImagemVisualizacao={urlVisualizacaoPontoFocal}
+                  textoAlternativo={rascunho.midiaFundo.textoAlternativo}
+                  pontoFocalDesktop={rascunho.midiaFundo.pontoFocalDesktop}
+                  pontoFocalMobile={rascunho.midiaFundo.pontoFocalMobile}
+                  desabilitado={somenteLeitura}
+                  aoAlterarPontoFocal={definirPontoFocalMidia}
+                />
+              ) : null}
             </CartaoSuperficie>
           </div>
         ) : null}

@@ -44,14 +44,16 @@ export type TipoRedeSocial =
 
 export type TipoDestinoAcaoHome =
   | "microfluxo"
+  | "secao_produtos"
   | "secao_servicos"
   | "secao_portfolio"
   | "secao_equipe"
+  | "secao_videos"
   | "link_externo"
   | "whatsapp"
   | "telefone";
 
-export type IntensidadeVeloEscuro = "suave" | "equilibrado" | "intenso";
+export type IntensidadeVeloEscuro = "nenhum" | "suave" | "equilibrado" | "intenso";
 
 export type TipoEfeitoCantosEditorial = "nenhum" | "dots" | "grade";
 
@@ -60,21 +62,28 @@ export interface CoordenadasPontoFocal {
   readonly yPercentual: number;
 }
 
+import type { ConfiguracaoDegradadoEditorial } from "../objetos-valor/degradadoEditorial";
+
 export interface MidiaFundoEditorial {
-  readonly tipo: "imagem" | "video";
+  readonly tipo: "imagem" | "video" | "degradado";
   readonly urlPrincipal: string;
   readonly urlMobileOpcional?: string;
   readonly urlPosterVideo?: string;
+  readonly degradadoOpcional?: ConfiguracaoDegradadoEditorial;
   readonly textoAlternativo: string;
   readonly pontoFocalDesktop: CoordenadasPontoFocal;
   readonly pontoFocalMobile?: CoordenadasPontoFocal;
   readonly intensidadeVeloEscuro: IntensidadeVeloEscuro;
   readonly efeitoCantos?: TipoEfeitoCantosEditorial;
+  readonly opacidadeDotsCantos?: number;
 }
 
 export interface IdentidadeMarcaEditorial {
   readonly nomeExibicao: string;
+  readonly mostrarNomeExibicao?: boolean;
   readonly subtituloCurto?: string;
+  readonly mostrarSubtituloCurto?: boolean;
+  readonly alinhamentoCabecalho?: "esquerda" | "centro" | "direita";
   readonly urlLogotipoOpcional?: string;
   readonly cidadeEstado?: string;
   readonly urlMapaEnderecoOpcional?: string;
@@ -86,9 +95,17 @@ export interface IdentidadeMarcaEditorial {
 
 export type TipoIconeAcaoHome = string;
 
+export interface ConfiguracaoCtaAcervo {
+  readonly tipoAcao: "whatsapp" | "microfluxo";
+  readonly rotuloBotao?: string;
+  readonly microfluxoId?: string;
+}
+
 export interface ItemAcaoHome {
   readonly posicionamentoEquipe?: PosicionamentoEquipeVitrine;
   readonly limiteAvataresEquipe?: number | null;
+  readonly modoExibicaoColecao?: "modal_gaveta" | "carrossel" | "grade_2_colunas";
+  readonly configuracaoCtaAcervo?: ConfiguracaoCtaAcervo;
   readonly id: string;
   readonly rotulo: string;
   readonly subtituloDiscreto?: string;
@@ -98,6 +115,7 @@ export interface ItemAcaoHome {
   readonly tipoDestino: TipoDestinoAcaoHome;
   readonly destino: string;
   readonly destaquePrincipal?: boolean;
+  readonly animarBordaDestaque?: boolean;
   readonly icone?: TipoIconeAcaoHome;
 }
 
@@ -161,6 +179,7 @@ export interface MidiaHomeResolvida {
   readonly posicaoObjetoCss: string;
   readonly intensidadeVeloEscuro: IntensidadeVeloEscuro;
   readonly efeitoCantos: TipoEfeitoCantosEditorial;
+  readonly opacidadeDotsCantos?: number;
 }
 
 /**
@@ -183,6 +202,7 @@ export function resolverMidiaEfetivaHome(
   );
 
   const efeitoCantos: TipoEfeitoCantosEditorial = midia.efeitoCantos ?? "nenhum";
+  const opacidadeDotsCantos: number | undefined = midia.opacidadeDotsCantos;
 
   if (midia.tipo === "video") {
     const imagemFallbackSegura =
@@ -199,6 +219,7 @@ export function resolverMidiaEfetivaHome(
         posicaoObjetoCss: pontoFocalValidado.gerarPosicaoObjetoCss(),
         intensidadeVeloEscuro: midia.intensidadeVeloEscuro,
         efeitoCantos,
+        opacidadeDotsCantos,
       };
     }
 
@@ -210,6 +231,7 @@ export function resolverMidiaEfetivaHome(
       posicaoObjetoCss: pontoFocalValidado.gerarPosicaoObjetoCss(),
       intensidadeVeloEscuro: midia.intensidadeVeloEscuro,
       efeitoCantos,
+      opacidadeDotsCantos,
     };
   }
 
@@ -223,6 +245,7 @@ export function resolverMidiaEfetivaHome(
     posicaoObjetoCss: pontoFocalValidado.gerarPosicaoObjetoCss(),
     intensidadeVeloEscuro: midia.intensidadeVeloEscuro,
     efeitoCantos,
+    opacidadeDotsCantos,
   };
 }
 
@@ -346,6 +369,9 @@ export function resolverAcoesVitrineComMicrofluxos(
     if (m.tipoAcao === "link_externo") {
       tipoDestino = "link_externo";
       destino = m.urlDestinoOpcional?.trim() || "https://";
+    } else if (m.tipoAcao === "secao_produtos") {
+      tipoDestino = "secao_produtos";
+      destino = "#produtos";
     } else if (m.tipoAcao === "secao_servicos") {
       tipoDestino = "secao_servicos";
       destino = "#servicos";
@@ -355,6 +381,9 @@ export function resolverAcoesVitrineComMicrofluxos(
     } else if (m.tipoAcao === "secao_equipe") {
       tipoDestino = "secao_equipe";
       destino = "#equipe";
+    } else if (m.tipoAcao === "secao_videos") {
+      tipoDestino = "secao_videos";
+      destino = "#videos";
     } else if (m.tipoAcao === "whatsapp") {
       tipoDestino = "whatsapp";
       destino = m.urlDestinoOpcional?.trim().startsWith("http")
@@ -379,11 +408,18 @@ export function resolverAcoesVitrineComMicrofluxos(
       destino,
       icone: (m.iconeBotaoHome as TipoIconeAcaoHome) || acaoExistente?.icone || "automatico",
       destaquePrincipal: m.destaquePrimarioHome ?? acaoExistente?.destaquePrincipal ?? false,
+      animarBordaDestaque: m.animarBordaDestaque ?? acaoExistente?.animarBordaDestaque ?? false,
       ...(tipoDestino === "secao_equipe" && m.posicionamentoEquipe
         ? { posicionamentoEquipe: m.posicionamentoEquipe }
         : {}),
       ...(tipoDestino === "secao_equipe" && m.limiteAvataresEquipe !== undefined
         ? { limiteAvataresEquipe: m.limiteAvataresEquipe }
+        : {}),
+      ...((tipoDestino === "secao_produtos" || tipoDestino === "secao_servicos") && m.modoExibicaoColecao
+        ? { modoExibicaoColecao: m.modoExibicaoColecao }
+        : {}),
+      ...((tipoDestino === "secao_produtos" || tipoDestino === "secao_servicos") && m.configuracaoCtaAcervo
+        ? { configuracaoCtaAcervo: m.configuracaoCtaAcervo }
         : {}),
     };
   });
@@ -395,7 +431,8 @@ export function resolverAcoesVitrineComMicrofluxos(
     (a) =>
       !destinosDosFluxos.has(a.destino) &&
       !rotulosDosFluxos.has(a.rotulo.trim().toLowerCase()) &&
-      (a.tipoDestino === "secao_servicos" ||
+      (a.tipoDestino === "secao_produtos" ||
+        a.tipoDestino === "secao_servicos" ||
         a.tipoDestino === "secao_portfolio" ||
         a.tipoDestino === "secao_equipe"),
   );

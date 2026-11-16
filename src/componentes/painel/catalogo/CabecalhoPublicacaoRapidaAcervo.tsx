@@ -60,7 +60,6 @@ export function CabecalhoPublicacaoRapidaAcervo({
         <AcoesPublicacaoPagina
           controle={controle}
           identificadorPublico={identificadorPublico}
-          orientacao="Salve cada item no formulário. Publicar página disponibiliza os itens salvos na vitrine."
         />
       </header>
     </div>

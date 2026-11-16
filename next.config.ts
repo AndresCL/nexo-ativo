@@ -27,6 +27,14 @@ export default function criarConfiguracaoNext(fase: string): NextConfig {
           protocol: "https",
           hostname: "images.pexels.com",
         },
+        {
+          protocol: "https",
+          hostname: "cdn.beacons.ai",
+        },
+        {
+          protocol: "https",
+          hostname: "**.fna.fbcdn.net",
+        },
       ],
     },
     async headers() {

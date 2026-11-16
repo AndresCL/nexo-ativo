@@ -243,8 +243,8 @@ export function GerenciadorCatalogoPainel({
     <div className="space-y-6">
       <CabecalhoPublicacaoRapidaAcervo
         aparencia="clara"
-        titulo="Catálogo"
-        subtitulo="Organize seus veículos e produtos, atualize o estoque e publique as novidades na vitrine."
+        titulo="Produtos"
+        subtitulo="Organize seus produtos, atualize preços e estoque e publique as novidades na vitrine."
         identificadorPublico={identificadorPublico}
 
         controle={publicacao}
@@ -311,7 +311,7 @@ export function GerenciadorCatalogoPainel({
               <Package className="h-4 w-4" aria-hidden="true" />
             </span>
             <h2 className="text-base font-semibold text-mineral-950">
-              {idProdutoEdicao ? "Editar item do catálogo" : "Novo item"}
+              {idProdutoEdicao ? "Editar produto" : "Novo produto"}
             </h2>
           </div>
 
@@ -323,12 +323,12 @@ export function GerenciadorCatalogoPainel({
             <CampoFormulario
               ref={referenciaNome}
               className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
-              rotulo="Nome do veículo ou produto"
+              rotulo="Nome do produto"
               required
               disabled={!podeEditarConteudo || publicacao.publicando || salvando}
               value={nomeProduto}
               onChange={(e) => setNomeProduto(e.target.value)}
-              placeholder="Ex.: Porsche 911 Carrera GTS ou BMW M3 Competition"
+              placeholder="Ex.: Relógio Chrono Titanium ou Café Especial Mogiana"
             />
 
             <CampoFormulario
@@ -527,7 +527,7 @@ export function GerenciadorCatalogoPainel({
               </h3>
               <p className="mt-2 max-w-xs text-xs leading-relaxed text-mineral-500">
                 {produtos.length === 0
-                  ? "Cadastre seu primeiro veículo ou produto no formulário para preparar a vitrine."
+                  ? "Cadastre seu primeiro produto no formulário para preparar a vitrine."
                   : "Tente outro nome, categoria ou disponibilidade."}
               </p>
               {produtos.length > 0 ? (

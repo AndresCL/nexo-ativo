@@ -140,8 +140,7 @@ export function DiagramaFunilInterativo({ resumoMetricas }: PropriedadesDiagrama
         />
 
         {/* Gráfico Visual de Funil (Recharts FunnelChart) */}
-        <div className="relative rounded-2xl border border-indigo-100 bg-gradient-to-b from-indigo-50/40 to-white p-4">
-          {montado ? (
+        {montado ? (
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <FunnelChart>
@@ -204,7 +203,6 @@ export function DiagramaFunilInterativo({ resumoMetricas }: PropriedadesDiagrama
               </div>
             ))}
           </div>
-        </div>
       </div>
     </div>
   );

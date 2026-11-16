@@ -239,9 +239,11 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
       .enum([
         "microfluxo",
         "link_externo",
+        "secao_produtos",
         "secao_servicos",
         "secao_portfolio",
         "secao_equipe",
+        "secao_videos",
         "whatsapp",
         "telefone",
       ])
@@ -265,7 +267,16 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
     tituloSecao: z.string().trim().max(100).optional(),
     iconeBotaoHome: z.string().min(1).max(60).optional(),
     destaquePrimarioHome: z.boolean().optional(),
+    animarBordaDestaque: z.boolean().optional(),
     ordemHome: z.number().int().min(0).max(50).optional(),
     posicionamentoEquipe: esquemaPosicionamentoEquipeVitrine.optional(),
     limiteAvataresEquipe: esquemaLimiteAvataresEquipe,
+  modoExibicaoColecao: z.enum(["modal_gaveta", "carrossel", "grade_2_colunas"]).optional(),
+  configuracaoCtaAcervo: z
+    .object({
+      tipoAcao: z.enum(["whatsapp", "microfluxo"]),
+      rotuloBotao: z.string().max(50).optional(),
+      microfluxoId: z.string().optional(),
+    })
+    .optional(),
   });

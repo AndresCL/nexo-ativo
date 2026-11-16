@@ -57,6 +57,7 @@ const DESCRITORES_SITUACAO_ASSINATURA: Readonly<
     classe: "bg-sky-50 text-sky-800 border-sky-200",
   },
   inadimplente: { rotulo: "Inadimplente", classe: "bg-red-50 text-red-800 border-red-200" },
+  suspensa: { rotulo: "Suspensa", classe: "bg-amber-50 text-amber-800 border-amber-200" },
   cancelada: { rotulo: "Encerrada", classe: "bg-marfim-50 text-mineral-600 border-marfim-200" },
 };
 
@@ -127,6 +128,29 @@ export function GerenciadorAssinaturaPainel({
     }
   }
 
+  const [confirmandoCancelamento, setConfirmandoCancelamento] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
+
+  async function aoCancelarAssinatura() {
+    setErro(null);
+    setSucesso(null);
+    setCancelando(true);
+    try {
+      await servicoAssinaturasPainelCliente.cancelarAssinatura(organizacao.id);
+      setConfirmandoCancelamento(false);
+      setSucesso("Assinatura cancelada com sucesso.");
+      roteador.refresh();
+    } catch (erroCapturado) {
+      setErro(
+        erroCapturado instanceof Error
+          ? erroCapturado.message
+          : "Não foi possível cancelar a assinatura.",
+      );
+    } finally {
+      setCancelando(false);
+    }
+  }
+
   const descritorSituacao =
     DESCRITORES_SITUACAO_ASSINATURA[situacaoAssinatura] ??
     DESCRITORES_SITUACAO_ASSINATURA.pendente_contratacao;
@@ -175,6 +199,36 @@ export function GerenciadorAssinaturaPainel({
               <span>Acessar Fatura / Checkout Asaas</span>
               <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
             </a>
+          ) : null}
+          {situacaoAssinatura === "ativa" && assinaturaAtual ? (
+            confirmandoCancelamento ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={cancelando}
+                  onClick={aoCancelarAssinatura}
+                  className="inline-flex min-h-10 items-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                >
+                  {cancelando ? "Cancelando..." : "Confirmar cancelamento"}
+                </button>
+                <button
+                  type="button"
+                  disabled={cancelando}
+                  onClick={() => setConfirmandoCancelamento(false)}
+                  className="inline-flex min-h-10 items-center rounded-lg border border-marfim-300 bg-white px-3 py-2 text-xs font-semibold text-mineral-700 transition-colors hover:bg-marfim-50 disabled:opacity-50"
+                >
+                  Voltar
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmandoCancelamento(true)}
+                className="inline-flex min-h-10 items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100"
+              >
+                Cancelar assinatura
+              </button>
+            )
           ) : null}
         </div>
       </header>

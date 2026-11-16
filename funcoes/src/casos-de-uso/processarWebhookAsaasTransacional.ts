@@ -140,6 +140,9 @@ export async function executarProcessamentoWebhookAsaasTransacional(
 
         transacao.set(refCobrancaHistorico, registroCobranca, { merge: true });
       }
+    } else if (eventoTipo === "SUBSCRIPTION_INACTIVATED") {
+      novaSituacaoAssinatura = "suspensa";
+      situacaoFinalCalculada = "suspensa";
     } else if (eventoTipo === "SUBSCRIPTION_DELETED") {
       novaSituacaoAssinatura = "cancelada";
       situacaoFinalCalculada = "cancelada";
@@ -149,12 +152,25 @@ export async function executarProcessamentoWebhookAsaasTransacional(
       organizacao.resumoDireitosPlano.planoCodigo) as CodigoPlanoAssinatura;
     const planoDefinicao = CATALOGO_PLANOS_FLUXO[planoCodigo] || CATALOGO_PLANOS_FLUXO.pro;
 
+    const inadimplenteDesdeAtual = organizacao.resumoDireitosPlano.inadimplenteDesde;
+    const manterInadimplenteDesde =
+      novaSituacaoAssinatura === "inadimplente" ||
+      novaSituacaoAssinatura === "em_carencia" ||
+      novaSituacaoAssinatura === "suspensa";
+    const proximoInadimplenteDesde = manterInadimplenteDesde
+      ? inadimplenteDesdeAtual || agoraIso
+      : undefined;
+
     const novoResumoDireitosPlano: ResumoDireitosPlano = {
       planoCodigo,
       situacaoAssinatura: novaSituacaoAssinatura,
       limiteProfissionaisAtivos: planoDefinicao.limiteProfissionaisAtivos,
       limiteEnviosEmailMensal: planoDefinicao.limiteEnviosEmailMensal,
-      permitePublicacaoPublica: novaSituacaoAssinatura === "ativa",
+      permitePublicacaoPublica:
+        novaSituacaoAssinatura === "ativa" ||
+        novaSituacaoAssinatura === "em_carencia" ||
+        novaSituacaoAssinatura === "inadimplente",
+      ...(proximoInadimplenteDesde ? { inadimplenteDesde: proximoInadimplenteDesde } : {}),
     };
 
     transacao.update(refOrg, {

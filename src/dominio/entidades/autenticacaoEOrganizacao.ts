@@ -16,7 +16,7 @@ export type SituacaoOrganizacao = "ativa" | "suspensa" | "encerrada";
 export type CodigoPlanoAssinatura = "avaliacao_inicial" | "pro" | "equipe" | "personalizado";
 
 export type SituacaoResumoAssinatura =
-  "pendente_contratacao" | "ativa" | "em_carencia" | "inadimplente" | "cancelada";
+  "pendente_contratacao" | "ativa" | "em_carencia" | "inadimplente" | "suspensa" | "cancelada";
 
 export interface ClaimsPlataforma {
   readonly papelPlataforma?: PapelPlataforma;
@@ -38,6 +38,7 @@ export interface ResumoDireitosPlano {
   readonly limiteProfissionaisAtivos: number;
   readonly limiteEnviosEmailMensal: number;
   readonly permitePublicacaoPublica: boolean;
+  readonly inadimplenteDesde?: string;
 }
 
 export interface Organizacao {

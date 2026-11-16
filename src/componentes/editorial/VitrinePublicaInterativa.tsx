@@ -32,6 +32,8 @@ import { identificarSecaoPorHash, resolverMicrofluxoPorDestino } from "./roteado
 import { criarPreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 import { restaurarFocoAcaoVitrine } from "./restaurarFocoAcaoVitrine";
 import { ContextoApresentacaoEquipe } from "@/ganchos/contextoApresentacaoEquipe";
+import { BottomSheetDetalhesItemAcervo } from "./acervo/BottomSheetDetalhesItemAcervo";
+import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 
 export interface PropriedadesVitrinePublicaInterativa {
   readonly pagina: ConteudoPaginaPublicada;
@@ -54,6 +56,11 @@ export function VitrinePublicaInterativa({
   );
   const [secaoAberta, setSecaoAberta] = useState<SecaoAcervoAberta>(null);
   const [tituloSecaoAberta, setTituloSecaoAberta] = useState<string | undefined>();
+  const [itemDetalhado, setItemDetalhado] = useState<{
+    tipo: "produtos" | "servicos";
+    item: ProdutoCatalogo | ServicoOrganizacao;
+    configuracaoCta?: ConfiguracaoCtaAcervo;
+  } | null>(null);
   const [cartaoProfissionalAtivo, setCartaoProfissionalAtivo] = useState<ProfissionalEquipe | null>(
     null,
   );
@@ -124,6 +131,7 @@ export function VitrinePublicaInterativa({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "visualizacao_vitrine",
       canalOrigem: origem.canalOrigem,
+      ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
       ...(origem.cartaoProfissionalId ? { cartaoProfissionalId: origem.cartaoProfissionalId } : {}),
     });
   }, [pagina.organizacaoId]);
@@ -164,6 +172,7 @@ export function VitrinePublicaInterativa({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "abertura_microfluxo",
           canalOrigem: origem.canalOrigem,
+          ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
           microfluxoId: resolucaoFluxo.microfluxo.id,
           microfluxoTitulo: resolucaoFluxo.microfluxo.titulo,
           ...(profissional ? { profissionalId: profissional.id } : {}),
@@ -265,6 +274,7 @@ export function VitrinePublicaInterativa({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "abertura_microfluxo",
       canalOrigem: origem.canalOrigem,
+      ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
       ...(origem.cartaoProfissionalId ? { cartaoProfissionalId: origem.cartaoProfissionalId } : {}),
       microfluxoId: escolhido.id,
       microfluxoTitulo: escolhido.titulo,
@@ -287,10 +297,18 @@ export function VitrinePublicaInterativa({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "clique_acao_home",
       canalOrigem: origem.canalOrigem,
+      ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
       ...(origem.cartaoProfissionalId ? { cartaoProfissionalId: origem.cartaoProfissionalId } : {}),
       acaoHomeId: acao.id,
       acaoHomeRotulo: acao.rotulo,
     });
+
+    if (acao.tipoDestino === "secao_produtos" || acao.destino === "#produtos") {
+      setMicrofluxoAtivo(null);
+      setTituloSecaoAberta(acao.tituloSecao);
+      setSecaoAberta("produtos");
+      return;
+    }
 
     if (acao.tipoDestino === "secao_servicos" || acao.destino === "#servicos") {
       setMicrofluxoAtivo(null);
@@ -326,6 +344,7 @@ export function VitrinePublicaInterativa({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "abertura_microfluxo",
           canalOrigem: origem.canalOrigem,
+          ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
           ...(origem.cartaoProfissionalId
             ? { cartaoProfissionalId: origem.cartaoProfissionalId }
             : {}),
@@ -392,8 +411,29 @@ export function VitrinePublicaInterativa({
       <ContextoApresentacaoEquipe.Provider value={!loaderVisivel}>
         <RenderizadorComposicaoEditorial
           previaEquipe={previaEquipe}
+          videosYoutube={acervo.videos}
+          modoExibicaoVideos={acervo.modoExibicaoVideos}
+          autoplayVideos={acervo.autoplayVideos}
+          ocultarTituloVideos={acervo.ocultarTituloVideos}
+          produtos={acervo.produtos}
+          servicos={acervo.servicos}
           pagina={paginaComAcoesResolvidas}
+          modoMobileForcado
           aoAcionarItem={aoAcionarItemHome}
+          aoSelecionarItemAcervo={(tipo, itemId) => {
+            const acaoCorrespondente = paginaComAcoesResolvidas.acoesPrincipais.find(
+              (a) => a.tipoDestino === (tipo === "produtos" ? "secao_produtos" : "secao_servicos"),
+            );
+            const configuracaoCta = acaoCorrespondente?.configuracaoCtaAcervo;
+
+            if (tipo === "produtos") {
+              const prod = acervo.produtos.find((p) => p.id === itemId);
+              if (prod) setItemDetalhado({ tipo: "produtos", item: prod, configuracaoCta });
+            } else {
+              const serv = acervo.servicos.find((s) => s.id === itemId);
+              if (serv) setItemDetalhado({ tipo: "servicos", item: serv, configuracaoCta });
+            }
+          }}
           complementoChamada={
             <BlocoAvaliacoesGoogle
               key={pagina.avaliacoesGoogle?.identificadorLocal}
@@ -440,6 +480,27 @@ export function VitrinePublicaInterativa({
         acervo={acervo}
         aoSolicitarExperiencia={abrirExperienciaComContexto}
         aoAbrirCartao={abrirCartao}
+      />
+
+      {/* Bottom Sheet Clean de Detalhes do Item (Produto ou Serviço) */}
+      <BottomSheetDetalhesItemAcervo
+        aberto={itemDetalhado !== null}
+        aoFechar={() => setItemDetalhado(null)}
+        pagina={pagina}
+        item={itemDetalhado?.item ?? null}
+        tipo={itemDetalhado?.tipo ?? "produtos"}
+        configuracaoCta={itemDetalhado?.configuracaoCta}
+        aoIniciarMicrofluxo={(microfluxoId, contextoItem) => {
+          const fluxo = microfluxosDisponiveis.find((m) => m.id === microfluxoId);
+          if (fluxo) {
+            setSecaoAberta(null);
+            setContextoMicrofluxo({
+              ...(contextoItem.produtoId ? { produtoPreSelecionadoId: contextoItem.produtoId } : {}),
+              ...(contextoItem.servicoId ? { servicoPreSelecionadoId: contextoItem.servicoId } : {}),
+            });
+            setMicrofluxoAtivo(fluxo);
+          }
+        }}
       />
 
       <AnimatePresence>

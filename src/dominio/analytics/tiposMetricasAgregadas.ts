@@ -8,7 +8,7 @@ export type TipoEventoTelemetriaAnonima =
   | "clique_ligacao";
 
 export type CanalOrigemTrafego =
-  "instagram" | "cartao_equipe" | "whatsapp" | "google" | "direto" | "permalink";
+  "instagram" | "cartao_equipe" | "qrcode" | "whatsapp" | "google" | "direto" | "permalink";
 
 export interface MetricaCanalOrigem {
   readonly canal: CanalOrigemTrafego;
@@ -65,6 +65,17 @@ export interface MetricasDiariasOrganizacao {
       }
     >
   >;
+  readonly porQrCode?: Readonly<
+    Record<
+      string,
+      {
+        readonly visualizacoes?: number;
+        readonly aberturasFluxo?: number;
+        readonly conclusoesFluxo?: number;
+        readonly contatosWhatsapp?: number;
+      }
+    >
+  >;
   readonly porCartao?: Readonly<
     Record<
       string,
@@ -101,6 +112,14 @@ export interface MetricasDiariasOrganizacao {
   readonly atualizadoEmIso: string;
 }
 
+export interface MetricaQrCode {
+  readonly codigo: string;
+  readonly visualizacoes: number;
+  readonly aberturasFluxo: number;
+  readonly conclusoesFluxo: number;
+  readonly contatosWhatsapp: number;
+}
+
 export interface ResumoMetricasPeriodo {
   readonly diasConsiderados: number;
   readonly totalVisualizacoes: number;
@@ -113,6 +132,7 @@ export interface ResumoMetricasPeriodo {
   readonly taxaConversaoMicrofluxoPercentual: number; // Ex: 14.5%
   readonly taxaConversaoContatoPercentual: number; // Ex: 8.2%
   readonly metricasPorCanal: readonly MetricaCanalOrigem[];
+  readonly metricasPorQrCode: readonly MetricaQrCode[];
   readonly metricasPorCartao: readonly MetricaCartaoProfissional[];
   readonly metricasPorMicrofluxo: readonly MetricaGranularMicrofluxo[];
   readonly metricasPorProfissional: readonly MetricaGranularProfissional[];
@@ -122,6 +142,7 @@ export interface ResumoMetricasPeriodo {
 const ROTULOS_CANAL: Readonly<Record<CanalOrigemTrafego, string>> = {
   instagram: "Instagram (Bio & Campanhas)",
   cartao_equipe: "Cartões VIP da Equipe",
+  qrcode: "QR Code (Balcão & Impressos)",
   whatsapp: "Compartilhamento WhatsApp",
   google: "Busca Google & Orgânico",
   direto: "Acesso Direto",
@@ -164,6 +185,7 @@ export function consolidarResumoMetricas(
       "cartao_equipe",
       { visualizacoes: 0, cliquesAcoesHome: 0, aberturasFluxo: 0, contatosWhatsapp: 0 },
     ],
+    ["qrcode", { visualizacoes: 0, cliquesAcoesHome: 0, aberturasFluxo: 0, contatosWhatsapp: 0 }],
     ["whatsapp", { visualizacoes: 0, cliquesAcoesHome: 0, aberturasFluxo: 0, contatosWhatsapp: 0 }],
     ["google", { visualizacoes: 0, cliquesAcoesHome: 0, aberturasFluxo: 0, contatosWhatsapp: 0 }],
     [
@@ -318,6 +340,34 @@ export function consolidarResumoMetricas(
     });
   }
 
+  const mapaQrCodes = new Map<
+    string,
+    { visualizacoes: number; aberturasFluxo: number; conclusoesFluxo: number; contatosWhatsapp: number }
+  >();
+
+  for (const metrica of selecionadas) {
+    if (metrica.porQrCode) {
+      for (const [codigo, dados] of Object.entries(metrica.porQrCode)) {
+        const atual = mapaQrCodes.get(codigo) ?? {
+          visualizacoes: 0,
+          aberturasFluxo: 0,
+          conclusoesFluxo: 0,
+          contatosWhatsapp: 0,
+        };
+        mapaQrCodes.set(codigo, {
+          visualizacoes: atual.visualizacoes + (dados.visualizacoes ?? 0),
+          aberturasFluxo: atual.aberturasFluxo + (dados.aberturasFluxo ?? 0),
+          conclusoesFluxo: atual.conclusoesFluxo + (dados.conclusoesFluxo ?? 0),
+          contatosWhatsapp: atual.contatosWhatsapp + (dados.contatosWhatsapp ?? 0),
+        });
+      }
+    }
+  }
+
+  const metricasPorQrCode: MetricaQrCode[] = Array.from(mapaQrCodes.entries())
+    .map(([codigo, dados]) => ({ codigo, ...dados }))
+    .sort((a, b) => b.visualizacoes - a.visualizacoes);
+
   // Consolidação de Canais
   const metricasPorCanal: MetricaCanalOrigem[] = Array.from(mapaCanais.entries()).map(
     ([canal, dados]) => {
@@ -343,8 +393,8 @@ export function consolidarResumoMetricas(
       const taxaConversao =
         dados.visualizacoes > 0
           ? Math.round(
-              ((dados.contatosWhatsapp + dados.cliquesAcoesHome) / dados.visualizacoes) * 1000,
-            ) / 10
+            ((dados.contatosWhatsapp + dados.cliquesAcoesHome) / dados.visualizacoes) * 1000,
+          ) / 10
           : 0;
       return {
         id,
@@ -389,6 +439,7 @@ export function consolidarResumoMetricas(
     taxaConversaoMicrofluxoPercentual,
     taxaConversaoContatoPercentual,
     metricasPorCanal,
+    metricasPorQrCode,
     metricasPorCartao,
     metricasPorMicrofluxo,
     metricasPorProfissional,

@@ -3,6 +3,7 @@ import { z } from "zod";
 export const esquemasCanalOrigem = z.enum([
   "instagram",
   "cartao_equipe",
+  "qrcode",
   "whatsapp",
   "google",
   "direto",
@@ -21,6 +22,7 @@ export const esquemaRegistroEventoAnonimo = z.object({
     "clique_ligacao",
   ]),
   canalOrigem: esquemasCanalOrigem.optional(),
+  qrCodeOrigem: z.string().max(120).optional(),
   cartaoProfissionalId: z.string().max(80).optional(),
   cartaoProfissionalNome: z.string().max(120).optional(),
   acaoHomeId: z.string().max(80).optional(),

@@ -4,6 +4,11 @@ import { ErroValidacaoDominio } from "../erros/errosDominio";
 import type { DefinicaoMicrofluxo } from "../microfluxos/tiposMicrofluxo";
 import { IdentificadorPublico } from "../objetos-valor/identificadorPublico";
 import { ValorMonetarioCentavos } from "../objetos-valor/valorMonetarioCentavos";
+import type { ModoExibicaoVideos, VideoYoutubeItem } from "../objetos-valor/videoYoutube";
+
+export type ModoExibicaoVideos = "carrossel" | "fila";
+
+export type ModoExibicaoItensVitrine = "modal_gaveta" | "carrossel" | "grade_2_colunas";
 
 export type DisponibilidadeProdutoCatalogo = "disponivel" | "sob_encomenda" | "esgotado";
 
@@ -101,6 +106,12 @@ export interface AcervoPublicoVitrine {
   readonly projetosPortfolio: readonly ProjetoPortfolio[];
   readonly profissionais: readonly ProfissionalEquipe[];
   readonly microfluxos?: readonly DefinicaoMicrofluxo[];
+  readonly videos?: readonly VideoYoutubeItem[];
+  readonly modoExibicaoVideos?: ModoExibicaoVideos;
+  readonly autoplayVideos?: boolean;
+  readonly ocultarTituloVideos?: boolean;
+  readonly modoExibicaoProdutos?: ModoExibicaoItensVitrine;
+  readonly modoExibicaoServicos?: ModoExibicaoItensVitrine;
 }
 
 export function criarAcervoPublicoVazio(): AcervoPublicoVitrine {
@@ -110,6 +121,8 @@ export function criarAcervoPublicoVazio(): AcervoPublicoVitrine {
     projetosPortfolio: [],
     profissionais: [],
     microfluxos: [],
+    videos: [],
+    modoExibicaoVideos: "carrossel",
   };
 }
 

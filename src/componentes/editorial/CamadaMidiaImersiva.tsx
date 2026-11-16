@@ -1,5 +1,7 @@
 "use client";
 
+import { construirCssDegradadoEditorial } from "@/dominio/objetos-valor/degradadoEditorial";
+
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -23,6 +25,7 @@ export interface PropriedadesCamadaMidiaImersiva {
 }
 
 const GRADIENTES_TEMA_ESCURO: Readonly<Record<IntensidadeVeloEscuro, string>> = {
+  nenhum: "bg-transparent",
   suave:
     "bg-gradient-to-t from-black/88 via-black/48 to-black/42 @5xl:bg-[linear-gradient(105deg,rgba(10,12,11,0.85)_0%,rgba(10,12,11,0.48)_48%,rgba(10,12,11,0.78)_100%)]",
   equilibrado:
@@ -32,6 +35,7 @@ const GRADIENTES_TEMA_ESCURO: Readonly<Record<IntensidadeVeloEscuro, string>> = 
 };
 
 const GRADIENTES_TEMA_CLARO: Readonly<Record<IntensidadeVeloEscuro, string>> = {
+  nenhum: "bg-transparent",
   suave:
     "bg-gradient-to-t from-[#f7f4ee]/88 via-[#f7f4ee]/35 to-[#f7f4ee]/20 @5xl:bg-[linear-gradient(105deg,rgba(247,244,238,0.86)_0%,rgba(247,244,238,0.28)_50%,rgba(247,244,238,0.82)_100%)]",
   equilibrado:
@@ -97,6 +101,26 @@ export function CamadaMidiaImersiva({
         : "bg-[radial-gradient(circle_at_50%_26%,transparent_20%,rgba(247,244,238,0.65)_78%)]"
       : null;
 
+  if (midia.tipo === "degradado") {
+    return (
+      <div
+        className={combinarClasses(
+          "pointer-events-none absolute inset-0 overflow-hidden",
+          className,
+        )}
+        style={{ background: construirCssDegradadoEditorial(midia.degradadoOpcional) }}
+        aria-hidden="true"
+      >
+        <div className={combinarClasses("absolute inset-0", classeVelo)} />
+        <EfeitoCantosEditorial
+          tipo={midiaResolvida.efeitoCantos}
+          temaEscuro={paleta.temaEscuro}
+          opacidadePercentual={midiaResolvida.opacidadeDotsCantos}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className={combinarClasses(
@@ -147,7 +171,11 @@ export function CamadaMidiaImersiva({
         />
       ) : null}
 
-      <EfeitoCantosEditorial tipo={midiaResolvida.efeitoCantos} temaEscuro={paleta.temaEscuro} />
+      <EfeitoCantosEditorial
+        tipo={midiaResolvida.efeitoCantos}
+        temaEscuro={paleta.temaEscuro}
+        opacidadePercentual={midiaResolvida.opacidadeDotsCantos}
+      />
     </div>
   );
 }

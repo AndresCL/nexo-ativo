@@ -24,7 +24,7 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvatarProfissional } from "./AvatarProfissional";
 import { PainelEditorialPublico } from "./PainelEditorialPublico";
 
-export type SecaoAcervoAberta = "servicos" | "portfolio" | "equipe" | null;
+export type SecaoAcervoAberta = "produtos" | "servicos" | "portfolio" | "equipe" | null;
 
 export interface PropriedadesGavetaEditorialPublica {
   readonly aoRetornarFoco?: () => void;
@@ -59,6 +59,8 @@ export function GavetaEditorialPublica({
   const tituloGaveta = useMemo(() => {
     if (tituloPersonalizado?.trim()) return tituloPersonalizado.trim();
     switch (secaoAberta) {
+      case "produtos":
+        return "Produtos";
       case "servicos":
         return "Serviços";
       case "portfolio":
@@ -79,6 +81,66 @@ export function GavetaEditorialPublica({
       titulo={tituloGaveta}
     >
       <TransicaoAlternancia chaveId={secaoAberta ?? "nenhuma"} variante="fade">
+        {secaoAberta === "produtos" ? (
+          <div className="mt-7 space-y-8 sm:mt-5 sm:space-y-6">
+            {acervo.produtos.length === 0 ? (
+              <p className="text-sm text-[var(--editorial-texto-secundario)]">
+                Os produtos estão sendo atualizados no momento.
+              </p>
+            ) : null}
+
+            {acervo.produtos.length > 0 ? (
+              <section aria-label="Lista de produtos" className="space-y-4 sm:space-y-3">
+                {acervo.produtos.map((produto) => (
+                  <article
+                    key={produto.id}
+                    className={combinarClasses(
+                      "group rounded-2xl border p-5 transition-all duration-300 hover:border-current/35 sm:p-4",
+                      paleta.temaEscuro
+                        ? "border-white/12 bg-[var(--editorial-superficie)]/70 backdrop-blur-md hover:bg-[var(--editorial-superficie)]"
+                        : "border-black/10 bg-[var(--editorial-superficie)]/80 backdrop-blur-md hover:bg-[var(--editorial-superficie)]",
+                    )}
+                  >
+                    <GaleriaImagensComThumbs
+                      imagens={obterListaImagensMidia(
+                        produto.urlImagemPrincipal
+                          ? {
+                              url: produto.urlImagemPrincipal,
+                              textoAlternativo: produto.nome,
+                              pontoFocal: produto.pontoFocalImagem,
+                            }
+                          : null,
+                        produto.imagens,
+                      )}
+                      tituloFallback={produto.nome}
+                      temaEscuro={paleta.temaEscuro}
+                      className="mb-4"
+                    />
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <span className="rounded-full bg-current/8 px-2.5 py-0.5 text-[11px] font-medium tracking-[0.12em] text-[var(--editorial-texto-secundario)] uppercase">
+                        {produto.categoria}
+                      </span>
+                      <span className="text-xs font-semibold text-[var(--editorial-destaque)]">
+                        {formatarApresentacaoPrecoItem({
+                          centavos: produto.precoCentavos,
+                          rotuloOpcional: produto.rotuloPrecoOpcional,
+                        })}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-2.5 text-base font-semibold sm:text-lg text-[var(--editorial-texto)]">
+                      {produto.nome}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--editorial-texto-secundario)]">
+                      {produto.resumo}
+                    </p>
+                  </article>
+                ))}
+              </section>
+            ) : null}
+          </div>
+        ) : null}
+
         {secaoAberta === "servicos" ? (
           <div className="mt-7 space-y-8 sm:mt-5 sm:space-y-6">
             {acervo.servicos.length === 0 ? (
@@ -103,10 +165,10 @@ export function GavetaEditorialPublica({
                       imagens={obterListaImagensMidia(
                         servico.urlImagemOpcional
                           ? {
-                              url: servico.urlImagemOpcional,
-                              textoAlternativo: servico.nome,
-                              pontoFocal: servico.pontoFocalImagem,
-                            }
+                            url: servico.urlImagemOpcional,
+                            textoAlternativo: servico.nome,
+                            pontoFocal: servico.pontoFocalImagem,
+                          }
                           : null,
                         servico.imagens,
                       )}
@@ -256,7 +318,7 @@ export function GavetaEditorialPublica({
                         ) : null}
                       </div>
 
-                      <p className="text-xs font-semibold text-[var(--editorial-destaque)] uppercase sm:text-[11px]">
+                      <p className="text-xs font-semibold text-[var(--editorial-texto-secundario)] uppercase sm:text-[11px]">
                         {prof.cargoOuEspecialidade}
                       </p>
                       <p className="text-xs leading-relaxed text-[var(--editorial-texto-secundario)]">

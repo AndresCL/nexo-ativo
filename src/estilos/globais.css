@@ -214,6 +214,39 @@
   animation: surgirSuaveUi 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+@keyframes brilhoBordaGiro {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animacao-brilho-borda-container {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 1.5px;
+}
+
+.animacao-brilho-borda-feixe {
+  position: absolute;
+  inset: -100%;
+  width: 300%;
+  height: 300%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 60deg,
+    var(--editorial-texto, #ffffff) 90deg,
+    transparent 120deg,
+    transparent 360deg
+  );
+  animation: brilhoBordaGiro 4s linear infinite;
+  opacity: 0.85;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

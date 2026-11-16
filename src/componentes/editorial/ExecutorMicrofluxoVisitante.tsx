@@ -214,6 +214,7 @@ export function ExecutorMicrofluxoVisitante({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "clique_whatsapp",
       canalOrigem: origem.canalOrigem,
+      ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
       ...(origem.cartaoProfissionalId ? { cartaoProfissionalId: origem.cartaoProfissionalId } : {}),
       ...(profissionalResponsavelWhatsApp
         ? { profissionalId: profissionalResponsavelWhatsApp.id }
@@ -306,6 +307,7 @@ export function ExecutorMicrofluxoVisitante({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "conclusao_microfluxo",
           canalOrigem: origem.canalOrigem,
+          ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
           ...(origem.cartaoProfissionalId
             ? { cartaoProfissionalId: origem.cartaoProfissionalId }
             : {}),

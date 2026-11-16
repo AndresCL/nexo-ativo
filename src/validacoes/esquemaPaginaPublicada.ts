@@ -15,20 +15,43 @@ const esquemaCoordenadasPontoFocal = z.object({
 });
 
 const esquemaMidiaFundoEditorial = z.object({
-  tipo: z.enum(["imagem", "video"]),
-  urlPrincipal: z.string().min(1),
+  tipo: z.enum(["imagem", "video", "degradado"]),
+  degradadoOpcional: z
+    .object({
+      corInicial: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      corFinal: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      direcao: z
+        .enum([
+          "esquerda_direita",
+          "direita_esquerda",
+          "cima_baixo",
+          "baixo_cima",
+          "diagonal_superior_esquerda",
+          "diagonal_superior_direita",
+          "diagonal_inferior_esquerda",
+          "diagonal_inferior_direita",
+        ])
+        .optional(),
+      anguloGraus: z.number().min(0).max(360).optional(),
+    })
+    .optional(),
+  urlPrincipal: z.string(),
   urlMobileOpcional: z.string().min(1).optional(),
   urlPosterVideo: z.string().min(1).optional(),
-  textoAlternativo: z.string().min(1).max(220),
+  textoAlternativo: z.string().max(220),
   pontoFocalDesktop: esquemaCoordenadasPontoFocal,
   pontoFocalMobile: esquemaCoordenadasPontoFocal.optional(),
-  intensidadeVeloEscuro: z.enum(["suave", "equilibrado", "intenso"]),
+  intensidadeVeloEscuro: z.enum(["nenhum", "suave", "equilibrado", "intenso"]),
   efeitoCantos: z.enum(["nenhum", "dots", "grade"]).optional(),
+  opacidadeDotsCantos: z.number().min(0).max(100).optional(),
 });
 
 const esquemaIdentidadeMarcaEditorial = z.object({
   nomeExibicao: z.string().min(2).max(90),
+  mostrarNomeExibicao: z.boolean().optional(),
   subtituloCurto: z.string().max(120).optional(),
+  mostrarSubtituloCurto: z.boolean().optional(),
+  alinhamentoCabecalho: z.enum(["esquerda", "centro", "direita"]).optional(),
   urlLogotipoOpcional: z.string().min(1).optional(),
   cidadeEstado: z.string().max(80).optional(),
   urlMapaEnderecoOpcional: z
@@ -50,6 +73,14 @@ const esquemaIdentidadeMarcaEditorial = z.object({
 const esquemaItemAcaoHome = z.object({
   posicionamentoEquipe: esquemaPosicionamentoEquipeVitrine.optional(),
   limiteAvataresEquipe: esquemaLimiteAvataresEquipe,
+  modoExibicaoColecao: z.enum(["modal_gaveta", "carrossel", "grade_2_colunas"]).optional(),
+  configuracaoCtaAcervo: z
+    .object({
+      tipoAcao: z.enum(["whatsapp", "microfluxo"]),
+      rotuloBotao: z.string().max(50).optional(),
+      microfluxoId: z.string().optional(),
+    })
+    .optional(),
   id: z.string().min(1),
   rotulo: z.string().min(1).max(60),
   subtituloDiscreto: z.string().max(90).optional(),
@@ -58,15 +89,18 @@ const esquemaItemAcaoHome = z.object({
   subtituloCartaoOpcional: z.string().max(90).optional(),
   tipoDestino: z.enum([
     "microfluxo",
+    "secao_produtos",
     "secao_servicos",
     "secao_portfolio",
     "secao_equipe",
+    "secao_videos",
     "link_externo",
     "whatsapp",
     "telefone",
   ]),
   destino: z.string().min(1).max(500),
   destaquePrincipal: z.boolean().optional(),
+  animarBordaDestaque: z.boolean().optional(),
   icone: z.string().min(1).max(60).optional(),
 });
 
