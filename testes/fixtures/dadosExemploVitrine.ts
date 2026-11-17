@@ -9,6 +9,10 @@ import {
   ACERVO_MAPLE_BEAR_CABO_FRIO,
   VITRINE_MAPLE_BEAR_CABO_FRIO,
 } from "./dadosMapleBearCaboFrio";
+import {
+  ACERVO_SUPPERA_SEGUROS,
+  VITRINE_SUPPERA_SEGUROS,
+} from "./dadosSupperaSeguros";
 
 /**
  * Exemplares editoriais completos para demonstração e conferência local em desenvolvimento
@@ -308,6 +312,7 @@ export const CATALOGO_DEMONSTRACOES_EDITORIAIS: Readonly<Record<string, Conteudo
       },
     },
     "maplebear-cabofrio": VITRINE_MAPLE_BEAR_CABO_FRIO,
+    "suppera-seguros": VITRINE_SUPPERA_SEGUROS,
   };
 
 export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublicoVitrine>> = {
@@ -1042,6 +1047,7 @@ export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublic
     ],
   },
   "maplebear-cabofrio": ACERVO_MAPLE_BEAR_CABO_FRIO,
+  "suppera-seguros": ACERVO_SUPPERA_SEGUROS,
 };
 
 export function buscarDemonstracaoEditorialPorSlug(

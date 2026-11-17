@@ -42,7 +42,8 @@ export function FormularioLogin({
   async function submeterLoginEmail(dados: DadosEntrarComEmail) {
     try {
       const emailHigienizado = dados.email.trim().toLowerCase();
-      await servicoAutenticacao.entrarComEmailESenha(emailHigienizado, dados.senha);
+      const senhaHigienizada = dados.senha.trim();
+      await servicoAutenticacao.entrarComEmailESenha(emailHigienizado, senhaHigienizada);
       navegador.push("/painel");
       navegador.refresh();
     } catch (erro) {

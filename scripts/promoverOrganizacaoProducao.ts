@@ -22,6 +22,11 @@ import {
 } from "../src/validacoes/esquemasCatalogoConteudo";
 import { esquemaDefinicaoMicrofluxo } from "../src/validacoes/esquemasMicrofluxo";
 import { esquemaRascunhoConfiguracaoPagina } from "../src/validacoes/esquemaRascunhoPagina";
+import { hidratarRascunhoConfiguracaoPagina } from "../src/dominio/entidades/rascunhoConfiguracaoPagina";
+import {
+  CATALOGO_ACERVOS_DEMONSTRACAO,
+  CATALOGO_DEMONSTRACOES_EDITORIAIS,
+} from "../testes/fixtures/dadosExemploVitrine";
 
 const CAMINHO_CREDENCIAL_PADRAO = resolve(
   process.cwd(),
@@ -51,10 +56,101 @@ function extrairArgumento(prefixo: string): string | undefined {
   return arg ? arg.slice(prefixo.length + 1).trim() : undefined;
 }
 
+function extrairPacoteDeFixtureLocal(
+  slug: string,
+  planoForcado: CodigoPlanoAssinatura,
+): PacoteOrganizacaoEmulador {
+  const vitrine = CATALOGO_DEMONSTRACOES_EDITORIAIS[slug];
+  const acervo = CATALOGO_ACERVOS_DEMONSTRACAO[slug];
+  if (!vitrine || !acervo) {
+    throw new Error(`Slug "${slug}" não encontrado nas fixtures locais.`);
+  }
+
+  const agoraIso = new Date().toISOString();
+  const defPlano = CATALOGO_PLANOS_FLUXO[planoForcado] ?? CATALOGO_PLANOS_FLUXO.pro;
+  const organizacaoLimpa: Organizacao = {
+    id: vitrine.organizacaoId,
+    nome: vitrine.identidade.nomeExibicao,
+    identificadorPublico: slug,
+    segmentoAtividade: vitrine.chamadaEditorial.sobretituloOpcional ?? "Serviços Especializados",
+    situacao: "ativa",
+    resumoDireitosPlano: {
+      planoCodigo: planoForcado,
+      situacaoAssinatura: "ativa",
+      limiteProfissionaisAtivos: defPlano.limiteProfissionaisAtivos,
+      limiteEnviosEmailMensal: defPlano.limiteEnviosEmailMensal,
+      permitePublicacaoPublica: true,
+    },
+    criadoEmIso: agoraIso,
+    atualizadoEmIso: agoraIso,
+  };
+
+  const rascunhoHidratado = hidratarRascunhoConfiguracaoPagina(
+    vitrine as unknown as Record<string, unknown>,
+    {
+      organizacaoId: vitrine.organizacaoId,
+      nomeOrganizacao: vitrine.identidade.nomeExibicao,
+      agoraIso,
+    },
+  );
+  const rascunhoValidado = esquemaRascunhoConfiguracaoPagina.parse(rascunhoHidratado);
+
+  const servicos = acervo.servicos.map((s) => ({
+    id: s.id,
+    dados: removerCamposIndefinidosParaFirestore(
+      esquemaServicoOrganizacao.parse({ ...s, atualizadoEmIso: agoraIso }),
+    ),
+  }));
+  const produtos = acervo.produtos.map((p) => ({
+    id: p.id,
+    dados: removerCamposIndefinidosParaFirestore(
+      esquemaProdutoCatalogo.parse({ ...p, atualizadoEmIso: agoraIso }),
+    ),
+  }));
+  const projetosPortfolio = acervo.projetosPortfolio.map((p) => ({
+    id: p.id,
+    dados: removerCamposIndefinidosParaFirestore(
+      esquemaProjetoPortfolio.parse({ ...p, atualizadoEmIso: agoraIso }),
+    ),
+  }));
+  const profissionais = acervo.profissionais.map((p) => ({
+    id: p.id,
+    dados: removerCamposIndefinidosParaFirestore(
+      esquemaProfissionalEquipe.parse({ ...p, atualizadoEmIso: agoraIso }),
+    ),
+  }));
+  const microfluxos = (acervo.microfluxos ?? []).map((m) => {
+    const { versaoPublicada: _versaoAntiga, ...semVersaoPublicada } = esquemaDefinicaoMicrofluxo.parse({
+      ...m,
+      atualizadoEmIso: agoraIso,
+    });
+    return {
+      id: m.id,
+      dados: removerCamposIndefinidosParaFirestore(semVersaoPublicada),
+    };
+  });
+
+  return {
+    organizacao: organizacaoLimpa,
+    rascunho: removerCamposIndefinidosParaFirestore(
+      rascunhoValidado as unknown as Record<string, unknown>,
+    ),
+    configuracoes: [],
+    servicos,
+    produtos,
+    projetosPortfolio,
+    profissionais,
+    microfluxos,
+  };
+}
+
 async function extrairPacoteDoEmuladorLocal(
   slug: string,
   planoForcado: CodigoPlanoAssinatura,
 ): Promise<PacoteOrganizacaoEmulador> {
+  if (process.argv.includes("--origem=fixture")) {
+    return extrairPacoteDeFixtureLocal(slug, planoForcado);
+  }
   process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
   const appOrigem = initializeApp({ projectId: "demo-fluxo" }, "extrator-emulador-origem");
 

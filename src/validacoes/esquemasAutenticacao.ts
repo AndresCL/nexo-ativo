@@ -8,6 +8,7 @@ export const esquemaEntrarComEmail = z.object({
     .email("Informe um endereço de e-mail válido."),
   senha: z
     .string({ required_error: "Informe sua senha." })
+    .trim()
     .min(8, "A senha possui pelo menos 8 caracteres."),
 });
 
@@ -26,8 +27,9 @@ export const esquemaCriarContaEmail = z
       .email("Informe um endereço de e-mail válido."),
     senha: z
       .string({ required_error: "Crie uma senha de acesso." })
+      .trim()
       .min(8, "Crie uma senha com pelo menos 8 caracteres."),
-    confirmacaoSenha: z.string({ required_error: "Confirme sua senha." }),
+    confirmacaoSenha: z.string({ required_error: "Confirme sua senha." }).trim(),
   })
   .refine((dados) => dados.senha === dados.confirmacaoSenha, {
     message: "A confirmação de senha não coincide com a senha digitada.",

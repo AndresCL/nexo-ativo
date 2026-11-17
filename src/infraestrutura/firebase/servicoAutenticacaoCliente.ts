@@ -72,7 +72,11 @@ export class ServicoAutenticacaoFirebaseCliente
   public async entrarComEmailESenha(email: string, senha: string): Promise<UsuarioAutenticado> {
     try {
       const { autenticacao } = obterServicosClienteFirebase();
-      const credencial = await signInWithEmailAndPassword(autenticacao, email, senha);
+      const credencial = await signInWithEmailAndPassword(
+        autenticacao,
+        email.trim().toLowerCase(),
+        senha.trim(),
+      );
       return await converterUsuarioFirebaseParaDominio(credencial.user);
     } catch (erro) {
       throw traduzirErroAutenticacaoFirebase(erro);
@@ -86,8 +90,12 @@ export class ServicoAutenticacaoFirebaseCliente
   ): Promise<UsuarioAutenticado> {
     try {
       const { autenticacao } = obterServicosClienteFirebase();
-      const credencial = await createUserWithEmailAndPassword(autenticacao, email, senha);
-      await updateProfile(credencial.user, { displayName: nomeExibicao });
+      const credencial = await createUserWithEmailAndPassword(
+        autenticacao,
+        email.trim().toLowerCase(),
+        senha.trim(),
+      );
+      await updateProfile(credencial.user, { displayName: nomeExibicao.trim() });
       await sendEmailVerification(credencial.user);
       return await converterUsuarioFirebaseParaDominio(credencial.user, true);
     } catch (erro) {

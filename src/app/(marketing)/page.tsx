@@ -1,17 +1,16 @@
-import { CabecalhoLanding } from "@/componentes/marketing/CabecalhoLanding";
-import { HeroLanding } from "@/componentes/marketing/HeroLanding";
-import { RodapeLanding } from "@/componentes/marketing/RodapeLanding";
-import { SecaoPlanos } from "@/componentes/marketing/SecaoPlanos";
+import { LogoNexoAtivo } from "@/componentes/interface/LogoNexoAtivo";
+import { TransicaoEditorial } from "@/componentes/interface/TransicaoEditorial";
 
 export default function PaginaApresentacaoInicial() {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <CabecalhoLanding />
-      <main className="flex-1">
-        <HeroLanding />
-        <SecaoPlanos />
-      </main>
-      <RodapeLanding />
-    </div>
+    <main className="flex min-h-dvh flex-col items-center justify-center px-6 text-center">
+      <TransicaoEditorial className="flex max-w-md flex-col items-center gap-6">
+        <LogoNexoAtivo tamanho="amplo" />
+        <p className="text-base leading-relaxed text-mineral-600 sm:text-lg">
+          Estamos preparando algo especial. Em breve estaremos no ar.
+        </p>
+      </TransicaoEditorial>
+    </main>
   );
 }
+
