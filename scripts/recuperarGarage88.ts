@@ -31,6 +31,29 @@ const IDENTIFICADOR_PUBLICO = "garage-88";
 const EMAIL_ADMINISTRADOR = "admin@garage88.com.br";
 const SENHA_LOCAL = "garage88@123";
 
+async function garantirUsuarioAdministradorAutenticacao(
+  autenticacao: ReturnType<typeof getAuth>,
+  uidPreferencialOpcional?: string,
+) {
+  return autenticacao.getUserByEmail(EMAIL_ADMINISTRADOR).catch((erro: unknown) => {
+    if (
+      typeof erro !== "object" ||
+      erro === null ||
+      !("code" in erro) ||
+      erro.code !== "auth/user-not-found"
+    ) {
+      throw erro;
+    }
+    return autenticacao.createUser({
+      ...(uidPreferencialOpcional ? { uid: uidPreferencialOpcional } : {}),
+      email: EMAIL_ADMINISTRADOR,
+      password: SENHA_LOCAL,
+      displayName: "Admin Garage 88",
+      emailVerified: true,
+    });
+  });
+}
+
 /** Recupera a base histórica do cliente somente no emulador local, sem substituir registros. */
 async function recuperarGarage88(): Promise<void> {
   loadEnvConfig(process.cwd());
@@ -144,30 +167,16 @@ async function recuperarGarage88(): Promise<void> {
     );
 
     if (existentes.some((documento) => documento.exists)) {
+      const membrosExistentes = await referenciaOrganizacao.collection("membros").limit(1).get();
+      const uidExistente = membrosExistentes.docs[0]?.id;
+      await garantirUsuarioAdministradorAutenticacao(autenticacao, uidExistente);
       console.info(
-        "A Garage 88 já possui registros locais. Recuperação ignorada para preservá-los.",
+        "A Garage 88 já possui registros locais. Usuário de autenticação garantido e registros do Firestore preservados.",
       );
       return;
     }
 
-    const usuario = await autenticacao
-      .getUserByEmail(EMAIL_ADMINISTRADOR)
-      .catch((erro: unknown) => {
-        if (
-          typeof erro !== "object" ||
-          erro === null ||
-          !("code" in erro) ||
-          erro.code !== "auth/user-not-found"
-        ) {
-          throw erro;
-        }
-        return autenticacao.createUser({
-          email: EMAIL_ADMINISTRADOR,
-          password: SENHA_LOCAL,
-          displayName: "Admin Garage 88",
-          emailVerified: true,
-        });
-      });
+    const usuario = await garantirUsuarioAdministradorAutenticacao(autenticacao);
     const organizacao: Organizacao = {
       id: ORGANIZACAO_ID,
       nome: "Garage 88",
@@ -175,10 +184,10 @@ async function recuperarGarage88(): Promise<void> {
       segmentoAtividade: "Concessionária de veículos",
       situacao: "ativa",
       resumoDireitosPlano: {
-        planoCodigo: "equipe",
+        planoCodigo: "pro",
         situacaoAssinatura: "ativa",
         limiteProfissionaisAtivos: 10,
-        limiteEnviosEmailMensal: 1000,
+        limiteEnviosEmailMensal: 300,
         permitePublicacaoPublica: true,
       },
       criadoEmIso: agoraIso,

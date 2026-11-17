@@ -21,7 +21,7 @@ export default async function ImagemCompartilhamentoEditorial({ params }: Propri
     await leitorPaginaPublicadaPadrao.buscarPorIdentificadorPublico(identificadorOrganizacao);
 
   const paleta = obterDescritorPaletaEditorial(pagina?.paletaId ?? "noite_mineral");
-  const nomeMarca = pagina?.identidade.nomeExibicao ?? "Fluxo";
+  const nomeMarca = pagina?.identidade.nomeExibicao ?? "Nexo Ativo";
   const subtituloMarca = pagina?.identidade.subtituloCurto ?? "Presença Digital Editorial";
   const manchete =
     pagina?.chamadaEditorial.tituloPrincipal ??

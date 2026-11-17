@@ -8,17 +8,17 @@ import {
 describe("Domínio de Assinaturas e Cobrança Asaas", () => {
   it("deve conter catálogo de planos comerciais com valores e regras corretas em centavos", () => {
     const planoPro = CATALOGO_PLANOS_FLUXO.pro;
-    const planoEquipe = CATALOGO_PLANOS_FLUXO.equipe;
+    const planoEmpresarial = CATALOGO_PLANOS_FLUXO.personalizado;
 
-    expect(planoPro.mensalidadeCentavos).toBe(9700); // R$ 97/mês
-    expect(planoPro.limiteProfissionaisAtivos).toBe(1);
-    expect(planoPro.limiteEnviosEmailMensal).toBe(100);
+    expect(planoPro.mensalidadeCentavos).toBe(8700); // R$ 87/mês
+    expect(planoPro.limiteProfissionaisAtivos).toBe(10);
+    expect(planoPro.limiteEnviosEmailMensal).toBe(300);
     expect(planoPro.valorImplantacaoAssistidaCentavos).toBe(29700); // R$ 297
 
-    expect(planoEquipe.mensalidadeCentavos).toBe(19700); // R$ 197/mês
-    expect(planoEquipe.limiteProfissionaisAtivos).toBe(5);
-    expect(planoEquipe.limiteEnviosEmailMensal).toBe(300);
-    expect(planoEquipe.valorImplantacaoAssistidaCentavos).toBe(59700); // R$ 597
+    expect(planoEmpresarial.nome).toBe("Empresarial");
+    expect(planoEmpresarial.mensalidadeCentavos).toBe(0);
+    expect(planoEmpresarial.limiteProfissionaisAtivos).toBe(999);
+    expect(planoEmpresarial.limiteEnviosEmailMensal).toBe(1000);
   });
 
   it("deve converter valores decimais em reais para centavos inteiros determinísticos", () => {

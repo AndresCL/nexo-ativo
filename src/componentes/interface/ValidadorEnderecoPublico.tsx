@@ -64,7 +64,7 @@ export function ValidadorEnderecoPublico({
 
       <CampoFormulario
         rotulo="Endereço público desejado"
-        prefixoFixo="fluxo.app/"
+        prefixoFixo="nexoativo.com.br/"
         placeholder="atelier-helena-costa"
         textoAuxiliar="Letras minúsculas sem acento, números e hífens."
         required
@@ -85,8 +85,8 @@ export function ValidadorEnderecoPublico({
         >
           <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>
-            Formato válido: <strong>fluxo.app/{enderecoValidado}</strong> está em conformidade com
-            as regras editoriais.
+            Formato válido: <strong>nexoativo.com.br/{enderecoValidado}</strong> está em
+            conformidade com as regras editoriais.
           </span>
         </p>
       ) : null}

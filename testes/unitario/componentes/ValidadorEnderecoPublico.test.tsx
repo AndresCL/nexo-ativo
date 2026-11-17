@@ -35,7 +35,9 @@ describe("ValidadorEnderecoPublico", () => {
 
     await usuario.click(screen.getByRole("button", { name: /Verificar formato do endereço/i }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("fluxo.app/estudio-sao-bento");
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "nexoativo.com.br/estudio-sao-bento",
+    );
     expect(aoValidar).toHaveBeenCalledWith({
       nomeOrganizacao: "Estúdio São Bento",
       identificadorPublico: "estudio-sao-bento",

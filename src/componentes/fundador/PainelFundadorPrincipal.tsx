@@ -3,7 +3,18 @@
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import { useMemo, useState } from "react";
-import { Building2, History, Search, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  AlertTriangle,
+  Building2,
+  CheckCircle2,
+  ExternalLink,
+  History,
+  Plus,
+  Search,
+  TrendingUp,
+} from "lucide-react";
+import { CATALOGO_PLANOS_FLUXO } from "@/dominio/assinaturas/tiposAssinaturaAsaas";
 import type {
   CodigoPlanoAssinatura,
   RegistroAuditoria,
@@ -19,6 +30,7 @@ import {
   servicoOperacoesFundadorCliente,
   type PortaOperacoesFundadorCliente,
 } from "@/infraestrutura/fundador/servicoOperacoesFundadorCliente";
+import { ModalCriarOrganizacaoFundador } from "@/componentes/fundador/ModalCriarOrganizacaoFundador";
 import { ModalPerfilPublicidadeFundador } from "@/componentes/fundador/ModalPerfilPublicidadeFundador";
 import { obterPoliticaPublicidade } from "@/dominio/publicidade/registroPoliticasPublicidade";
 import { Botao } from "@/componentes/interface/Botao";
@@ -38,7 +50,9 @@ export function PainelFundadorPrincipal({
   auditoriaInicial,
   servicoFundador = servicoOperacoesFundadorCliente,
 }: PropriedadesPainelFundadorPrincipal) {
+  const navegador = useRouter();
   const [abaAtiva, setAbaAtiva] = useState<"metricas" | "organizacoes" | "auditoria">("metricas");
+  const [acessandoOrgId, setAcessandoOrgId] = useState<string | null>(null);
   const [organizacoes, setOrganizacoes] =
     useState<readonly ItemVisaoGeralOrganizacaoFundador[]>(organizacoesIniciais);
   const [auditoria] = useState<readonly RegistroAuditoria[]>(auditoriaInicial);
@@ -51,11 +65,14 @@ export function PainelFundadorPrincipal({
 
   const [organizacaoPerfil, setOrganizacaoPerfil] =
     useState<ItemVisaoGeralOrganizacaoFundador | null>(null);
+  const [modalCriarAberto, setModalCriarAberto] = useState(false);
 
   const [novaSituacao, setNovaSituacao] = useState<SituacaoOrganizacao>("ativa");
   const [novoPlano, setNovoPlano] = useState<CodigoPlanoAssinatura>("pro");
   const [novaSituacaoAssinatura, setNovaSituacaoAssinatura] =
     useState<SituacaoResumoAssinatura>("ativa");
+  const [limiteProfissionais, setLimiteProfissionais] = useState<number>(10);
+  const [limiteEmailsMensal, setLimiteEmailsMensal] = useState<number>(300);
   const [justificativa, setJustificativa] = useState("");
 
   const [salvando, setSalvando] = useState(false);
@@ -117,6 +134,8 @@ export function PainelFundadorPrincipal({
         organizacaoId: modalAcao.organizacao.id,
         novoPlanoCodigo: novoPlano,
         novaSituacaoAssinatura,
+        limiteProfissionaisAtivos: limiteProfissionais,
+        limiteEnviosEmailMensal: limiteEmailsMensal,
         justificativa,
       });
 
@@ -127,6 +146,8 @@ export function PainelFundadorPrincipal({
                 ...org,
                 planoCodigo: novoPlano,
                 situacaoAssinatura: novaSituacaoAssinatura,
+                limiteProfissionaisAtivos: limiteProfissionais,
+                limiteEnviosEmailMensal: limiteEmailsMensal,
               }
             : org,
         ),
@@ -142,87 +163,159 @@ export function PainelFundadorPrincipal({
     }
   }
 
+  async function acessarPainelOrganizacao(org: ItemVisaoGeralOrganizacaoFundador) {
+    setAcessandoOrgId(org.id);
+    try {
+      const resposta = await fetch("/api/fundador/selecionar-organizacao", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ organizacaoId: org.id }),
+      });
+
+      if (!resposta.ok) {
+        throw new Error("Não foi possível selecionar a organização.");
+      }
+
+      navegador.push("/painel");
+      navegador.refresh();
+    } catch (e) {
+      notificar.erro(
+        e instanceof Error ? e.message : "Falha ao abrir o painel desta organização.",
+      );
+      setAcessandoOrgId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-marfim-300 pb-4">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-6">
         <div>
-          <span className="text-xs font-semibold tracking-wider text-mineral-500 uppercase">
-            Administração Global da Plataforma
-          </span>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-mineral-950">
+          <p className="text-[10px] font-semibold tracking-[0.16em] text-indigo-600 uppercase">
+            Nexo Ativo · Administração Global da Plataforma
+          </p>
+          <h1 className="mt-1 text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
             Painel Fundador
           </h1>
+          <p className="mt-1 text-xs text-mineral-500">
+            Acompanhe indicadores operacionais, gerencie organizações e consulte a trilha de auditoria.
+          </p>
         </div>
 
-        <div role="tablist" aria-label="Abas de governança" className="flex gap-2">
+        <div role="tablist" aria-label="Abas de governança" className="flex flex-wrap gap-2">
           <Botao
-            variante={abaAtiva === "metricas" ? "editorial_principal" : "operacional_secundario"}
+            variante={abaAtiva === "metricas" ? "operacional_primario" : "operacional_secundario"}
             tamanho="compacto"
             onClick={() => setAbaAtiva("metricas")}
+            className={
+              abaAtiva === "metricas"
+                ? "rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                : "rounded-lg"
+            }
           >
             <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Métricas e MRR</span>
           </Botao>
           <Botao
             variante={
-              abaAtiva === "organizacoes" ? "editorial_principal" : "operacional_secundario"
+              abaAtiva === "organizacoes" ? "operacional_primario" : "operacional_secundario"
             }
             tamanho="compacto"
             onClick={() => setAbaAtiva("organizacoes")}
+            className={
+              abaAtiva === "organizacoes"
+                ? "rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                : "rounded-lg"
+            }
           >
             <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Organizações ({organizacoes.length})</span>
           </Botao>
           <Botao
-            variante={abaAtiva === "auditoria" ? "editorial_principal" : "operacional_secundario"}
+            variante={abaAtiva === "auditoria" ? "operacional_primario" : "operacional_secundario"}
             tamanho="compacto"
             onClick={() => setAbaAtiva("auditoria")}
+            className={
+              abaAtiva === "auditoria"
+                ? "rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                : "rounded-lg"
+            }
           >
             <History className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Trilha de Auditoria</span>
           </Botao>
         </div>
-      </div>
+      </header>
 
       {abaAtiva === "metricas" ? (
         <section aria-label="Métricas da plataforma" className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <CartaoSuperficie preenchimento="compacto" className="space-y-1">
-              <p className="text-xs text-mineral-600">Receita Recorrente Mensal (MRR)</p>
-              <p className="text-3xl font-bold tracking-tight text-emerald-900">
-                {ValorMonetarioCentavos.deCentavos(
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              {
+                titulo: "Receita Recorrente Mensal (MRR)",
+                valor: ValorMonetarioCentavos.deCentavos(
                   metricasIniciais.receitaMensalRecorrenteCentavos,
-                ).formatarMoedaBrasileira()}
-              </p>
-            </CartaoSuperficie>
-
-            <CartaoSuperficie preenchimento="compacto" className="space-y-1">
-              <p className="text-xs text-mineral-600">Organizações Totais</p>
-              <p className="text-3xl font-bold tracking-tight text-mineral-950">
-                {metricasIniciais.totalOrganizacoes}
-              </p>
-            </CartaoSuperficie>
-
-            <CartaoSuperficie preenchimento="compacto" className="space-y-1">
-              <p className="text-xs text-emerald-800">Assinaturas Ativas</p>
-              <p className="text-3xl font-bold tracking-tight text-emerald-900">
-                {metricasIniciais.assinaturasAtivas}
-              </p>
-            </CartaoSuperficie>
-
-            <CartaoSuperficie preenchimento="compacto" className="space-y-1">
-              <p className="text-xs text-red-800">Inadimplentes / Atrasadas</p>
-              <p className="text-3xl font-bold tracking-tight text-red-900">
-                {metricasIniciais.assinaturasInadimplentes}
-              </p>
-            </CartaoSuperficie>
+                ).formatarMoedaBrasileira(),
+                apoio: "Assinaturas ativas na plataforma",
+                icone: TrendingUp,
+                cor: "border-emerald-200 from-emerald-50/80 text-emerald-950",
+                iconeCor: "bg-emerald-600",
+              },
+              {
+                titulo: "Organizações Totais",
+                valor: String(metricasIniciais.totalOrganizacoes),
+                apoio: "Cadastradas no Nexo Ativo",
+                icone: Building2,
+                cor: "border-indigo-200 from-indigo-50/80 text-indigo-950",
+                iconeCor: "bg-indigo-600",
+              },
+              {
+                titulo: "Assinaturas Ativas",
+                valor: String(metricasIniciais.assinaturasAtivas),
+                apoio: "Em situação regular",
+                icone: CheckCircle2,
+                cor: "border-sky-200 from-sky-50/80 text-sky-950",
+                iconeCor: "bg-sky-600",
+              },
+              {
+                titulo: "Inadimplentes / Atrasadas",
+                valor: String(metricasIniciais.assinaturasInadimplentes),
+                apoio: "Exigem acompanhamento",
+                icone: AlertTriangle,
+                cor: "border-amber-200 from-amber-50/80 text-amber-950",
+                iconeCor: "bg-amber-600",
+              },
+            ].map((item) => (
+              <div
+                key={item.titulo}
+                className={combinarClasses(
+                  "rounded-2xl border bg-gradient-to-b via-white to-white p-4 shadow-xs sm:p-5",
+                  item.cor,
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold">{item.titulo}</p>
+                  <span
+                    className={combinarClasses(
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white",
+                      item.iconeCor,
+                    )}
+                  >
+                    <item.icone className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                </div>
+                <p className="mt-3 break-words text-lg font-extrabold tracking-tight sm:text-xl">
+                  {item.valor}
+                </p>
+                <p className="mt-1 text-[10px] leading-relaxed text-mineral-500">{item.apoio}</p>
+              </div>
+            ))}
           </div>
 
-          <CartaoSuperficie className="p-6">
-            <h2 className="text-xl font-bold tracking-tight text-mineral-950">
+          <CartaoSuperficie className="rounded-2xl border border-marfim-200 bg-white p-6 shadow-xs">
+            <h2 className="text-base font-semibold tracking-tight text-mineral-950">
               Diretrizes de Governança
             </h2>
-            <p className="mt-2 text-xs leading-relaxed text-mineral-700">
+            <p className="mt-2 text-xs leading-relaxed text-mineral-600">
               O privilégio de fundador permite auditoria completa e intervenção administrativa para
               suporte a assinantes, liberação de planos personalizados ou suspensão cautelar de
               contas. Todas as ações gravam registros imutáveis na trilha de auditoria.
@@ -233,22 +326,33 @@ export function PainelFundadorPrincipal({
 
       {abaAtiva === "organizacoes" ? (
         <section aria-label="Gestão de organizações" className="space-y-4">
-          <div className="relative w-full sm:w-80">
-            <Search
-              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-mineral-400"
-              aria-hidden="true"
-            />
-            <input
-              type="search"
-              aria-label="Buscar organizações"
-              placeholder="Buscar por nome ou slug..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              className="w-full rounded-md border border-marfim-300 bg-white py-2 pr-3 pl-9 text-xs text-mineral-900 focus:border-mineral-700 focus:outline-none"
-            />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="relative w-full sm:w-80">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-mineral-400"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                aria-label="Buscar organizações"
+                placeholder="Buscar por nome ou slug..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="w-full rounded-lg border border-marfim-200 bg-white py-2 pr-3 pl-9 text-xs text-mineral-900 shadow-xs focus:border-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            <Botao
+              tamanho="compacto"
+              onClick={() => setModalCriarAberto(true)}
+              className="rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              <span>Nova Organização</span>
+            </Botao>
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-marfim-300 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-marfim-200 bg-white shadow-xs">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-marfim-200 bg-marfim-50 text-[11px] font-semibold tracking-wider text-mineral-600 uppercase">
                 <tr>
@@ -309,29 +413,48 @@ export function PainelFundadorPrincipal({
                     <td className="space-x-2 px-4 py-3 text-right">
                       <button
                         type="button"
+                        disabled={acessandoOrgId === org.id}
+                        onClick={() => void acessarPainelOrganizacao(org)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-900 transition-colors hover:bg-emerald-100 disabled:opacity-50"
+                      >
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                        <span>
+                          {acessandoOrgId === org.id ? "Abrindo..." : "Acessar Painel"}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => {
                           setModalAcao({ tipo: "situacao", organizacao: org });
                           setNovaSituacao(org.situacao);
                         }}
-                        className="rounded border border-marfim-300 px-2 py-1 text-[11px] font-medium text-mineral-800 hover:bg-marfim-100"
+                        className="rounded-lg border border-marfim-300 px-2.5 py-1 text-[11px] font-medium text-mineral-800 transition-colors hover:bg-marfim-100"
                       >
                         Alterar Situação
                       </button>
                       <button
                         type="button"
                         onClick={() => setOrganizacaoPerfil(org)}
-                        className="rounded border border-marfim-300 px-2 py-1 text-[11px] font-medium text-mineral-800 hover:bg-marfim-100"
+                        className="rounded-lg border border-marfim-300 px-2.5 py-1 text-[11px] font-medium text-mineral-800 transition-colors hover:bg-marfim-100"
                       >
                         Perfil de Publicidade
                       </button>
                       <button
                         type="button"
                         onClick={() => {
+                          const def =
+                            CATALOGO_PLANOS_FLUXO[org.planoCodigo] ?? CATALOGO_PLANOS_FLUXO.pro;
                           setModalAcao({ tipo: "plano", organizacao: org });
                           setNovoPlano(org.planoCodigo);
                           setNovaSituacaoAssinatura(org.situacaoAssinatura);
+                          setLimiteProfissionais(
+                            org.limiteProfissionaisAtivos ?? def.limiteProfissionaisAtivos,
+                          );
+                          setLimiteEmailsMensal(
+                            org.limiteEnviosEmailMensal ?? def.limiteEnviosEmailMensal,
+                          );
                         }}
-                        className="rounded border border-marfim-300 bg-mineral-900 px-2 py-1 text-[11px] font-medium text-marfim-50 hover:bg-mineral-800"
+                        className="rounded-lg bg-indigo-600 px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-indigo-700"
                       >
                         Ajustar Plano
                       </button>
@@ -346,7 +469,7 @@ export function PainelFundadorPrincipal({
 
       {abaAtiva === "auditoria" ? (
         <section aria-label="Trilha de auditoria" className="space-y-4">
-          <div className="overflow-hidden rounded-lg border border-marfim-300 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-marfim-200 bg-white shadow-xs">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-marfim-200 bg-marfim-50 text-[11px] font-semibold tracking-wider text-mineral-600 uppercase">
                 <tr>
@@ -405,9 +528,20 @@ export function PainelFundadorPrincipal({
         />
       ) : null}
 
+      {modalCriarAberto ? (
+        <ModalCriarOrganizacaoFundador
+          servicoFundador={servicoFundador}
+          aoFechar={() => setModalCriarAberto(false)}
+          aoConcluir={(novaOrganizacao) => {
+            setOrganizacoes((atuais) => [novaOrganizacao, ...atuais]);
+            setModalCriarAberto(false);
+          }}
+        />
+      ) : null}
+
       {modalAcao ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-mineral-950/60 p-4">
-          <CartaoSuperficie className="w-full max-w-md space-y-5 bg-white p-6 shadow-xl">
+          <CartaoSuperficie className="w-full max-w-md space-y-5 rounded-2xl bg-white p-6 shadow-xl">
             <div className="border-b border-marfim-200 pb-3">
               <h3 className="text-xl font-bold tracking-tight text-mineral-950">
                 {modalAcao.tipo === "situacao"
@@ -484,14 +618,56 @@ export function PainelFundadorPrincipal({
                   <select
                     id="select-plano"
                     value={novoPlano}
-                    onChange={(e) => setNovoPlano(e.target.value as CodigoPlanoAssinatura)}
+                    onChange={(e) => {
+                      const codigo = e.target.value as CodigoPlanoAssinatura;
+                      const def = CATALOGO_PLANOS_FLUXO[codigo] ?? CATALOGO_PLANOS_FLUXO.pro;
+                      setNovoPlano(codigo);
+                      setLimiteProfissionais(def.limiteProfissionaisAtivos);
+                      setLimiteEmailsMensal(def.limiteEnviosEmailMensal);
+                    }}
                     className="mt-1 w-full rounded-md border border-marfim-300 p-2 text-xs"
                   >
                     <option value="avaliacao_inicial">Avaliação Inicial</option>
                     <option value="pro">Pro (R$ 87/mês)</option>
-                    <option value="equipe">Equipe (R$ 87/mês)</option>
-                    <option value="personalizado">Personalizado</option>
+                    <option value="personalizado">Empresarial (Sob medida)</option>
                   </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="input-limite-profissionais"
+                      className="block text-xs font-medium text-mineral-800"
+                    >
+                      Profissionais Ativos
+                    </label>
+                    <input
+                      id="input-limite-profissionais"
+                      type="number"
+                      min={1}
+                      max={9999}
+                      value={limiteProfissionais}
+                      onChange={(e) => setLimiteProfissionais(Math.max(1, Number(e.target.value)))}
+                      className="mt-1 w-full rounded-md border border-marfim-300 p-2 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="input-limite-emails"
+                      className="block text-xs font-medium text-mineral-800"
+                    >
+                      E-mails por Mês
+                    </label>
+                    <input
+                      id="input-limite-emails"
+                      type="number"
+                      min={0}
+                      max={50000}
+                      value={limiteEmailsMensal}
+                      onChange={(e) => setLimiteEmailsMensal(Math.max(0, Number(e.target.value)))}
+                      className="mt-1 w-full rounded-md border border-marfim-300 p-2 text-xs"
+                    />
+                  </div>
                 </div>
 
                 <div>

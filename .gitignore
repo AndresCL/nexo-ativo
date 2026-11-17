@@ -17,6 +17,7 @@ funcoes/dist/
 .env.test.local
 .env.production.local
 funcoes/.secret.local
+*-firebase-adminsdk-*.json
 
 # Logs e cache Firebase Emulator Suite
 .firebase/

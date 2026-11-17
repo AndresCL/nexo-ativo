@@ -26,6 +26,8 @@ export interface ItemVisaoGeralOrganizacaoFundador {
   readonly situacao: SituacaoOrganizacao;
   readonly planoCodigo: CodigoPlanoAssinatura;
   readonly situacaoAssinatura: SituacaoResumoAssinatura;
+  readonly limiteProfissionaisAtivos?: number;
+  readonly limiteEnviosEmailMensal?: number;
   readonly totalMembros: number;
   readonly criadoEmIso: string;
   readonly atualizadoEmIso: string;
@@ -51,6 +53,23 @@ export interface ParametrosAjustarPlanoOrganizacaoFundador {
   readonly limiteEnviosEmailMensal?: number;
   readonly permitePublicacaoPublica?: boolean;
   readonly justificativa: string;
+}
+
+export interface ParametrosCriarOrganizacaoPeloFundador {
+  readonly nome: string;
+  readonly identificadorPublico: string;
+  readonly segmentoAtividade: string;
+  readonly emailProprietario: string;
+  readonly nomeProprietario: string;
+  readonly senhaInicialOpcional?: string;
+  readonly planoCodigo: CodigoPlanoAssinatura;
+  readonly perfilPublicidade?: CodigoPerfilPublicidade;
+  readonly vincularFundadorComoAdministrador?: boolean;
+}
+
+export interface ResultadoCriarOrganizacaoPeloFundador {
+  readonly organizacao: ItemVisaoGeralOrganizacaoFundador;
+  readonly uidProprietario: string;
 }
 
 export type { RegistroAuditoria };

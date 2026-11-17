@@ -61,15 +61,15 @@ describe("Domínio: Catálogo Compartilhado, Cota de Equipe por Plano e QR Code 
         resumoDireitosPlano: direitosIndividual,
         seraAtivo: true,
       }),
-    ).toThrow(/Plano Equipe/i);
+    ).toThrow(/Plano Pro/i);
 
-    // No Plano Equipe (até 10 ativos), o 2º profissional deve ser aceito
+    // No Plano Pro (até 10 ativos), o 2º profissional deve ser aceito
     expect(() =>
       validarLimiteProfissionaisPlano({
         profissionaisExistentes: [profissionalExistente],
         resumoDireitosPlano: {
           ...direitosIndividual,
-          planoCodigo: "equipe",
+          planoCodigo: "pro",
           limiteProfissionaisAtivos: 10,
         },
         seraAtivo: true,

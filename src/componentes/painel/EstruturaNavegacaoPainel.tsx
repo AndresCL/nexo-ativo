@@ -14,6 +14,7 @@ import {
   Palette,
   QrCode,
   Settings,
+  ShieldCheck,
   Users,
   Video,
   Wrench,
@@ -37,6 +38,7 @@ export interface PropriedadesEstruturaNavegacaoPainel {
   readonly nomeOrganizacaoAtiva?: string;
   readonly emailUsuario?: string | null;
   readonly totalSolicitacoesNovas?: number;
+  readonly ehFundador?: boolean;
 }
 
 const ITENS_MENU_PAINEL: readonly ItemNavegacaoPainel[] = [
@@ -157,6 +159,7 @@ export function EstruturaNavegacaoPainel({
   nomeOrganizacaoAtiva,
   emailUsuario,
   totalSolicitacoesNovas = 0,
+  ehFundador = false,
 }: PropriedadesEstruturaNavegacaoPainel) {
   const menuAberto = useEstadoInterfacePainel((estado) => estado.menuLateralAbertoMobile);
   const alternarMenu = useEstadoInterfacePainel((estado) => estado.alternarMenuLateralMobile);
@@ -236,6 +239,15 @@ export function EstruturaNavegacaoPainel({
             <p className="mt-0.5 truncate text-xs font-medium text-mineral-700">
               {nomeOrganizacaoAtiva ?? "Configuração inicial"}
             </p>
+            {ehFundador ? (
+              <Link
+                href="/fundador"
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/70 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 transition-colors hover:bg-indigo-100"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Painel Fundador</span>
+              </Link>
+            ) : null}
           </div>
 
           <ListaLinksNavegacao totalSolicitacoesNovas={totalSolicitacoesNovas} />

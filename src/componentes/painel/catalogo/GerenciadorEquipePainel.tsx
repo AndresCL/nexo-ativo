@@ -387,7 +387,7 @@ export function GerenciadorEquipePainel({
           </div>
           <p className="text-xs leading-relaxed text-mineral-500">
             {limitePlano <= 1
-              ? "O Plano Equipe habilita até 10 profissionais ativos com cartões digitais individuais."
+              ? "O Plano Pro habilita até 10 profissionais ativos com cartões digitais individuais."
               : "Cada profissional ativo recebe um endereço exclusivo de cartão digital e QR Code próprio."}
           </p>
         </div>

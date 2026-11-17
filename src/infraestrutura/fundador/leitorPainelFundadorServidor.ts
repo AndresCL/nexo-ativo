@@ -75,6 +75,8 @@ export async function carregarContextoPainelFundadorServidor(
       situacao: dados.situacao,
       planoCodigo: dados.resumoDireitosPlano?.planoCodigo ?? "avaliacao_inicial",
       situacaoAssinatura: dados.resumoDireitosPlano?.situacaoAssinatura ?? "pendente_contratacao",
+      limiteProfissionaisAtivos: dados.resumoDireitosPlano?.limiteProfissionaisAtivos ?? 10,
+      limiteEnviosEmailMensal: dados.resumoDireitosPlano?.limiteEnviosEmailMensal ?? 300,
       totalMembros: 1, // Projeção padrão inicial
       criadoEmIso: dados.criadoEmIso,
       atualizadoEmIso: dados.atualizadoEmIso,

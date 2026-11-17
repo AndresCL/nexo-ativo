@@ -34,7 +34,7 @@ function montarUrlDestinoQrCode(
   if (tipo === "fluxo" && fluxoId) {
     return {
       url: `${base}?fluxo=${encodeURIComponent(fluxoId)}&utm_source=qrcode&utm_content=fluxo_${encodeURIComponent(fluxoId)}`,
-      titulo: "QR Code do Fluxo na Home",
+      titulo: "QR Code de Ação na Home",
       nomeArquivo: `qrcode-${identificadorPublico}-fluxo-${fluxoId}`,
     };
   }

@@ -20,6 +20,7 @@ import { executarProcessamentoWebhookAsaasTransacional } from "./casos-de-uso/pr
 import { executarAlteracaoSituacaoOrganizacaoFundador } from "./casos-de-uso/atualizarSituacaoOrganizacaoFundador";
 import { executarAjustePlanoOrganizacaoFundador } from "./casos-de-uso/ajustarPlanoOrganizacaoFundador";
 import { executarDefinicaoPerfilPublicidadeOrganizacaoFundador } from "./casos-de-uso/definirPerfilPublicidadeOrganizacaoFundador";
+import { executarCriacaoOrganizacaoPeloFundador } from "./casos-de-uso/criarOrganizacaoPeloFundador";
 import { executarRegistroEventoAgregadoAnonimo } from "./analytics/registrarEventoAgregadoAnonimo";
 
 export {
@@ -173,6 +174,24 @@ export const ajustarPlanoOrganizacaoFundador = onCall(async (requisicao) => {
       throw new HttpsError("unauthenticated", "Requer autenticação de fundador.");
     }
     return await executarAjustePlanoOrganizacaoFundador(bancoDados, usuario, requisicao.data);
+  } catch (erro) {
+    throw converterErroParaHttpsError(erro);
+  }
+});
+
+export const criarOrganizacaoFundador = onCall(async (requisicao) => {
+  try {
+    const { autenticacao, bancoDados } = obterAdminFuncoes();
+    const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+    if (!usuario) {
+      throw new HttpsError("unauthenticated", "Requer autenticação de fundador.");
+    }
+    return await executarCriacaoOrganizacaoPeloFundador(
+      bancoDados,
+      autenticacao,
+      usuario,
+      requisicao.data,
+    );
   } catch (erro) {
     throw converterErroParaHttpsError(erro);
   }

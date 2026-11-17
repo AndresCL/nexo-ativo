@@ -5,6 +5,7 @@ import {
   exigirSessaoAutenticadaServidor,
   listarVinculosOrganizacaoServidor,
 } from "@/infraestrutura/firebase/sessaoServidor";
+import { verificarPrivilegioFundador } from "@/dominio/permissoes/autorizadorOrganizacao";
 import { EstruturaNavegacaoPainel } from "@/componentes/painel/EstruturaNavegacaoPainel";
 import { ProvedorPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { carregarPerfilPublicidadeOrganizacaoServidor } from "@/infraestrutura/painel/leitorPerfilPublicidadeServidor";
@@ -44,6 +45,7 @@ export default async function LayoutPainelCliente({ children }: { readonly child
           nomeOrganizacaoAtiva={organizacaoPrincipal?.nomeOrganizacao}
           emailUsuario={sessao.email}
           totalSolicitacoesNovas={totalSolicitacoesNovas}
+          ehFundador={verificarPrivilegioFundador(sessao)}
         >
           {children}
         </EstruturaNavegacaoPainel>

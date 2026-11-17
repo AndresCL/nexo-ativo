@@ -2,7 +2,9 @@ import { httpsCallable } from "firebase/functions";
 import type {
   ParametrosAjustarPlanoOrganizacaoFundador,
   ParametrosAlterarSituacaoOrganizacaoFundador,
+  ParametrosCriarOrganizacaoPeloFundador,
   ParametrosDefinirPerfilPublicidadeOrganizacaoFundador,
+  ResultadoCriarOrganizacaoPeloFundador,
 } from "@/dominio/fundador/tiposPainelFundador";
 import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteFirebase";
 
@@ -16,6 +18,9 @@ export interface PortaOperacoesFundadorCliente {
   definirPerfilPublicidadeOrganizacao(
     parametros: ParametrosDefinirPerfilPublicidadeOrganizacaoFundador,
   ): Promise<{ atualizado: boolean; organizacaoId: string; novoPerfil: string }>;
+  criarOrganizacaoManual?(
+    parametros: ParametrosCriarOrganizacaoPeloFundador,
+  ): Promise<ResultadoCriarOrganizacaoPeloFundador>;
 }
 
 export class ServicoOperacoesFundadorCliente implements PortaOperacoesFundadorCliente {
@@ -53,6 +58,19 @@ export class ServicoOperacoesFundadorCliente implements PortaOperacoesFundadorCl
       ParametrosDefinirPerfilPublicidadeOrganizacaoFundador,
       { atualizado: boolean; organizacaoId: string; novoPerfil: string }
     >(funcoesRemotas, "definirPerfilPublicidadeOrganizacaoFundador");
+
+    const resposta = await chamada(parametros);
+    return resposta.data;
+  }
+
+  public async criarOrganizacaoManual(
+    parametros: ParametrosCriarOrganizacaoPeloFundador,
+  ): Promise<ResultadoCriarOrganizacaoPeloFundador> {
+    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const chamada = httpsCallable<
+      ParametrosCriarOrganizacaoPeloFundador,
+      ResultadoCriarOrganizacaoPeloFundador
+    >(funcoesRemotas, "criarOrganizacaoFundador");
 
     const resposta = await chamada(parametros);
     return resposta.data;

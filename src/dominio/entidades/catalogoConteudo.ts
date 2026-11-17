@@ -166,7 +166,7 @@ export function ordenarItensAtivosCatalogo<
 
 /**
  * Garante o cumprimento da cota de profissionais ativos permitida pelo plano da organização
- * (Plano Pro: 1 profissional; Plano Equipe: até 10 profissionais; Personalizado: sob medida).
+ * (Plano Pro: até 10 profissionais; Empresarial: sob medida).
  */
 export function validarLimiteProfissionaisPlano(parametros: {
   readonly profissionaisExistentes: readonly ProfissionalEquipe[];
@@ -186,7 +186,7 @@ export function validarLimiteProfissionaisPlano(parametros: {
     const limite = parametros.resumoDireitosPlano.limiteProfissionaisAtivos;
     throw new ErroValidacaoDominio(
       limite <= 1
-        ? "Seu plano atual contempla 1 perfil profissional ativo. Para cadastrar equipe com múltiplos cartões digitais, migre para o Plano Equipe."
+        ? "Seu plano atual contempla 1 perfil profissional ativo. Para cadastrar equipe com múltiplos cartões digitais, contrate o Plano Pro."
         : `Seu plano atual contempla até ${limite} profissionais ativos simultaneamente.`,
       "LIMITE_PROFISSIONAIS_EXCEDIDO",
     );

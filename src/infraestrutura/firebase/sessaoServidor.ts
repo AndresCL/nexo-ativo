@@ -11,6 +11,7 @@ import { verificarPrivilegioFundador } from "@/dominio/permissoes/autorizadorOrg
 import { obterServicosAdminFirebase } from "./adminFirebase";
 
 export const NOME_COOKIE_SESSAO = "fluxo_sessao";
+export const NOME_COOKIE_ORGANIZACAO_FUNDADOR = "nexo_org_fundador";
 export const DURACAO_COOKIE_SESSAO_SEGUNDOS = 60 * 60 * 24 * 5; // 5 dias
 export const DURACAO_COOKIE_SESSAO_MS = DURACAO_COOKIE_SESSAO_SEGUNDOS * 1000;
 
@@ -82,6 +83,33 @@ export async function listarVinculosOrganizacaoServidor(
 ): Promise<VinculoOrganizacaoUsuario[]> {
   try {
     const { bancoDadosAdmin } = obterServicosAdminFirebase();
+    const gerenciadorCookies = await cookies();
+    const orgIdSelecionadaFundador = gerenciadorCookies
+      .get(NOME_COOKIE_ORGANIZACAO_FUNDADOR)
+      ?.value?.trim();
+
+    if (orgIdSelecionadaFundador && !orgIdSelecionadaFundador.includes("/")) {
+      const sessaoAtual = await obterSessaoAutenticadaServidor();
+      if (sessaoAtual && sessaoAtual.uid === uid && verificarPrivilegioFundador(sessaoAtual)) {
+        const docOrgAlvo = await bancoDadosAdmin
+          .collection("organizacoes")
+          .doc(orgIdSelecionadaFundador)
+          .get();
+
+        if (docOrgAlvo.exists) {
+          const dadosOrg = docOrgAlvo.data();
+          const vinculoFundadorSuperadmin: VinculoOrganizacaoUsuario = {
+            organizacaoId: docOrgAlvo.id,
+            nomeOrganizacao: String(dadosOrg?.nome ?? ""),
+            identificadorPublico: String(dadosOrg?.identificadorPublico ?? ""),
+            papel: "proprietario",
+            situacao: "ativo",
+          };
+          return [vinculoFundadorSuperadmin];
+        }
+      }
+    }
+
     const consulta = await bancoDadosAdmin
       .collection("usuarios")
       .doc(uid)

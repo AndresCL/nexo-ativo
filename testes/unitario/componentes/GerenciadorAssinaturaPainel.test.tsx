@@ -20,8 +20,8 @@ const organizacao: Organizacao = {
     ...criarResumoDireitosPlanoInicial(),
     planoCodigo: "pro",
     situacaoAssinatura: "ativa",
-    limiteProfissionaisAtivos: 1,
-    limiteEnviosEmailMensal: 100,
+    limiteProfissionaisAtivos: 10,
+    limiteEnviosEmailMensal: 300,
   },
   criadoEmIso: "2026-11-13T12:00:00Z",
   atualizadoEmIso: "2026-11-13T12:00:00Z",
@@ -31,7 +31,7 @@ const assinatura: RegistroAssinaturaAsaas = {
   organizacaoId: organizacao.id,
   assinaturaAsaasId: "sub-1",
   planoCodigo: "pro",
-  valorMensalCentavos: 9700,
+  valorMensalCentavos: 8700,
   situacaoAsaas: "ACTIVE",
   situacaoInterna: "ativa",
   contratouImplantacaoAssistida: false,
@@ -43,7 +43,7 @@ const cobranca: CobrancaHistoricoAsaas = {
   id: "cobranca-1",
   organizacaoId: organizacao.id,
   cobrancaAsaasId: "pay-1",
-  valorCentavos: 9700,
+  valorCentavos: 8700,
   formaPagamento: "PIX",
   situacao: "RECEIVED",
   dataVencimentoIso: "2026-11-13",
@@ -72,13 +72,13 @@ function montar(
       assinaturaAtual={assinatura}
       cobrancas={opcoes.cobrancas ?? [cobranca]}
       podeGerenciarAssinatura={opcoes.gerenciar ?? true}
-      servicoAssinaturas={{ criarAssinatura }}
+      servicoAssinaturas={{ criarAssinatura, cancelarAssinatura: vi.fn() }}
     />,
   );
   return criarAssinatura;
 }
 function preencher() {
-  fireEvent.click(screen.getByRole("button", { name: "Contratar Plano Equipe" }));
+  fireEvent.click(screen.getByRole("button", { name: "Gerenciar / Alterar Dados" }));
   fireEvent.change(screen.getByLabelText("CPF ou CNPJ"), { target: { value: "12345678900" } });
   fireEvent.change(screen.getByLabelText("WhatsApp com DDD"), { target: { value: "11999998888" } });
   fireEvent.change(screen.getByLabelText("E-mail para envio das faturas"), {
@@ -87,12 +87,14 @@ function preencher() {
 }
 
 describe("Assinatura do painel", () => {
-  it("mostra os limites reais do plano e o histórico com data e situação legíveis", () => {
+  it("mostra os limites reais do plano, o card Empresarial e o histórico com data e situação legíveis", () => {
     montar();
     const resumo = screen.getByRole("region", { name: "Resumo da assinatura" });
-    expect(within(resumo).getByText("Até 1")).toBeInTheDocument();
-    expect(within(resumo).getByText("100")).toBeInTheDocument();
+    expect(within(resumo).getByText("Até 10")).toBeInTheDocument();
+    expect(within(resumo).getByText("300")).toBeInTheDocument();
     expect(within(resumo).getByText("Próximo vencimento: 20/11/2026")).toBeInTheDocument();
+    expect(screen.getByText("Plano Empresarial")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Solicitar proposta sob medida/ })).toBeInTheDocument();
     const historico = screen.getByRole("table");
     expect(within(historico).getByText("13/11/2026")).toBeInTheDocument();
     expect(within(historico).getByText("Pix")).toBeInTheDocument();
@@ -108,7 +110,7 @@ describe("Assinatura do painel", () => {
     preencher();
     expect(criar).not.toHaveBeenCalled();
     const dialogo = screen.getByRole("dialog");
-    expect(within(dialogo).getByText("R$ 197,00/mês")).toBeInTheDocument();
+    expect(within(dialogo).getByText("R$ 87,00/mês")).toBeInTheDocument();
     expect(within(dialogo).queryByText("Implantação · pagamento único")).not.toBeInTheDocument();
     fireEvent.click(within(dialogo).getByRole("checkbox"));
     expect(within(dialogo).getByText("Implantação · pagamento único")).toBeInTheDocument();
@@ -116,7 +118,7 @@ describe("Assinatura do painel", () => {
     await waitFor(() =>
       expect(criar).toHaveBeenCalledWith({
         organizacaoId: "garage-88",
-        planoCodigo: "equipe",
+        planoCodigo: "pro",
         contratarImplantacaoAssistida: true,
         dadosFiscais: {
           nomeOuRazaoSocial: "Garage 88",
@@ -168,7 +170,6 @@ describe("Assinatura do painel", () => {
 
   it("respeita a permissão de gestão e mantém o histórico vazio visível", () => {
     const criar = montar({ gerenciar: false, cobrancas: [] });
-    expect(screen.getByRole("button", { name: "Contratar Plano Equipe" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Gerenciar / Alterar Dados" })).toBeDisabled();
     expect(screen.getByText("Nenhuma cobrança registrada")).toBeInTheDocument();
     expect(criar).not.toHaveBeenCalled();

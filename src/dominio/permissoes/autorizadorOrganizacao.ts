@@ -93,7 +93,7 @@ export function exigirPermissaoOrganizacao(
     );
   }
 
-  if (verificarPrivilegioFundador(usuario) && operacao === "visualizar_painel") {
+  if (verificarPrivilegioFundador(usuario)) {
     return;
   }
 

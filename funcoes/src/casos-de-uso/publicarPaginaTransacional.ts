@@ -235,7 +235,7 @@ export async function executarPublicacaoPaginaEditorial(
   const limiteProfissionais = organizacao.resumoDireitosPlano.limiteProfissionaisAtivos;
   if (profissionaisAtivos.length > limiteProfissionais) {
     throw new ErroValidacaoDominio(
-      `Sua organização possui ${profissionaisAtivos.length} profissionais ativos, mas o plano atual permite até ${limiteProfissionais}. Desative perfis excedentes ou altere para o Plano Equipe antes de publicar.`,
+      `Sua organização possui ${profissionaisAtivos.length} profissionais ativos, mas o plano atual permite até ${limiteProfissionais}. Desative perfis excedentes ou ajuste seu plano antes de publicar.`,
       "LIMITE_PROFISSIONAIS_EXCEDIDO",
     );
   }

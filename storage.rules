@@ -7,11 +7,17 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    function ehFundador() {
+      return estaAutenticado() && request.auth.token.papelPlataforma == 'fundador';
+    }
+
     function podeGerenciarMidiaOrganizacao(organizacaoId) {
-      return estaAutenticado()
+      return ehFundador() || (
+        estaAutenticado()
         && firestore.exists(/databases/(default)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid))
         && firestore.get(/databases/(default)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid)).data.situacao == 'ativo'
-        && (firestore.get(/databases/(default)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid)).data.papel in ['proprietario', 'administrador']);
+        && (firestore.get(/databases/(default)/documents/organizacoes/$(organizacaoId)/membros/$(request.auth.uid)).data.papel in ['proprietario', 'administrador'])
+      );
     }
 
     function ehImagemPermitida() {

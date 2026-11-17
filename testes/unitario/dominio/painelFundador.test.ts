@@ -7,6 +7,7 @@ import {
 } from "@/dominio/entidades/autenticacaoEOrganizacao";
 import { executarAjustePlanoOrganizacaoFundador } from "../../../funcoes/src/casos-de-uso/ajustarPlanoOrganizacaoFundador";
 import { executarAlteracaoSituacaoOrganizacaoFundador } from "../../../funcoes/src/casos-de-uso/atualizarSituacaoOrganizacaoFundador";
+import { executarCriacaoOrganizacaoPeloFundador } from "../../../funcoes/src/casos-de-uso/criarOrganizacaoPeloFundador";
 import { executarDefinicaoPerfilPublicidadeOrganizacaoFundador } from "../../../funcoes/src/casos-de-uso/definirPerfilPublicidadeOrganizacaoFundador";
 
 function criarBancoFirestoreEmMemoria(inicial: Record<string, Record<string, unknown>> = {}) {
@@ -241,5 +242,50 @@ describe("Painel Fundador: Governança Global e Trilha de Auditoria", () => {
         justificativa: "Perfil inexistente para teste.",
       }),
     ).rejects.toThrow();
+  });
+
+  it("deve permitir ao fundador criar uma organização manualmente com proprietário e vínculo de administrador", async () => {
+    const { bancoDados, documentos } = criarBancoFirestoreEmMemoria();
+    const authFalso = {
+      getUserByEmail: async () => {
+        const erro = new Error("Não encontrado") as Error & { code: string };
+        erro.code = "auth/user-not-found";
+        throw erro;
+      },
+      createUser: async (props: { email: string; displayName: string }) => ({
+        uid: "uid-novo-cliente",
+        email: props.email,
+        displayName: props.displayName,
+      }),
+    };
+
+    const resultado = await executarCriacaoOrganizacaoPeloFundador(
+      bancoDados,
+      authFalso,
+      usuarioFundador,
+      {
+        nome: "Garage 88",
+        identificadorPublico: "garage-88",
+        segmentoAtividade: "Concessionária de veículos",
+        emailProprietario: "admin@garage88.com.br",
+        nomeProprietario: "Admin Garage 88",
+        senhaInicialOpcional: "garage88@123",
+        planoCodigo: "pro",
+        perfilPublicidade: "padrao",
+        vincularFundadorComoAdministrador: true,
+      },
+    );
+
+    expect(resultado.organizacao.identificadorPublico).toBe("garage-88");
+    expect(resultado.organizacao.planoCodigo).toBe("pro");
+    expect(resultado.organizacao.totalMembros).toBe(2);
+    expect(documentos.get("identificadoresPublicos/garage-88")?.organizacaoId).toBe(
+      resultado.organizacao.id,
+    );
+    expect(
+      documentos.get(
+        `organizacoes/${resultado.organizacao.id}/membros/${usuarioFundador.uid}`,
+      )?.papel,
+    ).toBe("administrador");
   });
 });

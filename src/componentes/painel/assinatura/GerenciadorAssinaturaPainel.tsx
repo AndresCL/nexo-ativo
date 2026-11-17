@@ -71,9 +71,7 @@ export function GerenciadorAssinaturaPainel({
   const planoAtivoCodigo = organizacao.resumoDireitosPlano.planoCodigo;
   const situacaoAssinatura = organizacao.resumoDireitosPlano.situacaoAssinatura;
 
-  const [planoSelecionado, setPlanoSelecionado] = useState<"pro" | "equipe">(
-    planoAtivoCodigo === "equipe" ? "equipe" : "pro",
-  );
+  const [planoSelecionado, setPlanoSelecionado] = useState<"pro">("pro");
   const [incluirImplantacao, setIncluirImplantacao] = useState(false);
 
   const [modalContratacaoAberto, setModalContratacaoAberto] = useState(false);
@@ -132,16 +130,13 @@ export function GerenciadorAssinaturaPainel({
   const [cancelando, setCancelando] = useState(false);
 
   async function aoCancelarAssinatura() {
-    setErro(null);
-    setSucesso(null);
     setCancelando(true);
     try {
-      await servicoAssinaturasPainelCliente.cancelarAssinatura(organizacao.id);
+      await servicoAssinaturas.cancelarAssinatura(organizacao.id);
       setConfirmandoCancelamento(false);
-      setSucesso("Assinatura cancelada com sucesso.");
-      roteador.refresh();
+      notificar.sucesso("Assinatura cancelada com sucesso.");
     } catch (erroCapturado) {
-      setErro(
+      notificar.erro(
         erroCapturado instanceof Error
           ? erroCapturado.message
           : "Não foi possível cancelar a assinatura.",
@@ -306,20 +301,19 @@ export function GerenciadorAssinaturaPainel({
           </p>
         </div>
         <div className="grid gap-6 lg:grid-cols-2">
-          {(["pro", "equipe"] as const).map((codigo) => {
-            const plano = CATALOGO_PLANOS_FLUXO[codigo];
-            const ehPlanoAtual = planoAtivoCodigo === codigo && situacaoAssinatura === "ativa";
+          {(() => {
+            const plano = CATALOGO_PLANOS_FLUXO.pro;
+            const ehPlanoAtual =
+              (planoAtivoCodigo === "pro" || planoAtivoCodigo === "equipe") &&
+              situacaoAssinatura === "ativa";
 
             return (
               <CartaoSuperficie
-                key={codigo}
                 className={combinarClasses(
                   "relative flex flex-col justify-between rounded-2xl bg-gradient-to-b via-white to-white p-5 shadow-xs transition-shadow hover:shadow-sm sm:p-6",
                   ehPlanoAtual
                     ? "border-emerald-200 from-emerald-50/60 ring-1 ring-emerald-100"
-                    : codigo === "pro"
-                      ? "border-indigo-200 from-indigo-50/60"
-                      : "border-violet-200 from-violet-50/60",
+                    : "border-indigo-200 from-indigo-50/60",
                 )}
               >
                 <div>
@@ -331,7 +325,11 @@ export function GerenciadorAssinaturaPainel({
                       <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-800">
                         Plano Ativo
                       </span>
-                    ) : null}
+                    ) : (
+                      <span className="rounded-full border border-indigo-200 bg-indigo-100 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-800">
+                        Plano Padrão
+                      </span>
+                    )}
                   </div>
 
                   <p className="mt-2 text-xs text-mineral-600">{plano.descricao}</p>
@@ -365,23 +363,86 @@ export function GerenciadorAssinaturaPainel({
                       "w-full rounded-lg text-xs font-semibold",
                       ehPlanoAtual
                         ? "border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100"
-                        : codigo === "pro"
-                          ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                          : "bg-violet-600 text-white hover:bg-violet-700",
+                        : "bg-indigo-600 text-white hover:bg-indigo-700",
                     )}
                     disabled={!podeGerenciarAssinatura || processando}
                     onClick={(evento) => {
                       botaoContratacao.current = evento.currentTarget;
-                      setPlanoSelecionado(codigo);
+                      setPlanoSelecionado("pro");
                       setModalContratacaoAberto(true);
                     }}
                   >
-                    {ehPlanoAtual ? "Gerenciar / Alterar Dados" : `Contratar Plano ${plano.nome}`}
+                    {ehPlanoAtual ? "Gerenciar / Alterar Dados" : "Contratar Plano Pro"}
                   </Botao>
                 </div>
               </CartaoSuperficie>
             );
-          })}
+          })()}
+
+          {(() => {
+            const planoEmpresarial = CATALOGO_PLANOS_FLUXO.personalizado;
+            const ehEmpresarialAtivo =
+              planoAtivoCodigo === "personalizado" && situacaoAssinatura === "ativa";
+
+            return (
+              <CartaoSuperficie
+                className={combinarClasses(
+                  "relative flex flex-col justify-between rounded-2xl bg-gradient-to-b via-white to-white p-5 shadow-xs transition-shadow hover:shadow-sm sm:p-6",
+                  ehEmpresarialAtivo
+                    ? "border-emerald-200 from-emerald-50/60 ring-1 ring-emerald-100"
+                    : "border-violet-200 from-violet-50/60",
+                )}
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-xl font-bold tracking-tight text-mineral-950">
+                      Plano {planoEmpresarial.nome}
+                    </h2>
+                    {ehEmpresarialAtivo ? (
+                      <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-800">
+                        Plano Ativo
+                      </span>
+                    ) : (
+                      <span className="rounded-full border border-violet-200 bg-violet-100 px-2.5 py-0.5 text-[10px] font-semibold text-violet-800">
+                        Integrações sob medida
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-2 text-xs text-mineral-600">{planoEmpresarial.descricao}</p>
+
+                  <div className="mt-5 border-t border-marfim-200 pt-4">
+                    <p className="text-3xl font-bold tracking-tight text-mineral-950">
+                      Sob consulta
+                      <span className="text-xs font-normal text-mineral-600"> · projeto dedicado</span>
+                    </p>
+                  </div>
+
+                  <ul className="mt-5 space-y-2.5 border-t border-marfim-200 pt-4 text-xs text-mineral-700">
+                    {planoEmpresarial.destaques.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-700"
+                          aria-hidden="true"
+                        />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-8 border-t border-marfim-200 pt-5">
+                  <a
+                    href={`mailto:contato@nexoativo.com.br?subject=${encodeURIComponent(`Plano Empresarial e Integrações Sob Medida · ${organizacao.nome}`)}`}
+                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-violet-700"
+                  >
+                    <span>Solicitar proposta sob medida</span>
+                    <ExternalLink className="h-3.5 w-3.5 opacity-80" aria-hidden="true" />
+                  </a>
+                </div>
+              </CartaoSuperficie>
+            );
+          })()}
         </div>
       </section>
 
@@ -406,11 +467,7 @@ export function GerenciadorAssinaturaPainel({
               {ValorMonetarioCentavos.deCentavos(
                 CATALOGO_PLANOS_FLUXO.pro.valorImplantacaoAssistidaCentavos ?? 0,
               ).formatarMoedaBrasileira()}{" "}
-              <span className="text-xs font-normal text-mineral-500">(Pro)</span> /{" "}
-              {ValorMonetarioCentavos.deCentavos(
-                CATALOGO_PLANOS_FLUXO.equipe.valorImplantacaoAssistidaCentavos ?? 0,
-              ).formatarMoedaBrasileira()}{" "}
-              <span className="text-xs font-normal text-mineral-500">(Equipe)</span>
+              <span className="text-xs font-normal text-mineral-500">(Plano Pro)</span>
             </p>
           </div>
         </div>
@@ -663,7 +720,7 @@ export function GerenciadorAssinaturaPainel({
                     {ValorMonetarioCentavos.deCentavos(
                       definicaoPlanoSelecionado.valorImplantacaoAssistidaCentavos ?? 0,
                     ).formatarMoedaBrasileira()}{" "}
-                    com consultoria inicial da equipe do Fluxo.
+                    com consultoria inicial da equipe do Nexo Ativo.
                   </span>
                 </label>
               </fieldset>

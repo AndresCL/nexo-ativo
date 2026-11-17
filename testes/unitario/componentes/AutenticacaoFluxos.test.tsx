@@ -91,7 +91,12 @@ describe("Fluxos de Autenticação e Provisionamento de Organização", () => {
       criarOrganizacaoInicial: criarOrgMock,
     };
 
-    render(<FormularioCriarPrimeiraOrganizacao servicoProvisionamento={portaOrg} />);
+    render(
+      <FormularioCriarPrimeiraOrganizacao
+        servicoProvisionamento={portaOrg}
+        cadastroHabilitado={true}
+      />,
+    );
 
     await usuario.type(
       screen.getByLabelText(/Nome da sua atuação ou empresa/i),
@@ -109,5 +114,17 @@ describe("Fluxos de Autenticação e Provisionamento de Organização", () => {
       segmentoAtividade: "Dermatologia",
     });
     expect(refreshMock).toHaveBeenCalled();
+  });
+
+  it("deve bloquear a criação por padrão e exibir badge amarelo informando que cadastros não são permitidos", () => {
+    render(<FormularioCriarPrimeiraOrganizacao />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /Por enquanto, novos cadastros não são permitidos/i,
+    );
+    expect(screen.getByText("nexoativo.com.br/")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Criar organização e iniciar configuração/i }),
+    ).toBeDisabled();
   });
 });

@@ -5,7 +5,7 @@ import {
 import { ValorMonetarioCentavos } from "../objetos-valor/valorMonetarioCentavos";
 import type { MensagemEmailTransacional } from "./tiposEmailTransacional";
 
-const REMETENTE_PADRAO_FLUXO = "Fluxo Editorial <notificacoes@fluxo.app.br>";
+const REMETENTE_PADRAO_FLUXO = "Nexo Ativo <notificacoes@nexoativo.com.br>";
 
 /**
  * Escapa caracteres especiais HTML para evitar injeção de marcação ou scripts

@@ -82,47 +82,49 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
     codigo: "pro",
     nome: "Pro",
     descricao:
-      "Para profissionais autônomos e estúdios que exigem presença digital editorial autoral e conversão de excelência.",
+      "Para profissionais autônomos, clínicas, estúdios e equipes que exigem presença digital autoral, cartões individuais e conversão de excelência.",
     mensalidadeCentavos: 8700, // R$ 87/mês
-    limiteProfissionaisAtivos: 1,
-    limiteEnviosEmailMensal: 100,
+    limiteProfissionaisAtivos: 10,
+    limiteEnviosEmailMensal: 300,
     valorImplantacaoAssistidaCentavos: 29700, // R$ 297 opcional
     destaques: [
       "Página premium com as 3 composições editoriais",
       "Experiências interativas com motor determinístico",
-      "Cálculos comerciais em centavos preservados historicamente",
-      "Notificações instantâneas por e-mail com link direto para WhatsApp",
-      "1 profissional principal com cartão digital e QR Code",
+      "Até 10 profissionais ativos com cartões digitais e QR Codes próprios",
+      "Catálogo compartilhado e direcionamento de solicitações por especialista",
+      "Notificações por e-mail com link direto para WhatsApp (300 envios/mês)",
     ],
   },
   equipe: {
     codigo: "equipe",
-    nome: "Equipe",
+    nome: "Pro",
     descricao:
-      "Para escritórios, ateliês e bancas com múltiplos especialistas que demandam presença unificada e cartões individuais.",
-    mensalidadeCentavos: 8700, // R$ 87/mês
-    limiteProfissionaisAtivos: 5,
+      "Para profissionais autônomos, clínicas, estúdios e equipes que exigem presença digital autoral, cartões individuais e conversão de excelência.",
+    mensalidadeCentavos: 8700, // R$ 87/mês (legado compatível com Pro)
+    limiteProfissionaisAtivos: 10,
     limiteEnviosEmailMensal: 300,
-    valorImplantacaoAssistidaCentavos: 59700, // R$ 597 opcional
+    valorImplantacaoAssistidaCentavos: 29700,
     destaques: [
-      "Todos os recursos inclusos no Plano Pro",
-      "Até 5 profissionais ativos com cartões digitais e QR Codes próprios",
+      "Página premium com as 3 composições editoriais",
+      "Experiências interativas com motor determinístico",
+      "Até 10 profissionais ativos com cartões digitais e QR Codes próprios",
       "Catálogo compartilhado e direcionamento de solicitações por especialista",
-      "Franquia expandida de e-mails transacionais (300 envios/mês)",
-      "Gestão de permissões administrativas por membro da equipe",
+      "Notificações por e-mail com link direto para WhatsApp (300 envios/mês)",
     ],
   },
   personalizado: {
     codigo: "personalizado",
-    nome: "Personalizado",
-    descricao: "Projetos sob medida para bancas, redes e operações com alto volume contratual.",
+    nome: "Empresarial",
+    descricao:
+      "Projetos e integrações sob medida para redes, concessionárias e operações com fluxos personalizados.",
     mensalidadeCentavos: 0,
     limiteProfissionaisAtivos: 999,
     limiteEnviosEmailMensal: 1000,
     destaques: [
-      "Limites flexíveis sob demanda da organização",
+      "Integrações sob medida com CRM, ERP, APIs e webhooks",
+      "Limites personalizados de especialistas, unidades e envios de e-mail",
       "Onboarding dedicado e consultoria de identidade editorial",
-      "Atendimento prioritário pela equipe fundadora",
+      "Atendimento prioritário e acompanhamento pela equipe fundadora",
     ],
   },
 };

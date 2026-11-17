@@ -67,7 +67,7 @@ service cloud.firestore {
     match /organizacoes/{organizacaoId} {
       allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
       allow create, delete: if false;
-      allow update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+      allow update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
           'id',
           'identificadorPublico',
@@ -84,46 +84,46 @@ service cloud.firestore {
 
       match /configuracaoPagina/{documentoId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
-        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
           && mantemOrganizacaoCorreta(organizacaoId);
         allow delete: if false;
       }
 
       match /profissionais/{profissionalId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
-        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
           && mantemOrganizacaoCorreta(organizacaoId);
-        allow delete: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']);
+        allow delete: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador();
       }
 
       match /servicos/{servicoId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
-        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
           && mantemOrganizacaoCorreta(organizacaoId);
         allow delete: if false;
       }
 
       match /produtos/{produtoId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
-        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
           && mantemOrganizacaoCorreta(organizacaoId);
         allow delete: if false;
       }
 
       match /projetosPortfolio/{projetoId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
-        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
           && mantemOrganizacaoCorreta(organizacaoId);
         allow delete: if false;
       }
 
       match /microfluxos/{microfluxoId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
-        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
           && mantemOrganizacaoCorreta(organizacaoId)
           && (!request.resource.data.keys().hasAny(['versaoPublicada'])
               || (resource != null && request.resource.data.versaoPublicada == resource.data.versaoPublicada));
-        allow delete: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']);
+        allow delete: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador();
 
         match /versoes/{numeroVersao} {
           allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
@@ -134,7 +134,7 @@ service cloud.firestore {
       match /solicitacoes/{solicitacaoId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
         allow create, delete: if false;
-        allow update: if ehMembroAtivo(organizacaoId)
+        allow update: if (ehMembroAtivo(organizacaoId) || ehFundador())
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'situacao',
             'profissionalId',
@@ -145,7 +145,7 @@ service cloud.firestore {
 
       match /configuracoes/email {
         allow read: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador();
-        allow create, update: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador'])
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
           && mantemOrganizacaoCorreta(organizacaoId)
           && !request.resource.data.keys().hasAny(['enviosNoMesAtual']);
         allow delete: if false;

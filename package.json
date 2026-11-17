@@ -11,6 +11,8 @@
     "emuladores": "firebase emulators:start --project demo-fluxo --import ./dados-emulador --export-on-exit ./dados-emulador",
     "emuladores:salvar": "firebase emulators:export ./dados-emulador --project demo-fluxo --force",
     "recuperar:garage88": "vite-node --config vitest.config.ts scripts/recuperarGarage88.ts",
+    "provisionar:fundador": "vite-node --config vitest.config.ts scripts/provisionarFundador.ts",
+    "promover:organizacao": "vite-node --config vitest.config.ts scripts/promoverOrganizacaoProducao.ts",
     "atualizar:chamadas-garage88": "vite-node --config vitest.config.ts scripts/atualizarChamadasGarage88.ts",
     "build": "next build",
     "iniciar": "next start",
