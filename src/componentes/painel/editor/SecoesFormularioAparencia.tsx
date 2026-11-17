@@ -10,7 +10,6 @@ import {
   type IdentificadorTipografiaEditorial,
 } from "@/dominio/entidades/composicaoEditorial";
 import {
-  type EspacamentoAcoesHome,
   type IntensidadeVeloEscuro,
   type TipoEfeitoCantosEditorial,
   type TipoRedeSocial,
@@ -100,7 +99,7 @@ export interface PropriedadesSecoesFormularioAparencia {
 export function SecoesFormularioAparencia({
   servicoUpload,
   somenteLeitura = false,
-  microfluxos = [],
+  microfluxos: _microfluxos = [],
 }: PropriedadesSecoesFormularioAparencia) {
   const abaAtiva = useEstadoEditorAparencia((e) => e.abaAtiva);
   const rascunho = useEstadoEditorAparencia((e) => e.rascunho);

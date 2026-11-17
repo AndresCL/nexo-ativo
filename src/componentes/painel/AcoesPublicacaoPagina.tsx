@@ -1,14 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { ExternalLink, Globe, Save } from "lucide-react";
+import { Globe, Save } from "lucide-react";
 import type { ControlePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 import { Botao } from "@/componentes/interface/Botao";
 
 export function AcoesPublicacaoPagina({
   controle,
-  identificadorPublico,
+  identificadorPublico: _identificadorPublico,
   exibirSalvarRascunho = false,
   publicacaoBloqueada = false,
   orientacao,

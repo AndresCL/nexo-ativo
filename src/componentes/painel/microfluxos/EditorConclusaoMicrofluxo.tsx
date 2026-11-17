@@ -3,7 +3,6 @@
 import { BlocosConteudoEditorial } from "@/componentes/editorial/ConteudoEtapaLivreVisitante";
 import { MolduraSmartphone } from "@/componentes/editorial/MolduraSmartphone";
 import { EditorComposicaoEtapa } from "./EditorComposicaoEtapa";
-import { useState } from "react";
 import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
 import {
   construirCaminhoExperiencia,

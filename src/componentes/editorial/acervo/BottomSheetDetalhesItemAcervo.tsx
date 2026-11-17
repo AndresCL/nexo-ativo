@@ -138,6 +138,7 @@ export function BottomSheetDetalhesItemAcervo({
   }
 
   function executarAcaoCta() {
+    if (!item) return;
     if (tipoCta === "microfluxo" && configuracaoCta?.microfluxoId && aoIniciarMicrofluxo) {
       aoFechar();
       aoIniciarMicrofluxo(configuracaoCta.microfluxoId, {

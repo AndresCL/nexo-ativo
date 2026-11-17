@@ -1,17 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Compass, GalleryHorizontal, Rows3 } from "lucide-react";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import { CabecalhoPublicacaoRapidaAcervo } from "@/componentes/painel/catalogo/CabecalhoPublicacaoRapidaAcervo";
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 import { servicoCatalogoConteudoCliente } from "@/infraestrutura/painel/servicoCatalogoConteudoCliente";
 import type { ModoExibicaoVideos, VideoYoutubeItem } from "@/dominio/objetos-valor/videoYoutube";
-import {
-  carregarConfiguracaoVideos,
-  salvarConfiguracaoVideos,
-} from "@/infraestrutura/painel/servicoVideosYoutubeCliente";
+import { salvarConfiguracaoVideos } from "@/infraestrutura/painel/servicoVideosYoutubeCliente";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { FormularioVideoYoutube } from "./FormularioVideoYoutube";
 import { ListaVideosPainel } from "./ListaVideosPainel";
@@ -40,7 +37,7 @@ export function GerenciadorVideosPainel({
   const [videos, setVideos] = useState<readonly VideoYoutubeItem[]>(videosIniciais);
   const [modoExibicao, setModoExibicao] = useState<ModoExibicaoVideos>(modoExibicaoInicial);
   const [autoplay, setAutoplay] = useState(autoplayInicial);
-  const [ocultarTitulo, setOcultarTitulo] = useState(ocultarTituloInicial);
+  const [ocultarTitulo] = useState(ocultarTituloInicial);
   const [salvando, setSalvando] = useState(false);
 
   const controlePublicacao = usePublicacaoPagina({

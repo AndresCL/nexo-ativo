@@ -25,7 +25,7 @@ export default function PaginaErroRecuperavel({
       </p>
       <div className="mt-7">
         <Botao
-          variante="primario"
+          variante="operacional_primario"
           className="bg-mineral-950 text-white hover:bg-mineral-900"
           onClick={reset}
         >

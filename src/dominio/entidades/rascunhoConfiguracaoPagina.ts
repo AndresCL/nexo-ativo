@@ -206,7 +206,7 @@ export function hidratarRascunhoConfiguracaoPagina(
     dadosBrutos.espacamentoAcoes === "medio" ||
     dadosBrutos.espacamentoAcoes === "amplo"
       ? dadosBrutos.espacamentoAcoes
-      : fallback.espacamentoAcoes;
+      : padrao.espacamentoAcoes;
 
   return {
     organizacaoId: fallback.organizacaoId,

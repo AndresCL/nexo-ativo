@@ -4,7 +4,7 @@ import { ErroValidacaoDominio } from "../erros/errosDominio";
 import type { DefinicaoMicrofluxo } from "../microfluxos/tiposMicrofluxo";
 import { IdentificadorPublico } from "../objetos-valor/identificadorPublico";
 import { ValorMonetarioCentavos } from "../objetos-valor/valorMonetarioCentavos";
-import type { ModoExibicaoVideos, VideoYoutubeItem } from "../objetos-valor/videoYoutube";
+import type { VideoYoutubeItem } from "../objetos-valor/videoYoutube";
 
 export type ModoExibicaoVideos = "carrossel" | "fila";
 
@@ -52,6 +52,7 @@ export interface ProdutoCatalogo {
   readonly resumo: string;
   readonly categoria: string;
   readonly precoCentavos?: number;
+  readonly rotuloPrecoOpcional?: string;
   readonly disponibilidade: DisponibilidadeProdutoCatalogo;
   readonly especificacoesCurtas: readonly string[];
   readonly urlImagemPrincipal?: string;

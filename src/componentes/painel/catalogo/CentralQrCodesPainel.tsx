@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { QrCode } from "lucide-react";
-import type { DefinicaoMicrofluxo } from "@/dominio/entidades/microfluxo";
-import type { CartaoProfissional } from "@/dominio/entidades/vitrine";
+import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
+import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
 import { ExibicaoQrCodeEditorial } from "@/componentes/editorial/ExibicaoQrCodeEditorial";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { TransicaoPaginaPainel } from "@/componentes/interface/TransicaoPaginaPainel";
@@ -12,7 +11,7 @@ type TipoDestinoQrCode = "vitrine" | "profissional" | "fluxo";
 
 export interface PropriedadesCentralQrCodesPainel {
   readonly identificadorPublico: string;
-  readonly profissionais: readonly CartaoProfissional[];
+  readonly profissionais: readonly ProfissionalEquipe[];
   readonly microfluxos: readonly DefinicaoMicrofluxo[];
 }
 
@@ -61,7 +60,7 @@ export function CentralQrCodesPainel({
 
   const [tipo, setTipo] = useState<TipoDestinoQrCode>("vitrine");
   const [profissionalSlug, setProfissionalSlug] = useState(
-    profissionaisAtivos[0]?.identificadorPublico ?? "",
+    profissionaisAtivos[0]?.identificadorCartao ?? "",
   );
   const [fluxoId, setFluxoId] = useState(fluxosAtivos[0]?.id ?? "");
   const [baseOrigem, setBaseOrigem] = useState("https://nexoativo.com.br");
@@ -132,7 +131,7 @@ export function CentralQrCodesPainel({
                 className="w-full rounded-lg border border-mineral-200 bg-white px-3 py-2 text-sm"
               >
                 {profissionaisAtivos.map((p) => (
-                  <option key={p.id} value={p.identificadorPublico}>
+                  <option key={p.id} value={p.identificadorCartao}>
                     {p.nomeCompleto}
                   </option>
                 ))}

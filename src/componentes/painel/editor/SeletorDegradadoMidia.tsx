@@ -5,7 +5,6 @@ import {
   DEGRADADO_EDITORIAL_PADRAO,
   type ConfiguracaoDegradadoEditorial,
 } from "@/dominio/objetos-valor/degradadoEditorial";
-import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 const PONTOS_ANGULO_DEGRADADO = [
   { graus: 0, rotulo: "0°", direcao: "Abaixo → Acima" },

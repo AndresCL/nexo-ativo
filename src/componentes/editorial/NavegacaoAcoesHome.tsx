@@ -126,7 +126,7 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
  */
 export function NavegacaoAcoesHome({
   acoes,
-  espacamentoAcoes = "padrao",
+  espacamentoAcoes = "medio",
   paletaId: _paletaId,
   aoAcionarItem,
   aoSelecionarItemAcervo,

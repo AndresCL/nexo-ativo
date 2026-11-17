@@ -83,7 +83,7 @@ const CONFIG_CANAIS: Readonly<Record<CanalOrigemTrafego, ConfiguracaoCanalVisual
 
 export function GraficoCanaisOrigem({
   canais,
-  qrCodes = [],
+  qrCodes: _qrCodes = [],
   identificadorOrganizacao,
 }: PropriedadesGraficoCanaisOrigem) {
   const totalVisitas = canais.reduce((acc, c) => acc + c.visualizacoes, 0);

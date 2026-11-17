@@ -19,7 +19,7 @@ export default function PaginaVitrineNaoEncontrada() {
       </p>
       <div className="mt-8">
         <Botao
-          variante="primario"
+          variante="operacional_primario"
           className="bg-mineral-950 text-white hover:bg-mineral-900"
           comoFilho
         >

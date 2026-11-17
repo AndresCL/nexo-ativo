@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, CheckSquare, Square } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 import {
   CartesianGrid,
   Legend,

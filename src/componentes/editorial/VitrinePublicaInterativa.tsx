@@ -10,6 +10,7 @@ import {
 import {
   gerarVariaveisCssPaletaEditorial,
   resolverAcoesVitrineComMicrofluxos,
+  type ConfiguracaoCtaAcervo,
   type ConteudoPaginaPublicada,
   type ItemAcaoHome,
 } from "@/dominio/entidades/paginaPublicada";
