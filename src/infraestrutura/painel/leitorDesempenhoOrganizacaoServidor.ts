@@ -287,7 +287,9 @@ export async function carregarContextoDesempenhoOrganizacaoServidor(
       if (
         !validacao.success ||
         validacao.data.organizacaoId !== organizacaoId ||
-        (validacao.data.tipoAcao && validacao.data.tipoAcao !== "microfluxo")
+        (validacao.data.tipoAcao &&
+          validacao.data.tipoAcao !== "microfluxo" &&
+          validacao.data.tipoAcao !== "publicacao_post")
       )
         return [];
       return [{ id: validacao.data.id, titulo: validacao.data.titulo }];

@@ -15,7 +15,10 @@ import {
 } from "./composicaoEditorial";
 import { PontoFocalMidia } from "../objetos-valor/pontoFocalMidia";
 import { gerarPaletaEditorialAPartirDeCorPrimaria } from "../servicos/geradorPaletaEditorial";
-import type { DefinicaoMicrofluxo } from "../microfluxos/tiposMicrofluxo";
+import type {
+  ConfiguracaoPostVitrine,
+  DefinicaoMicrofluxo,
+} from "../microfluxos/tiposMicrofluxo";
 import { ordenarMicrofluxosPorPrioridadeEOrdem } from "../microfluxos/ordenacaoMicrofluxos";
 
 export type {
@@ -44,6 +47,7 @@ export type TipoRedeSocial =
 
 export type TipoDestinoAcaoHome =
   | "microfluxo"
+  | "publicacao_post"
   | "secao_produtos"
   | "secao_servicos"
   | "secao_portfolio"
@@ -108,6 +112,7 @@ export interface ItemAcaoHome {
   readonly limiteAvataresEquipe?: number | null;
   readonly modoExibicaoColecao?: "modal_gaveta" | "carrossel" | "grade_2_colunas";
   readonly configuracaoCtaAcervo?: ConfiguracaoCtaAcervo;
+  readonly configuracaoPost?: ConfiguracaoPostVitrine;
   readonly id: string;
   readonly rotulo: string;
   readonly subtituloDiscreto?: string;
@@ -372,6 +377,9 @@ export function resolverAcoesVitrineComMicrofluxos(
     if (m.tipoAcao === "link_externo") {
       tipoDestino = "link_externo";
       destino = m.urlDestinoOpcional?.trim() || "https://";
+    } else if (m.tipoAcao === "publicacao_post") {
+      tipoDestino = "publicacao_post";
+      destino = `#post-${m.id}`;
     } else if (m.tipoAcao === "secao_produtos") {
       tipoDestino = "secao_produtos";
       destino = "#produtos";
@@ -423,6 +431,9 @@ export function resolverAcoesVitrineComMicrofluxos(
         : {}),
       ...((tipoDestino === "secao_produtos" || tipoDestino === "secao_servicos") && m.configuracaoCtaAcervo
         ? { configuracaoCtaAcervo: m.configuracaoCtaAcervo }
+        : {}),
+      ...(tipoDestino === "publicacao_post" && m.configuracaoPost
+        ? { configuracaoPost: m.configuracaoPost }
         : {}),
     };
   });

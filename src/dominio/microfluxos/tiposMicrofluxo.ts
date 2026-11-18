@@ -1,5 +1,6 @@
 import type { RegraCalculoComercialMicrofluxo } from "../comercial/tiposCalculoComercial";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
+import type { MidiaItemCatalogo } from "../entidades/catalogoConteudo";
 
 export type AncoraPadraoMicrofluxo = string;
 
@@ -135,6 +136,7 @@ export interface EtapaMicrofluxo {
 
 export type TipoAcaoVitrine =
   | "microfluxo"
+  | "publicacao_post"
   | "link_externo"
   | "secao_produtos"
   | "secao_servicos"
@@ -143,6 +145,28 @@ export type TipoAcaoVitrine =
   | "secao_videos"
   | "whatsapp"
   | "telefone";
+
+export type TipoAcaoCtaPostVitrine =
+  | "nenhum"
+  | "whatsapp"
+  | "microfluxo"
+  | "link_externo"
+  | "telefone";
+
+export interface ConfiguracaoCtaPostVitrine {
+  readonly tipoAcao: TipoAcaoCtaPostVitrine;
+  readonly rotuloBotao?: string;
+  readonly microfluxoId?: string;
+  readonly destinoOpcional?: string;
+}
+
+export interface ConfiguracaoPostVitrine {
+  readonly tituloPost?: string;
+  readonly dataTexto?: string;
+  readonly corpoTexto: string;
+  readonly imagens?: readonly MidiaItemCatalogo[];
+  readonly cta: ConfiguracaoCtaPostVitrine;
+}
 
 export type AcaoConclusaoMicrofluxo =
   | { readonly tipo: "whatsapp"; readonly rotulo: string; readonly numeroOpcional?: string }
@@ -185,6 +209,7 @@ export interface DefinicaoMicrofluxo {
     readonly rotuloBotao?: string;
     readonly microfluxoId?: string;
   };
+  readonly configuracaoPost?: ConfiguracaoPostVitrine;
   readonly id: string;
   readonly organizacaoId: string;
   readonly tipoAcao?: TipoAcaoVitrine;

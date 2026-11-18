@@ -117,6 +117,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
       tituloSecao: z.string().trim().max(100).optional(),
       tipoDestino: z.enum([
         "microfluxo",
+        "publicacao_post",
         "secao_produtos",
         "secao_servicos",
         "secao_portfolio",

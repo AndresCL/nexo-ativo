@@ -6,6 +6,56 @@ import type {
 } from "../entidades/autenticacaoEOrganizacao";
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 
+export const CODIGOS_ETAPA_KANBAN_FUNDADOR = [
+  "onboarding",
+  "ativo",
+  "atencao",
+  "inativo",
+] as const;
+
+export type EtapaKanbanOrganizacaoFundador = (typeof CODIGOS_ETAPA_KANBAN_FUNDADOR)[number];
+
+export const DESCRITORES_ETAPA_KANBAN_FUNDADOR: Readonly<
+  Record<
+    EtapaKanbanOrganizacaoFundador,
+    {
+      readonly rotulo: string;
+      readonly descricao: string;
+    }
+  >
+> = {
+  onboarding: {
+    rotulo: "Em Onboarding",
+    descricao: "Implantação e configuração inicial da vitrine",
+  },
+  ativo: {
+    rotulo: "Ativo / Saudável",
+    descricao: "Cliente operando regularmente na plataforma",
+  },
+  atencao: {
+    rotulo: "Em Negociação / Atenção",
+    descricao: "Acompanhamento comercial, suporte ou renovação",
+  },
+  inativo: {
+    rotulo: "Churn / Inativo",
+    descricao: "Conta pausada, cancelada ou encerrada",
+  },
+};
+
+export interface MensagemKanbanFundador {
+  readonly id: string;
+  readonly texto: string;
+  readonly autorEmail?: string;
+  readonly criadoEmIso: string;
+}
+
+export interface AcompanhamentoOrganizacaoFundador {
+  readonly organizacaoId: string;
+  readonly etapaKanban: EtapaKanbanOrganizacaoFundador;
+  readonly mensagens: readonly MensagemKanbanFundador[];
+  readonly atualizadoEmIso: string;
+}
+
 export interface MetricasOperacionaisFundador {
   readonly totalOrganizacoes: number;
   readonly organizacoesAtivas: number;
@@ -29,9 +79,22 @@ export interface ItemVisaoGeralOrganizacaoFundador {
   readonly limiteProfissionaisAtivos?: number;
   readonly limiteEnviosEmailMensal?: number;
   readonly totalMembros: number;
+  readonly etapaKanban?: EtapaKanbanOrganizacaoFundador;
+  readonly mensagensKanban?: readonly MensagemKanbanFundador[];
   readonly criadoEmIso: string;
   readonly atualizadoEmIso: string;
 }
+
+export interface ParametrosAlterarEtapaKanbanFundador {
+  readonly organizacaoId: string;
+  readonly etapaKanban: EtapaKanbanOrganizacaoFundador;
+}
+
+export interface ParametrosAdicionarMensagemKanbanFundador {
+  readonly organizacaoId: string;
+  readonly texto: string;
+}
+
 
 export interface ParametrosAlterarSituacaoOrganizacaoFundador {
   readonly organizacaoId: string;

@@ -1,14 +1,31 @@
 import { httpsCallable } from "firebase/functions";
 import type {
+  EtapaKanbanOrganizacaoFundador,
+  MensagemKanbanFundador,
+  ParametrosAdicionarMensagemKanbanFundador,
   ParametrosAjustarPlanoOrganizacaoFundador,
+  ParametrosAlterarEtapaKanbanFundador,
   ParametrosAlterarSituacaoOrganizacaoFundador,
   ParametrosCriarOrganizacaoPeloFundador,
   ParametrosDefinirPerfilPublicidadeOrganizacaoFundador,
   ResultadoCriarOrganizacaoPeloFundador,
 } from "@/dominio/fundador/tiposPainelFundador";
 import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteFirebase";
+import {
+  esquemaAdicionarMensagemKanbanFundador,
+  esquemaAlterarEtapaKanbanFundador,
+} from "@/validacoes/esquemasPainelFundador";
 
-export interface PortaOperacoesFundadorCliente {
+export interface PortaKanbanFundadorCliente {
+  alterarEtapaKanbanOrganizacao(
+    parametros: ParametrosAlterarEtapaKanbanFundador,
+  ): Promise<{ organizacaoId: string; etapaKanban: EtapaKanbanOrganizacaoFundador }>;
+  adicionarMensagemKanbanOrganizacao(
+    parametros: ParametrosAdicionarMensagemKanbanFundador,
+  ): Promise<MensagemKanbanFundador>;
+}
+
+export interface PortaOperacoesFundadorCliente extends Partial<PortaKanbanFundadorCliente> {
   alterarSituacaoOrganizacao(
     parametros: ParametrosAlterarSituacaoOrganizacaoFundador,
   ): Promise<{ atualizado: boolean; organizacaoId: string; novaSituacao: string }>;
@@ -23,7 +40,9 @@ export interface PortaOperacoesFundadorCliente {
   ): Promise<ResultadoCriarOrganizacaoPeloFundador>;
 }
 
-export class ServicoOperacoesFundadorCliente implements PortaOperacoesFundadorCliente {
+export class ServicoOperacoesFundadorCliente
+  implements PortaOperacoesFundadorCliente, PortaKanbanFundadorCliente
+{
   public async alterarSituacaoOrganizacao(
     parametros: ParametrosAlterarSituacaoOrganizacaoFundador,
   ): Promise<{ atualizado: boolean; organizacaoId: string; novaSituacao: string }> {
@@ -75,7 +94,48 @@ export class ServicoOperacoesFundadorCliente implements PortaOperacoesFundadorCl
     const resposta = await chamada(parametros);
     return resposta.data;
   }
+
+  public async alterarEtapaKanbanOrganizacao(
+    parametros: ParametrosAlterarEtapaKanbanFundador,
+  ): Promise<{ organizacaoId: string; etapaKanban: EtapaKanbanOrganizacaoFundador }> {
+    const validado = esquemaAlterarEtapaKanbanFundador.parse(parametros);
+    const resposta = await fetch("/api/fundador/acompanhamento", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(validado),
+    });
+
+    if (!resposta.ok) {
+      const erroJson = (await resposta.json().catch(() => null)) as { erro?: string } | null;
+      throw new Error(erroJson?.erro ?? "Não foi possível salvar a etapa do Kanban.");
+    }
+
+    return {
+      organizacaoId: validado.organizacaoId,
+      etapaKanban: validado.etapaKanban,
+    };
+  }
+
+  public async adicionarMensagemKanbanOrganizacao(
+    parametros: ParametrosAdicionarMensagemKanbanFundador,
+  ): Promise<MensagemKanbanFundador> {
+    const validado = esquemaAdicionarMensagemKanbanFundador.parse(parametros);
+    const resposta = await fetch("/api/fundador/acompanhamento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(validado),
+    });
+
+    if (!resposta.ok) {
+      const erroJson = (await resposta.json().catch(() => null)) as { erro?: string } | null;
+      throw new Error(erroJson?.erro ?? "Não foi possível salvar a mensagem.");
+    }
+
+    const dados = (await resposta.json()) as { mensagem: MensagemKanbanFundador };
+    return dados.mensagem;
+  }
 }
 
-export const servicoOperacoesFundadorCliente: PortaOperacoesFundadorCliente =
-  new ServicoOperacoesFundadorCliente();
+export const servicoOperacoesFundadorCliente: PortaOperacoesFundadorCliente &
+  PortaKanbanFundadorCliente = new ServicoOperacoesFundadorCliente();
+

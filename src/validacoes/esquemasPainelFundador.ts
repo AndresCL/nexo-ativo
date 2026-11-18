@@ -1,12 +1,32 @@
 import { z } from "zod";
-import type {
-  ParametrosAjustarPlanoOrganizacaoFundador,
-  ParametrosAlterarSituacaoOrganizacaoFundador,
-  ParametrosCriarOrganizacaoPeloFundador,
-  ParametrosDefinirPerfilPublicidadeOrganizacaoFundador,
+import {
+  CODIGOS_ETAPA_KANBAN_FUNDADOR,
+  type ParametrosAdicionarMensagemKanbanFundador,
+  type ParametrosAjustarPlanoOrganizacaoFundador,
+  type ParametrosAlterarEtapaKanbanFundador,
+  type ParametrosAlterarSituacaoOrganizacaoFundador,
+  type ParametrosCriarOrganizacaoPeloFundador,
+  type ParametrosDefinirPerfilPublicidadeOrganizacaoFundador,
 } from "../dominio/fundador/tiposPainelFundador";
 import { CODIGOS_PERFIL_PUBLICIDADE } from "../dominio/publicidade/tiposPerfilPublicidade";
 import { esquemaIdentificadorPublico } from "./esquemasComuns";
+
+export const esquemaAlterarEtapaKanbanFundador: z.ZodType<ParametrosAlterarEtapaKanbanFundador> =
+  z.object({
+    organizacaoId: z.string().trim().min(2, "Informe a organização alvo."),
+    etapaKanban: z.enum(CODIGOS_ETAPA_KANBAN_FUNDADOR),
+  });
+
+export const esquemaAdicionarMensagemKanbanFundador: z.ZodType<ParametrosAdicionarMensagemKanbanFundador> =
+  z.object({
+    organizacaoId: z.string().trim().min(2, "Informe a organização alvo."),
+    texto: z
+      .string()
+      .trim()
+      .min(1, "Digite uma mensagem para registrar.")
+      .max(1000, "A mensagem pode ter no máximo 1000 caracteres."),
+  });
+
 
 export const esquemaAlterarSituacaoOrganizacaoFundador: z.ZodType<ParametrosAlterarSituacaoOrganizacaoFundador> =
   z.object({

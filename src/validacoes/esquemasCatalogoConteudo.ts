@@ -11,7 +11,7 @@ const esquemaCoordenadasPontoFocal = z.object({
   yPercentual: z.number().min(0).max(100),
 });
 
-const esquemaMidiaItemCatalogo = z.object({
+export const esquemaMidiaItemCatalogo = z.object({
   url: z.string().trim().min(1).max(600),
   textoAlternativo: z.string().max(220).optional(),
   pontoFocal: esquemaCoordenadasPontoFocal.optional(),

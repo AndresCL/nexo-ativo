@@ -52,12 +52,17 @@ import { CanvasEditorVisualFluxos } from "../microfluxos/CanvasEditorVisualFluxo
 import { SeletorIconeAcaoPopover } from "../editor/SeletorIconeAcaoPopover";
 import { TituloExperienciaEditavel } from "./TituloExperienciaEditavel";
 import { ConfiguracaoEquipeVitrine } from "./ConfiguracaoEquipeVitrine";
+import { ConfiguracaoPostExperiencia } from "./ConfiguracaoPostExperiencia";
 import { OpcaoOcultarTituloVideosExperiencia } from "./OpcaoOcultarTituloVideosExperiencia";
 
 const DESCRITORES_TIPO_ACAO: Record<TipoAcaoVitrine, { rotulo: string; iconeBadge: string }> = {
   microfluxo: {
     rotulo: "Percurso guiado",
     iconeBadge: "Jornada",
+  },
+  publicacao_post: {
+    rotulo: "Publicação / Post",
+    iconeBadge: "Post",
   },
   link_externo: {
     rotulo: "Link externo",
@@ -838,6 +843,14 @@ export function GerenciadorExperienciasPainel({
                       ...atual,
                       tipoAcao: novoTipo,
                       ...(novoTipo === "secao_equipe" ? { urlDestinoOpcional: "#equipe" } : {}),
+                      ...(novoTipo === "publicacao_post" && !atual.configuracaoPost
+                        ? {
+                            configuracaoPost: {
+                              corpoTexto: "",
+                              cta: { tipoAcao: "whatsapp" },
+                            },
+                          }
+                        : {}),
                     }));
                   }}
                   className="mt-1 w-full rounded-lg border border-marfim-200 bg-white px-2.5 py-1.5 text-xs text-mineral-950 focus:border-indigo-400 focus:outline-none"
@@ -1080,6 +1093,19 @@ export function GerenciadorExperienciasPainel({
                 quantidadeProfissionais={quantidadeProfissionaisAtivos}
                 aoAlterar={(posicionamentoEquipe) =>
                   atualizarFluxoSelecionado((atual) => ({ ...atual, posicionamentoEquipe }))
+                }
+              />
+            ) : null}
+
+            {fluxoAtual.tipoAcao === "publicacao_post" ? (
+              <ConfiguracaoPostExperiencia
+                organizacaoId={organizacaoId}
+                fluxoAtual={fluxoAtual}
+                microfluxosDisponiveis={microfluxos}
+                servicoUpload={servicoCatalogo}
+                desabilitado={!podeAlterar}
+                aoAlterarPost={(configuracaoPost) =>
+                  atualizarFluxoSelecionado((atual) => ({ ...atual, configuracaoPost }))
                 }
               />
             ) : null}

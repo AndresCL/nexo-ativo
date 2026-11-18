@@ -13,7 +13,11 @@ export interface PropriedadesModalPerfilPublicidadeFundador {
   readonly organizacao: ItemVisaoGeralOrganizacaoFundador;
   readonly servicoFundador: PortaOperacoesFundadorCliente;
   readonly aoFechar: () => void;
-  readonly aoConcluir: (organizacaoId: string, novoPerfil: CodigoPerfilPublicidade) => void;
+  readonly aoConcluir: (
+    organizacaoId: string,
+    novoPerfil: CodigoPerfilPublicidade,
+    justificativa: string,
+  ) => void;
 }
 
 export function ModalPerfilPublicidadeFundador({
@@ -35,7 +39,7 @@ export function ModalPerfilPublicidadeFundador({
         justificativa,
       });
       notificar.sucesso(`Perfil de publicidade de "${organizacao.nome}" atualizado.`);
-      aoConcluir(organizacao.id, perfil);
+      aoConcluir(organizacao.id, perfil, justificativa.trim());
     } catch (e) {
       notificar.erro(e instanceof Error ? e.message : "Não foi possível alterar o perfil.");
     } finally {

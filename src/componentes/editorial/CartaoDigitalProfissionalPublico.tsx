@@ -45,6 +45,7 @@ import { AvatarProfissional } from "./AvatarProfissional";
 import { CamadaMidiaImersiva } from "./CamadaMidiaImersiva";
 import { ExecutorMicrofluxoVisitante } from "./ExecutorMicrofluxoVisitante";
 import { GavetaEditorialPublica, type SecaoAcervoAberta } from "./GavetaEditorialPublica";
+import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
 import { renderizarIconeAcao } from "./NavegacaoAcoesHome";
 import { RodapeEditorial } from "./RodapeEditorial";
 import { identificarSecaoPorHash, resolverMicrofluxoPorDestino } from "./roteadorAcoesPublicas";
@@ -70,6 +71,7 @@ export function CartaoDigitalProfissionalPublico({
   const ultimaVisualizacaoRegistrada = useRef<string | null>(null);
   const [secaoAberta, setSecaoAberta] = useState<SecaoAcervoAberta>(null);
   const [tituloSecaoAberta, setTituloSecaoAberta] = useState<string | undefined>();
+  const [acaoPostAberta, setAcaoPostAberta] = useState<ItemAcaoHome | null>(null);
   const [microfluxoAtivo, setMicrofluxoAtivo] = useState<DefinicaoMicrofluxo | null>(null);
   const [contextoMicrofluxo, setContextoMicrofluxo] = useState<
     ContextoOrigemMicrofluxo | undefined
@@ -384,6 +386,29 @@ export function CartaoDigitalProfissionalPublico({
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
       setSecaoAberta("equipe");
+      return;
+    }
+
+    if (acao.tipoDestino === "publicacao_post" || acao.destino.startsWith("#post-")) {
+      setMicrofluxoAtivo(null);
+      setSecaoAberta(null);
+      setAcaoPostAberta(acao);
+
+      const idExperienciaPost = acao.destino.startsWith("#post-")
+        ? acao.destino.slice("#post-".length)
+        : acao.id.replace(/^acao-fluxo-/, "");
+      const fluxoPost = microfluxosDisponiveis.find((m) => m.id === idExperienciaPost);
+
+      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        organizacaoId: paginaOrganizacao.organizacaoId,
+        tipoEvento: "abertura_microfluxo",
+        canalOrigem: "cartao_equipe",
+        cartaoProfissionalId: profissional.id,
+        cartaoProfissionalNome: profissional.nomeCompleto,
+        profissionalId: profissional.id,
+        microfluxoId: fluxoPost?.id ?? idExperienciaPost,
+        microfluxoTitulo: fluxoPost?.titulo ?? acao.rotulo,
+      });
       return;
     }
 
@@ -786,6 +811,23 @@ export function CartaoDigitalProfissionalPublico({
         acervo={acervoConsolidado}
         aoSolicitarExperiencia={abrirExperienciaComContexto}
         consultorPadraoId={profissional.id}
+      />
+
+      {/* Bottom Sheet de Publicação / Post */}
+      <BottomSheetPostVitrine
+        aberto={acaoPostAberta !== null}
+        aoFechar={() => setAcaoPostAberta(null)}
+        pagina={paginaOrganizacao}
+        acaoPost={acaoPostAberta}
+        whatsappFallbackOpcional={profissional.whatsappOpcional}
+        aoIniciarMicrofluxo={(microfluxoId) => {
+          const fluxo = microfluxosDisponiveis.find((m) => m.id === microfluxoId);
+          if (fluxo) {
+            setSecaoAberta(null);
+            setContextoMicrofluxo({ profissionalPreSelecionadoId: profissional.id });
+            setMicrofluxoAtivo(fluxo);
+          }
+        }}
       />
 
       {/* Executor do Microfluxo (Abre interativamente com o consultor pré-selecionado) */}

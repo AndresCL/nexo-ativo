@@ -93,6 +93,12 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
       "aria-hidden": true,
     });
   }
+  if (acao.tipoDestino === "publicacao_post") {
+    return MAPA_ICONES_POR_ID["comunicado"]?.componente({
+      className: "h-4 w-4 shrink-0",
+      "aria-hidden": true,
+    });
+  }
   if (acao.tipoDestino === "microfluxo") {
     if (/conectar|falar|consultor/i.test(acao.destino + acao.rotulo)) {
       return MAPA_ICONES_POR_ID["conectar"]?.componente({

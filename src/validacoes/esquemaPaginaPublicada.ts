@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CODIGOS_PERFIL_PUBLICIDADE } from "../dominio/publicidade/tiposPerfilPublicidade";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
+import { esquemaConfiguracaoPostVitrine } from "./esquemasMicrofluxo";
 import {
   esquemaChamadaEditorial,
   esquemaChamadasEditoriaisAdicionais,
@@ -81,6 +82,7 @@ const esquemaItemAcaoHome = z.object({
       microfluxoId: z.string().optional(),
     })
     .optional(),
+  configuracaoPost: esquemaConfiguracaoPostVitrine.optional(),
   id: z.string().min(1),
   rotulo: z.string().min(1).max(60),
   subtituloDiscreto: z.string().max(90).optional(),
@@ -89,6 +91,7 @@ const esquemaItemAcaoHome = z.object({
   subtituloCartaoOpcional: z.string().max(90).optional(),
   tipoDestino: z.enum([
     "microfluxo",
+    "publicacao_post",
     "secao_produtos",
     "secao_servicos",
     "secao_portfolio",

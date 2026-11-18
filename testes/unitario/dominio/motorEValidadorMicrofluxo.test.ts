@@ -173,4 +173,51 @@ describe("Validador de Grafo Acíclico (DAG) e Motor de Execução de Microfluxo
       expect(resultado.data.etapas[1]?.fonteCatalogo).toBe("servicos");
     }
   });
+
+  it("deve validar experiencia do tipo publicacao_post e resolver acao na vitrine com configuracaoPost", async () => {
+    const { resolverAcoesVitrineComMicrofluxos } = await import(
+      "@/dominio/entidades/paginaPublicada"
+    );
+    const experienciaPost: DefinicaoMicrofluxo = {
+      id: "exp-post-1",
+      organizacaoId: "org-1",
+      tipoAcao: "publicacao_post",
+      titulo: "Comunicado de Fim de Ano",
+      rotuloBotaoHome: "Ver horário especial",
+      descricaoCurta: "",
+      textoBotaoConclusao: "",
+      mensagemConfirmacaoTitulo: "",
+      mensagemConfirmacaoCorpo: "",
+      etapaInicialId: "",
+      etapas: [],
+      ativo: true,
+      atualizadoEmIso: new Date().toISOString(),
+      configuracaoPost: {
+        tituloPost: "Horário Especial de Fim de Ano",
+        dataTexto: "Dezembro 2026",
+        corpoTexto: "Atenderemos em horário estendido durante todo o mês.",
+        cta: {
+          tipoAcao: "whatsapp",
+          rotuloBotao: "Agendar pelo WhatsApp",
+        },
+      },
+    };
+
+    expect(avaliarIntegridadeGrafoMicrofluxo(experienciaPost)).toHaveLength(0);
+
+    const postSemTexto: DefinicaoMicrofluxo = {
+      ...experienciaPost,
+      configuracaoPost: {
+        corpoTexto: "   ",
+        cta: { tipoAcao: "link_externo", destinoOpcional: "invalido" },
+      },
+    };
+    expect(avaliarIntegridadeGrafoMicrofluxo(postSemTexto).length).toBeGreaterThanOrEqual(2);
+
+    const acoes = resolverAcoesVitrineComMicrofluxos([], [experienciaPost]);
+    expect(acoes).toHaveLength(1);
+    expect(acoes[0]?.tipoDestino).toBe("publicacao_post");
+    expect(acoes[0]?.destino).toBe("#post-exp-post-1");
+    expect(acoes[0]?.configuracaoPost?.tituloPost).toBe("Horário Especial de Fim de Ano");
+  });
 });

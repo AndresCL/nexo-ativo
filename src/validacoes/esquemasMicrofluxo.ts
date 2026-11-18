@@ -1,8 +1,22 @@
 import { z } from "zod";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
+import { esquemaMidiaItemCatalogo } from "./esquemasCatalogoConteudo";
 import type { DefinicaoMicrofluxo, EtapaMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { esquemaRegraCalculoComercialMicrofluxo } from "./esquemasCalculoComercial";
+
+export const esquemaConfiguracaoPostVitrine = z.object({
+  tituloPost: z.string().max(140).optional(),
+  dataTexto: z.string().max(60).optional(),
+  corpoTexto: z.string().max(5000),
+  imagens: z.array(esquemaMidiaItemCatalogo).max(12).optional(),
+  cta: z.object({
+    tipoAcao: z.enum(["nenhum", "whatsapp", "microfluxo", "link_externo", "telefone"]),
+    rotuloBotao: z.string().max(60).optional(),
+    microfluxoId: z.string().max(120).optional(),
+    destinoOpcional: z.string().max(500).optional(),
+  }),
+});
 
 const esquemaOpcaoEtapa = z.object({
   desconectada: z.boolean().optional(),
@@ -238,6 +252,7 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
     tipoAcao: z
       .enum([
         "microfluxo",
+        "publicacao_post",
         "link_externo",
         "secao_produtos",
         "secao_servicos",
@@ -279,4 +294,5 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
       microfluxoId: z.string().optional(),
     })
     .optional(),
+  configuracaoPost: esquemaConfiguracaoPostVitrine.optional(),
   });

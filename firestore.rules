@@ -225,6 +225,10 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /acompanhamentoFundador/{organizacaoId} {
+      allow read, write: if ehFundador();
+    }
+
     // Negação explícita para qualquer outro caminho não mapeado
     match /{document=**} {
       allow read, write: if false;

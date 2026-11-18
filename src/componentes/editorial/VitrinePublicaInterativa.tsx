@@ -34,6 +34,7 @@ import { criarPreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrin
 import { restaurarFocoAcaoVitrine } from "./restaurarFocoAcaoVitrine";
 import { ContextoApresentacaoEquipe } from "@/ganchos/contextoApresentacaoEquipe";
 import { BottomSheetDetalhesItemAcervo } from "./acervo/BottomSheetDetalhesItemAcervo";
+import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
 import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 
 export interface PropriedadesVitrinePublicaInterativa {
@@ -62,6 +63,7 @@ export function VitrinePublicaInterativa({
     item: ProdutoCatalogo | ServicoOrganizacao;
     configuracaoCta?: ConfiguracaoCtaAcervo;
   } | null>(null);
+  const [acaoPostAberta, setAcaoPostAberta] = useState<ItemAcaoHome | null>(null);
   const [cartaoProfissionalAtivo, setCartaoProfissionalAtivo] = useState<ProfissionalEquipe | null>(
     null,
   );
@@ -332,6 +334,30 @@ export function VitrinePublicaInterativa({
       return;
     }
 
+    if (acao.tipoDestino === "publicacao_post" || acao.destino.startsWith("#post-")) {
+      setMicrofluxoAtivo(null);
+      setSecaoAberta(null);
+      setAcaoPostAberta(acao);
+
+      const idExperienciaPost = acao.destino.startsWith("#post-")
+        ? acao.destino.slice("#post-".length)
+        : acao.id.replace(/^acao-fluxo-/, "");
+      const fluxoPost = microfluxosDisponiveis.find((m) => m.id === idExperienciaPost);
+
+      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        organizacaoId: pagina.organizacaoId,
+        tipoEvento: "abertura_microfluxo",
+        canalOrigem: origem.canalOrigem,
+        ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
+        ...(origem.cartaoProfissionalId
+          ? { cartaoProfissionalId: origem.cartaoProfissionalId }
+          : {}),
+        microfluxoId: fluxoPost?.id ?? idExperienciaPost,
+        microfluxoTitulo: fluxoPost?.titulo ?? acao.rotulo,
+      });
+      return;
+    }
+
     if (acao.tipoDestino === "microfluxo") {
       const resolucaoFluxo = resolverMicrofluxoPorDestino(acao.destino, microfluxosDisponiveis);
       const fluxoAlvo = resolucaoFluxo?.microfluxo;
@@ -499,6 +525,22 @@ export function VitrinePublicaInterativa({
               ...(contextoItem.produtoId ? { produtoPreSelecionadoId: contextoItem.produtoId } : {}),
               ...(contextoItem.servicoId ? { servicoPreSelecionadoId: contextoItem.servicoId } : {}),
             });
+            setMicrofluxoAtivo(fluxo);
+          }
+        }}
+      />
+
+      {/* Bottom Sheet de Publicação / Post */}
+      <BottomSheetPostVitrine
+        aberto={acaoPostAberta !== null}
+        aoFechar={() => setAcaoPostAberta(null)}
+        pagina={pagina}
+        acaoPost={acaoPostAberta}
+        aoIniciarMicrofluxo={(microfluxoId) => {
+          const fluxo = microfluxosDisponiveis.find((m) => m.id === microfluxoId);
+          if (fluxo) {
+            setSecaoAberta(null);
+            setContextoMicrofluxo(undefined);
             setMicrofluxoAtivo(fluxo);
           }
         }}

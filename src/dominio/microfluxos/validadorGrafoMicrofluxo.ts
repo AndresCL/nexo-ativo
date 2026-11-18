@@ -75,6 +75,28 @@ export function avaliarIntegridadeGrafoMicrofluxo(
           mensagem: `A ação de telefone "${microfluxo.titulo}" precisa ter um número de contato preenchido.`,
         });
       }
+    } else if (microfluxo.tipoAcao === "publicacao_post") {
+      const post = microfluxo.configuracaoPost;
+      if (!post?.corpoTexto?.trim()) {
+        inconsistencias.push({
+          codigo: "REGRA_CALCULO_COMERCIAL_INVALIDA",
+          mensagem: `A publicação "${microfluxo.titulo}" precisa ter o texto do post preenchido.`,
+        });
+      }
+      if (post?.cta.tipoAcao === "link_externo") {
+        const url = post.cta.destinoOpcional?.trim() || "";
+        if (!url || !/^https?:\/\//i.test(url)) {
+          inconsistencias.push({
+            codigo: "REGRA_CALCULO_COMERCIAL_INVALIDA",
+            mensagem: `O botão de link externo da publicação "${microfluxo.titulo}" precisa de uma URL iniciando com http:// ou https://.`,
+          });
+        }
+      } else if (post?.cta.tipoAcao === "microfluxo" && !post.cta.microfluxoId?.trim()) {
+        inconsistencias.push({
+          codigo: "REGRA_CALCULO_COMERCIAL_INVALIDA",
+          mensagem: `Selecione qual experiência o botão da publicação "${microfluxo.titulo}" deve iniciar.`,
+        });
+      }
     }
 
     return inconsistencias;

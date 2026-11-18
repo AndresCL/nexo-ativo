@@ -9,6 +9,10 @@ import { executarAjustePlanoOrganizacaoFundador } from "../../../funcoes/src/cas
 import { executarAlteracaoSituacaoOrganizacaoFundador } from "../../../funcoes/src/casos-de-uso/atualizarSituacaoOrganizacaoFundador";
 import { executarCriacaoOrganizacaoPeloFundador } from "../../../funcoes/src/casos-de-uso/criarOrganizacaoPeloFundador";
 import { executarDefinicaoPerfilPublicidadeOrganizacaoFundador } from "../../../funcoes/src/casos-de-uso/definirPerfilPublicidadeOrganizacaoFundador";
+import {
+  esquemaAdicionarMensagemKanbanFundador,
+  esquemaAlterarEtapaKanbanFundador,
+} from "@/validacoes/esquemasPainelFundador";
 
 function criarBancoFirestoreEmMemoria(inicial: Record<string, Record<string, unknown>> = {}) {
   const documentos = new Map<string, Record<string, unknown>>(Object.entries(inicial));
@@ -287,5 +291,35 @@ describe("Painel Fundador: Governança Global e Trilha de Auditoria", () => {
         `organizacoes/${resultado.organizacao.id}/membros/${usuarioFundador.uid}`,
       )?.papel,
     ).toBe("administrador");
+  });
+
+  it("deve validar corretamente as etapas do Kanban e mensagens do acompanhamento do fundador", () => {
+    expect(
+      esquemaAlterarEtapaKanbanFundador.safeParse({
+        organizacaoId: "org-alvo",
+        etapaKanban: "atencao",
+      }).success,
+    ).toBe(true);
+
+    expect(
+      esquemaAlterarEtapaKanbanFundador.safeParse({
+        organizacaoId: "org-alvo",
+        etapaKanban: "etapa_invalida",
+      }).success,
+    ).toBe(false);
+
+    expect(
+      esquemaAdicionarMensagemKanbanFundador.safeParse({
+        organizacaoId: "org-alvo",
+        texto: "Cliente solicitou acompanhamento na configuração dos microfluxos.",
+      }).success,
+    ).toBe(true);
+
+    expect(
+      esquemaAdicionarMensagemKanbanFundador.safeParse({
+        organizacaoId: "org-alvo",
+        texto: "   ",
+      }).success,
+    ).toBe(false);
   });
 });
