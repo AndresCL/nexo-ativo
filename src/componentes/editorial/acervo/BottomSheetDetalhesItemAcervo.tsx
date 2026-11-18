@@ -8,15 +8,17 @@ import {
   type ProdutoCatalogo,
   type ServicoOrganizacao,
 } from "@/dominio/entidades/catalogoConteudo";
-import type {
-  ConteudoPaginaPublicada,
-  ConfiguracaoCtaAcervo,
+import {
+  obterDescritorPaletaEditorial,
+  type ConteudoPaginaPublicada,
+  type ConfiguracaoCtaAcervo,
 } from "@/dominio/entidades/paginaPublicada";
 import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numeroWhatsappInternacional";
+import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
 import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
-import { BottomSheetEditorialBase } from "./BottomSheetEditorialBase";
+import { BottomSheetEditorialBase } from "../BottomSheetEditorialBase";
 
 interface PropriedadesBottomSheetDetalhesItemAcervo {
   readonly aberto: boolean;
@@ -42,6 +44,7 @@ export function BottomSheetDetalhesItemAcervo({
 }: PropriedadesBottomSheetDetalhesItemAcervo) {
   if (!item) return null;
 
+  const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
   const ehProduto = tipo === "produtos";
   const produto = ehProduto ? (item as ProdutoCatalogo) : null;
   const servico = !ehProduto ? (item as ServicoOrganizacao) : null;
@@ -112,9 +115,18 @@ export function BottomSheetDetalhesItemAcervo({
       aberto={aberto}
       aoFechar={aoFechar}
       pagina={pagina}
-      tituloFallbackImagens={item.nome}
-      imagensGaleria={imagensGaleria}
       ariaDescribedBy="descricao-item-detalhe"
+      midiaTopoSangrada={
+        imagensGaleria.length > 0 ? (
+          <GaleriaImagensComThumbs
+            imagens={imagensGaleria}
+            tituloFallback={item.nome}
+            temaEscuro={paleta.temaEscuro}
+            proporcaoClassName="aspect-4/3 w-full !rounded-none"
+            className="space-y-0 [&_div.flex]:p-3 [&_div.flex]:bg-[var(--editorial-superficie)]/50"
+          />
+        ) : undefined
+      }
       rodapeFixo={
         <button
           type="button"

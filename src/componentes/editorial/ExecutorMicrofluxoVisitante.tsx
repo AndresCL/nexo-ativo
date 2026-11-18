@@ -15,7 +15,7 @@ import {
 } from "@/dominio/microfluxos/conclusaoMicrofluxo";
 import { copiarTextoComAviso } from "@/componentes/interface/notificacoes/copiarTextoComAviso";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as DialogoPrimitivo from "@radix-ui/react-dialog";
 import {
   ArrowLeft,
@@ -24,7 +24,6 @@ import {
   CheckCircle2,
   Copy,
   Sparkles,
-  X,
 } from "lucide-react";
 import type { PortaSubmissaoSolicitacaoVisitante } from "@/aplicacao/portas/portasSolicitacoesComerciais";
 import {
@@ -43,8 +42,6 @@ import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servi
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import {
   deveIgnorarOtimizadorImagem,
-  gerarVariaveisCssPaletaEditorial,
-  obterDescritorPaletaEditorial,
   obterDescritorTipografiaEditorial,
   type ConteudoPaginaPublicada,
 } from "@/dominio/entidades/paginaPublicada";
@@ -65,7 +62,7 @@ import {
 import { TransicaoAlternancia } from "@/componentes/interface/TransicaoAlternancia";
 import { AvatarProfissional } from "./AvatarProfissional";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
-import { CLASSES_PAINEL_EDITORIAL_RESPONSIVO } from "./estilosPainelEditorial";
+import { BottomSheetEditorialBase } from "./BottomSheetEditorialBase";
 
 export interface PropriedadesExecutorMicrofluxoVisitante {
   readonly aberto: boolean;
@@ -137,12 +134,6 @@ export function ExecutorMicrofluxoVisitante({
     return null;
   }
 
-  const variaveisPaleta = gerarVariaveisCssPaletaEditorial(
-    pagina.paletaId,
-    pagina.corPersonalizadaHex,
-    pagina.customizacaoTokens,
-  ) as CSSProperties;
-  const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
   const tipografia = obterDescritorTipografiaEditorial(pagina.tipografiaId);
 
   const etapaAtual = obterEtapaAtualExecucao(estado);
@@ -395,76 +386,75 @@ export function ExecutorMicrofluxoVisitante({
   const produtosDisponiveisEtapa = incluirProdutosNoCatalogo ? acervo.produtos : [];
 
   return (
-    <DialogoPrimitivo.Root open={aberto} onOpenChange={aoAlterarAbertura}>
-      <DialogoPrimitivo.Portal>
-        <DialogoPrimitivo.Overlay
-          className={combinarClasses(
-            "animacao-overlay-dialogo fixed inset-0 z-40 backdrop-blur-xs",
-            pagina.composicaoVisual === "imersivo" ? "bg-black/25" : "bg-black/70",
-          )}
-        />
-        <DialogoPrimitivo.Content
-          ref={painelConteudoRef}
-          style={variaveisPaleta}
-          data-testid="executor-microfluxo-visitante"
-          className={combinarClasses(
-            CLASSES_PAINEL_EDITORIAL_RESPONSIVO,
-            "justify-between sm:justify-start",
-            paleta.temaEscuro
-              ? "border-white/18 shadow-black/60 ring-1 ring-white/10"
-              : "border-black/12 shadow-black/20 ring-1 ring-black/5",
-            tipografia.classeCorpo,
-          )}
-        >
-          <div
-            className="mx-auto -mt-1 mb-3 h-1.5 w-12 shrink-0 rounded-full bg-current/25 sm:hidden"
-            aria-hidden="true"
-          />
-          <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">
-            {estado.concluido ? (
-              <DialogoPrimitivo.Close asChild>
-                <button
-                  type="button"
-                  aria-label="Fechar experiência"
-                  className="absolute top-4 right-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-current/20 bg-[var(--editorial-fundo)]/80 backdrop-blur-xs transition-opacity hover:opacity-75"
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </DialogoPrimitivo.Close>
+    <BottomSheetEditorialBase
+      aberto={aberto}
+      aoFechar={() => aoAlterarAbertura(false)}
+      pagina={pagina}
+      dataTestId="executor-microfluxo-visitante"
+      rotuloBotaoFechar="Fechar experiência"
+      conteudoScrollRef={painelConteudoRef}
+      cabecalhoFixo={
+        !estado.concluido ? (
+          <header className="relative border-b border-current/12 pr-10 pb-4">
+            <p className="flex min-h-7 items-center text-xs leading-relaxed text-[var(--editorial-texto-secundario)]">
+              {microfluxo.titulo}
+            </p>
+            <div aria-live="polite">
+              <DialogoPrimitivo.Title
+                className={combinarClasses("mt-1 text-xl sm:text-2xl", tipografia.classeTitulo)}
+              >
+                {etapaAtual.titulo}
+              </DialogoPrimitivo.Title>
+              <DialogoPrimitivo.Description className="mt-1.5 text-xs leading-relaxed text-[var(--editorial-texto-secundario)]">
+                Passo {estado.historicoEtapasIds.length + 1}
+                {etapaAtual.subtituloOpcional?.trim()
+                  ? `: ${etapaAtual.subtituloOpcional.trim()}`
+                  : ""}
+              </DialogoPrimitivo.Description>
+            </div>
+          </header>
+        ) : undefined
+      }
+      rodapeFixo={
+        !estado.concluido ? (
+          <div className="flex items-center justify-between gap-3">
+            {estado.historicoEtapasIds.length > 0 ? (
+              <button
+                type="button"
+                onClick={voltarEtapa}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-sm border border-current/25 px-4 py-2.5 text-xs font-medium transition-opacity hover:opacity-80"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Voltar</span>
+              </button>
             ) : (
-              <header className="relative border-b border-current/12 pb-4">
-                <p className="flex min-h-9 items-center pr-14 text-xs leading-relaxed text-[var(--editorial-texto-secundario)]">
-                  {microfluxo.titulo}
-                </p>
-                <div aria-live="polite">
-                  <DialogoPrimitivo.Title
-                    className={combinarClasses("mt-1 text-xl sm:text-2xl", tipografia.classeTitulo)}
-                  >
-                    {etapaAtual.titulo}
-                  </DialogoPrimitivo.Title>
-                  <DialogoPrimitivo.Description className="mt-1.5 text-xs leading-relaxed text-[var(--editorial-texto-secundario)]">
-                    Passo {estado.historicoEtapasIds.length + 1}
-                    {etapaAtual.subtituloOpcional?.trim()
-                      ? `: ${etapaAtual.subtituloOpcional.trim()}`
-                      : ""}
-                  </DialogoPrimitivo.Description>
-                </div>
-                <DialogoPrimitivo.Close asChild>
-                  <button
-                    type="button"
-                    aria-label="Fechar experiência"
-                    className="absolute top-0 right-0 inline-flex h-11 w-11 items-center justify-center rounded-full border border-current/20 transition-opacity hover:opacity-75"
-                  >
-                    <X className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </DialogoPrimitivo.Close>
-              </header>
+              <span />
             )}
 
-            <TransicaoAlternancia
-              chaveId={estado.concluido ? "concluido" : etapaAtual.id}
-              variante="horizontal"
+            <button
+              type="button"
+              disabled={enviandoSolicitacao}
+              onClick={() => tentarAvancar()}
+              className="inline-flex min-h-11 items-center gap-2 rounded-sm bg-[var(--editorial-texto)] px-5 py-2.5 text-sm font-medium text-[var(--editorial-fundo)] transition-opacity hover:opacity-90 disabled:opacity-50"
             >
+              <span>
+                {enviandoSolicitacao
+                  ? "Registrando solicitação…"
+                  : ehUltimaEtapa
+                    ? microfluxo.textoBotaoConclusao || "Concluir experiência"
+                    : "Continuar"}
+              </span>
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        ) : undefined
+      }
+      classNameConteudoInterno="pt-2"
+    >
+      <TransicaoAlternancia
+        chaveId={estado.concluido ? "concluido" : etapaAtual.id}
+        variante="horizontal"
+      >
               {estado.concluido ? (
                 <section data-testid="confirmacao-microfluxo-concluido" className="mt-2 space-y-6">
                   <div className="flex flex-col items-center text-center space-y-3">
@@ -1507,42 +1497,6 @@ export function ExecutorMicrofluxoVisitante({
                 ) : null}
               </div>
             ) : null}
-          </div>
-
-          {!estado.concluido ? (
-            <footer className="mt-4 flex shrink-0 items-center justify-between gap-3 border-t border-current/12 pt-4">
-              {estado.historicoEtapasIds.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={voltarEtapa}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-sm border border-current/25 px-4 py-2.5 text-xs font-medium transition-opacity hover:opacity-80"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Voltar</span>
-                </button>
-              ) : (
-                <span />
-              )}
-
-              <button
-                type="button"
-                disabled={enviandoSolicitacao}
-                onClick={() => tentarAvancar()}
-                className="inline-flex min-h-11 items-center gap-2 rounded-sm bg-[var(--editorial-texto)] px-5 py-2.5 text-sm font-medium text-[var(--editorial-fundo)] transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
-                <span>
-                  {enviandoSolicitacao
-                    ? "Registrando solicitação…"
-                    : ehUltimaEtapa
-                      ? microfluxo.textoBotaoConclusao || "Concluir experiência"
-                      : "Continuar"}
-                </span>
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </footer>
-          ) : null}
-        </DialogoPrimitivo.Content>
-      </DialogoPrimitivo.Portal>
-    </DialogoPrimitivo.Root>
+    </BottomSheetEditorialBase>
   );
 }

@@ -1,2 +1,0 @@
-export const CLASSES_PAINEL_EDITORIAL_RESPONSIVO =
-  "animacao-painel-responsivo fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] w-full flex-col overflow-y-auto rounded-t-3xl border-t bg-[var(--editorial-fundo)]/95 p-6 text-[var(--editorial-texto)] shadow-2xl backdrop-blur-2xl sm:inset-y-0 sm:right-6 sm:left-auto sm:my-auto sm:h-fit sm:max-h-[min(48rem,calc(100dvh-3rem))] sm:w-[28rem] sm:max-w-[calc(100vw-3rem)] sm:rounded-2xl sm:border sm:p-5";

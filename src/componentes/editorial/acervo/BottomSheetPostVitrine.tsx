@@ -3,16 +3,18 @@
 import * as DialogoPrimitivo from "@radix-ui/react-dialog";
 import { ArrowUpRight, Calendar, MessageCircle, Phone, Sparkles } from "lucide-react";
 import { obterListaImagensMidia } from "@/dominio/entidades/catalogoConteudo";
-import type {
-  ConteudoPaginaPublicada,
-  ItemAcaoHome,
+import {
+  obterDescritorPaletaEditorial,
+  type ConteudoPaginaPublicada,
+  type ItemAcaoHome,
 } from "@/dominio/entidades/paginaPublicada";
 import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numeroWhatsappInternacional";
+import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
 import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
+import { BottomSheetEditorialBase } from "../BottomSheetEditorialBase";
 import { RenderizadorTextoRicoEditorial } from "../RenderizadorTextoRicoEditorial";
-import { BottomSheetEditorialBase } from "./BottomSheetEditorialBase";
 
 export interface PropriedadesBottomSheetPostVitrine {
   readonly aberto: boolean;
@@ -33,6 +35,7 @@ export function BottomSheetPostVitrine({
 }: PropriedadesBottomSheetPostVitrine) {
   if (!acaoPost) return null;
 
+  const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
   const post = acaoPost.configuracaoPost;
   const tituloExibicao = post?.tituloPost?.trim() || acaoPost.rotulo;
   const dataTexto = post?.dataTexto?.trim();
@@ -153,9 +156,18 @@ export function BottomSheetPostVitrine({
       aberto={aberto}
       aoFechar={aoFechar}
       pagina={pagina}
-      tituloFallbackImagens={tituloExibicao}
-      imagensGaleria={imagensGaleria}
       ariaDescribedBy="corpo-post-detalhe"
+      midiaTopoSangrada={
+        imagensGaleria.length > 0 ? (
+          <GaleriaImagensComThumbs
+            imagens={imagensGaleria}
+            tituloFallback={tituloExibicao}
+            temaEscuro={paleta.temaEscuro}
+            proporcaoClassName="aspect-4/3 w-full !rounded-none"
+            className="space-y-0 [&_div.flex]:p-3 [&_div.flex]:bg-[var(--editorial-superficie)]/50"
+          />
+        ) : undefined
+      }
       rodapeFixo={
         tipoCta !== "nenhum" ? (
           <button
@@ -197,4 +209,3 @@ export function BottomSheetPostVitrine({
     </BottomSheetEditorialBase>
   );
 }
-
