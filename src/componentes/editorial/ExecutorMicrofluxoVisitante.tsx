@@ -319,6 +319,17 @@ export function ExecutorMicrofluxoVisitante({
         });
       }
 
+      if (estado && !proximo.concluido && proximo.etapaAtualId !== estado.etapaAtualId) {
+        // Registra o avanço real para a próxima etapa no funil de abandono
+        void servicoTelemetriaAnonimaPadrao.registrarEvento({
+          organizacaoId: pagina.organizacaoId,
+          tipoEvento: "avanco_etapa_microfluxo",
+          microfluxoId: microfluxo.id,
+          microfluxoTitulo: microfluxo.titulo,
+          etapaId: proximo.etapaAtualId,
+        });
+      }
+
       setEstado(proximo);
     } catch (erro) {
       setMensagemErro(

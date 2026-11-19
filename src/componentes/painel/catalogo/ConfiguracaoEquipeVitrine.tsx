@@ -43,7 +43,7 @@ export function ConfiguracaoEquipeVitrine({
             }
           >
             <option value="lista_acoes">No lugar definido na lista de ações</option>
-            <option value="abaixo_hero">Abaixo do texto do hero</option>
+            <option value="abaixo_hero">Na coluna lateral (destaque desktop)</option>
           </select>
         </label>
         <label className="text-xs font-medium text-mineral-700">

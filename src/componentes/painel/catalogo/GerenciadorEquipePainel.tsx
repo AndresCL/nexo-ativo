@@ -105,6 +105,7 @@ export function GerenciadorEquipePainel({
   const [linkedin, setLinkedin] = useState("");
   const [instagram, setInstagram] = useState("");
   const [aceitaSolicitacoesDiretas, setAceitaSolicitacoesDiretas] = useState(true);
+  const [exibirAcoesVitrineNoCartao, setExibirAcoesVitrineNoCartao] = useState(true);
 
   const [qrSelecionadoId, setQrSelecionadoId] = useState<string | "organizacao" | null>(null);
   const [idConfirmarExclusao, setIdConfirmarExclusao] = useState<string | null>(null);
@@ -139,6 +140,7 @@ export function GerenciadorEquipePainel({
     setLinkedin("");
     setInstagram("");
     setAceitaSolicitacoesDiretas(true);
+    setExibirAcoesVitrineNoCartao(true);
   }
 
   function editarProfissional(profissional: ProfissionalEquipe) {
@@ -156,6 +158,7 @@ export function GerenciadorEquipePainel({
     setLinkedin(profissional.linkedinOpcional ?? "");
     setInstagram(profissional.instagramOpcional ?? "");
     setAceitaSolicitacoesDiretas(profissional.aceitaSolicitacoesDiretas);
+    setExibirAcoesVitrineNoCartao(profissional.exibirAcoesVitrineNoCartao ?? true);
     referenciaNome.current?.focus();
   }
 
@@ -204,6 +207,7 @@ export function GerenciadorEquipePainel({
         ...(linkedin.trim() ? { linkedinOpcional: linkedin.trim() } : {}),
         ...(instagram.trim() ? { instagramOpcional: instagram.trim() } : {}),
         aceitaSolicitacoesDiretas,
+        ...(exibirAcoesVitrineNoCartao ? {} : { exibirAcoesVitrineNoCartao: false }),
         ordemExibicao: existente?.ordemExibicao ?? profissionais.length + 1,
         ativo: seraAtivo,
         atualizadoEmIso: new Date().toISOString(),
@@ -588,6 +592,19 @@ export function GerenciadorEquipePainel({
                 className="h-4 w-4 accent-sky-600"
               />
               <span>Permitir início de atendimento direto pelo cartão digital</span>
+            </label>
+
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-indigo-200 bg-indigo-50/40 px-3.5 py-2.5 text-xs text-mineral-900">
+              <input
+                type="checkbox"
+                disabled={!podeEditarConteudo || publicacao.publicando || ocupado}
+                checked={exibirAcoesVitrineNoCartao}
+                onChange={(e) => setExibirAcoesVitrineNoCartao(e.target.checked)}
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <span>
+                Exibir acordeão com links e experiências da vitrine no cartão digital
+              </span>
             </label>
 
             <div className="flex flex-wrap items-center gap-2 pt-2">

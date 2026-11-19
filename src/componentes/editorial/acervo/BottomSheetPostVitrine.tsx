@@ -1,7 +1,8 @@
 "use client";
 
 import * as DialogoPrimitivo from "@radix-ui/react-dialog";
-import { ArrowUpRight, Calendar, MessageCircle, Phone, Sparkles } from "lucide-react";
+import { ArrowUpRight, Calendar, Phone, Sparkles } from "lucide-react";
+import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
 import { obterListaImagensMidia } from "@/dominio/entidades/catalogoConteudo";
 import {
   obterDescritorPaletaEditorial,
@@ -148,7 +149,7 @@ export function BottomSheetPostVitrine({
     ) : tipoCta === "telefone" ? (
       <Phone className="h-4 w-4" aria-hidden="true" />
     ) : (
-      <MessageCircle className="h-4 w-4 fill-white stroke-none" aria-hidden="true" />
+      <IconeWhatsapp className="h-4 w-4 shrink-0" aria-hidden="true" />
     );
 
   return (

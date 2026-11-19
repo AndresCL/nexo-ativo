@@ -3,7 +3,7 @@
 ## Princípios Visuais
 
 - **Apresentação autoral, nunca página corporativa longa:** Sem cabeçalhos gigantes, menus horizontais extensos ou grades genéricas de botões coloridos.
-- **Home Desktop:** Mídia em toda a viewport, marca discreta, título editorial, poucas ações alinhadas à direita e redes sociais sutis.
+- **Home Desktop:** Mídia em toda a viewport, marca discreta no topo, poucas ações alinhadas à direita e redes sociais sutis.
 - **Home Mobile:** Mídia preenchendo a tela com respeito a `safe-area-inset`, opções empilhadas e centralizadas horizontalmente (regra exclusiva da Home mobile, não imposta às etapas internas dos microfluxos) e alvos de toque mínimos de 44px.
 
 ## As Três Composições Aprovadas

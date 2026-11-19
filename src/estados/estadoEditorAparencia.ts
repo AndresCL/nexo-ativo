@@ -62,6 +62,7 @@ export interface EstadoEditorAparencia {
   ) => void;
   adicionarRedeSocial: () => void;
   atualizarRedeSocial: (redeId: string, parcial: Partial<LinkRedeSocial>) => void;
+  moverRedeSocial: (redeId: string, direcao: "cima" | "baixo") => void;
   removerRedeSocial: (redeId: string) => void;
   adicionarObraGaleria: () => void;
   atualizarObraGaleria: (obraId: string, parcial: Partial<DestaqueObraGaleria>) => void;
@@ -285,6 +286,28 @@ function criarStoreEditorAparencia(dadosIniciais?: DadosIniciaisEditorAparencia)
           ),
         },
       })),
+
+    moverRedeSocial: (redeId, direcao) =>
+      set((estado) => {
+        const atuais = [...estado.rascunho.redesSociais];
+        const indiceAtual = atuais.findIndex((item) => item.id === redeId);
+        if (indiceAtual === -1) return estado;
+
+        const indiceDestino = direcao === "cima" ? indiceAtual - 1 : indiceAtual + 1;
+        if (indiceDestino < 0 || indiceDestino >= atuais.length) return estado;
+
+        const [itemMovido] = atuais.splice(indiceAtual, 1);
+        if (!itemMovido) return estado;
+        atuais.splice(indiceDestino, 0, itemMovido);
+
+        return {
+          possuiAlteracoesNaoSalvas: true,
+          rascunho: {
+            ...estado.rascunho,
+            redesSociais: atuais,
+          },
+        };
+      }),
 
     removerRedeSocial: (redeId) =>
       set((estado) => ({

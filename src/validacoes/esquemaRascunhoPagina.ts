@@ -46,6 +46,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
       corCtaTexto: z.string().optional(),
       corSecundarioFundo: z.string().optional(),
       corSecundarioTexto: z.string().optional(),
+      corBrilhoBorda: z.string().optional(),
     })
     .optional(),
   tipografiaId: z.enum([
@@ -60,6 +61,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
     mostrarSubtituloCurto: z.boolean().optional(),
     alinhamentoCabecalho: z.enum(["esquerda", "centro", "direita"]).optional(),
     urlLogotipoOpcional: z.string().max(600).optional(),
+    formatoBordaLogotipo: z.enum(["natural", "suave", "arredondado", "circulo"]).optional(),
     cidadeEstado: z.string().max(80).optional(),
     urlMapaEnderecoOpcional: z
       .string()
@@ -108,6 +110,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
     intensidadeVeloEscuro: z.enum(["nenhum", "suave", "equilibrado", "intenso"]),
     efeitoCantos: z.enum(["nenhum", "dots", "grade"]).optional(),
     opacidadeDotsCantos: z.number().min(0).max(100).optional(),
+    tomDotsCantos: z.enum(["neutro", "destaque", "borda"]).optional(),
   }),
   acoesPrincipais: z.array(
     z.object({
@@ -130,6 +133,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
       destino: z.string().trim().min(1, "Informe o destino da ação.").max(500),
       destaquePrincipal: z.boolean().optional(),
       animarBordaDestaque: z.boolean().optional(),
+      corBrilhoBorda: z.string().optional(),
       icone: z.string().min(1).max(60).optional(),
     }),
   ),

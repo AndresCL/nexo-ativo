@@ -46,7 +46,6 @@ import {
   Mail,
   MapPin,
   Megaphone,
-  MessageCircle,
   MessageSquare,
   Music,
   Newspaper,
@@ -84,6 +83,7 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
+import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
 
 export interface ItemCatalogoIcone {
   readonly id: string;
@@ -106,7 +106,7 @@ export const CATALOGO_ICONES_ACOES: readonly ItemCatalogoIcone[] = [
     id: "whatsapp",
     rotulo: "WhatsApp",
     palavrasChave: ["whats", "zap", "mensagem", "conversa", "chat", "contato"],
-    componente: (props) => <MessageCircle {...props} />,
+    componente: (props) => <IconeWhatsapp {...props} />,
   },
   {
     id: "conectar",

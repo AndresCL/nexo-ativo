@@ -37,10 +37,10 @@ export function gerarMatrizExportacaoSolicitacoes(
   const escopo = opcoes.escopo ?? "ativas";
 
   const solicitacoesFiltradas = solicitacoes.filter((item) => {
-    if (escopo === "ativas" && item.situacao === "arquivada") {
+    if (escopo === "ativas" && item.situacao === "desqualificada") {
       return false;
     }
-    if (escopo === "arquivadas" && item.situacao !== "arquivada") {
+    if (escopo === "desqualificadas" && item.situacao !== "desqualificada") {
       return false;
     }
     if (

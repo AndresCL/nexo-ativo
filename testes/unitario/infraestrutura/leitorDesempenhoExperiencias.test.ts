@@ -70,8 +70,24 @@ describe("Leitura do desempenho por experiência", () => {
         aberturas: 2,
         conclusoes: 1,
         aberturasPermalink: 1,
+        porEtapa: {},
       },
     ]);
-    expect(contexto?.experiencias).toEqual([{ id: experiencia.id, titulo: experiencia.titulo }]);
+    expect(contexto?.experiencias).toEqual([
+      {
+        id: experiencia.id,
+        titulo: experiencia.titulo,
+        etapas: [
+          {
+            id: "etapa-catalogo",
+            titulo: "Escolha o item ou modalidade de seu interesse",
+          },
+          {
+            id: "etapa-contato",
+            titulo: "Para onde enviamos os detalhes e disponibilidade?",
+          },
+        ],
+      },
+    ]);
   });
 });

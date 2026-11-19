@@ -236,6 +236,12 @@ export function hidratarRascunhoConfiguracaoPagina(
       identidadeBruta.urlLogotipoOpcional
         ? { urlLogotipoOpcional: identidadeBruta.urlLogotipoOpcional }
         : {}),
+      ...(identidadeBruta.formatoBordaLogotipo === "natural" ||
+      identidadeBruta.formatoBordaLogotipo === "suave" ||
+      identidadeBruta.formatoBordaLogotipo === "arredondado" ||
+      identidadeBruta.formatoBordaLogotipo === "circulo"
+        ? { formatoBordaLogotipo: identidadeBruta.formatoBordaLogotipo }
+        : {}),
       ...(typeof identidadeBruta.cidadeEstado === "string" && identidadeBruta.cidadeEstado
         ? { cidadeEstado: identidadeBruta.cidadeEstado }
         : {}),
@@ -354,6 +360,11 @@ export function hidratarRascunhoConfiguracaoPagina(
         midiaBruta.efeitoCantos === "dots" || midiaBruta.efeitoCantos === "grade"
           ? midiaBruta.efeitoCantos
           : "nenhum",
+      ...(midiaBruta.tomDotsCantos === "neutro" ||
+      midiaBruta.tomDotsCantos === "destaque" ||
+      midiaBruta.tomDotsCantos === "borda"
+        ? { tomDotsCantos: midiaBruta.tomDotsCantos }
+        : {}),
       ...(typeof midiaBruta.opacidadeDotsCantos === "number"
         ? { opacidadeDotsCantos: Math.max(0, Math.min(100, midiaBruta.opacidadeDotsCantos)) }
         : {}),

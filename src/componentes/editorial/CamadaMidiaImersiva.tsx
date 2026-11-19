@@ -116,6 +116,7 @@ export function CamadaMidiaImersiva({
           tipo={midiaResolvida.efeitoCantos}
           temaEscuro={paleta.temaEscuro}
           opacidadePercentual={midiaResolvida.opacidadeDotsCantos}
+          tom={midiaResolvida.tomDotsCantos}
         />
       </div>
     );
@@ -175,6 +176,7 @@ export function CamadaMidiaImersiva({
         tipo={midiaResolvida.efeitoCantos}
         temaEscuro={paleta.temaEscuro}
         opacidadePercentual={midiaResolvida.opacidadeDotsCantos}
+        tom={midiaResolvida.tomDotsCantos}
       />
     </div>
   );

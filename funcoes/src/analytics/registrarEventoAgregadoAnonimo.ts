@@ -3,11 +3,12 @@ import type { TipoEventoTelemetriaAnonima } from "../../../src/dominio/analytics
 import { ErroValidacaoDominio } from "../../../src/dominio/erros/errosDominio";
 import { esquemaRegistroEventoAnonimo } from "../../../src/validacoes/esquemasTelemetriaAnonima";
 
-const CAMPO_POR_EVENTO: Readonly<Record<TipoEventoTelemetriaAnonima, string>> = {
+const CAMPO_POR_EVENTO: Readonly<Record<TipoEventoTelemetriaAnonima, string | null>> = {
   visualizacao_vitrine: "visualizacoesVitrine",
   visualizacao_cartao: "visualizacoesCartao",
   clique_acao_home: "cliquesAcoesHome",
   abertura_microfluxo: "aberturasMicrofluxo",
+  avanco_etapa_microfluxo: null,
   conclusao_microfluxo: "conclusoesMicrofluxo",
   clique_whatsapp: "cliquesWhatsapp",
   clique_ligacao: "cliquesLigacao",
@@ -52,7 +53,7 @@ export async function executarRegistroEventoAgregadoAnonimo(
   const campoIncrementar = CAMPO_POR_EVENTO[tipoEvento];
   const payloadAtualizacao: Record<string, unknown> = {
     dataIso: hojeDataIso,
-    [campoIncrementar]: FieldValue.increment(1),
+    ...(campoIncrementar ? { [campoIncrementar]: FieldValue.increment(1) } : {}),
     atualizadoEmIso: agoraIso,
   };
 
@@ -134,9 +135,16 @@ export async function executarRegistroEventoAgregadoAnonimo(
     const dadosMicro: Record<string, unknown> = {};
     if (tipoEvento === "abertura_microfluxo") {
       dadosMicro.aberturas = FieldValue.increment(1);
-      if (canalOrigem === "permalink") dadosMicro.aberturasPermalink = FieldValue.increment(1);
+      if (canalOrigem === "permalink") {
+        dadosMicro.aberturasPermalink = FieldValue.increment(1);
+      }
     } else if (tipoEvento === "conclusao_microfluxo") {
       dadosMicro.conclusoes = FieldValue.increment(1);
+    } else if (tipoEvento === "avanco_etapa_microfluxo" && validacao.data.etapaId) {
+      const seguroEtapaId = validacao.data.etapaId.replace(/[./#$\[\]]/g, "_");
+      dadosMicro.porEtapa = {
+        [seguroEtapaId]: FieldValue.increment(1),
+      };
     }
     if (microfluxoTitulo) {
       dadosMicro.titulo = microfluxoTitulo;

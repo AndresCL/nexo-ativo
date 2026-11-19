@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { LinkRedeSocial, TipoRedeSocial } from "@/dominio/entidades/paginaPublicada";
+import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 const NOMES_PADRAO_REDE: Readonly<Record<TipoRedeSocial, string>> = {
@@ -60,19 +61,7 @@ function renderizarIconeRedeSocial(rede: TipoRedeSocial): ReactNode {
         </svg>
       );
     case "whatsapp":
-      return (
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          className="h-4.5 w-4.5"
-          aria-hidden="true"
-        >
-          <path d="M20 11.5A8.5 8.5 0 0 1 7.6 19L4 20l1.1-3.5A8.5 8.5 0 1 1 20 11.5Z" />
-          <path d="M9.5 9.5c.4 1.8 2.2 3.6 4 4l1.3-.9c.3-.2.7-.2 1 0l1.2.8" />
-        </svg>
-      );
+      return <IconeWhatsapp className="h-4.5 w-4.5" aria-hidden="true" />;
     case "behance":
       return (
         <span aria-hidden="true" className="text-xs font-semibold tracking-tight">

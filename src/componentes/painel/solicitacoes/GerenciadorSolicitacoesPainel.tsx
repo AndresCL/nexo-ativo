@@ -72,7 +72,6 @@ export function GerenciadorSolicitacoesPainel({
 }: PropriedadesGerenciadorSolicitacoesPainel) {
   const [solicitacoes, setSolicitacoes] =
     useState<readonly SolicitacaoComercial[]>(solicitacoesIniciais);
-  const [exibirArquivadas, setExibirArquivadas] = useState(false);
   const [termoBusca, setTermoBusca] = useState("");
   const [solicitacaoSelecionadaId, setSolicitacaoSelecionadaId] = useState<string | null>(null);
   const [exibirConfiguracaoEmail, setExibirConfiguracaoEmail] = useState(false);
@@ -82,7 +81,7 @@ export function GerenciadorSolicitacoesPainel({
 
   const [salvandoId, setSalvandoId] = useState<string | null>(null);
   const salvamentoEmCurso = useRef(false);
-  const abrirDetalhesRef = useRef<HTMLButtonElement>(null);
+  const abrirDetalhesRef = useRef<HTMLInputElement>(null);
 
   const [_configuracaoEmail, setConfiguracaoEmail] = useState<
     ConfiguracaoEmailOrganizacao | undefined
@@ -103,13 +102,10 @@ export function GerenciadorSolicitacoesPainel({
 
   const solicitacoesFiltradas = useMemo(() => {
     const buscaNormalizada = termoBusca.trim().toLowerCase();
+    if (!buscaNormalizada) {
+      return solicitacoes;
+    }
     return solicitacoes.filter((item) => {
-      if ((item.situacao === "arquivada") !== exibirArquivadas) {
-        return false;
-      }
-      if (!buscaNormalizada) {
-        return true;
-      }
       const alvo = [
         item.nomeVisitante,
         item.telefoneOuWhatsapp,
@@ -123,7 +119,7 @@ export function GerenciadorSolicitacoesPainel({
 
       return alvo.includes(buscaNormalizada);
     });
-  }, [solicitacoes, exibirArquivadas, termoBusca]);
+  }, [solicitacoes, termoBusca]);
 
   const solicitacaoAtiva = solicitacoes.find((s) => s.id === solicitacaoSelecionadaId) ?? null;
 
@@ -138,7 +134,7 @@ export function GerenciadorSolicitacoesPainel({
     const frequenciaExperiencias: Record<string, number> = {};
 
     for (const item of solicitacoes) {
-      if (item.situacao === "arquivada") continue;
+      if (item.situacao === "desqualificada") continue;
 
       if (item.situacao === "nova") {
         const criadoEm = new Date(item.criadoEmIso).getTime();
@@ -456,7 +452,7 @@ export function GerenciadorSolicitacoesPainel({
         </CartaoSuperficie>
       </TransicaoColapsavel>
 
-      {!exibirArquivadas && solicitacoes.length > 0 ? (
+      {solicitacoes.length > 0 ? (
         <div
           data-testid="barra-saude-comercial-painel"
           className="grid grid-cols-1 gap-3 sm:grid-cols-3"
@@ -521,34 +517,15 @@ export function GerenciadorSolicitacoesPainel({
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2" aria-label="Visualização de solicitações">
-          <button
-            ref={abrirDetalhesRef}
-            type="button"
-            aria-pressed={!exibirArquivadas}
-            onClick={() => setExibirArquivadas(false)}
-            className={combinarClasses(
-              "rounded-lg border px-4 py-2 text-xs font-semibold",
-              !exibirArquivadas
-                ? "border-indigo-200 bg-indigo-50 text-indigo-900"
-                : "border-marfim-300 bg-white text-mineral-600",
-            )}
-          >
-            Quadro comercial
-          </button>
-          <button
-            type="button"
-            aria-pressed={exibirArquivadas}
-            onClick={() => setExibirArquivadas(true)}
-            className={combinarClasses(
-              "rounded-lg border px-4 py-2 text-xs font-semibold",
-              exibirArquivadas
-                ? "border-mineral-400 bg-marfim-100 text-mineral-900"
-                : "border-marfim-300 bg-white text-mineral-600",
-            )}
-          >
-            Arquivadas ({solicitacoes.filter((s) => s.situacao === "arquivada").length})
-          </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-mineral-700">
+            Total no fluxo:{" "}
+            <strong className="font-bold text-mineral-950">{solicitacoes.length}</strong>
+          </span>
+          <span className="text-mineral-300">·</span>
+          <span className="text-xs text-mineral-500">
+            5 etapas comerciais
+          </span>
         </div>
 
         <div className="relative w-full sm:w-72">
@@ -557,6 +534,7 @@ export function GerenciadorSolicitacoesPainel({
             aria-hidden="true"
           />
           <input
+            ref={abrirDetalhesRef}
             type="search"
             aria-label="Buscar por nome, telefone ou serviço"
             placeholder="Buscar visitante ou item..."
@@ -570,7 +548,6 @@ export function GerenciadorSolicitacoesPainel({
       <QuadroSolicitacoes
         solicitacoes={solicitacoesFiltradas}
         nomeOrganizacao={nomeOrganizacao}
-        exibirArquivadas={exibirArquivadas}
         buscando={termoBusca.trim().length > 0}
         podeGerenciar={podeGerenciarSolicitacoes}
         salvandoId={salvandoId}
@@ -583,7 +560,6 @@ export function GerenciadorSolicitacoesPainel({
         aoMudarAberto={setExibirDialogoExportacao}
         solicitacoes={solicitacoesFiltradas}
         nomeOrganizacao={nomeOrganizacao}
-        exibirArquivadasAtualmente={exibirArquivadas}
       />
 
       {/* Diálogo de Pós-Venda: Convite para Avaliação Google ao concluir */}

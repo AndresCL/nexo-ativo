@@ -1,6 +1,6 @@
 export type FormatoExportacaoSolicitacoes = "csv" | "excel";
 
-export type EscopoExportacaoSolicitacoes = "ativas" | "todas" | "arquivadas";
+export type EscopoExportacaoSolicitacoes = "ativas" | "todas" | "desqualificadas";
 
 export type ValorCelulaExportacao = string | number;
 

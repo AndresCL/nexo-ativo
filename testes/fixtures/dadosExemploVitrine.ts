@@ -13,6 +13,14 @@ import {
   ACERVO_SUPPERA_SEGUROS,
   VITRINE_SUPPERA_SEGUROS,
 } from "./dadosSupperaSeguros";
+import {
+  ACERVO_NEXOATIVO,
+  VITRINE_NEXOATIVO,
+} from "./dadosNexoAtivo";
+import {
+  ACERVO_POUSADA_VELAS_DO_FORTE,
+  VITRINE_POUSADA_VELAS_DO_FORTE,
+} from "./dadosPousadaVelasDoForte";
 
 /**
  * Exemplares editoriais completos para demonstração e conferência local em desenvolvimento
@@ -313,6 +321,8 @@ export const CATALOGO_DEMONSTRACOES_EDITORIAIS: Readonly<Record<string, Conteudo
     },
     "maplebear-cabofrio": VITRINE_MAPLE_BEAR_CABO_FRIO,
     "suppera-seguros": VITRINE_SUPPERA_SEGUROS,
+    nexoativo: VITRINE_NEXOATIVO,
+    "pousada-velas-do-forte": VITRINE_POUSADA_VELAS_DO_FORTE,
   };
 
 export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublicoVitrine>> = {
@@ -1048,6 +1058,8 @@ export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublic
   },
   "maplebear-cabofrio": ACERVO_MAPLE_BEAR_CABO_FRIO,
   "suppera-seguros": ACERVO_SUPPERA_SEGUROS,
+  nexoativo: ACERVO_NEXOATIVO,
+  "pousada-velas-do-forte": ACERVO_POUSADA_VELAS_DO_FORTE,
 };
 
 export function buscarDemonstracaoEditorialPorSlug(

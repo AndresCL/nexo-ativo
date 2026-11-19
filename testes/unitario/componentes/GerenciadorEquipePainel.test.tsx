@@ -155,6 +155,11 @@ describe("Equipe do painel", () => {
     fireEvent.click(
       screen.getByLabelText("Permitir início de atendimento direto pelo cartão digital"),
     );
+    fireEvent.click(
+      screen.getByLabelText(
+        "Exibir acordeão com links e experiências da vitrine no cartão digital",
+      ),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Salvar cartão digital" }));
     await waitFor(() => expect(salvarProfissional).toHaveBeenCalledTimes(1));
     expect(salvarProfissional.mock.calls[0]?.[0]).toEqual({
@@ -171,6 +176,7 @@ describe("Equipe do painel", () => {
       linkedinOpcional: "https://linkedin.com/in/ana-costa",
       instagramOpcional: "https://instagram.com/ana-costa",
       aceitaSolicitacoesDiretas: false,
+      exibirAcoesVitrineNoCartao: false,
       atualizadoEmIso: expect.any(String),
     });
   });

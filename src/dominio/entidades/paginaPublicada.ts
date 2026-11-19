@@ -60,6 +60,8 @@ export type TipoDestinoAcaoHome =
 export type IntensidadeVeloEscuro = "nenhum" | "suave" | "equilibrado" | "intenso";
 
 export type TipoEfeitoCantosEditorial = "nenhum" | "dots" | "grade";
+export type TomDotsCantosEditorial = "neutro" | "destaque" | "borda";
+export type FormatoBordaLogotipo = "natural" | "suave" | "arredondado" | "circulo";
 
 export type EspacamentoAcoesHome = "compacto" | "medio" | "amplo";
 
@@ -82,6 +84,7 @@ export interface MidiaFundoEditorial {
   readonly intensidadeVeloEscuro: IntensidadeVeloEscuro;
   readonly efeitoCantos?: TipoEfeitoCantosEditorial;
   readonly opacidadeDotsCantos?: number;
+  readonly tomDotsCantos?: TomDotsCantosEditorial;
 }
 
 export interface IdentidadeMarcaEditorial {
@@ -91,6 +94,7 @@ export interface IdentidadeMarcaEditorial {
   readonly mostrarSubtituloCurto?: boolean;
   readonly alinhamentoCabecalho?: "esquerda" | "centro" | "direita";
   readonly urlLogotipoOpcional?: string;
+  readonly formatoBordaLogotipo?: FormatoBordaLogotipo;
   readonly cidadeEstado?: string;
   readonly urlMapaEnderecoOpcional?: string;
   readonly registroProfissionalOpcional?: string;
@@ -123,6 +127,7 @@ export interface ItemAcaoHome {
   readonly destino: string;
   readonly destaquePrincipal?: boolean;
   readonly animarBordaDestaque?: boolean;
+  readonly corBrilhoBorda?: string;
   readonly icone?: TipoIconeAcaoHome;
 }
 
@@ -188,6 +193,7 @@ export interface MidiaHomeResolvida {
   readonly intensidadeVeloEscuro: IntensidadeVeloEscuro;
   readonly efeitoCantos: TipoEfeitoCantosEditorial;
   readonly opacidadeDotsCantos?: number;
+  readonly tomDotsCantos?: TomDotsCantosEditorial;
 }
 
 /**
@@ -211,6 +217,7 @@ export function resolverMidiaEfetivaHome(
 
   const efeitoCantos: TipoEfeitoCantosEditorial = midia.efeitoCantos ?? "nenhum";
   const opacidadeDotsCantos: number | undefined = midia.opacidadeDotsCantos;
+  const tomDotsCantos: TomDotsCantosEditorial | undefined = midia.tomDotsCantos;
 
   if (midia.tipo === "video") {
     const imagemFallbackSegura =
@@ -228,6 +235,7 @@ export function resolverMidiaEfetivaHome(
         intensidadeVeloEscuro: midia.intensidadeVeloEscuro,
         efeitoCantos,
         opacidadeDotsCantos,
+        tomDotsCantos,
       };
     }
 
@@ -240,6 +248,7 @@ export function resolverMidiaEfetivaHome(
       intensidadeVeloEscuro: midia.intensidadeVeloEscuro,
       efeitoCantos,
       opacidadeDotsCantos,
+      tomDotsCantos,
     };
   }
 
@@ -254,6 +263,7 @@ export function resolverMidiaEfetivaHome(
     intensidadeVeloEscuro: midia.intensidadeVeloEscuro,
     efeitoCantos,
     opacidadeDotsCantos,
+    tomDotsCantos,
   };
 }
 
@@ -309,6 +319,8 @@ export function gerarVariaveisCssPaletaEditorial(
   const ctaTexto = customizacaoTokens?.corCtaTexto || paleta.corCtaTexto;
   const secundarioFundo = customizacaoTokens?.corSecundarioFundo || paleta.corSecundarioFundo;
   const secundarioTexto = customizacaoTokens?.corSecundarioTexto || paleta.corSecundarioTexto;
+  const brilhoBorda =
+    customizacaoTokens?.corBrilhoBorda || paleta.corBrilhoBorda || destaque;
 
   return {
     "--editorial-fundo": fundo,
@@ -324,6 +336,7 @@ export function gerarVariaveisCssPaletaEditorial(
     "--editorial-cta-texto": ctaTexto,
     "--editorial-secundario-fundo": secundarioFundo,
     "--editorial-secundario-texto": secundarioTexto,
+    "--editorial-brilho-borda": brilhoBorda,
   };
 }
 
@@ -420,6 +433,7 @@ export function resolverAcoesVitrineComMicrofluxos(
       icone: (m.iconeBotaoHome as TipoIconeAcaoHome) || acaoExistente?.icone || "automatico",
       destaquePrincipal: m.destaquePrimarioHome ?? acaoExistente?.destaquePrincipal ?? false,
       animarBordaDestaque: m.animarBordaDestaque ?? acaoExistente?.animarBordaDestaque ?? false,
+      corBrilhoBorda: m.corBrilhoBorda ?? acaoExistente?.corBrilhoBorda,
       ...(tipoDestino === "secao_equipe" && m.posicionamentoEquipe
         ? { posicionamentoEquipe: m.posicionamentoEquipe }
         : {}),

@@ -438,4 +438,47 @@ describe("Componente: EditorGuiadoAparencia", () => {
       publicarPagina.mock.invocationCallOrder[0]!,
     );
   });
+
+  it("permite reordenar as redes sociais para cima e para baixo no editor", async () => {
+    const { salvarRascunho } = renderizarEditorComDuble();
+    fireEvent.click(screen.getByRole("tab", { name: /Redes sociais/ }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar rede" }));
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar rede" }));
+
+    const seletoresRede = screen.getAllByLabelText("Rede");
+    expect(seletoresRede).toHaveLength(2);
+
+    fireEvent.change(seletoresRede[0]!, { target: { value: "instagram" } });
+    fireEvent.change(seletoresRede[1]!, { target: { value: "linkedin" } });
+
+    const enderecos = screen.getAllByLabelText(/Endereço completo/);
+    fireEvent.change(enderecos[0]!, { target: { value: "https://instagram.com/clinica" } });
+    fireEvent.change(enderecos[1]!, { target: { value: "https://linkedin.com/company/clinica" } });
+
+    // O primeiro item não pode subir e o último não pode descer
+    expect(
+      screen.getByRole("button", { name: "Mover rede instagram para cima" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Mover rede linkedin para baixo" }),
+    ).toBeDisabled();
+
+    // Move o LinkedIn para cima (passa a ser o primeiro)
+    fireEvent.click(screen.getByRole("button", { name: "Mover rede linkedin para cima" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Salvar rascunho" }));
+    await waitFor(() => expect(salvarRascunho).toHaveBeenCalledTimes(1));
+
+    expect(salvarRascunho.mock.calls[0]?.[0].redesSociais).toEqual([
+      expect.objectContaining({
+        rede: "linkedin",
+        url: "https://linkedin.com/company/clinica",
+      }),
+      expect.objectContaining({
+        rede: "instagram",
+        url: "https://instagram.com/clinica",
+      }),
+    ]);
+  });
 });

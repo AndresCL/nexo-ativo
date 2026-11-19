@@ -114,6 +114,7 @@ describe("Painel Comercial de Solicitações (/painel/solicitacoes)", () => {
     parametros: {
       podeGerenciar?: boolean;
       atualizar?: PortaGerenciamentoSolicitacoesPainel["atualizarAndamentoSolicitacao"];
+      solicitacoesAdicionais?: readonly SolicitacaoComercial[];
     } = {},
   ) {
     const atualizar = parametros.atualizar ?? vi.fn().mockResolvedValue(undefined);
@@ -125,10 +126,11 @@ describe("Painel Comercial de Solicitações (/painel/solicitacoes)", () => {
           solicitacaoDemonstracao,
           {
             ...solicitacaoDemonstracao,
-            id: "arquivada-1",
-            nomeVisitante: "Cliente arquivado",
-            situacao: "arquivada",
+            id: "desqualificada-1",
+            nomeVisitante: "Cliente desqualificado",
+            situacao: "desqualificada",
           },
+          ...(parametros.solicitacoesAdicionais ?? []),
         ]}
         profissionaisAtivos={[]}
         podeGerenciarSolicitacoes={parametros.podeGerenciar ?? true}
@@ -138,21 +140,19 @@ describe("Painel Comercial de Solicitações (/painel/solicitacoes)", () => {
     return atualizar;
   }
 
-  it("mantém as quatro colunas e separa solicitações arquivadas", () => {
+  it("mantém as cinco colunas comerciais incluindo Desqualificadas diretamente no quadro", () => {
     montarQuadro();
     for (const nome of [
       "Novas (1)",
       "Em atendimento (0)",
       "Proposta enviada (0)",
       "Concluídas (0)",
+      "Desqualificadas (1)",
     ]) {
       expect(screen.getByRole("region", { name: nome })).toBeInTheDocument();
     }
-    expect(screen.queryByText("Cliente arquivado")).not.toBeInTheDocument();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Arquivadas (1)" }));
-    expect(screen.getByText("Cliente arquivado")).toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Novas (1)" })).not.toBeInTheDocument();
+    expect(screen.getByText("Cliente desqualificado")).toBeInTheDocument();
+    expect(screen.getByText("Henrique Vasconcelos")).toBeInTheDocument();
   });
 
   it("move imediatamente e grava apenas a situação ao usar Mover para", async () => {
@@ -264,7 +264,7 @@ describe("Painel Comercial de Solicitações (/painel/solicitacoes)", () => {
     expect(botaoWhatsapp).toBeInTheDocument();
     expect(botaoWhatsapp).toHaveAttribute("href", expect.stringContaining("wa.me/5511999887766"));
 
-    const botaoCopiar = screen.getByRole("button", { name: "Copiar resumo completo" });
+    const botaoCopiar = screen.getAllByRole("button", { name: "Copiar resumo completo" })[0];
     expect(botaoCopiar).toBeInTheDocument();
   });
 
@@ -301,5 +301,44 @@ describe("Painel Comercial de Solicitações (/painel/solicitacoes)", () => {
       "href",
       expect.stringContaining("search.google.com%2Flocal%2Fwritereview%3Fplaceid%3DChIJ123456789"),
     );
+  });
+
+  it("aplica o limite de 15 solicitações por coluna e permite expandir via Ver mais / Ver menos", () => {
+    // Cria 18 solicitações para a coluna "Novas"
+    const solicitacoesExtras: SolicitacaoComercial[] = Array.from({ length: 18 }, (_, i) => ({
+      ...solicitacaoDemonstracao,
+      id: `sol-extra-${i + 1}`,
+      nomeVisitante: `Visitante Extra ${i + 1}`,
+      situacao: "nova",
+      chaveIdempotencia: `chave-extra-${i + 1}`,
+    }));
+
+    montarQuadro({ solicitacoesAdicionais: solicitacoesExtras });
+
+    // A coluna "Novas" tem 19 itens (1 demonstracao + 18 extras)
+    const colunaNovas = screen.getByRole("region", { name: "Novas (19)" });
+    expect(colunaNovas).toBeInTheDocument();
+
+    // Deve exibir botão "Ver mais (+4)"
+    const botaoVerMais = within(colunaNovas).getByRole("button", { name: /Ver mais \(\+4\)/i });
+    expect(botaoVerMais).toBeInTheDocument();
+
+    // O 15º item exibido (índice 14 dos extras) deve estar visível
+    expect(within(colunaNovas).getByText("Visitante Extra 14")).toBeInTheDocument();
+    // O 18º item não deve estar no DOM da lista colapsada
+    expect(within(colunaNovas).queryByText("Visitante Extra 18")).not.toBeInTheDocument();
+
+    // Clica para expandir
+    fireEvent.click(botaoVerMais);
+
+    // Agora todos os 19 itens estão renderizados e botão virou "Ver menos"
+    expect(within(colunaNovas).getByText("Visitante Extra 18")).toBeInTheDocument();
+    const botaoVerMenos = within(colunaNovas).getByRole("button", { name: /Ver menos/i });
+    expect(botaoVerMenos).toBeInTheDocument();
+
+    // Clica para recolher
+    fireEvent.click(botaoVerMenos);
+    expect(within(colunaNovas).queryByText("Visitante Extra 18")).not.toBeInTheDocument();
+    expect(within(colunaNovas).getByRole("button", { name: /Ver mais \(\+4\)/i })).toBeInTheDocument();
   });
 });

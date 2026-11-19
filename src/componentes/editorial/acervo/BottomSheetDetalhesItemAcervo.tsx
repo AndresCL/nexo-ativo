@@ -1,7 +1,8 @@
 "use client";
 
 import * as DialogoPrimitivo from "@radix-ui/react-dialog";
-import { MessageCircle, Sparkles, Clock } from "lucide-react";
+import { Sparkles, Clock } from "lucide-react";
+import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
 import {
   formatarApresentacaoPrecoItem,
   obterListaImagensMidia,
@@ -141,7 +142,7 @@ export function BottomSheetDetalhesItemAcervo({
           {tipoCta === "microfluxo" ? (
             <Sparkles className="h-4 w-4" aria-hidden="true" />
           ) : (
-            <MessageCircle className="h-4 w-4 fill-white stroke-none" aria-hidden="true" />
+            <IconeWhatsapp className="h-4 w-4 shrink-0" aria-hidden="true" />
           )}
           <span>
             {rotuloBotaoPersonalizado ||

@@ -5,7 +5,7 @@ import type { DefinicaoMicrofluxo } from "../microfluxos/tiposMicrofluxo";
 import { normalizarNumeroWhatsappInternacional } from "../servicos/numeroWhatsappInternacional";
 
 export type SituacaoSolicitacaoComercial =
-  "nova" | "em_atendimento" | "proposta_enviada" | "concluida" | "arquivada";
+  "nova" | "em_atendimento" | "proposta_enviada" | "concluida" | "desqualificada";
 
 export const DESCRITORES_SITUACAO_SOLICITACAO: Readonly<
   Record<
@@ -32,9 +32,9 @@ export const DESCRITORES_SITUACAO_SOLICITACAO: Readonly<
     rotulo: "Concluída",
     descricao: "Atendimento ou contratação efetivada com sucesso.",
   },
-  arquivada: {
-    rotulo: "Arquivada",
-    descricao: "Solicitação encerrada ou fora de escopo.",
+  desqualificada: {
+    rotulo: "Desqualificada",
+    descricao: "Sem perfil comercial, contato inválido ou encerrada sem venda.",
   },
 };
 

@@ -3,11 +3,16 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { BarraProgressoHorizontalDiscreta } from "@/componentes/interface/BarraProgressoHorizontalDiscreta";
-import { deveIgnorarOtimizadorImagem } from "@/dominio/entidades/paginaPublicada";
+import {
+  deveIgnorarOtimizadorImagem,
+  type FormatoBordaLogotipo,
+} from "@/dominio/entidades/paginaPublicada";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
+import { obterClasseBordaLogotipo } from "./IdentidadeETituloEditorial";
 
 export interface PropriedadesTelaCarregamentoEditorial {
   readonly urlLogotipo?: string | null;
+  readonly formatoBordaLogotipo?: FormatoBordaLogotipo;
   readonly nomeCliente?: string;
   readonly corDestaqueClasse?: string;
   readonly className?: string;
@@ -21,6 +26,7 @@ export interface PropriedadesTelaCarregamentoEditorial {
  */
 export function TelaCarregamentoEditorial({
   urlLogotipo,
+  formatoBordaLogotipo,
   nomeCliente,
   corDestaqueClasse,
   className,
@@ -31,32 +37,55 @@ export function TelaCarregamentoEditorial({
     ...(variaveisCssPaleta as CSSProperties | undefined),
   };
 
+  const classeBorda = obterClasseBordaLogotipo(formatoBordaLogotipo);
+  const ehCirculo = formatoBordaLogotipo === "circulo";
+
   return (
     <div
       role="status"
       aria-label={nomeCliente ? `Carregando ${nomeCliente}...` : "Carregando..."}
       style={estiloContêiner}
       className={combinarClasses(
-        "fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0f1110] text-center select-none transition-opacity duration-500",
+        "fixed inset-0 z-50 flex flex-col items-center justify-center bg-[var(--editorial-fundo,#0f1110)] text-[var(--editorial-texto,#ffffff)] text-center select-none transition-opacity duration-500",
         desvanecendo ? "pointer-events-none opacity-0" : "opacity-100",
         className,
       )}
     >
       {urlLogotipo ? (
-        <div className="relative mb-5 flex shrink-0 items-center justify-center">
-          <Image
-            src={urlLogotipo}
-            alt={nomeCliente ? `Marca de ${nomeCliente}` : "Marca"}
-            width={255}
-            height={58}
-            priority
-            loading="eager"
-            unoptimized={deveIgnorarOtimizadorImagem(urlLogotipo)}
-            className="h-10 max-h-14 w-auto max-w-[220px] object-contain drop-shadow-md sm:h-12"
-          />
-        </div>
+        ehCirculo ? (
+          <div className="relative mb-5 h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-full overflow-hidden shadow-lg shadow-black/20">
+            <Image
+              src={urlLogotipo}
+              alt={nomeCliente ? `Marca de ${nomeCliente}` : "Marca"}
+              fill
+              sizes="(max-width: 640px) 56px, 64px"
+              priority
+              loading="eager"
+              unoptimized={deveIgnorarOtimizadorImagem(urlLogotipo)}
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className={combinarClasses(
+              "relative mb-5 flex shrink-0 items-center justify-center",
+              classeBorda,
+            )}
+          >
+            <Image
+              src={urlLogotipo}
+              alt={nomeCliente ? `Marca de ${nomeCliente}` : "Marca"}
+              width={255}
+              height={58}
+              priority
+              loading="eager"
+              unoptimized={deveIgnorarOtimizadorImagem(urlLogotipo)}
+              className="h-10 max-h-14 w-auto max-w-[220px] object-contain drop-shadow-md sm:h-12"
+            />
+          </div>
+        )
       ) : nomeCliente ? (
-        <p className="mb-4 text-base font-medium tracking-wider text-white/90 sm:text-lg">
+        <p className="mb-4 text-base font-medium tracking-wider text-current/90 sm:text-lg">
           {nomeCliente}
         </p>
       ) : null}

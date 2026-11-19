@@ -7,13 +7,15 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import {
   ArrowUpRight,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Mail,
-  MessageCircle,
   Send,
   UserPlus,
 } from "lucide-react";
+import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
+import { TransicaoColapsavel } from "@/componentes/interface/TransicaoColapsavel";
 import { montarLinkWhatsapp } from "@/dominio/servicos/numeroWhatsappInternacional";
 import type {
   AcervoPublicoVitrine,
@@ -28,6 +30,7 @@ import {
   type ConteudoPaginaPublicada,
   type ItemAcaoHome,
 } from "@/dominio/entidades/paginaPublicada";
+import { obterClasseBordaLogotipo } from "./IdentidadeETituloEditorial";
 import type {
   ContextoOrigemMicrofluxo,
   DefinicaoMicrofluxo,
@@ -68,6 +71,7 @@ export function CartaoDigitalProfissionalPublico({
   aoVoltar,
 }: PropriedadesCartaoDigitalProfissionalPublico) {
   const [contatoSalvo, setContatoSalvo] = useState(false);
+  const [acordeaoAcoesAberto, setAcordeaoAcoesAberto] = useState(true);
   const ultimaVisualizacaoRegistrada = useRef<string | null>(null);
   const [secaoAberta, setSecaoAberta] = useState<SecaoAcervoAberta>(null);
   const [tituloSecaoAberta, setTituloSecaoAberta] = useState<string | undefined>();
@@ -614,29 +618,76 @@ export function CartaoDigitalProfissionalPublico({
         <div className="my-auto w-full py-4 sm:py-6 lg:py-8">
           <div className="grid w-full gap-8 sm:gap-10 lg:grid-cols-12 lg:items-center lg:gap-10 xl:gap-16">
             {/* Coluna da Esquerda: Identidade, Perfil e Contato Direto do Consultor */}
-            <section className="flex flex-col items-center text-center lg:col-span-7 lg:items-start lg:text-left">
+            <section
+              className={combinarClasses(
+                "flex flex-col items-center text-center",
+                (profissional.exibirAcoesVitrineNoCartao ?? true) &&
+                  acoesSemDuplicidadeWhatsapp &&
+                  acoesSemDuplicidadeWhatsapp.length > 0
+                  ? "lg:col-span-7 lg:items-start lg:text-left"
+                  : "lg:col-span-12",
+              )}
+            >
               {/* Bloco de Identidade: Logo da Loja | Avatar do Consultor */}
-              <div className="flex items-center justify-center lg:justify-start gap-3.5 sm:gap-5">
+              <div
+                className={combinarClasses(
+                  "flex items-center justify-center gap-3.5 sm:gap-5",
+                  (profissional.exibirAcoesVitrineNoCartao ?? true) &&
+                    acoesSemDuplicidadeWhatsapp &&
+                    acoesSemDuplicidadeWhatsapp.length > 0
+                    ? "lg:justify-start"
+                    : "lg:justify-center",
+                )}
+              >
                 {paginaOrganizacao.identidade.urlLogotipoOpcional ? (
-                  <>
-                    <div className="relative h-11 w-24 shrink-0 sm:h-14 sm:w-28 lg:h-16 lg:w-32">
-                      <Image
-                        src={paginaOrganizacao.identidade.urlLogotipoOpcional}
-                        alt={paginaOrganizacao.identidade.nomeExibicao}
-                        fill
-                        priority
-                        sizes="(max-width: 640px) 88px, (max-width: 1024px) 112px, 128px"
-                        unoptimized={deveIgnorarOtimizadorImagem(
-                          paginaOrganizacao.identidade.urlLogotipoOpcional,
-                        )}
-                        className="object-contain filter drop-shadow-md"
+                  paginaOrganizacao.identidade.formatoBordaLogotipo === "circulo" ? (
+                    <>
+                      <div className="relative h-11 w-11 sm:h-14 sm:w-14 lg:h-16 lg:w-16 shrink-0 rounded-full overflow-hidden shadow-sm">
+                        <Image
+                          src={paginaOrganizacao.identidade.urlLogotipoOpcional}
+                          alt={paginaOrganizacao.identidade.nomeExibicao}
+                          fill
+                          priority
+                          sizes="(max-width: 640px) 44px, (max-width: 1024px) 56px, 64px"
+                          unoptimized={deveIgnorarOtimizadorImagem(
+                            paginaOrganizacao.identidade.urlLogotipoOpcional,
+                          )}
+                          className="object-cover"
+                        />
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        className="h-11 w-px shrink-0 bg-white/25 sm:h-14 lg:h-16"
                       />
-                    </div>
-                    <div
-                      aria-hidden="true"
-                      className="h-11 w-px shrink-0 bg-white/25 sm:h-14 lg:h-16"
-                    />
-                  </>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        className={combinarClasses(
+                          "relative h-11 w-24 shrink-0 sm:h-14 sm:w-28 lg:h-16 lg:w-32",
+                          obterClasseBordaLogotipo(
+                            paginaOrganizacao.identidade.formatoBordaLogotipo,
+                          ),
+                        )}
+                      >
+                        <Image
+                          src={paginaOrganizacao.identidade.urlLogotipoOpcional}
+                          alt={paginaOrganizacao.identidade.nomeExibicao}
+                          fill
+                          priority
+                          sizes="(max-width: 640px) 88px, (max-width: 1024px) 112px, 128px"
+                          unoptimized={deveIgnorarOtimizadorImagem(
+                            paginaOrganizacao.identidade.urlLogotipoOpcional,
+                          )}
+                          className="object-contain filter drop-shadow-md"
+                        />
+                      </div>
+                      <div
+                        aria-hidden="true"
+                        className="h-11 w-px shrink-0 bg-white/25 sm:h-14 lg:h-16"
+                      />
+                    </>
+                  )
                 ) : null}
 
                 {/* Foto de Perfil Destacada */}
@@ -672,7 +723,16 @@ export function CartaoDigitalProfissionalPublico({
               </div>
 
               {profissional.minibiografia ? (
-                <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-white/80 sm:text-sm lg:mx-0 lg:max-w-lg">
+                <p
+                  className={combinarClasses(
+                    "mx-auto mt-2 max-w-md text-xs leading-relaxed text-white/80 sm:text-sm",
+                    (profissional.exibirAcoesVitrineNoCartao ?? true) &&
+                      acoesSemDuplicidadeWhatsapp &&
+                      acoesSemDuplicidadeWhatsapp.length > 0
+                      ? "lg:mx-0 lg:max-w-lg"
+                      : "lg:max-w-lg",
+                  )}
+                >
                   {profissional.minibiografia}
                 </p>
               ) : null}
@@ -698,8 +758,8 @@ export function CartaoDigitalProfissionalPublico({
                     }}
                     className="inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-[#25D366] px-4 py-2.5 text-white shadow-lg shadow-green-950/30 transition-all duration-200 hover:bg-[#20bd5a] hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                   >
-                    <MessageCircle
-                      className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 fill-white text-white"
+                    <IconeWhatsapp
+                      className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-white"
                       aria-hidden="true"
                     />
                     <span className="flex flex-col items-center text-center">
@@ -773,18 +833,38 @@ export function CartaoDigitalProfissionalPublico({
             </section>
 
             {/* Coluna da Direita (Web): Ações e Apresentação da Loja/Empresa (Dispostas na lateral como a Home) */}
-            {acoesSemDuplicidadeWhatsapp && acoesSemDuplicidadeWhatsapp.length > 0 ? (
+            {(profissional.exibirAcoesVitrineNoCartao ?? true) &&
+            acoesSemDuplicidadeWhatsapp &&
+            acoesSemDuplicidadeWhatsapp.length > 0 ? (
               <aside className="w-full lg:col-span-5 lg:flex lg:flex-col lg:justify-center border-t border-[var(--editorial-borda)]/40 pt-6 lg:border-t-0 lg:pt-0">
-                <div className="mb-3 text-center lg:text-left">
-                  <h2 className="text-xs sm:text-sm font-semibold tracking-wide text-[var(--editorial-subtitulo)]">
+                <button
+                  type="button"
+                  aria-expanded={acordeaoAcoesAberto}
+                  aria-controls="painel-acoes-cartao-profissional"
+                  onClick={() => setAcordeaoAcoesAberto((atual) => !atual)}
+                  className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg py-1 text-center transition-opacity hover:opacity-85 lg:justify-between lg:text-left cursor-pointer"
+                >
+                  <span className="text-xs sm:text-sm font-semibold tracking-wide text-[var(--editorial-subtitulo)]">
                     Escolha como prefere continuar
-                  </h2>
-                </div>
-                <div className="w-full space-y-2 lg:space-y-2.5">
-                  {acoesSemDuplicidadeWhatsapp.map((acao, indice) =>
-                    renderizarLinkAcaoHome(acao, indice),
-                  )}
-                </div>
+                  </span>
+                  <ChevronDown
+                    className={combinarClasses(
+                      "h-4 w-4 shrink-0 text-[var(--editorial-subtitulo)] transition-transform duration-200",
+                      acordeaoAcoesAberto ? "rotate-180" : "rotate-0",
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
+                <TransicaoColapsavel aberto={acordeaoAcoesAberto}>
+                  <div
+                    id="painel-acoes-cartao-profissional"
+                    className="w-full space-y-2 lg:space-y-2.5"
+                  >
+                    {acoesSemDuplicidadeWhatsapp.map((acao, indice) =>
+                      renderizarLinkAcaoHome(acao, indice),
+                    )}
+                  </div>
+                </TransicaoColapsavel>
               </aside>
             ) : null}
           </div>

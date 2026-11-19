@@ -76,13 +76,13 @@ describe("Ranking da equipe no painel de desempenho", () => {
         name: "Comparação de Aberturas entre experiências",
       }),
     ).toBeInTheDocument();
-    fireEvent.click(within(secao).getByRole("button", { name: /Experiência Alfa/ }));
+    fireEvent.click(within(secao).getByRole("row", { name: /Experiência Alfa/ }));
     expect(
       within(secao).getByRole("img", {
         name: "Comparação de Aberturas entre experiências",
       }),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("row", { name: /2026-11-11/ }));
+    fireEvent.click(screen.getByRole("button", { name: "2026-11-11" }));
     expect(within(secao).queryByText("50%")).not.toBeInTheDocument();
     expect(screen.getAllByText("Permalink", { exact: true }).length).toBeGreaterThan(0);
   });
@@ -101,7 +101,7 @@ describe("Ranking da equipe no painel de desempenho", () => {
     const { ranking } = renderizarPainel();
     const consultarCelulas = () =>
       within(within(ranking).getByRole("row", { name: /Carlos Eduardo/ })).getAllByRole("cell");
-    fireEvent.click(screen.getByRole("row", { name: /2026-11-11/ }));
+    fireEvent.click(screen.getByRole("button", { name: "2026-11-11" }));
     expect(consultarCelulas()[4]).toHaveTextContent(/^0$/);
     expect(consultarCelulas()[5]).toHaveTextContent(/^—$/);
     fireEvent.click(screen.getByRole("button", { name: "Ver período completo" }));

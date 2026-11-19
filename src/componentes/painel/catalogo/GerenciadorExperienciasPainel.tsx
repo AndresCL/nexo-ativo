@@ -791,7 +791,7 @@ export function GerenciadorExperienciasPainel({
                       }}
                       className="h-4 w-4 rounded border-marfim-300 accent-mineral-900"
                     />
-                    <span>Brilho na borda</span>
+                    <span>Brilho interior</span>
                   </label>
                 ) : null}
                 <details key={fluxoAtual.id} className="relative">
@@ -831,7 +831,6 @@ export function GerenciadorExperienciasPainel({
                 <select
                   id="tipo-acao-vitrine"
                   value={
-                    fluxoAtual.tipoAcao === "secao_servicos" ||
                     fluxoAtual.tipoAcao === "secao_portfolio"
                       ? "microfluxo"
                       : (fluxoAtual.tipoAcao ?? "microfluxo")
@@ -843,6 +842,8 @@ export function GerenciadorExperienciasPainel({
                       ...atual,
                       tipoAcao: novoTipo,
                       ...(novoTipo === "secao_equipe" ? { urlDestinoOpcional: "#equipe" } : {}),
+                      ...(novoTipo === "secao_servicos" ? { urlDestinoOpcional: "#servicos" } : {}),
+                      ...(novoTipo === "secao_produtos" ? { urlDestinoOpcional: "#produtos" } : {}),
                       ...(novoTipo === "publicacao_post" && !atual.configuracaoPost
                         ? {
                             configuracaoPost: {
@@ -856,7 +857,7 @@ export function GerenciadorExperienciasPainel({
                   className="mt-1 w-full rounded-lg border border-marfim-200 bg-white px-2.5 py-1.5 text-xs text-mineral-950 focus:border-indigo-400 focus:outline-none"
                 >
                   {Object.entries(DESCRITORES_TIPO_ACAO)
-                    .filter(([valor]) => valor !== "secao_servicos" && valor !== "secao_portfolio")
+                    .filter(([valor]) => valor !== "secao_portfolio")
                     .map(([valor, descritor]) => (
                       <option key={valor} value={valor}>
                         {descritor.rotulo}

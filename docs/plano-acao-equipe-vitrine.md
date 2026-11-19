@@ -42,14 +42,14 @@ Essa atualização foi validada com 70 testes direcionados, verificação de tip
 
 A posição faz parte da configuração da ação de equipe. O título e a ação continuam os mesmos em todas as posições. A configuração terá duas escolhas independentes:
 
-| Dispositivo | Opções                                                 | Padrão para ações existentes  |
-| ----------- | ------------------------------------------------------ | ----------------------------- |
-| Desktop     | Na posição da lista de ações; abaixo do texto do hero. | Na posição da lista de ações. |
-| Mobile      | Na posição da lista de ações; acima do primeiro botão. | Na posição da lista de ações. |
+| Dispositivo | Opções                                                            | Padrão para ações existentes  |
+| ----------- | ----------------------------------------------------------------- | ----------------------------- |
+| Desktop     | Na posição da lista de ações; na coluna lateral da apresentação.  | Na posição da lista de ações. |
+| Mobile      | Na posição da lista de ações; acima do primeiro botão.            | Na posição da lista de ações. |
 
-**Avaliação visual:** abaixo do texto do hero no desktop, a equipe acompanha a apresentação da marca e libera espaço na coluna de ações. Na lista, acompanha as demais opções comerciais e respeita sua ordem. No mobile, acima do primeiro botão aumenta a exposição da equipe e também acrescenta altura antes da ação principal; manter a posição da lista preserva a prioridade comercial definida no painel. As opções ficam explícitas, sem reposicionamento automático baseado no texto do título.
+**Avaliação visual:** na coluna lateral no desktop, a equipe acompanha a apresentação da marca e libera espaço na coluna de ações. Na lista, acompanha as demais opções comerciais e respeita sua ordem. No mobile, acima do primeiro botão aumenta a exposição da equipe e também acrescenta altura antes da ação principal; manter a posição da lista preserva a prioridade comercial definida no painel. As opções ficam explícitas, sem reposicionamento automático baseado no texto do título.
 
-“Abaixo do hero” significa logo após a chamada editorial e seu complemento de avaliações, dentro da apresentação principal. Não será uma seção abaixo de toda a primeira tela. Nas composições Imersivo e Retrato, corresponde ao bloco de texto; no Retrato, precede a barra de redes sociais. Na Galeria, corresponde ao texto editorial ao lado da obra, e não ao final da imagem. No mobile, “acima do primeiro botão” corresponde ao início da região de ações, após a chamada e seus complementos existentes.
+A posição lateral no desktop fica logo após o complemento de avaliações, dentro da apresentação principal. Não será uma seção abaixo de toda a primeira tela. No Retrato, precede a barra de redes sociais. Na Galeria, fica ao lado da obra em exposição, e não ao final da imagem. No mobile, “acima do primeiro botão” corresponde ao início da região de ações, após o complemento de avaliações quando presente.
 
 Regras de distribuição:
 
@@ -59,7 +59,7 @@ Regras de distribuição:
 - Renderizar o convite no local selecionado, com somente uma ocorrência visível e acessível por tamanho de contêiner. Quando o bloco estiver fora da lista, ele deixa de ocupar uma linha nela naquele tamanho.
 - O breakpoint acompanha as container queries existentes da composição (`@5xl`), inclusive na prévia de 390px dentro de uma janela desktop. O breakpoint da gaveta permanece próprio (`sm`).
 - Resolver visibilidade com CSS e dados estáveis, preservando SSR. Caso a composição exija pontos de montagem separados, usar visibilidade complementar e identificadores próprios, sem dois controles acessíveis ao mesmo tempo. Não usar `window.innerWidth` durante o render para escolher a posição.
-- O bloco anterior às ações participa da mesma região visual de navegação. O bloco após o hero fica alinhado ao texto editorial. A regra deve funcionar também quando equipe for a única ação.
+- O bloco anterior às ações participa da mesma região visual de navegação. O bloco na coluna lateral fica alinhado à área complementar da composição. A regra deve funcionar também quando equipe for a única ação.
 - Clique em qualquer posição mantém o ID da ação e a telemetria existente. Ao fechar a gaveta depois de redimensionar a tela, devolver foco ao acionador atualmente visível ou a um destino de foco válido da vitrine.
 - Equipe conhecida e vazia não deixa espaçadores em nenhum local. Dados de equipe ausentes mantêm a ação textual de compatibilidade na lista.
 - Os seletores “Posição no desktop” e “Posição no celular” aparecem somente para `secao_equipe` no painel. A prévia usa os mesmos valores e o mesmo componente visual da vitrine.
@@ -89,7 +89,7 @@ Além dos arquivos abaixo, criar `src/dominio/editorial/posicionamentoEquipeVitr
 
 `RenderizadorComposicaoEditorial` já encaminha todas as propriedades; seu comportamento atual atende à mudança. O contrato permanece no arquivo existente nesta entrega, evitando uma extração estrutural que não é necessária à funcionalidade.
 
-Com o posicionamento configurável, as três composições também ganham um ponto para o convite após o texto do hero. A navegação resolve as alternativas “na lista” e “antes das ações” usando as mesmas regras responsivas. O componente `AcaoEquipeVitrine` atende aos diferentes locais; apenas alinhamento e espaçamento dependem do local. A distribuição deve ficar em funções/componentes pequenos, sem repetir as regras de posição nas três composições.
+Com o posicionamento configurável, as três composições também ganham um ponto para o convite na coluna lateral no desktop. A navegação resolve as alternativas “na lista” e “antes das ações” usando as mesmas regras responsivas. O componente `AcaoEquipeVitrine` atende aos diferentes locais; apenas alinhamento e espaçamento dependem do local. A distribuição deve ficar em funções/componentes pequenos, sem repetir as regras de posição nas três composições.
 
 O grupo poderá ser envolvido por um contêiner com `aria-hidden="true"` dentro da ação. Isso permite reutilizar o avatar sem ampliar sua API de acessibilidade apenas para este caso.
 

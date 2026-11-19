@@ -144,6 +144,50 @@ describe("Vitrine com Gavetas Editoriais, Cartão Digital Individual e Painel de
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
+  it("permite recolher o acordeão 'Escolha como prefere continuar' ou ocultá-lo completamente quando exibirAcoesVitrineNoCartao for false", async () => {
+    const paginaGarage = CATALOGO_DEMONSTRACOES_EDITORIAIS["garage-88"]!;
+    const acervoGarage = CATALOGO_ACERVOS_DEMONSTRACAO["garage-88"]!;
+    const consultor = acervoGarage.profissionais[0]!;
+
+    const { rerender } = render(
+      <CartaoDigitalProfissionalPublico
+        paginaOrganizacao={paginaGarage}
+        profissional={consultor}
+        servicosAtivos={acervoGarage.servicos}
+        acervo={acervoGarage}
+        urlPublicaCartao="https://fluxo.app/garage-88/equipe/bruno-silva"
+      />,
+    );
+
+    const botaoAcordeao = screen.getByRole("button", {
+      name: /Escolha como prefere continuar/i,
+    });
+    expect(botaoAcordeao).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: /Simular financiamento/i })).toBeInTheDocument();
+
+    // Clica para recolher o acordeão
+    fireEvent.click(botaoAcordeao);
+    expect(botaoAcordeao).toHaveAttribute("aria-expanded", "false");
+
+    // Quando exibirAcoesVitrineNoCartao === false, não deve mostrar nada da seção
+    rerender(
+      <CartaoDigitalProfissionalPublico
+        paginaOrganizacao={paginaGarage}
+        profissional={{ ...consultor, exibirAcoesVitrineNoCartao: false }}
+        servicosAtivos={acervoGarage.servicos}
+        acervo={acervoGarage}
+        urlPublicaCartao="https://fluxo.app/garage-88/equipe/bruno-silva"
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /Escolha como prefere continuar/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Simular financiamento/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("deve cadastrar profissional sugerindo slug automático e respeitar limite de equipe do plano", async () => {
     const salvarProfissional = vi.fn().mockResolvedValue(undefined);
     const excluirProfissional = vi.fn().mockResolvedValue(undefined);

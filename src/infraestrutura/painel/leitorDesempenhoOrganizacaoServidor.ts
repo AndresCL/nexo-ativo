@@ -1,5 +1,4 @@
 import { esquemaDefinicaoMicrofluxo } from "@/validacoes/esquemasMicrofluxo";
-import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import type {
   MetricasDiariasOrganizacao,
   ResumoMetricasPeriodo,
@@ -15,11 +14,17 @@ import { esquemaProfissionalEquipe } from "@/validacoes/esquemasCatalogoConteudo
 import { verificarPermissaoOrganizacao } from "@/dominio/permissoes/autorizadorOrganizacao";
 import { obterServicosAdminFirebase } from "@/infraestrutura/firebase/adminFirebase";
 
+export interface ItemExperienciaPainel {
+  readonly id: string;
+  readonly titulo: string;
+  readonly etapas?: readonly { readonly id: string; readonly titulo: string }[];
+}
+
 export interface ContextoDesempenhoOrganizacaoServidor {
   readonly organizacao: Organizacao;
   readonly resumoMetricas: ResumoMetricasPeriodo;
   readonly profissionais: readonly ProfissionalEquipe[];
-  readonly experiencias: readonly Pick<DefinicaoMicrofluxo, "id" | "titulo">[];
+  readonly experiencias: readonly ItemExperienciaPainel[];
   readonly podeVisualizarPainel: boolean;
 }
 
@@ -77,12 +82,24 @@ function reconstruirMetricasDiariasDeDocFirestore(
   };
   const porMicrofluxo: Record<
     string,
-    { titulo: string; aberturas: number; conclusoes: number; aberturasPermalink?: number }
+    {
+      titulo: string;
+      aberturas: number;
+      conclusoes: number;
+      aberturasPermalink?: number;
+      porEtapa?: Record<string, number>;
+    }
   > = {
     ...(dados.porMicrofluxo as
       | Record<
           string,
-          { titulo: string; aberturas: number; conclusoes: number; aberturasPermalink?: number }
+          {
+            titulo: string;
+            aberturas: number;
+            conclusoes: number;
+            aberturasPermalink?: number;
+            porEtapa?: Record<string, number>;
+          }
         >
       | undefined),
   };
@@ -129,9 +146,11 @@ function reconstruirMetricasDiariasDeDocFirestore(
         porProfissional[profId] = item;
       }
     } else if (chave.startsWith("porMicrofluxo.")) {
-      const [, microId, metrica] = chave.split(".");
+      const partes = chave.split(".");
+      const microId = partes[1];
+      const metrica = partes[2];
       if (microId && metrica) {
-        const item = porMicrofluxo[microId] ?? { titulo: microId, aberturas: 0, conclusoes: 0 };
+        const item = porMicrofluxo[microId] ?? { titulo: microId, aberturas: 0, conclusoes: 0, porEtapa: {} };
         if (metrica === "titulo") {
           item.titulo = String(valor);
         } else if (metrica === "aberturas") {
@@ -140,6 +159,10 @@ function reconstruirMetricasDiariasDeDocFirestore(
           item.conclusoes += Number(valor || 0);
         } else if (metrica === "aberturasPermalink") {
           item.aberturasPermalink = (item.aberturasPermalink || 0) + Number(valor || 0);
+        } else if (metrica === "porEtapa" && partes[3]) {
+          const etapaId = partes[3];
+          item.porEtapa = item.porEtapa ?? {};
+          item.porEtapa[etapaId] = (item.porEtapa[etapaId] || 0) + Number(valor || 0);
         }
         porMicrofluxo[microId] = item;
       }
@@ -245,10 +268,26 @@ export async function carregarContextoDesempenhoOrganizacaoServidor(
     });
   }
 
-  // Solicitações complementam a atribuição da equipe; os eventos diários são a fonte das métricas de experiências.
+  // Contabilização comercial a partir das solicitações reais (CRM)
+  let totalContatosSolicitacoes = 0;
+  let leadsQualificados = 0;
+  let vendasConcluidas = 0;
+
+  // Solicitações complementam a atribuição da equipe e alimentam o funil comercial de CRO
   if (snapSolicitacoes && !snapSolicitacoes.empty) {
     for (const doc of snapSolicitacoes.docs) {
       const s = doc.data();
+      totalContatosSolicitacoes += 1;
+
+      // Status comercial (CRM)
+      const situacao = s.situacao as string | undefined;
+      if (situacao === "concluida") {
+        vendasConcluidas += 1;
+        leadsQualificados += 1;
+      } else if (situacao === "em_atendimento" || situacao === "proposta_enviada") {
+        leadsQualificados += 1;
+      }
+
       if (s.profissionalId || s.profissionalNome) {
         const profId = (s.profissionalId as string) || "consultor-geral";
         const profNome = (s.profissionalNome as string) || profId;
@@ -265,6 +304,16 @@ export async function carregarContextoDesempenhoOrganizacaoServidor(
       }
     }
   }
+
+  // Re-consolida o resumo aplicando as métricas de CRO com os dados comerciais reais
+  resumoMetricas = consolidarResumoMetricas(historicoDiario, 365, {
+    contatosTotais:
+      totalContatosSolicitacoes > 0
+        ? totalContatosSolicitacoes + resumoMetricas.totalCliquesWhatsapp
+        : undefined,
+    leadsQualificados,
+    vendasConcluidas,
+  });
 
   const metricasPorProfissional = Array.from(mapaProfissionais.entries()).map(([id, val]) => ({
     id,
@@ -292,7 +341,13 @@ export async function carregarContextoDesempenhoOrganizacaoServidor(
           validacao.data.tipoAcao !== "publicacao_post")
       )
         return [];
-      return [{ id: validacao.data.id, titulo: validacao.data.titulo }];
+      return [
+        {
+          id: validacao.data.id,
+          titulo: validacao.data.titulo,
+          etapas: validacao.data.etapas.map((e) => ({ id: e.id, titulo: e.titulo })),
+        },
+      ];
     }),
     podeVisualizarPainel: true,
   };

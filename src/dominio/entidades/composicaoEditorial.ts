@@ -38,6 +38,7 @@ export interface DescritorPaletaEditorial {
   readonly corCtaTexto: string;
   readonly corSecundarioFundo: string;
   readonly corSecundarioTexto: string;
+  readonly corBrilhoBorda?: string;
   readonly temaEscuro: boolean;
 }
 
@@ -52,6 +53,7 @@ export interface CustomizacaoTokensEditorial {
   readonly corCtaTexto?: string;
   readonly corSecundarioFundo?: string;
   readonly corSecundarioTexto?: string;
+  readonly corBrilhoBorda?: string;
 }
 
 export interface DescritorTipografiaEditorial {

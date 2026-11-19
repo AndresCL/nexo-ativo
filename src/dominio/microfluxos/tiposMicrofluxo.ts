@@ -236,6 +236,7 @@ export interface DefinicaoMicrofluxo {
   readonly iconeBotaoHome?: string;
   readonly destaquePrimarioHome?: boolean;
   readonly animarBordaDestaque?: boolean;
+  readonly corBrilhoBorda?: string;
   readonly ordemHome?: number;
 }
 

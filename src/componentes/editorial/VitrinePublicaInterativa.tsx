@@ -89,7 +89,9 @@ export function VitrinePublicaInterativa({
     try {
       const dadosArmazenar = JSON.stringify({
         urlLogotipo: pagina.identidade.urlLogotipoOpcional ?? null,
+        formatoBordaLogotipo: pagina.identidade.formatoBordaLogotipo ?? null,
         nomeCliente: pagina.identidade.nomeExibicao,
+        variaveisCssPaleta: variaveisPaleta,
       });
       localStorage.setItem(`fluxo_marca_${pagina.identificadorPublico}`, dadosArmazenar);
       localStorage.setItem(`fluxo_marca_${pagina.organizacaoId}`, dadosArmazenar);
@@ -122,6 +124,8 @@ export function VitrinePublicaInterativa({
     pagina.organizacaoId,
     pagina.identidade.nomeExibicao,
     pagina.identidade.urlLogotipoOpcional,
+    pagina.identidade.formatoBordaLogotipo,
+    variaveisPaleta,
   ]);
 
   const microfluxosDisponiveis = useMemo(() => {
@@ -430,6 +434,7 @@ export function VitrinePublicaInterativa({
       {loaderVisivel ? (
         <TelaCarregamentoEditorial
           urlLogotipo={pagina.identidade.urlLogotipoOpcional}
+          formatoBordaLogotipo={pagina.identidade.formatoBordaLogotipo}
           nomeCliente={pagina.identidade.nomeExibicao}
           desvanecendo={desvanecendoLoader}
           variaveisCssPaleta={variaveisPaleta}

@@ -163,6 +163,28 @@ export function GraficoTemporalInterativo({
 
       {/* Área do Gráfico Interativo com Recharts BarChart */}
       <div className="relative overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-b from-indigo-50/60 via-white to-white p-4 shadow-xs sm:p-6">
+        {/* Seletor rápido de dias em chips / botões acessíveis para teclado e testes */}
+        <div className="mb-4 flex flex-wrap items-center gap-1.5 border-b border-indigo-100 pb-3 text-xs">
+          <span className="font-semibold text-mineral-600 mr-1">Filtrar dia:</span>
+          {dadosFormatados.map((d) => {
+            const ativo = d.dataIso === diaSelecionado;
+            return (
+              <button
+                key={d.dataIso}
+                type="button"
+                onClick={() => aoSelecionarDia(ativo ? null : d.dataIso)}
+                className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-semibold transition-all ${
+                  ativo
+                    ? "bg-indigo-600 text-white shadow-2xs"
+                    : "border border-indigo-200 bg-white text-indigo-950 hover:bg-indigo-50"
+                }`}
+              >
+                {d.dataIso}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Gráfico Recharts Responsivo */}
         {montado ? (
           <div className="h-72 w-full">

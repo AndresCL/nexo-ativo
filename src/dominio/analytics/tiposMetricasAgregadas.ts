@@ -1,8 +1,12 @@
+import type { EntradaDadosMetricasCRO, ResumoMetricasCRO } from "./tiposMetricasCRO";
+import { CalculadorMetricasCRO } from "./calculadorMetricasCRO";
+
 export type TipoEventoTelemetriaAnonima =
   | "visualizacao_vitrine"
   | "visualizacao_cartao"
   | "clique_acao_home"
   | "abertura_microfluxo"
+  | "avanco_etapa_microfluxo"
   | "conclusao_microfluxo"
   | "clique_whatsapp"
   | "clique_ligacao";
@@ -36,6 +40,7 @@ export interface MetricaGranularMicrofluxo {
   readonly aberturas: number;
   readonly conclusoes: number;
   readonly aberturasPermalink?: number;
+  readonly porEtapa?: Readonly<Record<string, number>>;
 }
 
 export interface MetricaGranularProfissional {
@@ -96,6 +101,7 @@ export interface MetricasDiariasOrganizacao {
         readonly aberturas: number;
         readonly conclusoes: number;
         readonly aberturasPermalink?: number;
+        readonly porEtapa?: Readonly<Record<string, number>>;
       }
     >
   >;
@@ -131,6 +137,7 @@ export interface ResumoMetricasPeriodo {
   readonly totalCliquesLigacao: number;
   readonly taxaConversaoMicrofluxoPercentual: number; // Ex: 14.5%
   readonly taxaConversaoContatoPercentual: number; // Ex: 8.2%
+  readonly metricasCRO?: ResumoMetricasCRO;
   readonly metricasPorCanal: readonly MetricaCanalOrigem[];
   readonly metricasPorQrCode: readonly MetricaQrCode[];
   readonly metricasPorCartao: readonly MetricaCartaoProfissional[];
@@ -156,6 +163,11 @@ const ROTULOS_CANAL: Readonly<Record<CanalOrigemTrafego, string>> = {
 export function consolidarResumoMetricas(
   metricasDiarias: readonly MetricasDiariasOrganizacao[],
   diasDesejados = 30,
+  dadosComerciaisComplementares?: {
+    leadsQualificados?: number;
+    vendasConcluidas?: number;
+    contatosTotais?: number;
+  },
 ): ResumoMetricasPeriodo {
   const ordenadas = [...metricasDiarias].sort((a, b) => b.dataIso.localeCompare(a.dataIso));
   const selecionadas = ordenadas.slice(0, diasDesejados);
@@ -208,7 +220,13 @@ export function consolidarResumoMetricas(
 
   const mapaMicrofluxos = new Map<
     string,
-    { titulo: string; aberturas: number; conclusoes: number; aberturasPermalink: number }
+    {
+      titulo: string;
+      aberturas: number;
+      conclusoes: number;
+      aberturasPermalink: number;
+      porEtapa?: Record<string, number>;
+    }
   >();
   const mapaProfissionais = new Map<
     string,
@@ -271,12 +289,20 @@ export function consolidarResumoMetricas(
           aberturas: 0,
           conclusoes: 0,
           aberturasPermalink: 0,
+          porEtapa: {},
         };
+        const etapasAcumuladas: Record<string, number> = { ...(existente.porEtapa ?? {}) };
+        if (dados.porEtapa) {
+          for (const [etapaId, count] of Object.entries(dados.porEtapa)) {
+            etapasAcumuladas[etapaId] = (etapasAcumuladas[etapaId] || 0) + Number(count || 0);
+          }
+        }
         mapaMicrofluxos.set(id, {
           titulo: dados.titulo || existente.titulo,
           aberturas: existente.aberturas + (dados.aberturas || 0),
           conclusoes: existente.conclusoes + (dados.conclusoes || 0),
           aberturasPermalink: existente.aberturasPermalink + (dados.aberturasPermalink || 0),
+          porEtapa: etapasAcumuladas,
         });
       }
     }
@@ -416,6 +442,7 @@ export function consolidarResumoMetricas(
     aberturas: val.aberturas,
     conclusoes: val.conclusoes,
     aberturasPermalink: val.aberturasPermalink,
+    porEtapa: val.porEtapa,
   }));
 
   const metricasPorProfissional: MetricaGranularProfissional[] = Array.from(
@@ -426,6 +453,21 @@ export function consolidarResumoMetricas(
     contatos: val.contatos,
     solicitacoes: val.solicitacoes,
   }));
+
+  const cliquesAcaoTotais = totalCliquesWhatsapp + totalAberturasMicrofluxo + totalCliquesAcoesHome;
+  const contatosUnicos =
+    dadosComerciaisComplementares?.contatosTotais !== undefined
+      ? dadosComerciaisComplementares.contatosTotais
+      : totalConclusoesMicrofluxo + totalCliquesWhatsapp;
+
+  const entradasCRO: EntradaDadosMetricasCRO = {
+    visitantesOuSessoes: totalVisualizacoes,
+    cliquesAcaoTotais,
+    contatosUnicos,
+    leadsQualificados: dadosComerciaisComplementares?.leadsQualificados ?? 0,
+    vendasConcluidas: dadosComerciaisComplementares?.vendasConcluidas ?? 0,
+  };
+  const metricasCRO = CalculadorMetricasCRO.consolidarResumo(entradasCRO);
 
   return {
     diasConsiderados: selecionadas.length || diasDesejados,
@@ -438,6 +480,7 @@ export function consolidarResumoMetricas(
     totalCliquesLigacao,
     taxaConversaoMicrofluxoPercentual,
     taxaConversaoContatoPercentual,
+    metricasCRO,
     metricasPorCanal,
     metricasPorQrCode,
     metricasPorCartao,

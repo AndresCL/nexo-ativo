@@ -25,7 +25,7 @@ export interface PropriedadesDialogoExportacaoSolicitacoes {
   readonly aoMudarAberto: (aberto: boolean) => void;
   readonly solicitacoes: readonly SolicitacaoComercial[];
   readonly nomeOrganizacao: string;
-  readonly exibirArquivadasAtualmente: boolean;
+  readonly focarDesqualificadas?: boolean;
 }
 
 export function DialogoExportacaoSolicitacoes({
@@ -33,11 +33,11 @@ export function DialogoExportacaoSolicitacoes({
   aoMudarAberto,
   solicitacoes,
   nomeOrganizacao,
-  exibirArquivadasAtualmente,
+  focarDesqualificadas = false,
 }: PropriedadesDialogoExportacaoSolicitacoes) {
   const [formato, setFormato] = useState<FormatoExportacaoSolicitacoes>("excel");
   const [escopo, setEscopo] = useState<EscopoExportacaoSolicitacoes>(
-    exibirArquivadasAtualmente ? "arquivadas" : "ativas",
+    focarDesqualificadas ? "desqualificadas" : "ativas",
   );
 
   // Lista de microfluxos únicos presentes nas solicitações
@@ -69,11 +69,11 @@ export function DialogoExportacaoSolicitacoes({
     }
   }
 
-  // Filtra as solicitações pelo escopo (ativas/todas/arquivadas)
+  // Filtra as solicitações pelo escopo (ativas/todas/desqualificadas)
   const solicitacoesPorEscopo = useMemo(() => {
     return solicitacoes.filter((item) => {
-      if (escopo === "ativas") return item.situacao !== "arquivada";
-      if (escopo === "arquivadas") return item.situacao === "arquivada";
+      if (escopo === "ativas") return item.situacao !== "desqualificada";
+      if (escopo === "desqualificadas") return item.situacao === "desqualificada";
       return true;
     });
   }, [solicitacoes, escopo]);
@@ -319,7 +319,7 @@ export function DialogoExportacaoSolicitacoes({
                   />
                   <div>
                     <span className="font-medium text-mineral-900">Todas as situações</span>
-                    <span className="ml-1 text-mineral-500">(inclui arquivadas)</span>
+                    <span className="ml-1 text-mineral-500">(inclui desqualificadas)</span>
                   </div>
                 </label>
 
@@ -327,12 +327,12 @@ export function DialogoExportacaoSolicitacoes({
                   <input
                     type="radio"
                     name="escopo-exportacao"
-                    checked={escopo === "arquivadas"}
-                    onChange={() => setEscopo("arquivadas")}
+                    checked={escopo === "desqualificadas"}
+                    onChange={() => setEscopo("desqualificadas")}
                     className="h-3.5 w-3.5 text-indigo-600 border-marfim-300 focus:ring-indigo-500"
                   />
                   <div>
-                    <span className="font-medium text-mineral-900">Apenas arquivadas</span>
+                    <span className="font-medium text-mineral-900">Apenas desqualificadas</span>
                   </div>
                 </label>
               </div>

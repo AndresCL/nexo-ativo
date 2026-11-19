@@ -96,6 +96,7 @@ export interface ProfissionalEquipe {
   readonly linkedinOpcional?: string;
   readonly instagramOpcional?: string;
   readonly aceitaSolicitacoesDiretas: boolean;
+  readonly exibirAcoesVitrineNoCartao?: boolean;
   readonly ordemExibicao: number;
   readonly ativo: boolean;
   readonly atualizadoEmIso: string;

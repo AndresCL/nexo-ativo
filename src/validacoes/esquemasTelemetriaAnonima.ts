@@ -17,6 +17,7 @@ export const esquemaRegistroEventoAnonimo = z.object({
     "visualizacao_cartao",
     "clique_acao_home",
     "abertura_microfluxo",
+    "avanco_etapa_microfluxo",
     "conclusao_microfluxo",
     "clique_whatsapp",
     "clique_ligacao",

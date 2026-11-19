@@ -88,6 +88,7 @@ export const esquemaProfissionalEquipe: z.ZodType<ProfissionalEquipe> = z.object
   linkedinOpcional: z.string().url("Informe uma URL válida.").max(300).optional(),
   instagramOpcional: z.string().url("Informe uma URL válida.").max(300).optional(),
   aceitaSolicitacoesDiretas: z.boolean(),
+  exibirAcoesVitrineNoCartao: z.boolean().optional(),
   ordemExibicao: z.number().int().min(0).max(10_000),
   ativo: z.boolean(),
   atualizadoEmIso: z.string().min(1),

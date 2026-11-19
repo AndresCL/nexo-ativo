@@ -48,7 +48,7 @@ describe("gerarMatrizExportacaoSolicitacoes", () => {
         respostaTexto: "20/11/2026 às 14:00",
       },
     ],
-    situacao: "arquivada",
+    situacao: "desqualificada",
     chaveIdempotencia: "chave-2",
     criadoEmIso: "2026-11-14T11:00:00.000Z",
     atualizadoEmIso: "2026-11-14T11:00:00.000Z",

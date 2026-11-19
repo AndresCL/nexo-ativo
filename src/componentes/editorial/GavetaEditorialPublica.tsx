@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { ArrowUpRight, Clock, MessageCircle } from "lucide-react";
+import { ArrowUpRight, Clock } from "lucide-react";
+import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
 import {
   formatarApresentacaoPrecoItem,
   obterListaImagensMidia,
@@ -346,8 +347,8 @@ export function GavetaEditorialPublica({
                             }}
                             className="inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#25D366] px-3.5 py-1.5 text-center text-xs font-semibold text-white shadow-xs transition-opacity hover:opacity-90 sm:flex-[1.4] sm:px-2.5 sm:text-[11px] sm:whitespace-nowrap"
                           >
-                            <MessageCircle
-                              className="h-3.5 w-3.5 fill-white text-white"
+                            <IconeWhatsapp
+                              className="h-3.5 w-3.5 shrink-0 text-white"
                               aria-hidden="true"
                             />
                             <span>Chamar no WhatsApp</span>

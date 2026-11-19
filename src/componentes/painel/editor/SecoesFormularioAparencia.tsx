@@ -1,6 +1,17 @@
 "use client";
 
-import { ChevronDown, Image, Palette, Plus, Search, Share2, Trash2, Type } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  Image,
+  Palette,
+  Plus,
+  Search,
+  Share2,
+  Trash2,
+  Type,
+} from "lucide-react";
 import type { PortaUploadMidiaEditorial } from "@/aplicacao/portas/portasEditorAparencia";
 import {
   CATALOGO_PALETAS_EDITORIAIS,
@@ -12,6 +23,7 @@ import {
 import {
   type IntensidadeVeloEscuro,
   type TipoEfeitoCantosEditorial,
+  type TomDotsCantosEditorial,
   type TipoRedeSocial,
 } from "@/dominio/entidades/paginaPublicada";
 import { useEstadoEditorAparencia, type AbaEditorAparencia } from "@/estados/estadoEditorAparencia";
@@ -109,6 +121,7 @@ export function SecoesFormularioAparencia({
   const definirPontoFocalMidia = useEstadoEditorAparencia((e) => e.definirPontoFocalMidia);
   const adicionarRedeSocial = useEstadoEditorAparencia((e) => e.adicionarRedeSocial);
   const atualizarRedeSocial = useEstadoEditorAparencia((e) => e.atualizarRedeSocial);
+  const moverRedeSocial = useEstadoEditorAparencia((e) => e.moverRedeSocial);
   const removerRedeSocial = useEstadoEditorAparencia((e) => e.removerRedeSocial);
   const atualizarSeo = useEstadoEditorAparencia((e) => e.atualizarSeo);
 
@@ -444,6 +457,14 @@ export function SecoesFormularioAparencia({
                         descricao: "Texto e ícone dos botões secundários",
                         padrao: CATALOGO_PALETAS_EDITORIAIS[rascunho.paletaId].corSecundarioTexto,
                       },
+                      {
+                        chave: "corBrilhoBorda" as const,
+                        rotulo: "Brilho interior",
+                        descricao: "Cor do brilho interior do botão em destaque quando ativado",
+                        padrao:
+                          CATALOGO_PALETAS_EDITORIAIS[rascunho.paletaId].corBrilhoBorda ||
+                          CATALOGO_PALETAS_EDITORIAIS[rascunho.paletaId].corDestaque,
+                      },
                     ].map((token) => {
                       const valorAtual = rascunho.customizacaoTokens?.[token.chave] || token.padrao;
 
@@ -611,6 +632,44 @@ export function SecoesFormularioAparencia({
                       atualizarIdentidade({ urlLogotipoOpcional: novaUrl || undefined })
                     }
                   />
+
+                  {rascunho.identidade.urlLogotipoOpcional ? (
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-medium text-mineral-800">
+                        Bordas do logotipo
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {(
+                          [
+                            { valor: "natural", rotulo: "Natural" },
+                            { valor: "suave", rotulo: "Suave" },
+                            { valor: "arredondado", rotulo: "Arredondado" },
+                            { valor: "circulo", rotulo: "Círculo" },
+                          ] as const
+                        ).map((opcao) => {
+                          const ativo =
+                            (rascunho.identidade.formatoBordaLogotipo ?? "natural") === opcao.valor;
+                          return (
+                            <button
+                              key={opcao.valor}
+                              type="button"
+                              disabled={somenteLeitura}
+                              onClick={() =>
+                                atualizarIdentidade({ formatoBordaLogotipo: opcao.valor })
+                              }
+                              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                                ativo
+                                  ? "border-mineral-950 bg-mineral-950 text-white"
+                                  : "border-marfim-300 bg-white text-mineral-700 hover:bg-marfim-50"
+                              }`}
+                            >
+                              {opcao.rotulo}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
 
                   <div className="space-y-1.5">
                     <label className="block text-xs font-medium text-mineral-800">
@@ -949,31 +1008,68 @@ export function SecoesFormularioAparencia({
                 </div>
 
                 {rascunho.midiaFundo.efeitoCantos === "dots" ? (
-                  <div className="mt-3 rounded-lg border border-marfim-200 bg-marfim-50/60 p-3">
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <label
-                        htmlFor="opacidade-dots-cantos"
-                        className="text-xs font-medium text-mineral-800"
-                      >
-                        Opacidade dos dots
+                  <div className="mt-3 space-y-3 rounded-lg border border-marfim-200 bg-marfim-50/60 p-3">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-mineral-800">
+                        Tom dos dots
                       </label>
-                      <span className="font-mono text-xs font-semibold text-mineral-900">
-                        {rascunho.midiaFundo.opacidadeDotsCantos ?? 20}%
-                      </span>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {(
+                          [
+                            { valor: "neutro", nome: "Neutro" },
+                            { valor: "destaque", nome: "Destaque" },
+                            { valor: "borda", nome: "Borda suave" },
+                          ] as readonly { valor: TomDotsCantosEditorial; nome: string }[]
+                        ).map((item) => {
+                          const ativo =
+                            (rascunho.midiaFundo.tomDotsCantos ?? "neutro") === item.valor;
+                          return (
+                            <button
+                              key={item.valor}
+                              type="button"
+                              disabled={somenteLeitura}
+                              aria-pressed={ativo}
+                              onClick={() => atualizarMidiaFundo({ tomDotsCantos: item.valor })}
+                              className={combinarClasses(
+                                "min-h-8 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
+                                ativo
+                                  ? "border-indigo-200 bg-indigo-50 text-indigo-900"
+                                  : "border-marfim-300 bg-white text-mineral-800 hover:bg-marfim-100",
+                              )}
+                            >
+                              {item.nome}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <input
-                      id="opacidade-dots-cantos"
-                      type="range"
-                      min={5}
-                      max={100}
-                      step={5}
-                      disabled={somenteLeitura}
-                      value={rascunho.midiaFundo.opacidadeDotsCantos ?? 20}
-                      onChange={(e) =>
-                        atualizarMidiaFundo({ opacidadeDotsCantos: Number(e.target.value) })
-                      }
-                      className="h-2 w-full cursor-pointer accent-indigo-600"
-                    />
+
+                    <div>
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <label
+                          htmlFor="opacidade-dots-cantos"
+                          className="text-xs font-medium text-mineral-800"
+                        >
+                          Opacidade dos dots
+                        </label>
+                        <span className="font-mono text-xs font-semibold text-mineral-900">
+                          {rascunho.midiaFundo.opacidadeDotsCantos ?? 20}%
+                        </span>
+                      </div>
+                      <input
+                        id="opacidade-dots-cantos"
+                        type="range"
+                        min={5}
+                        max={100}
+                        step={5}
+                        disabled={somenteLeitura}
+                        value={rascunho.midiaFundo.opacidadeDotsCantos ?? 20}
+                        onChange={(e) =>
+                          atualizarMidiaFundo({ opacidadeDotsCantos: Number(e.target.value) })
+                        }
+                        className="h-2 w-full cursor-pointer accent-indigo-600"
+                      />
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -1026,7 +1122,7 @@ export function SecoesFormularioAparencia({
                 <p className="text-xs text-mineral-500">Nenhuma rede social cadastrada.</p>
               ) : (
                 <div className="space-y-3">
-                  {rascunho.redesSociais.map((item) => (
+                  {rascunho.redesSociais.map((item, indice) => (
                     <div
                       key={item.id}
                       className="grid gap-2.5 rounded-md border border-marfim-300 bg-marfim-50/50 p-3 sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:items-end"
@@ -1066,15 +1162,40 @@ export function SecoesFormularioAparencia({
                         }
                       />
 
-                      <Botao
-                        variante="fantasma"
-                        tamanho="compacto"
-                        disabled={somenteLeitura}
-                        aria-label={`Remover rede ${item.rede}`}
-                        onClick={() => removerRedeSocial(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-alerta-erro" aria-hidden="true" />
-                      </Botao>
+                      <div className="flex items-center justify-end gap-1">
+                        <Botao
+                          variante="fantasma"
+                          tamanho="compacto"
+                          disabled={somenteLeitura || indice === 0}
+                          aria-label={`Mover rede ${item.rede} para cima`}
+                          title="Mover para cima"
+                          onClick={() => moverRedeSocial(item.id, "cima")}
+                        >
+                          <ArrowUp className="h-4 w-4 text-mineral-700" aria-hidden="true" />
+                        </Botao>
+
+                        <Botao
+                          variante="fantasma"
+                          tamanho="compacto"
+                          disabled={somenteLeitura || indice === rascunho.redesSociais.length - 1}
+                          aria-label={`Mover rede ${item.rede} para baixo`}
+                          title="Mover para baixo"
+                          onClick={() => moverRedeSocial(item.id, "baixo")}
+                        >
+                          <ArrowDown className="h-4 w-4 text-mineral-700" aria-hidden="true" />
+                        </Botao>
+
+                        <Botao
+                          variante="fantasma"
+                          tamanho="compacto"
+                          disabled={somenteLeitura}
+                          aria-label={`Remover rede ${item.rede}`}
+                          title="Remover rede"
+                          onClick={() => removerRedeSocial(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-alerta-erro" aria-hidden="true" />
+                        </Botao>
+                      </div>
                     </div>
                   ))}
                 </div>

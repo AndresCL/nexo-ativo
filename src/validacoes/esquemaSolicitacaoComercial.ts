@@ -11,7 +11,7 @@ export const esquemaSituacaoSolicitacaoComercial: z.ZodType<SituacaoSolicitacaoC
   "em_atendimento",
   "proposta_enviada",
   "concluida",
-  "arquivada",
+  "desqualificada",
 ]);
 
 const esquemaItemRespostaRegistrada: z.ZodType<ItemRespostaRegistradaSolicitacao> = z.object({

@@ -1,11 +1,15 @@
 import type { CSSProperties } from "react";
-import type { TipoEfeitoCantosEditorial } from "@/dominio/entidades/paginaPublicada";
+import type {
+  TipoEfeitoCantosEditorial,
+  TomDotsCantosEditorial,
+} from "@/dominio/entidades/paginaPublicada";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 export interface PropriedadesEfeitoCantosEditorial {
   readonly tipo?: TipoEfeitoCantosEditorial;
   readonly temaEscuro?: boolean;
   readonly opacidadePercentual?: number;
+  readonly tom?: TomDotsCantosEditorial;
   readonly className?: string;
 }
 
@@ -26,6 +30,7 @@ export function EfeitoCantosEditorial({
   tipo = "nenhum",
   temaEscuro = true,
   opacidadePercentual = 20,
+  tom = "neutro",
   className,
 }: PropriedadesEfeitoCantosEditorial) {
   if (tipo !== "dots" && tipo !== "grade") {
@@ -42,17 +47,26 @@ export function EfeitoCantosEditorial({
         className,
       )}
     >
-      <MatrizDotsQuatroCantos temaEscuro={temaEscuro} />
+      <MatrizDotsQuatroCantos temaEscuro={temaEscuro} tom={tom} />
     </div>
   );
 }
 
 function MatrizDotsQuatroCantos({
   temaEscuro,
+  tom,
 }: {
   readonly temaEscuro: boolean;
+  readonly tom: TomDotsCantosEditorial;
 }) {
-  const corPonto = temaEscuro ? "#ffffff" : "#0a0c0b";
+  const corPonto =
+    tom === "destaque"
+      ? "var(--editorial-destaque)"
+      : tom === "borda"
+        ? "var(--editorial-borda)"
+        : temaEscuro
+          ? "#ffffff"
+          : "#0a0c0b";
 
   const cantos: readonly {
     readonly id: string;

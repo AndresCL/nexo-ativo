@@ -283,8 +283,8 @@ export function NavegacaoAcoesHome({
         const iconeItem = renderizarIconeAcao(acao);
 
         const conteudoInterno = (
-          <>
-            <div className={combinarClasses("flex items-center gap-3", ehDestaque ? "justify-center" : "")}>
+          <div className="relative z-10 flex w-full items-center justify-between">
+            <div className={combinarClasses("flex items-center gap-3", ehDestaque ? "justify-center w-full" : "")}>
               {iconeItem ? (
                 <div
                   className={combinarClasses(
@@ -318,43 +318,40 @@ export function NavegacaoAcoesHome({
                 className="h-5 w-5 shrink-0 opacity-70 transition-transform duration-200 group-hover:translate-x-1 group-hover:opacity-100"
               />
             ) : null}
-          </>
+          </div>
         );
 
-        const temBordaAnimada = ehDestaque && acao.animarBordaDestaque === true;
+        const temBrilhoInterior = ehDestaque && acao.animarBordaDestaque === true;
+        const classesBrilhoInterior = temBrilhoInterior ? "efeito-brilho-interior" : undefined;
+        const estiloBrilho = acao.corBrilhoBorda
+          ? ({ "--editorial-brilho-borda": acao.corBrilhoBorda } as React.CSSProperties)
+          : undefined;
 
         const elementoBotao = aoAcionarItem ? (
           <button
             type="button"
             data-acao-home-id={acao.id}
+            style={estiloBrilho}
             onClick={(evento) => aoAcionarItem(acao, evento.currentTarget)}
-            className={combinarClasses(classesBaseItem, temBordaAnimada ? "relative z-10 !border-transparent" : undefined)}
+            className={combinarClasses(classesBaseItem, classesBrilhoInterior)}
           >
             {conteudoInterno}
           </button>
         ) : (
           <a
             href={acao.destino}
+            style={estiloBrilho}
             {...(externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            className={combinarClasses(classesBaseItem, temBordaAnimada ? "relative z-10 !border-transparent" : undefined)}
+            className={combinarClasses(classesBaseItem, classesBrilhoInterior)}
           >
             {conteudoInterno}
           </a>
         );
 
-        const elementoPrincipalComBorda = temBordaAnimada ? (
-          <div className="animacao-brilho-borda-container w-full rounded-full">
-            <div className="animacao-brilho-borda-feixe" aria-hidden="true" />
-            {elementoBotao}
-          </div>
-        ) : (
-          elementoBotao
-        );
-
         if (ehDestaque && acao.subtituloDiscreto) {
           return (
             <div key={acao.id} className="flex w-full flex-col items-center gap-1.5">
-              {elementoPrincipalComBorda}
+              {elementoBotao}
               <p className="text-center text-xs font-medium text-[var(--editorial-texto-secundario)] opacity-80 px-2">
                 {acao.subtituloDiscreto}
               </p>
@@ -362,7 +359,7 @@ export function NavegacaoAcoesHome({
           );
         }
 
-        return <div key={acao.id} className="w-full">{elementoPrincipalComBorda}</div>;
+        return <div key={acao.id} className="w-full">{elementoBotao}</div>;
       })}
     </nav>
   );

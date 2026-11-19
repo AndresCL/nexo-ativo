@@ -8,22 +8,19 @@ export default function PaginaVitrineNaoEncontrada() {
       <div className="mb-6">
         <LogoNexoAtivo tamanho="compacto" />
       </div>
-      <p className="text-xs tracking-[0.22em] text-mineral-500 uppercase">
-        Endereço não localizado
-      </p>
-      <h1 className="mt-3 max-w-lg font-sans text-3xl font-semibold tracking-tight text-mineral-900 sm:text-4xl">
-        Esta presença editorial ainda não foi publicada ou não está disponível.
+      <h1 className="font-sans text-2xl font-semibold tracking-tight text-mineral-950 sm:text-3xl">
+        Página não encontrada
       </h1>
-      <p className="mt-4 max-w-md text-sm leading-relaxed text-mineral-600">
-        Verifique se o endereço foi digitado corretamente ou volte à página inicial da plataforma.
+      <p className="mt-2 max-w-sm text-sm text-mineral-500">
+        Esta presença digital ainda não está disponível ou o link é inválido.
       </p>
-      <div className="mt-8">
+      <div className="mt-6">
         <Botao
           variante="operacional_primario"
           className="bg-mineral-950 text-white hover:bg-mineral-900"
           comoFilho
         >
-          <Link href="/">Conhecer o Nexo Ativo</Link>
+          <Link href="/">Voltar ao início</Link>
         </Botao>
       </div>
     </main>

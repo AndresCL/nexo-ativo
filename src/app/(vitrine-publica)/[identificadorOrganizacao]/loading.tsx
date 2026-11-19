@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import type { FormatoBordaLogotipo } from "@/dominio/entidades/paginaPublicada";
 import { TelaCarregamentoEditorial } from "@/componentes/editorial/TelaCarregamentoEditorial";
 
 interface DadosMarcaCache {
   readonly urlLogotipo?: string | null;
+  readonly formatoBordaLogotipo?: FormatoBordaLogotipo | null;
   readonly nomeCliente?: string;
+  readonly variaveisCssPaleta?: Readonly<Record<string, string>>;
 }
 
 function recuperarMarcaArmazenada(segmento?: string): DadosMarcaCache | null {
@@ -38,6 +41,11 @@ export default function CarregandoVitrinePublica() {
   }, [segmento]);
 
   return (
-    <TelaCarregamentoEditorial urlLogotipo={marca?.urlLogotipo} nomeCliente={marca?.nomeCliente} />
+    <TelaCarregamentoEditorial
+      urlLogotipo={marca?.urlLogotipo}
+      formatoBordaLogotipo={marca?.formatoBordaLogotipo ?? undefined}
+      nomeCliente={marca?.nomeCliente}
+      variaveisCssPaleta={marca?.variaveisCssPaleta}
+    />
   );
 }
