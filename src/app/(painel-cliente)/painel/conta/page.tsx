@@ -81,31 +81,33 @@ export default async function PaginaMinhaConta() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 pb-16">
-      <div>
+    <div className="space-y-6">
+      <header className="border-b border-marfim-200/80 pb-3 sm:pb-4">
         <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
           Minha conta
         </h1>
-        <p className="mt-1 text-xs text-mineral-600 sm:text-sm">
-          Gerencie suas informações de perfil, credenciais de acesso e segurança da sua conta.
+        <p className="mt-1 text-xs text-mineral-600">
+          Gerencie suas informações de perfil, credenciais e sessão.
         </p>
+      </header>
+
+      <div className="max-w-3xl space-y-6">
+        <FormularioPerfilUsuario
+          nomeInicial={sessao.nomeExibicao || ""}
+          email={sessao.email || ""}
+          emailVerificado={sessao.emailVerificado}
+          provedores={sessao.provedoresConectados}
+        />
+
+        <FormularioAlterarSenha provedores={sessao.provedoresConectados} />
+
+        <SecaoSessaoLogout />
+
+        <ZonaPerigoExcluirConta
+          estadoExclusao={estadoExclusao}
+          provedores={sessao.provedoresConectados}
+        />
       </div>
-
-      <FormularioPerfilUsuario
-        nomeInicial={sessao.nomeExibicao || ""}
-        email={sessao.email || ""}
-        emailVerificado={sessao.emailVerificado}
-        provedores={sessao.provedoresConectados}
-      />
-
-      <FormularioAlterarSenha provedores={sessao.provedoresConectados} />
-
-      <SecaoSessaoLogout />
-
-      <ZonaPerigoExcluirConta
-        estadoExclusao={estadoExclusao}
-        provedores={sessao.provedoresConectados}
-      />
     </div>
   );
 }

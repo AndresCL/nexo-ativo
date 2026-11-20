@@ -30,12 +30,12 @@ export function BotaoEncerrarSessao({
 
   return (
     <Botao
-      variante="fantasma"
+      variante="operacional_secundario"
       tamanho="compacto"
       onClick={executarLogout}
       carregando={encerrando}
       textoCarregando="Saindo..."
-      className="w-full justify-start text-mineral-600 hover:bg-indigo-50/50 hover:text-indigo-700"
+      className="rounded-xl border-marfim-300 bg-white text-mineral-700 hover:bg-marfim-100 hover:text-mineral-950"
     >
       <LogOut className="h-4 w-4" aria-hidden="true" />
       <span>Sair da conta</span>

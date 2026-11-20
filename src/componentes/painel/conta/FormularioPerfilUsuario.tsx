@@ -64,23 +64,18 @@ export function FormularioPerfilUsuario({
   return (
     <section
       aria-labelledby="titulo-perfil-usuario"
-      className="rounded-2xl border border-marfim-200/80 bg-white p-6 shadow-2xs sm:p-8"
+      className="rounded-2xl border border-marfim-200/90 bg-white p-5 shadow-2xs sm:p-6"
     >
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-          <User className="h-5 w-5" aria-hidden="true" />
-        </div>
-        <div>
-          <h2 id="titulo-perfil-usuario" className="text-base font-semibold text-mineral-950">
-            Dados pessoais
-          </h2>
-          <p className="text-xs text-mineral-500">
-            Gerencie seu nome de exibição e visualize suas informações de acesso.
-          </p>
-        </div>
+      <div className="border-b border-marfim-100 pb-3">
+        <h2 id="titulo-perfil-usuario" className="text-sm font-semibold text-mineral-950">
+          Dados pessoais
+        </h2>
+        <p className="mt-0.5 text-xs text-mineral-500">
+          Informações de exibição e identificação da sua conta.
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit(submeter)} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit(submeter)} className="mt-4 space-y-4">
         <div>
           <label htmlFor="campo-nome" className="block text-xs font-medium text-mineral-700">
             Nome de exibição
@@ -89,7 +84,7 @@ export function FormularioPerfilUsuario({
             id="campo-nome"
             type="text"
             {...register("nomeExibicao")}
-            className="mt-1.5 block w-full rounded-xl border border-marfim-300 bg-white px-3.5 py-2 text-sm text-mineral-900 shadow-2xs placeholder:text-mineral-400 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+            className="mt-1.5 block w-full rounded-xl border border-marfim-300 bg-white px-3.5 py-2 text-sm text-mineral-900 shadow-2xs placeholder:text-mineral-400 focus:border-mineral-950 focus:outline-none focus:ring-1 focus:ring-mineral-950"
             placeholder="Seu nome"
           />
           {errors.nomeExibicao ? (
@@ -107,29 +102,30 @@ export function FormularioPerfilUsuario({
               type="email"
               value={email}
               disabled
-              className="block w-full cursor-not-allowed rounded-xl border border-marfim-200 bg-marfim-50/70 px-3.5 py-2 text-sm text-mineral-600 shadow-2xs"
+              className="block w-full cursor-not-allowed rounded-xl border border-marfim-200 bg-marfim-50/60 px-3.5 py-2 text-sm text-mineral-600 shadow-2xs"
             />
             {emailVerificado ? (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 border border-emerald-200/60">
                 <Check className="h-3 w-3" /> Verificado
               </span>
             ) : null}
           </div>
           <p className="mt-1 text-[11px] text-mineral-500">
             {ehGoogle
-              ? "Autenticado via Conta Google. O e-mail principal é gerenciado pelo Google."
-              : "O e-mail de acesso não pode ser alterado diretamente por questões de segurança."}
+              ? "Autenticado via Google. O e-mail principal é gerenciado pela sua conta Google."
+              : "O e-mail de acesso não pode ser alterado diretamente por segurança."}
           </p>
         </div>
 
-        <div className="pt-2">
+        <div className="pt-1">
           <Botao
             type="submit"
             variante="operacional_primario"
-            tamanho="padrao"
+            tamanho="compacto"
             carregando={salvando}
             textoCarregando="Salvando..."
             disabled={!isDirty || salvando}
+            className="rounded-xl bg-mineral-950 text-white hover:bg-mineral-800"
           >
             Salvar alterações
           </Botao>

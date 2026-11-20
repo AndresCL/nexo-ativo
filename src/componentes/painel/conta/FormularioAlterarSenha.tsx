@@ -55,29 +55,27 @@ export function FormularioAlterarSenha({
     return (
       <section
         aria-labelledby="titulo-seguranca"
-        className="rounded-2xl border border-marfim-200/80 bg-white p-6 shadow-2xs sm:p-8"
+        className="rounded-2xl border border-marfim-200/90 bg-white p-5 shadow-2xs sm:p-6"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-            <KeyRound className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div>
-            <h2 id="titulo-seguranca" className="text-base font-semibold text-mineral-950">
-              Segurança e senha
-            </h2>
-            <p className="text-xs text-mineral-500">
-              Gerencie a senha de acesso da sua conta.
-            </p>
-          </div>
+        <div className="border-b border-marfim-100 pb-3">
+          <h2 id="titulo-seguranca" className="text-sm font-semibold text-mineral-950">
+            Segurança e senha
+          </h2>
+          <p className="mt-0.5 text-xs text-mineral-500">
+            Credenciais de autenticação da sua conta.
+          </p>
         </div>
 
-        <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-xs text-amber-900">
-          <p className="font-medium">Autenticação federada ativa (Google)</p>
-          <p className="mt-1 text-amber-800">
-            Sua conta está conectada através do Google. Por esse motivo, você não utiliza uma senha
-            específica do Nexo Ativo para acessar o sistema. Para alterar sua senha de acesso,
-            atualize as credenciais diretamente na sua conta Google.
-          </p>
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-marfim-200 bg-marfim-50/50 p-4">
+          <div>
+            <p className="text-xs font-semibold text-mineral-900">Autenticação via Google</p>
+            <p className="mt-0.5 text-[11px] text-mineral-600">
+              Sua conta utiliza o login seguro do Google. Para redefinir sua senha, acesse as configurações da sua Conta Google.
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full border border-marfim-300 bg-white px-2.5 py-1 text-[11px] font-medium text-mineral-700 shadow-2xs">
+            Google OAuth
+          </span>
         </div>
       </section>
     );
@@ -86,23 +84,18 @@ export function FormularioAlterarSenha({
   return (
     <section
       aria-labelledby="titulo-seguranca"
-      className="rounded-2xl border border-marfim-200/80 bg-white p-6 shadow-2xs sm:p-8"
+      className="rounded-2xl border border-marfim-200/90 bg-white p-5 shadow-2xs sm:p-6"
     >
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-          <KeyRound className="h-5 w-5" aria-hidden="true" />
-        </div>
-        <div>
-          <h2 id="titulo-seguranca" className="text-base font-semibold text-mineral-950">
-            Segurança e senha
-          </h2>
-          <p className="text-xs text-mineral-500">
-            Mantenha sua conta protegida com uma senha forte.
-          </p>
-        </div>
+      <div className="border-b border-marfim-100 pb-3">
+        <h2 id="titulo-seguranca" className="text-sm font-semibold text-mineral-950">
+          Segurança e senha
+        </h2>
+        <p className="mt-0.5 text-xs text-mineral-500">
+          Mantenha sua conta protegida com uma senha forte.
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit(submeter)} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit(submeter)} className="mt-4 space-y-4">
         <div>
           <label htmlFor="campo-senha-atual" className="block text-xs font-medium text-mineral-700">
             Senha atual
@@ -157,14 +150,15 @@ export function FormularioAlterarSenha({
           ) : null}
         </div>
 
-        <div className="pt-2">
+        <div className="pt-1">
           <Botao
             type="submit"
             variante="operacional_primario"
-            tamanho="padrao"
+            tamanho="compacto"
             carregando={salvando}
             textoCarregando="Atualizando senha..."
             disabled={salvando}
+            className="rounded-xl bg-mineral-950 text-white hover:bg-mineral-800"
           >
             Atualizar senha
           </Botao>

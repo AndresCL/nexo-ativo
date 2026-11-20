@@ -66,65 +66,58 @@ export function ZonaPerigoExcluirConta({
     <>
       <section
         aria-labelledby="titulo-zona-perigo"
-        className="rounded-2xl border border-red-200/80 bg-red-50/30 p-6 shadow-2xs sm:p-8"
+        className="rounded-2xl border border-marfim-200/90 bg-white p-5 shadow-2xs sm:p-6"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100 text-red-700">
-            <Trash2 className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div>
-            <h2 id="titulo-zona-perigo" className="text-base font-semibold text-red-950">
-              Zona de perigo · Eliminar conta
-            </h2>
-            <p className="text-xs text-red-700/80">
-              Exclusão definitiva da sua conta, páginas publicadas, dados e vínculos.
-            </p>
-          </div>
+        <div className="border-b border-marfim-100 pb-3">
+          <h2 id="titulo-zona-perigo" className="text-sm font-semibold text-mineral-950">
+            Eliminar conta
+          </h2>
+          <p className="mt-0.5 text-xs text-mineral-500">
+            Exclusão definitiva da sua conta, vitrine publicada e histórico de dados.
+          </p>
         </div>
 
-        <div className="mt-5 text-xs text-mineral-700 space-y-2">
-          <p>
-            A exclusão da sua conta é <strong>permanente e irreversível</strong>. Ao confirmar, sua
-            vitrine deixará de ser acessível ao público, seus QR codes perderão o redirecionamento e
-            todo o seu histórico de contatos e personalizações será removido.
+        <div className="mt-4 text-xs text-mineral-600 space-y-3">
+          <p className="leading-relaxed">
+            A exclusão é permanente e irreversível. Ao confirmar, sua vitrine pública será desativada, seus QR codes perderão o redirecionamento e todo o histórico será removido.
           </p>
 
           {estadoExclusao.bloqueadoPorAssinaturaAtiva ? (
-            <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900">
-              <p className="font-semibold flex items-center gap-1.5">
+            <div className="rounded-xl border border-marfim-200 bg-marfim-50/60 p-3.5 text-xs text-mineral-800">
+              <p className="font-semibold flex items-center gap-1.5 text-mineral-900">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
                 Assinatura ativa detectada
               </p>
-              <p className="mt-1">
+              <p className="mt-1 text-mineral-600 leading-relaxed">
                 {estadoExclusao.motivoBloqueio ||
-                  "Você possui uma assinatura em andamento. Cancele a assinatura antes de eliminar sua conta para evitar cobranças automáticas no cartão."}
+                  "Você possui uma assinatura em andamento. Cancele a assinatura antes de eliminar sua conta."}
               </p>
-              <div className="mt-3">
+              <div className="mt-2.5">
                 <Link
                   href="/painel/assinatura"
-                  className="inline-flex items-center gap-1 font-medium text-amber-900 underline hover:text-amber-950"
+                  className="inline-flex items-center gap-1 font-medium text-mineral-900 underline hover:text-mineral-950"
                 >
                   Ir para gerenciamento da assinatura
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3 w-3" />
                 </Link>
               </div>
             </div>
           ) : estadoExclusao.ehFundador ? (
-            <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900">
-              <p className="font-semibold">Conta de Fundador</p>
-              <p className="mt-1">
+            <div className="rounded-xl border border-marfim-200 bg-marfim-50/60 p-3.5 text-xs text-mineral-700">
+              <p className="font-semibold text-mineral-900">Conta de Fundador</p>
+              <p className="mt-0.5 text-mineral-600">
                 Contas com papel de Fundador não podem ser auto-eliminadas pelo painel de cliente.
               </p>
             </div>
           ) : (
-            <div className="pt-3">
+            <div className="pt-2">
               <Botao
                 type="button"
-                tamanho="padrao"
+                tamanho="compacto"
                 onClick={() => setModalAberto(true)}
-                className="bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600 border-transparent"
+                className="rounded-xl border border-red-200 bg-white text-red-700 hover:bg-red-50 hover:text-red-800"
               >
-                Eliminar minha conta definitivamente
+                Eliminar conta definitivamente
               </Botao>
             </div>
           )}
