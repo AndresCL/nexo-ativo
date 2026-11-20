@@ -81,9 +81,14 @@ export function ComposicaoImersiva({
 
         <div aria-hidden="true" className="min-h-10 flex-1 @5xl:hidden sm:min-h-12" />
 
-        <div className="grid items-center gap-5 @5xl:flex-1 @5xl:content-center @5xl:grid-cols-12 @5xl:gap-x-12 @5xl:gap-y-4 @5xl:py-4">
-          <TransicaoEditorial atrasoSegundos={0.06} className="@5xl:col-span-7">
+        {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
+          <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0 max-w-7xl mx-auto mb-2">
             {complementoChamada}
+          </TransicaoEditorial>
+        ) : null}
+
+        <div className="grid items-center gap-5 @5xl:flex-1 @5xl:content-center @5xl:grid-cols-12 @5xl:gap-x-12 @5xl:gap-y-4 @5xl:py-4">
+          <TransicaoEditorial atrasoSegundos={0.06} className="hidden @5xl:col-span-7 @5xl:block">
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}
               previaEquipe={previaEquipe}
@@ -91,7 +96,7 @@ export function ComposicaoImersiva({
             />
           </TransicaoEditorial>
 
-          <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5">
+          <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5 @5xl:col-start-8">
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
               espacamentoAcoes={pagina.espacamentoAcoes}
@@ -105,7 +110,6 @@ export function ComposicaoImersiva({
               paletaId={pagina.paletaId}
               aoAcionarItem={aoAcionarItem}
               aoSelecionarItemAcervo={aoSelecionarItemAcervo}
-              className="@5xl:max-w-sm"
             />
           </TransicaoEditorial>
 
@@ -122,6 +126,12 @@ export function ComposicaoImersiva({
             </TransicaoEditorial>
           ) : null}
         </div>
+
+        {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
+          <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0 max-w-7xl mx-auto mt-4">
+            {complementoChamada}
+          </TransicaoEditorial>
+        ) : null}
 
         <RodapeEditorial
           identidade={pagina.identidade}

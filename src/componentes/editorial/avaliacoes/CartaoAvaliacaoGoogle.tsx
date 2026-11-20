@@ -5,73 +5,80 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 export function CartaoAvaliacaoGoogle({
   avaliacao,
   compacto = false,
+  aoClicar,
 }: {
   readonly avaliacao: AvaliacaoGoogle;
   readonly compacto?: boolean;
+  readonly aoClicar?: () => void;
 }) {
   return (
-    <article className="min-w-0 rounded-xl border border-current/20 bg-[var(--editorial-superficie)]/90 p-4 text-[var(--editorial-texto)]">
-      <div className="flex items-center gap-3">
+    <article
+      onClick={aoClicar}
+      className={combinarClasses(
+        "rounded-xl border border-current/20 bg-[var(--editorial-superficie)]/90 text-[var(--editorial-texto)] transition-all",
+        compacto
+          ? "w-[260px] shrink-0 snap-start p-3 text-left shadow-2xs hover:border-current/40 sm:w-[280px]"
+          : "p-4",
+        aoClicar && "cursor-pointer",
+      )}
+    >
+      <div className="flex items-center gap-2.5">
         {avaliacao.urlFotoAutor ? (
           <Image
             src={avaliacao.urlFotoAutor}
             alt=""
-            width={32}
-            height={32}
+            width={28}
+            height={28}
             unoptimized
             referrerPolicy="no-referrer"
-            className="h-8 w-8 rounded-full"
+            className="h-7 w-7 rounded-full object-cover"
           />
         ) : null}
-        <div className="min-w-0">
-          {avaliacao.urlAutor ? (
-            <a
-              href={avaliacao.urlAutor}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium underline-offset-4 hover:underline"
-            >
-              {avaliacao.autor}
-            </a>
-          ) : (
-            <p className="text-sm font-medium">{avaliacao.autor}</p>
-          )}
-          <p className="text-xs" aria-label={`${avaliacao.nota} de 5 estrelas`}>
-            <span aria-hidden="true">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-semibold leading-tight">{avaliacao.autor}</p>
+          <div className="mt-1 flex items-center gap-1.5 leading-none">
+            <span className="font-bold text-amber-500 text-xs">
+              ★ {avaliacao.nota}
+            </span>
+            <span aria-hidden="true" className="text-amber-500 text-[10px]">
               {"★".repeat(avaliacao.nota)}
+            </span>
+            <span aria-hidden="true" className="opacity-25 text-[10px]">
               {"☆".repeat(5 - avaliacao.nota)}
             </span>
-          </p>
+          </div>
         </div>
         {avaliacao.descricaoData ? (
           <time
             dateTime={avaliacao.publicadaEmIso}
-            className="ml-auto text-xs text-[var(--editorial-texto-secundario)]"
+            className="shrink-0 text-[10px] text-[var(--editorial-texto-secundario)]"
           >
             {avaliacao.descricaoData}
           </time>
         ) : null}
       </div>
+
       {avaliacao.texto ? (
         <p
           className={combinarClasses(
-            "mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed",
-            compacto && "line-clamp-3",
+            "mt-2 text-xs leading-relaxed whitespace-pre-wrap break-words",
+            compacto ? "line-clamp-3 text-[var(--editorial-texto)]/90" : "text-sm",
           )}
         >
           {avaliacao.texto}
         </p>
       ) : (
-        <p className="mt-3 text-xs text-[var(--editorial-texto-secundario)]">
+        <p className="mt-2 text-[11px] text-[var(--editorial-texto-secundario)]">
           Avaliação sem comentário.
         </p>
       )}
-      {avaliacao.urlAvaliacao ? (
+
+      {!compacto && avaliacao.urlAvaliacao ? (
         <a
           href={avaliacao.urlAvaliacao}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex min-h-11 items-center text-xs underline underline-offset-4"
+          className="mt-3 inline-flex items-center text-xs underline underline-offset-4"
         >
           Ler no Google
         </a>

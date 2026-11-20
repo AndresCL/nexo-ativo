@@ -32,6 +32,8 @@ export function FormularioCriarPrimeiraOrganizacao({
     register,
     handleSubmit,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<DadosCriarOrganizacaoInicial>({
     resolver: zodResolver(esquemaCriarOrganizacaoInicial),
@@ -42,10 +44,32 @@ export function FormularioCriarPrimeiraOrganizacao({
     },
   });
 
-  function sugerirEnderecoAutomatico(nomeInformado: string) {
+  async function validarDisponibilidadeSlug(slugInformado: string) {
+    const slugLimpo = slugInformado.trim().toLowerCase();
+    if (slugLimpo.length < 3) return;
+    if (!servicoProvisionamento.verificarDisponibilidadeIdentificador) return;
+
+    try {
+      const disponivel =
+        await servicoProvisionamento.verificarDisponibilidadeIdentificador(slugLimpo);
+      if (!disponivel) {
+        setError("identificadorPublico", {
+          type: "manual",
+          message: "Este endereço público já está em uso por outra organização. Escolha outro.",
+        });
+      } else {
+        clearErrors("identificadorPublico");
+      }
+    } catch {
+      // Falha de rede não impede o fluxo; validação transacional definitiva ocorre no submit
+    }
+  }
+
+  async function sugerirEnderecoAutomatico(nomeInformado: string) {
     const sugestao = normalizarSugestaoIdentificador(nomeInformado);
     if (sugestao.length > 0) {
       setValue("identificadorPublico", sugestao, { shouldValidate: true });
+      await validarDisponibilidadeSlug(sugestao);
     }
   }
 
@@ -58,9 +82,22 @@ export function FormularioCriarPrimeiraOrganizacao({
       await servicoProvisionamento.criarOrganizacaoInicial(dados);
       navegador.refresh();
     } catch (erro) {
-      notificar.erro(
-        erro instanceof Error ? erro.message : "Não foi possível criar sua organização agora.",
-      );
+      const mensagem =
+        erro instanceof Error ? erro.message : "Não foi possível criar sua organização agora.";
+      const codigo = (erro as { codigo?: string })?.codigo;
+
+      if (
+        codigo === "ENDERECO_PUBLICO_INDISPONIVEL" ||
+        mensagem.toLowerCase().includes("endereço público já está") ||
+        mensagem.toLowerCase().includes("já está sendo utilizado")
+      ) {
+        setError("identificadorPublico", {
+          type: "manual",
+          message: "Este endereço público já está em uso por outra organização. Escolha outro.",
+        });
+      }
+
+      notificar.erro(mensagem);
     }
   }
 
@@ -107,7 +144,9 @@ export function FormularioCriarPrimeiraOrganizacao({
         required
         disabled={!cadastroHabilitado}
         mensagemErro={errors.identificadorPublico?.message}
-        {...register("identificadorPublico")}
+        {...register("identificadorPublico", {
+          onBlur: (evento) => validarDisponibilidadeSlug(evento.target.value),
+        })}
       />
 
       <div className="pt-2">

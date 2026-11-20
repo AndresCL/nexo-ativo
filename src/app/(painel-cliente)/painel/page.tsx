@@ -29,7 +29,7 @@ export default async function PaginaVisaoGeralPainel() {
         </header>
 
         <CartaoSuperficie className="rounded-2xl p-5 shadow-xs sm:p-6">
-          <FormularioCriarPrimeiraOrganizacao />
+          <FormularioCriarPrimeiraOrganizacao cadastroHabilitado={true} />
         </CartaoSuperficie>
       </div>
     );

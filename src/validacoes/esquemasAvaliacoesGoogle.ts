@@ -13,6 +13,7 @@ export const esquemaConfiguracaoAvaliacoesGoogle = z
     habilitado: z.boolean(),
     identificadorLocal: esquemaIdentificadorLocalGoogle.optional(),
     modoExibicao: z.enum(["resumo", "carrossel"]),
+    posicao: z.enum(["topo", "rodape"]).optional(),
   })
   .superRefine((dados, contexto) => {
     if (dados.habilitado && !dados.identificadorLocal) {

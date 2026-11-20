@@ -173,12 +173,17 @@ export function ComposicaoGaleriaEditorial({
             atrasoSegundos={0.1}
             className="flex flex-col justify-between gap-7 @5xl:col-span-5"
           >
-            {complementoChamada}
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}
               previaEquipe={previaEquipe}
               aoAcionarItem={aoAcionarItem}
             />
+
+            {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
+              <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0">
+                {complementoChamada}
+              </TransicaoEditorial>
+            ) : null}
 
             <NavegacaoAcoesHome
               acoes={pagina.acoesPrincipais}
@@ -194,6 +199,12 @@ export function ComposicaoGaleriaEditorial({
               aoAcionarItem={aoAcionarItem}
               aoSelecionarItemAcervo={aoSelecionarItemAcervo}
             />
+
+            {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
+              <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0">
+                {complementoChamada}
+              </TransicaoEditorial>
+            ) : null}
 
             <div className="flex justify-center @5xl:justify-end">
               <BarraRedesSociaisDiscreta

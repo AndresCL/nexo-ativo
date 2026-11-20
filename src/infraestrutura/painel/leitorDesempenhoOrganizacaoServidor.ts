@@ -1,4 +1,5 @@
 import { esquemaDefinicaoMicrofluxo } from "@/validacoes/esquemasMicrofluxo";
+import { obterOpcoesDeSaida } from "@/dominio/microfluxos/composicaoEtapaLivre";
 import type {
   MetricasDiariasOrganizacao,
   ResumoMetricasPeriodo,
@@ -14,10 +15,26 @@ import { esquemaProfissionalEquipe } from "@/validacoes/esquemasCatalogoConteudo
 import { verificarPermissaoOrganizacao } from "@/dominio/permissoes/autorizadorOrganizacao";
 import { obterServicosAdminFirebase } from "@/infraestrutura/firebase/adminFirebase";
 
+export interface InformacaoOpcaoTransicao {
+  readonly id: string;
+  readonly rotulo: string;
+  readonly proximaEtapaIdOpcional?: string;
+  readonly encerrarPercurso?: boolean;
+}
+
+export interface EtapaExperienciaPainel {
+  readonly id: string;
+  readonly titulo: string;
+  readonly tipoEtapa?: string;
+  readonly proximaEtapaPadraoId?: string;
+  readonly opcoes?: readonly InformacaoOpcaoTransicao[];
+}
+
 export interface ItemExperienciaPainel {
   readonly id: string;
   readonly titulo: string;
-  readonly etapas?: readonly { readonly id: string; readonly titulo: string }[];
+  readonly etapaInicialId?: string;
+  readonly etapas?: readonly EtapaExperienciaPainel[];
 }
 
 export interface ContextoDesempenhoOrganizacaoServidor {
@@ -150,7 +167,12 @@ function reconstruirMetricasDiariasDeDocFirestore(
       const microId = partes[1];
       const metrica = partes[2];
       if (microId && metrica) {
-        const item = porMicrofluxo[microId] ?? { titulo: microId, aberturas: 0, conclusoes: 0, porEtapa: {} };
+        const item = porMicrofluxo[microId] ?? {
+          titulo: microId,
+          aberturas: 0,
+          conclusoes: 0,
+          porEtapa: {},
+        };
         if (metrica === "titulo") {
           item.titulo = String(valor);
         } else if (metrica === "aberturas") {
@@ -345,7 +367,28 @@ export async function carregarContextoDesempenhoOrganizacaoServidor(
         {
           id: validacao.data.id,
           titulo: validacao.data.titulo,
-          etapas: validacao.data.etapas.map((e) => ({ id: e.id, titulo: e.titulo })),
+          etapaInicialId: validacao.data.etapaInicialId,
+          etapas: validacao.data.etapas.map((e) => {
+            const opcoesSaida = obterOpcoesDeSaida(e);
+            return {
+              id: e.id,
+              titulo: e.titulo,
+              ...(e.tipoEtapa ? { tipoEtapa: e.tipoEtapa } : {}),
+              ...(e.proximaEtapaPadraoId ? { proximaEtapaPadraoId: e.proximaEtapaPadraoId } : {}),
+              ...(opcoesSaida.length > 0
+                ? {
+                    opcoes: opcoesSaida.map((o) => ({
+                      id: o.id,
+                      rotulo: o.rotulo,
+                      ...(o.proximaEtapaIdOpcional
+                        ? { proximaEtapaIdOpcional: o.proximaEtapaIdOpcional }
+                        : {}),
+                      ...(o.encerrarPercurso ? { encerrarPercurso: o.encerrarPercurso } : {}),
+                    })),
+                  }
+                : {}),
+            };
+          }),
         },
       ];
     }),

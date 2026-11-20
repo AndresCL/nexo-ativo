@@ -119,10 +119,35 @@ export async function executarProcessamentoWebhookAsaasTransacional(
 
     if (pagamento) {
       const situacaoCobranca = pagamento.status as SituacaoCobrancaAsaas;
-      novaSituacaoAssinatura = mapearSituacaoCobrancaParaAssinatura(situacaoCobranca);
+      if (situacaoCobranca === "PENDING") {
+        if (
+          organizacao.resumoDireitosPlano.situacaoAssinatura === "ativa" ||
+          dadosAssinatura?.situacaoInterna === "ativa"
+        ) {
+          // Se a assinatura já está ativa, faturas pendentes do próximo ciclo de renovação
+          // não rebaixam a situação da assinatura. Ela permanece ativa.
+          novaSituacaoAssinatura = "ativa";
+        } else if (dadosAssinatura?.situacaoInterna === "pendente_contratacao") {
+          novaSituacaoAssinatura = "pendente_contratacao";
+        } else if (
+          organizacao.resumoDireitosPlano.situacaoAssinatura === "cancelada" ||
+          organizacao.resumoDireitosPlano.situacaoAssinatura === "inadimplente" ||
+          organizacao.resumoDireitosPlano.situacaoAssinatura === "suspensa"
+        ) {
+          novaSituacaoAssinatura = organizacao.resumoDireitosPlano.situacaoAssinatura;
+        } else {
+          novaSituacaoAssinatura = "pendente_contratacao";
+        }
+      } else {
+        novaSituacaoAssinatura = mapearSituacaoCobrancaParaAssinatura(situacaoCobranca);
+      }
       situacaoFinalCalculada = novaSituacaoAssinatura;
 
-      if (refCobrancaHistorico) {
+      if (eventoTipo === "PAYMENT_DELETED") {
+        if (refCobrancaHistorico) {
+          transacao.delete(refCobrancaHistorico);
+        }
+      } else if (refCobrancaHistorico) {
         const registroCobranca: CobrancaHistoricoAsaas = {
           id: pagamento.id,
           organizacaoId,
@@ -148,8 +173,17 @@ export async function executarProcessamentoWebhookAsaasTransacional(
       situacaoFinalCalculada = "cancelada";
     }
 
-    const planoCodigo = (dadosAssinatura?.planoCodigo ||
-      organizacao.resumoDireitosPlano.planoCodigo) as CodigoPlanoAssinatura;
+    let planoCodigo: CodigoPlanoAssinatura =
+      (dadosAssinatura?.planoCodigo as CodigoPlanoAssinatura | undefined) ||
+      organizacao.resumoDireitosPlano.planoCodigo;
+
+    // Se a organização estava em avaliação inicial e recebemos pagamento ou evento de assinatura:
+    if (pagamento?.subscription || assinatura?.id) {
+      if (planoCodigo === "avaliacao_inicial") {
+        planoCodigo = "pro";
+      }
+    }
+
     const planoDefinicao = CATALOGO_PLANOS_FLUXO[planoCodigo] || CATALOGO_PLANOS_FLUXO.pro;
 
     const inadimplenteDesdeAtual = organizacao.resumoDireitosPlano.inadimplenteDesde;
@@ -161,16 +195,30 @@ export async function executarProcessamentoWebhookAsaasTransacional(
       ? inadimplenteDesdeAtual || agoraIso
       : undefined;
 
+    const vigenciaAteIso =
+      dadosAssinatura?.vigenciaAteIso ||
+      dadosAssinatura?.proximoVencimentoIso ||
+      organizacao.resumoDireitosPlano.vigenciaAteIso;
+
+    const dataHoje = agoraIso.split("T")[0] ?? agoraIso;
+    const temVigenciaFutura = Boolean(
+      vigenciaAteIso &&
+        new Date(vigenciaAteIso).getTime() >= new Date(dataHoje).getTime(),
+    );
+
+    const permitePublicacao =
+      novaSituacaoAssinatura === "ativa" ||
+      novaSituacaoAssinatura === "em_carencia" ||
+      (novaSituacaoAssinatura === "cancelada" && temVigenciaFutura);
+
     const novoResumoDireitosPlano: ResumoDireitosPlano = {
       planoCodigo,
       situacaoAssinatura: novaSituacaoAssinatura,
       limiteProfissionaisAtivos: planoDefinicao.limiteProfissionaisAtivos,
       limiteEnviosEmailMensal: planoDefinicao.limiteEnviosEmailMensal,
-      permitePublicacaoPublica:
-        novaSituacaoAssinatura === "ativa" ||
-        novaSituacaoAssinatura === "em_carencia" ||
-        novaSituacaoAssinatura === "inadimplente",
+      permitePublicacaoPublica: permitePublicacao,
       ...(proximoInadimplenteDesde ? { inadimplenteDesde: proximoInadimplenteDesde } : {}),
+      ...(vigenciaAteIso ? { vigenciaAteIso } : {}),
     };
 
     transacao.update(refOrg, {
@@ -178,7 +226,40 @@ export async function executarProcessamentoWebhookAsaasTransacional(
       atualizadoEmIso: agoraIso,
     });
 
-    if (docAssinatura.exists) {
+    if (pagamento?.subscription) {
+      const valorCentavos = converterReaisParaCentavosInteiros(pagamento.value);
+      const registroAssinaturaParaSalvar = {
+        id: organizacaoId,
+        organizacaoId,
+        assinaturaAsaasId: pagamento.subscription,
+        planoCodigo,
+        valorMensalCentavos: dadosAssinatura?.valorMensalCentavos ?? valorCentavos,
+        situacaoAsaas: "ACTIVE",
+        situacaoInterna: novaSituacaoAssinatura,
+        contratouImplantacaoAssistida: dadosAssinatura?.contratouImplantacaoAssistida ?? false,
+        ...(pagamento.dueDate ? { proximoVencimentoIso: pagamento.dueDate } : {}),
+        ...(pagamento.invoiceUrl ? { urlFaturaOuCheckout: pagamento.invoiceUrl } : {}),
+        criadoEmIso: dadosAssinatura?.criadoEmIso ?? agoraIso,
+        atualizadoEmIso: agoraIso,
+      };
+      transacao.set(refAssinaturaGlobal, registroAssinaturaParaSalvar, { merge: true });
+    } else if (assinatura?.id) {
+      const valorCentavos = converterReaisParaCentavosInteiros(assinatura.value);
+      const registroAssinaturaParaSalvar = {
+        id: organizacaoId,
+        organizacaoId,
+        assinaturaAsaasId: assinatura.id,
+        planoCodigo,
+        valorMensalCentavos: dadosAssinatura?.valorMensalCentavos ?? valorCentavos,
+        situacaoAsaas: assinatura.status,
+        situacaoInterna: novaSituacaoAssinatura,
+        contratouImplantacaoAssistida: dadosAssinatura?.contratouImplantacaoAssistida ?? false,
+        ...(assinatura.nextDueDate ? { proximoVencimentoIso: assinatura.nextDueDate } : {}),
+        criadoEmIso: dadosAssinatura?.criadoEmIso ?? agoraIso,
+        atualizadoEmIso: agoraIso,
+      };
+      transacao.set(refAssinaturaGlobal, registroAssinaturaParaSalvar, { merge: true });
+    } else if (docAssinatura.exists) {
       transacao.update(refAssinaturaGlobal, {
         situacaoInterna: novaSituacaoAssinatura,
         atualizadoEmIso: agoraIso,

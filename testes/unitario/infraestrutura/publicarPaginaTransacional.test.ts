@@ -103,7 +103,11 @@ describe("Caso de Uso Transacional: publicarPaginaEditorial e Sincronização de
     identificadorPublico: "atelier-monte-claro",
     segmentoAtividade: "Arquitetura",
     situacao: "ativa",
-    resumoDireitosPlano: criarResumoDireitosPlanoInicial(),
+    resumoDireitosPlano: {
+      ...criarResumoDireitosPlanoInicial(),
+      situacaoAssinatura: "ativa",
+      permitePublicacaoPublica: true,
+    },
     criadoEmIso: "2026-11-08T10:00:00.000Z",
     atualizadoEmIso: "2026-11-08T10:00:00.000Z",
   };
@@ -489,6 +493,29 @@ describe("Caso de Uso Transacional: publicarPaginaEditorial e Sincronização de
         organizacaoId: organizacaoBase.id,
       }),
     ).rejects.toThrow(/pelo menos uma etapa/);
+    expect(documentos.has("paginasPublicadas/org-monte-claro")).toBe(false);
+  });
+
+  it("bloqueia publicação quando a organização está no plano inicial sem direito de publicação pública", async () => {
+    const orgInicial: Organizacao = {
+      ...organizacaoBase,
+      resumoDireitosPlano: criarResumoDireitosPlanoInicial(),
+    };
+    const { bancoDados, documentos } = criarBancoFirestoreEmMemoria({
+      "organizacoes/org-monte-claro": orgInicial,
+      "organizacoes/org-monte-claro/membros/usr-prop": { ...membroProprietario },
+      "organizacoes/org-monte-claro/configuracaoPagina/rascunho": criarRascunhoConfiguracaoPaginaPadrao({
+        organizacaoId: orgInicial.id,
+        nomeOrganizacao: orgInicial.nome,
+        agoraIso: "2026-11-08T10:00:00.000Z",
+      }),
+    });
+
+    await expect(
+      executarPublicacaoPaginaEditorial(bancoDados, usuarioVerificado, {
+        organizacaoId: orgInicial.id,
+      }),
+    ).rejects.toThrow("O plano atual desta organização não habilita publicação externa.");
     expect(documentos.has("paginasPublicadas/org-monte-claro")).toBe(false);
   });
 });

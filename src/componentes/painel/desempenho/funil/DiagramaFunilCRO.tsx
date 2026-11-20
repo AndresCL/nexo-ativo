@@ -1,14 +1,19 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
-import { Filter, Layers, Link2, Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Filter, GitFork, Layers, Link2 } from "lucide-react";
 import type {
   MetricaGranularMicrofluxo,
   ResumoMetricasPeriodo,
 } from "@/dominio/analytics/tiposMetricasAgregadas";
-import { combinarClasses } from "@/utilitarios/combinarClasses";
 import type { ItemExperienciaPainel } from "@/infraestrutura/painel/leitorDesempenhoOrganizacaoServidor";
 import { ConectorAbandonoFunil } from "./ConectorAbandonoFunil";
+import { TooltipInformativo } from "@/componentes/interface/TooltipInformativo";
+import { analisarTopologiaFunil } from "@/dominio/microfluxos/analisadorTopologiaFunil";
+import {
+  calcularEstagiosFunilRamificado,
+  type EstagioFunilCalculado,
+} from "@/dominio/analytics/calculadorFunilRamificado";
 
 export interface PropriedadesDiagramaFunilCRO {
   readonly resumoMetricas: ResumoMetricasPeriodo;
@@ -20,7 +25,6 @@ export function DiagramaFunilCRO({
   experiencias = [],
 }: PropriedadesDiagramaFunilCRO) {
   const [experienciaIdSelecionada, setExperienciaIdSelecionada] = useState<string>("todas");
-  const idSelect = useId();
 
   // Consolidação de métricas por microfluxo
   const mapaMetricasMicrofluxo = useMemo(() => {
@@ -55,131 +59,101 @@ export function DiagramaFunilCRO({
     return itens.sort((a, b) => b.aberturas - a.aberturas || a.titulo.localeCompare(b.titulo));
   }, [experiencias, mapaMetricasMicrofluxo]);
 
-  // Construção dos estágios do funil:
-  // - Modo Global: Macro estágios do negócio (Visitantes -> Cliques -> Contatos -> Qualificados -> Vendas)
-  // - Modo Individual: Etapas reais do próprio microfluxo (sem permalink como degrau falso!)
-  const etapas = useMemo(() => {
+  // Topologia do grafo da experiência selecionada (Padrão 1 Seguro)
+  const topologia = useMemo(() => {
+    if (
+      !definicaoExperienciaSelecionada?.etapas ||
+      definicaoExperienciaSelecionada.etapas.length === 0
+    ) {
+      return { nos: [], temRamificacoes: false };
+    }
+    return analisarTopologiaFunil(
+      definicaoExperienciaSelecionada.etapas,
+      definicaoExperienciaSelecionada.etapaInicialId,
+    );
+  }, [definicaoExperienciaSelecionada]);
+
+  // Estágios individuais do percurso selecionado com cálculo ramificado blindado
+  const estagiosIndividuais = useMemo<readonly EstagioFunilCalculado[]>(() => {
     if (experienciaIdSelecionada === "todas" || !microfluxoSelecionado) {
-      return resumoMetricas.metricasCRO?.etapasFunil ?? [];
+      return [];
     }
 
-    const topo = microfluxoSelecionado.aberturas;
-    const conclusoes = microfluxoSelecionado.conclusoes;
-    const taxaConclusao = topo > 0 ? Math.round((conclusoes / topo) * 1000) / 10 : 0;
-
-    // Etapas reais cadastradas no fluxo pelo lojista
     const etapasCadastradas = definicaoExperienciaSelecionada?.etapas ?? [];
-    const metricasEtapas = microfluxoSelecionado.porEtapa ?? {};
-
-    // Se o fluxo tem etapas cadastradas, renderiza todas as etapas dinamicamente
-    if (etapasCadastradas.length > 0) {
-      const temTelemetriaEtapas = Object.keys(metricasEtapas).length > 0;
-
-      const resultado = [
+    if (etapasCadastradas.length === 0) {
+      const topo = microfluxoSelecionado.aberturas;
+      const conclusoes = microfluxoSelecionado.conclusoes;
+      const taxaConclusao = topo > 0 ? Math.round((conclusoes / topo) * 1000) / 10 : 0;
+      return [
         {
-          id: "inicio",
-          nome: `1. Início: ${etapasCadastradas[0]?.titulo || "Início do percurso"}`,
+          tipo: "linear",
+          id: "aberturas",
+          nome: "1. Aberturas do Percurso",
           volume: topo,
           percentualSobreTopo: 100,
           percentualSobreEtapaAnterior: 100,
           detalhe: `Visitantes que iniciaram '${microfluxoSelecionado.titulo}'`,
-          cor: "#0284C7",
+          cor: "#4F46E5",
+        },
+        {
+          tipo: "linear",
+          id: "conclusoes",
+          nome: "2. Propostas Concluídas (CVR)",
+          volume: conclusoes,
+          percentualSobreTopo: taxaConclusao,
+          percentualSobreEtapaAnterior: taxaConclusao,
+          detalhe: `${taxaConclusao}% dos que iniciaram chegaram até a conclusão`,
+          cor: "#10B981",
         },
       ];
-
-      let volumeAnterior = topo;
-
-      for (let i = 1; i < etapasCadastradas.length; i++) {
-        const etapa = etapasCadastradas[i]!;
-        // Se há telemetria gravada para etapas, usa o volume real medido; caso contrário, usa o piso de conclusões
-        const gravado = metricasEtapas[etapa.id];
-        const volumeEtapa = temTelemetriaEtapas
-          ? Math.min(topo, gravado !== undefined ? gravado : 0)
-          : Math.min(topo, conclusoes);
-        const pctTopo = topo > 0 ? Math.round((volumeEtapa / topo) * 1000) / 10 : 0;
-        const pctAnterior =
-          volumeAnterior > 0 ? Math.round((volumeEtapa / volumeAnterior) * 1000) / 10 : 0;
-
-        resultado.push({
-          id: etapa.id,
-          nome: `${i + 1}. ${etapa.titulo}`,
-          volume: volumeEtapa,
-          percentualSobreTopo: pctTopo,
-          percentualSobreEtapaAnterior: pctAnterior,
-          detalhe: `${pctTopo}% dos que iniciaram alcançaram esta tela`,
-          cor: i === etapasCadastradas.length - 1 ? "#10B981" : "#6366F1",
-        });
-
-        volumeAnterior = volumeEtapa;
-      }
-
-      // Adiciona o estágio final de Conclusão / Envio de Proposta
-      resultado.push({
-        id: "conclusao-final",
-        nome: `${etapasCadastradas.length + 1}. Propostas Concluídas (CVR)`,
-        volume: conclusoes,
-        percentualSobreTopo: taxaConclusao,
-        percentualSobreEtapaAnterior:
-          volumeAnterior > 0 ? Math.round((conclusoes / volumeAnterior) * 1000) / 10 : 0,
-        detalhe: `${taxaConclusao}% dos que iniciaram chegaram até o envio final`,
-        cor: "#059669",
-      });
-
-      return resultado;
     }
 
-    // Fluxo sem etapas detalhadas cadastradas: visão direta de abertura e conclusão
-    return [
-      {
-        id: "aberturas",
-        nome: "1. Aberturas do Percurso",
-        volume: topo,
-        percentualSobreTopo: 100,
-        percentualSobreEtapaAnterior: 100,
-        detalhe: `Visitantes que iniciaram '${microfluxoSelecionado.titulo}'`,
-        cor: "#0284C7",
-      },
-      {
-        id: "conclusoes",
-        nome: "2. Propostas Concluídas (CVR)",
-        volume: conclusoes,
-        percentualSobreTopo: taxaConclusao,
-        percentualSobreEtapaAnterior: taxaConclusao,
-        detalhe: `${taxaConclusao}% dos que iniciaram chegaram até a conclusão`,
-        cor: "#10B981",
-      },
-    ];
+    return calcularEstagiosFunilRamificado({
+      topologia,
+      topo: microfluxoSelecionado.aberturas,
+      conclusoes: microfluxoSelecionado.conclusoes,
+      metricasEtapas: microfluxoSelecionado.porEtapa ?? {},
+      tituloMicrofluxo: microfluxoSelecionado.titulo,
+    });
+  }, [experienciaIdSelecionada, microfluxoSelecionado, definicaoExperienciaSelecionada, topologia]);
+
+  // Estágios exibidos: Globais do negócio ou Individuais da experiência com Padrão 1 Seguro
+  const estagios = useMemo<readonly EstagioFunilCalculado[]>(() => {
+    if (experienciaIdSelecionada === "todas" || !microfluxoSelecionado) {
+      const globais = resumoMetricas.metricasCRO?.etapasFunil ?? [];
+      return globais.map((g) => ({
+        tipo: "linear" as const,
+        id: g.id,
+        nome: g.nome,
+        volume: g.volume,
+        percentualSobreTopo: g.percentualSobreTopo,
+        percentualSobreEtapaAnterior: g.percentualSobreEtapaAnterior,
+        detalhe: g.detalhe,
+        cor: g.cor,
+      }));
+    }
+    return estagiosIndividuais;
   }, [
     experienciaIdSelecionada,
     microfluxoSelecionado,
-    definicaoExperienciaSelecionada,
     resumoMetricas.metricasCRO?.etapasFunil,
+    estagiosIndividuais,
   ]);
 
-  // Identifica a maior perda absoluta entre etapas consecutivas para destacar o maior gargalo
+  // Identifica a maior perda absoluta entre etapas para destacar o maior gargalo real
   const maiorPerda = useMemo(() => {
     let max = 0;
-    for (let i = 0; i < etapas.length - 1; i++) {
-      const perda = Math.max((etapas[i]?.volume ?? 0) - (etapas[i + 1]?.volume ?? 0), 0);
+    for (let i = 0; i < estagios.length - 1; i++) {
+      const etapa = estagios[i]!;
+      const proxima = estagios[i + 1]!;
+      const perda =
+        etapa.tipo === "ramificado"
+          ? etapa.desistenciasNaDecisao
+          : Math.max(etapa.volume - proxima.volume, 0);
       if (perda > max) max = perda;
     }
     return max;
-  }, [etapas]);
-
-  // Taxa de conversão relevante para o badge de saúde
-  const taxaAvaliada =
-    experienciaIdSelecionada === "todas"
-      ? (resumoMetricas.metricasCRO?.cvrContato.valorPercentual ?? 0)
-      : microfluxoSelecionado && microfluxoSelecionado.aberturas > 0
-        ? Math.round((microfluxoSelecionado.conclusoes / microfluxoSelecionado.aberturas) * 1000) / 10
-        : 0;
-
-  const saudeFunil =
-    taxaAvaliada >= 15
-      ? { rotulo: "Conversão de Alto Impacto", cor: "bg-emerald-50 text-emerald-800 border-emerald-200" }
-      : taxaAvaliada > 0
-        ? { rotulo: "Funil Ativo & Saudável", cor: "bg-sky-50 text-sky-800 border-sky-200" }
-        : { rotulo: "Aguardando Interações", cor: "bg-marfim-100 text-mineral-600 border-marfim-300" };
+  }, [estagios]);
 
   // Cálculo de Atribuição de Origem do Percurso (Permalink vs Vitrine)
   const infoOrigemPercurso = useMemo(() => {
@@ -194,138 +168,220 @@ export function DiagramaFunilCRO({
 
   return (
     <div className="space-y-4">
-      {/* Cabeçalho da Seção com Seletor de Modo (Todas Juntas vs Individual) */}
+      {/* Cabeçalho da Seção Flat com Seletor de Percurso */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-indigo-600 text-white shadow-2xs">
-              <Sparkles className="h-3 w-3" />
-            </span>
-            <span className="text-[11px] font-semibold tracking-wider text-mineral-500 uppercase">
-              Pipeline de Conversão
-            </span>
-          </div>
-          <h3 className="mt-1 text-2xl font-bold tracking-tight text-mineral-950">
+          <h3 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
             Funil de Conversão & Retenção
           </h3>
-          <p className="mt-0.5 text-xs text-mineral-600">
+          <p className="mt-1 text-xs text-mineral-500">
             {experienciaIdSelecionada === "todas"
               ? "Jornada completa desde a chegada na vitrine até a conclusão com a equipe."
-              : `Retenção e abandonos do percurso: ${microfluxoSelecionado?.titulo}`}
+              : `Retenção e rotas do percurso: ${microfluxoSelecionado?.titulo}`}
           </p>
         </div>
 
-        {/* Controles de Filtro e Badge de Saúde */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Seletor Dinâmico de Experiência */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
-            <Filter className="h-3.5 w-3.5 text-mineral-500" />
-            <label htmlFor={idSelect} className="sr-only">
-              Filtrar funil por percurso
-            </label>
-            <select
-              id={idSelect}
-              value={experienciaIdSelecionada}
-              onChange={(e) => setExperienciaIdSelecionada(e.target.value)}
-              className="cursor-pointer border-none bg-transparent text-xs font-semibold text-mineral-800 focus:outline-none"
-            >
-              <option value="todas">Todas as Experiências (Visão Geral)</option>
-              {listaOpcoesExperiencias.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.titulo} ({item.aberturas} aberturas)
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div
-            className={combinarClasses(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-2xs",
-              saudeFunil.cor,
-            )}
+        {/* Seletor Dinâmico de Experiência (Flat) */}
+        <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs shadow-2xs">
+          <Filter className="h-3.5 w-3.5 text-mineral-500" />
+          <label htmlFor="filtro-funil-percurso" className="sr-only">
+            Filtrar funil por percurso
+          </label>
+          <select
+            id="filtro-funil-percurso"
+            value={experienciaIdSelecionada}
+            onChange={(e) => setExperienciaIdSelecionada(e.target.value)}
+            className="cursor-pointer border-none bg-transparent text-xs font-semibold text-mineral-800 focus:outline-none"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
-            <span>{saudeFunil.rotulo}</span>
-          </div>
+            <option value="todas">Todas as Experiências (Visão Geral)</option>
+            {listaOpcoesExperiencias.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.titulo} ({item.aberturas} aberturas)
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Card com os Estágios do Funil CRO */}
-      <div className="relative overflow-hidden rounded-2xl border border-indigo-200 bg-white p-5 shadow-xs sm:p-6 space-y-4">
-        {/* Luz ambiente de fundo sutil */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-indigo-100/60 via-sky-100/30 to-transparent blur-3xl"
-        />
-
-        {/* Sub-cabeçalho com indicador de escopo */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3 text-xs font-semibold text-mineral-700">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-indigo-600" />
-            <span>
+      {/* Card com os Estágios Detalhados do Funil CRO */}
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs sm:p-6 space-y-3">
+        {/* Sub-cabeçalho Tabular Flat Padronizado */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 text-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <Layers className="h-4 w-4 text-mineral-700 shrink-0" />
+            <span className="font-semibold text-mineral-900 truncate">
               {experienciaIdSelecionada === "todas"
                 ? "Estágios Globais do Negócio"
                 : `Funil Individual: ${microfluxoSelecionado?.titulo}`}
             </span>
           </div>
-          <span className="text-[11px] font-normal text-mineral-500">
-            {experienciaIdSelecionada === "todas"
-              ? "Base: Visitantes Totais"
-              : "Base: Aberturas do Percurso"}
-          </span>
+
+          <div className="flex items-center gap-4 text-right text-[11px] font-medium text-mineral-400 shrink-0">
+            <span className="w-14 sm:w-16 text-right">Volume</span>
+            <span className="w-14 sm:w-16 text-right">% Topo</span>
+            <span className="w-14 sm:w-16 text-right">vs. Anterior</span>
+          </div>
         </div>
 
-        {/* Estágios Visuais com Conectores de Abandono */}
-        <div className="space-y-1">
-          {etapas.map((etapa, indice) => {
+        {/* Estágios Visuais Alinhados Tabularmente */}
+        <div className="space-y-0.5">
+          {estagios.map((etapa, indice) => {
             const larguraBarra = `${Math.max(etapa.percentualSobreTopo, 3)}%`;
-            const proximaEtapa = etapas[indice + 1];
+            const proximaEtapa = estagios[indice + 1];
+
+            if (etapa.tipo === "ramificado") {
+              const ehMaiorGargalo = etapa.desistenciasNaDecisao === maiorPerda && maiorPerda > 0;
+
+              return (
+                <div key={etapa.id}>
+                  <div className="rounded-xl px-3 py-2 transition-colors hover:bg-slate-50/70">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <span className="text-xs font-bold text-mineral-950 truncate">
+                          {etapa.nome}
+                        </span>
+                        {etapa.detalhe ? (
+                          <TooltipInformativo
+                            texto={etapa.detalhe}
+                            tamanhoIcone={12}
+                            alinhamento="centro"
+                          />
+                        ) : null}
+                        <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[9px] font-semibold text-slate-700 shrink-0">
+                          Decisão de Rota
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-right shrink-0">
+                        <span className="w-14 sm:w-16 text-right font-bold tabular-nums text-xs text-mineral-950">
+                          {etapa.volume.toLocaleString("pt-BR")}
+                        </span>
+                        <span className="w-14 sm:w-16 text-right font-semibold tabular-nums text-xs text-mineral-800">
+                          {etapa.percentualSobreTopo}%
+                        </span>
+                        <span className="w-14 sm:w-16 text-right font-medium tabular-nums text-xs text-mineral-400">
+                          {indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Barra de Progresso Fina Flat com Cor do Estágio */}
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: larguraBarra, backgroundColor: etapa.cor || "#4F46E5" }}
+                      />
+                    </div>
+
+                    {/* Sub-rotas alternativas dentro do nó de decisão */}
+                    {etapa.rotas.length > 0 ? (
+                      <div className="mt-2.5 pt-2 border-t border-slate-100 space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-mineral-600">
+                          <GitFork className="h-3 w-3 text-mineral-500" />
+                          <span>Distribuição das Rotas:</span>
+                        </div>
+
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {etapa.rotas.map((rota) => {
+                            const larguraRota = `${Math.max(rota.percentualSobreDecisao, 2)}%`;
+                            return (
+                              <div
+                                key={rota.opcaoId}
+                                className="rounded-lg border border-slate-200/70 bg-slate-50/50 p-2.5 space-y-1"
+                              >
+                                <div className="flex items-start justify-between gap-1.5">
+                                  <span className="text-[11px] font-semibold text-mineral-900 leading-tight">
+                                    {rota.rotuloOpcao}
+                                  </span>
+                                  <span className="text-[11px] font-bold tabular-nums text-mineral-950 shrink-0">
+                                    {rota.volume.toLocaleString("pt-BR")}
+                                  </span>
+                                </div>
+
+                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                                  <div
+                                    className="h-full rounded-full bg-slate-700 transition-all duration-500"
+                                    style={{ width: larguraRota }}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between text-[10px] text-mineral-500">
+                                  <span>{rota.percentualSobreTopo}% do topo</span>
+                                  <span className="font-medium text-mineral-600">
+                                    ({rota.percentualSobreDecisao}% desta decisão)
+                                  </span>
+                                </div>
+
+                                {rota.etapasInternas.length > 0 ? (
+                                  <div className="pt-1 border-t border-slate-200/60 text-[10px] text-mineral-600">
+                                    <span className="text-mineral-400">Passo da rota: </span>
+                                    {rota.etapasInternas.map((e) => e.titulo).join(" → ")}
+                                  </div>
+                                ) : null}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Conector de Abandono da Decisão Compacto */}
+                  {proximaEtapa ? (
+                    <ConectorAbandonoFunil
+                      volumeAnterior={etapa.volume}
+                      volumeAtual={etapa.volumeAvancoTotal}
+                      ehMaiorGargalo={ehMaiorGargalo}
+                    />
+                  ) : null}
+                </div>
+              );
+            }
+
+            // Estágio Linear Simples Alinhado Tabularmente
             const perda = proximaEtapa ? Math.max(etapa.volume - proximaEtapa.volume, 0) : 0;
             const ehMaiorGargalo = perda === maiorPerda && maiorPerda > 0;
 
             return (
               <div key={etapa.id}>
-                <div className="group relative rounded-xl border border-slate-100 bg-slate-50/50 p-3 transition-all hover:border-slate-200 hover:bg-slate-50">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="h-2.5 w-2.5 rounded-full shrink-0 shadow-2xs"
-                        style={{ backgroundColor: etapa.cor }}
-                        aria-hidden="true"
-                      />
-                      <span className="text-xs font-bold text-mineral-900">{etapa.nome}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="font-extrabold tabular-nums text-mineral-950">
-                        {etapa.volume.toLocaleString("pt-BR")}
+                <div className="rounded-xl px-3 py-2 transition-colors hover:bg-slate-50/70">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <span className="text-xs font-bold text-mineral-950 truncate">
+                        {etapa.nome}
                       </span>
-                      <span className="rounded-md bg-white border border-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-mineral-700 shadow-2xs">
-                        {etapa.percentualSobreTopo}% do topo
-                      </span>
-                      {indice > 0 ? (
-                        <span className="text-[10px] font-semibold text-mineral-500">
-                          ({etapa.percentualSobreEtapaAnterior}% da anterior)
-                        </span>
+                      {etapa.detalhe ? (
+                        <TooltipInformativo
+                          texto={etapa.detalhe}
+                          tamanhoIcone={12}
+                          alinhamento="centro"
+                        />
                       ) : null}
                     </div>
+
+                    <div className="flex items-center gap-4 text-right shrink-0">
+                      <span className="w-14 sm:w-16 text-right font-bold tabular-nums text-xs text-mineral-950">
+                        {etapa.volume.toLocaleString("pt-BR")}
+                      </span>
+                      <span className="w-14 sm:w-16 text-right font-semibold tabular-nums text-xs text-mineral-800">
+                        {etapa.percentualSobreTopo}%
+                      </span>
+                      <span className="w-14 sm:w-16 text-right font-medium tabular-nums text-xs text-mineral-400">
+                        {indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—"}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Barra de Progresso do Estágio */}
-                  <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200/70">
+                  {/* Barra de Progresso Fina Flat com Cor do Estágio */}
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: larguraBarra,
-                        backgroundColor: etapa.cor,
-                      }}
+                      style={{ width: larguraBarra, backgroundColor: etapa.cor || "#4F46E5" }}
                     />
                   </div>
-
-                  <p className="mt-1.5 text-[11px] text-mineral-500">{etapa.detalhe}</p>
                 </div>
 
-                {/* Conector de Abandono entre este estágio e o próximo */}
+                {/* Conector de Abandono Compacto */}
                 {proximaEtapa ? (
                   <ConectorAbandonoFunil
                     volumeAnterior={etapa.volume}
@@ -338,23 +394,27 @@ export function DiagramaFunilCRO({
           })}
         </div>
 
-        {/* Atribuição de Origem do Percurso (Sem poluir os degraus do funil!) */}
+        {/* Atribuição de Origem do Percurso */}
         {infoOrigemPercurso ? (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 text-xs">
+          <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 text-xs">
             <div className="flex items-center gap-2 font-bold text-mineral-800">
-              <Link2 className="h-3.5 w-3.5 text-indigo-600" />
+              <Link2 className="h-3.5 w-3.5 text-mineral-700" />
               <span>Atribuição de Origem das {infoOrigemPercurso.total} Aberturas</span>
             </div>
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="rounded-lg bg-white p-2.5 border border-slate-100 shadow-2xs">
-                <span className="text-[11px] text-mineral-500 block">Via Link Direto (Permalink / Campanhas):</span>
-                <span className="font-bold text-indigo-950 text-sm">
+            <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <div className="rounded-lg bg-white p-3 border border-slate-200/80">
+                <span className="text-[11px] text-mineral-500 block">
+                  Via Link Direto (Permalink / Campanhas):
+                </span>
+                <span className="font-bold text-mineral-950 text-sm tabular-nums">
                   {infoOrigemPercurso.permalink} acessos ({infoOrigemPercurso.pctPermalink}%)
                 </span>
               </div>
-              <div className="rounded-lg bg-white p-2.5 border border-slate-100 shadow-2xs">
-                <span className="text-[11px] text-mineral-500 block">Via Vitrine da Loja (Navegação):</span>
-                <span className="font-bold text-sky-950 text-sm">
+              <div className="rounded-lg bg-white p-3 border border-slate-200/80">
+                <span className="text-[11px] text-mineral-500 block">
+                  Via Vitrine da Loja (Navegação):
+                </span>
+                <span className="font-bold text-mineral-950 text-sm tabular-nums">
                   {infoOrigemPercurso.vitrine} acessos ({infoOrigemPercurso.pctVitrine}%)
                 </span>
               </div>

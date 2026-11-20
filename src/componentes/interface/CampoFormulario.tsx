@@ -61,14 +61,14 @@ export const CampoFormulario = forwardRef<HTMLInputElement, PropriedadesCampoFor
 
         <div
           className={combinarClasses(
-            "flex min-h-11 items-center rounded-md border bg-white transition-colors",
+            "flex min-h-11 min-w-0 items-center overflow-hidden rounded-md border bg-white transition-colors",
             possuiErro
               ? "border-alerta-erro focus-within:ring-2 focus-within:ring-alerta-erro/25"
               : "border-marfim-300 focus-within:border-mineral-950",
           )}
         >
           {prefixoFixo ? (
-            <span className="select-none border-r border-marfim-200 bg-marfim-100/70 px-3 py-2.5 text-sm text-mineral-500">
+            <span className="shrink-0 select-none whitespace-nowrap border-r border-marfim-200 bg-marfim-100/70 px-3 py-2.5 text-xs text-mineral-500 sm:text-sm">
               {prefixoFixo}
             </span>
           ) : null}
@@ -80,7 +80,7 @@ export const CampoFormulario = forwardRef<HTMLInputElement, PropriedadesCampoFor
             aria-invalid={possuiErro}
             aria-describedby={descricoesAssociadas || undefined}
             className={combinarClasses(
-              "w-full bg-transparent px-3.5 py-2.5 text-sm text-mineral-950 placeholder:text-mineral-500 focus:outline-none",
+              "min-w-0 flex-1 whitespace-nowrap bg-transparent px-3.5 py-2.5 text-sm text-mineral-950 placeholder:text-mineral-500 focus:outline-none",
               className,
             )}
             {...propriedadesEntrada}

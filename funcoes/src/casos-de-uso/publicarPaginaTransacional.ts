@@ -5,6 +5,7 @@ import type {
   UsuarioAutenticado,
 } from "../../../src/dominio/entidades/autenticacaoEOrganizacao";
 import {
+  obterLimiteProfissionaisPermitido,
   ordenarItensAtivosCatalogo,
   type ProdutoCatalogo,
   type ProfissionalEquipe,
@@ -232,7 +233,9 @@ export async function executarPublicacaoPaginaEditorial(
     microfluxosAtivosBrutos,
   );
 
-  const limiteProfissionais = organizacao.resumoDireitosPlano.limiteProfissionaisAtivos;
+  const limiteProfissionais = obterLimiteProfissionaisPermitido(
+    organizacao.resumoDireitosPlano,
+  );
   if (profissionaisAtivos.length > limiteProfissionais) {
     throw new ErroValidacaoDominio(
       `Sua organização possui ${profissionaisAtivos.length} profissionais ativos, mas o plano atual permite até ${limiteProfissionais}. Desative perfis excedentes ou ajuste seu plano antes de publicar.`,

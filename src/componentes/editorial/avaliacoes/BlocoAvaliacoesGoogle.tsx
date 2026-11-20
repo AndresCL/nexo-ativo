@@ -9,7 +9,7 @@ import type {
 } from "@/aplicacao/portas/portasAvaliacoesGoogle";
 import { useAvaliacoesGoogle } from "@/ganchos/usarAvaliacoesGoogle";
 import { PainelEditorialPublico } from "../PainelEditorialPublico";
-import { AtribuicaoGoogleMaps } from "./AtribuicaoGoogleMaps";
+import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { CartaoAvaliacaoGoogle } from "./CartaoAvaliacaoGoogle";
 import { CarrosselAvaliacoesGoogle } from "./CarrosselAvaliacoesGoogle";
 
@@ -17,10 +17,12 @@ export function BlocoAvaliacoesGoogle({
   pagina,
   previa = false,
   servico,
+  className,
 }: {
   readonly pagina: ConteudoPaginaPublicada;
   readonly previa?: boolean;
   readonly servico?: PortaAvaliacoesGoogleCliente;
+  readonly className?: string;
 }) {
   const configuracao = pagina.avaliacoesGoogle;
   const identificadorLocal = configuracao?.habilitado ? configuracao.identificadorLocal : undefined;
@@ -29,20 +31,35 @@ export function BlocoAvaliacoesGoogle({
     : previa
       ? { tipo: "previa", organizacaoId: pagina.organizacaoId, identificadorLocal }
       : { tipo: "publicada", identificadorPublico: pagina.identificadorPublico };
+
   const { dados, erro, carregando, definirElemento } = useAvaliacoesGoogle(origem, servico);
   const [aberto, alterarAbertura] = useState(false);
   const referenciaBotao = useRef<HTMLButtonElement>(null);
+
   if (!identificadorLocal || (dados?.totalAvaliacoes === 0 && !previa)) return null;
   const url = dados?.urlGoogleMaps ?? construirUrlLocalGoogle(identificadorLocal);
 
+  const avaliacoesOrdenadas = dados?.avaliacoes
+    ? [...dados.avaliacoes].sort((a, b) => {
+        const dataA = a.publicadaEmIso ? new Date(a.publicadaEmIso).getTime() : 0;
+        const dataB = b.publicadaEmIso ? new Date(b.publicadaEmIso).getTime() : 0;
+        return dataB - dataA;
+      })
+    : [];
+
   return (
-    <div ref={definirElemento} className="mt-5 max-w-xl text-left" aria-busy={carregando}>
+    <div
+      ref={definirElemento}
+      className={combinarClasses("w-full max-w-xl text-left", className)}
+      aria-busy={carregando}
+    >
       {carregando ? (
         <p role="status" className="text-xs text-[var(--editorial-texto-secundario)]">
           Consultando avaliações…
         </p>
       ) : null}
-      {erro ? (
+
+      {erro && (
         <div className="text-xs">
           {previa ? <p role="alert">{erro}</p> : null}
           <a
@@ -54,34 +71,66 @@ export function BlocoAvaliacoesGoogle({
             Ver avaliações no Google
           </a>
         </div>
-      ) : null}
-      {dados?.totalAvaliacoes === 0 && previa ? (
-        <p className="text-xs">Este estabelecimento ainda não tem avaliações.</p>
-      ) : null}
+      )}
+
       {dados && dados.totalAvaliacoes > 0 ? (
         <>
-          <button
-            ref={referenciaBotao}
-            type="button"
-            onClick={() => alterarAbertura(true)}
-            aria-haspopup="dialog"
-            className="inline-flex min-h-11 flex-wrap items-center gap-2 rounded-lg border border-current/25 bg-[var(--editorial-superficie)]/90 px-4 py-2 text-sm text-[var(--editorial-texto)] focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            {dados.notaMedia !== undefined ? (
-              <span aria-label={`${dados.notaMedia.toLocaleString("pt-BR")} de 5 estrelas`}>
-                ★ {dados.notaMedia.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}
-              </span>
-            ) : null}
-            <span>
-              · {dados.totalAvaliacoes.toLocaleString("pt-BR")}{" "}
-              {dados.totalAvaliacoes === 1 ? "avaliação" : "avaliações"} no Google
-            </span>
-            <span className="text-xs underline underline-offset-4">Ver avaliações</span>
-          </button>
           {configuracao?.modoExibicao === "carrossel" ? (
-            <CarrosselAvaliacoesGoogle key={identificadorLocal} avaliacoes={dados.avaliacoes} />
+            /* Modo 2: Apenas a faixa de mini-cards horizontais */
+            <CarrosselAvaliacoesGoogle
+              key={identificadorLocal}
+              avaliacoes={avaliacoesOrdenadas}
+              aoSelecionar={() => alterarAbertura(true)}
+            />
+          ) : (
+            /* Modo 1: Apenas o Pill Compacto de Avaliações */
+            <button
+              ref={referenciaBotao}
+              type="button"
+              onClick={() => alterarAbertura(true)}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-9 items-center gap-2 rounded-full border border-current/20 bg-[var(--editorial-superficie)]/90 px-3.5 py-1.5 text-xs text-[var(--editorial-texto)] shadow-2xs backdrop-blur-xs transition-colors hover:border-current/40"
+            >
+              {dados.notaMedia !== undefined ? (
+                <span
+                  aria-label={`${dados.notaMedia.toLocaleString("pt-BR")} de 5 estrelas`}
+                  className="font-semibold text-amber-500"
+                >
+                  ★ {dados.notaMedia.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}
+                </span>
+              ) : null}
+              <span>
+                · {dados.totalAvaliacoes.toLocaleString("pt-BR")}{" "}
+                {dados.totalAvaliacoes === 1 ? "avaliação" : "avaliações"} no Google
+              </span>
+              <span className="font-medium underline underline-offset-2 opacity-80">
+                Ver avaliações
+              </span>
+            </button>
+          )}
+
+          {/* Botão invisível de compatibilidade acessível quando em modo carrossel */}
+          {configuracao?.modoExibicao === "carrossel" ? (
+            <button
+              ref={referenciaBotao}
+              type="button"
+              onClick={() => alterarAbertura(true)}
+              aria-haspopup="dialog"
+              className="sr-only"
+            >
+              {dados.notaMedia !== undefined ? (
+                <span aria-label={`${dados.notaMedia.toLocaleString("pt-BR")} de 5 estrelas`}>
+                  ★ {dados.notaMedia.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}
+                </span>
+              ) : null}
+              <span>
+                · {dados.totalAvaliacoes.toLocaleString("pt-BR")}{" "}
+                {dados.totalAvaliacoes === 1 ? "avaliação" : "avaliações"} no Google
+              </span>
+            </button>
           ) : null}
-          <AtribuicaoGoogleMaps url={url} atribuicoes={dados.atribuicoes} />
+
+          {/* Bottom Sheet com os depoimentos completos */}
           <PainelEditorialPublico
             pagina={pagina}
             titulo="Avaliações no Google"
@@ -89,25 +138,21 @@ export function BlocoAvaliacoesGoogle({
             aoAlterarAbertura={alterarAbertura}
             referenciaRetornoFoco={referenciaBotao}
           >
-            <div className="mt-5 space-y-4">
-              <p className="text-sm">
-                {dados.nome} · {dados.endereco}
-              </p>
-              <p className="text-xs text-[var(--editorial-texto-secundario)]">
-                Seleção de avaliações por relevância fornecida pelo Google.
-              </p>
-              {dados.avaliacoes.map((avaliacao) => (
+            <div className="mt-4 space-y-3">
+              {avaliacoesOrdenadas.map((avaliacao) => (
                 <CartaoAvaliacaoGoogle key={avaliacao.id} avaliacao={avaliacao} />
               ))}
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
-              >
-                Ver todas no Google
-              </a>
-              <AtribuicaoGoogleMaps url={url} atribuicoes={dados.atribuicoes} />
+
+              <div className="pt-2 text-center">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg border border-current/20 px-4 text-xs font-semibold underline-offset-4 hover:underline"
+                >
+                  Ver todas no Google
+                </a>
+              </div>
             </div>
           </PainelEditorialPublico>
         </>

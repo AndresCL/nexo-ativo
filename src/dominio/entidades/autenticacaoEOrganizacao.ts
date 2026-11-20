@@ -39,6 +39,8 @@ export interface ResumoDireitosPlano {
   readonly limiteEnviosEmailMensal: number;
   readonly permitePublicacaoPublica: boolean;
   readonly inadimplenteDesde?: string;
+  readonly canceladaEmIso?: string;
+  readonly vigenciaAteIso?: string;
 }
 
 export interface Organizacao {
@@ -86,6 +88,6 @@ export function criarResumoDireitosPlanoInicial(): ResumoDireitosPlano {
     situacaoAssinatura: "pendente_contratacao",
     limiteProfissionaisAtivos: 1,
     limiteEnviosEmailMensal: 50,
-    permitePublicacaoPublica: true,
+    permitePublicacaoPublica: false,
   };
 }

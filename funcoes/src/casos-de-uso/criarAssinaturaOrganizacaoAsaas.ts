@@ -1,6 +1,7 @@
 import type { Firestore } from "firebase-admin/firestore";
 import {
   CATALOGO_PLANOS_FLUXO,
+  type CobrancaHistoricoAsaas,
   type RegistroAssinaturaAsaas,
   type RegistroClienteAsaas,
 } from "../../../src/dominio/assinaturas/tiposAssinaturaAsaas";
@@ -60,13 +61,38 @@ export async function executarCriacaoAssinaturaAsaas(
     throw new ErroValidacaoDominio("Plano selecionado inválido.", "PLANO_INVALIDO");
   }
 
+  // Se a organização já possui assinatura ativa e regular, não permite duplicar contratos
+  if (organizacao.resumoDireitosPlano.situacaoAssinatura === "ativa") {
+    throw new ErroValidacaoDominio(
+      "A organização já possui uma assinatura ativa e regular.",
+      "ASSINATURA_JA_ATIVA",
+    );
+  }
+
+  // Se a organização está cancelada, mas ainda possui período de vigência restante já pago,
+  // impede criar nova cobrança antecipada duplicando o ciclo em curso
+  const vigenciaAtualIso = organizacao.resumoDireitosPlano.vigenciaAteIso;
+  const hojeIso = new Date().toISOString().slice(0, 10);
+  if (
+    organizacao.resumoDireitosPlano.situacaoAssinatura === "cancelada" &&
+    vigenciaAtualIso &&
+    vigenciaAtualIso.slice(0, 10) >= hojeIso
+  ) {
+    throw new ErroValidacaoDominio(
+      `A organização já possui acesso ativo garantido até ${vigenciaAtualIso.slice(0, 10)}. Não é necessário contratar um novo plano até o término do ciclo.`,
+      "VIGENCIA_PAGA_ATIVA",
+    );
+  }
+
   // Obter ou criar o cliente no Asaas
   const clienteAsaasId = await provedorAsaas.obterOuCriarCliente({
     organizacaoId,
     dadosFiscais,
   });
 
-  const agoraIso = new Date().toISOString();
+  const agora = new Date();
+  const agoraIso = agora.toISOString();
+  const dataHojeIso = agoraIso.slice(0, 10);
 
   // Criar assinatura recorrente
   const resultadoAssinatura = await provedorAsaas.criarAssinatura({
@@ -108,7 +134,9 @@ export async function executarCriacaoAssinaturaAsaas(
       valorMensalCentavos: definicaoPlano.mensalidadeCentavos,
       situacaoAsaas: resultadoAssinatura.situacao,
       situacaoInterna: "pendente_contratacao",
-      urlFaturaOuCheckout: resultadoAssinatura.urlFaturaOuCheckout,
+      ...(resultadoAssinatura.urlFaturaOuCheckout
+        ? { urlFaturaOuCheckout: resultadoAssinatura.urlFaturaOuCheckout }
+        : {}),
       contratouImplantacaoAssistida: contratarImplantacaoAssistida,
       ...(definicaoPlano.valorImplantacaoAssistidaCentavos
         ? { valorImplantacaoCentavos: definicaoPlano.valorImplantacaoAssistidaCentavos }
@@ -122,6 +150,39 @@ export async function executarCriacaoAssinaturaAsaas(
 
     transacao.set(refClienteGlobal, registroCliente, { merge: true });
     transacao.set(refAssinaturaGlobal, registroAssinatura, { merge: true });
+
+    // Uma nova assinatura criada em estado pendente não libera publicação pública
+    // até que o primeiro pagamento seja confirmado/compensado no Asaas.
+    transacao.update(refOrg, {
+      "resumoDireitosPlano.planoCodigo": planoCodigo,
+      "resumoDireitosPlano.situacaoAssinatura": "pendente_contratacao",
+      "resumoDireitosPlano.limiteProfissionaisAtivos": definicaoPlano.limiteProfissionaisAtivos,
+      "resumoDireitosPlano.limiteEnviosEmailMensal": definicaoPlano.limiteEnviosEmailMensal,
+      "resumoDireitosPlano.permitePublicacaoPublica": false,
+      atualizadoEmIso: agoraIso,
+    });
+
+    if (resultadoAssinatura.cobrancaInicialId) {
+      const refCobrancaInicial = refOrg
+        .collection("cobrancasAsaas")
+        .doc(resultadoAssinatura.cobrancaInicialId);
+      const cobrancaParaSalvar: CobrancaHistoricoAsaas = {
+        id: resultadoAssinatura.cobrancaInicialId,
+        organizacaoId,
+        cobrancaAsaasId: resultadoAssinatura.cobrancaInicialId,
+        assinaturaAsaasId: resultadoAssinatura.assinaturaAsaasId,
+        valorCentavos: definicaoPlano.mensalidadeCentavos,
+        formaPagamento: "UNDEFINED",
+        situacao: "PENDING",
+        dataVencimentoIso: resultadoAssinatura.proximoVencimento ?? dataHojeIso,
+        ...(resultadoAssinatura.urlFaturaOuCheckout
+          ? { urlFaturaOuComprovante: resultadoAssinatura.urlFaturaOuCheckout }
+          : {}),
+        criadoEmIso: agoraIso,
+        atualizadoEmIso: agoraIso,
+      };
+      transacao.set(refCobrancaInicial, cobrancaParaSalvar, { merge: true });
+    }
   });
 
   return {

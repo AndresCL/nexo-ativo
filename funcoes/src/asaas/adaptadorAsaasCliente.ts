@@ -10,6 +10,7 @@ export interface ParametrosCriarAssinaturaAsaas {
   readonly clienteAsaasId: string;
   readonly valorMensalReais: number;
   readonly descricao: string;
+  readonly dataPrimeiroVencimentoIso?: string;
 }
 
 export interface ParametrosCriarCobrancaImplantacaoAsaas {
@@ -24,6 +25,7 @@ export interface RespostaCriacaoAssinaturaAsaas {
   readonly urlFaturaOuCheckout?: string;
   readonly proximoVencimento?: string;
   readonly situacao: string;
+  readonly cobrancaInicialId?: string;
 }
 
 export interface RespostaCriacaoCobrancaAvulsaAsaas {
@@ -41,6 +43,7 @@ export interface PortaProvedorAsaas {
     parametros: ParametrosCriarCobrancaImplantacaoAsaas,
   ): Promise<RespostaCriacaoCobrancaAvulsaAsaas>;
   cancelarAssinatura(assinaturaAsaasId: string): Promise<void>;
+  removerCobranca(cobrancaAsaasId: string): Promise<void>;
 }
 
 export interface OpcoesAdaptadorAsaas {
@@ -60,7 +63,9 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
 
   public constructor(opcoes: OpcoesAdaptadorAsaas = {}) {
     this.chaveApi = opcoes.chaveApi ?? process.env.ASAAS_API_KEY?.trim();
-    this.urlBase = opcoes.urlBase ?? (process.env.ASAAS_URL_BASE || "https://sandbox.asaas.com/v3");
+    const urlConfigurada = opcoes.urlBase ?? (process.env.ASAAS_URL_BASE || "https://api-sandbox.asaas.com/v3");
+    // Normaliza caso a URL tenha sido informada como sandbox.asaas.com em vez de api-sandbox.asaas.com
+    this.urlBase = urlConfigurada.replace("://sandbox.asaas.com", "://api-sandbox.asaas.com");
     this.funcaoFetch = opcoes.funcaoFetch ?? fetch;
   }
 
@@ -69,15 +74,46 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
       return `cus_simulado_${parametros.organizacaoId}`;
     }
 
-    const payload = {
+    // Consulta prévia para reaproveitar cliente existente com o mesmo CPF/CNPJ
+    try {
+      const respostaBusca = await this.funcaoFetch(
+        `${this.urlBase}/customers?cpfCnpj=${encodeURIComponent(parametros.dadosFiscais.cpfOuCnpj)}`,
+        {
+          method: "GET",
+          headers: {
+            access_token: this.chaveApi,
+          },
+        },
+      );
+      if (respostaBusca.ok) {
+        const contentType = respostaBusca.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const dadosBusca = (await respostaBusca.json()) as { data?: readonly { id: string }[] };
+          if (dadosBusca.data && dadosBusca.data.length > 0 && dadosBusca.data[0]?.id) {
+            return dadosBusca.data[0].id;
+          }
+        }
+      }
+    } catch {
+      // Caso a busca prévia falhe por conexão, continua com a criação
+    }
+
+    const payload: Record<string, string | undefined> = {
       name: parametros.dadosFiscais.nomeOuRazaoSocial,
       cpfCnpj: parametros.dadosFiscais.cpfOuCnpj,
       email: parametros.dadosFiscais.email,
-      phone: parametros.dadosFiscais.telefone,
-      postalCode: parametros.dadosFiscais.cep,
-      addressNumber: parametros.dadosFiscais.enderecoNumero,
       externalReference: parametros.organizacaoId,
     };
+
+    if (parametros.dadosFiscais.telefone) {
+      payload.phone = parametros.dadosFiscais.telefone;
+    }
+    if (parametros.dadosFiscais.cep) {
+      payload.postalCode = parametros.dadosFiscais.cep;
+    }
+    if (parametros.dadosFiscais.enderecoNumero) {
+      payload.addressNumber = parametros.dadosFiscais.enderecoNumero;
+    }
 
     const resposta = await this.funcaoFetch(`${this.urlBase}/customers`, {
       method: "POST",
@@ -90,7 +126,18 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
 
     if (!resposta.ok) {
       const detalhe = await resposta.text();
-      throw new Error(`Falha ao registrar cliente no Asaas: ${detalhe}`);
+      let mensagemErro = detalhe;
+      try {
+        const jsonErro = JSON.parse(detalhe) as { errors?: { description: string }[] };
+        if (jsonErro.errors && jsonErro.errors.length > 0) {
+          mensagemErro = jsonErro.errors.map((e) => e.description).join("; ");
+        }
+      } catch {
+        if (detalhe.includes("<!DOCTYPE") || detalhe.includes("<html")) {
+          mensagemErro = `Servidor Asaas retornou HTTP ${resposta.status} (${resposta.statusText})`;
+        }
+      }
+      throw new Error(`Falha ao registrar cliente no Asaas: ${mensagemErro}`);
     }
 
     const dados = (await resposta.json()) as { id: string };
@@ -110,12 +157,13 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
     }
 
     const amanha = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    const dataPrimeiroVencimento = parametros.dataPrimeiroVencimentoIso || amanha;
 
     const payload = {
       customer: parametros.clienteAsaasId,
       billingType: "UNDEFINED", // Permite ao assinante escolher PIX, Cartão ou Boleto no checkout Asaas
       value: parametros.valorMensalReais,
-      nextDueDate: amanha,
+      nextDueDate: dataPrimeiroVencimento,
       cycle: "MONTHLY",
       description: parametros.descricao,
       externalReference: parametros.organizacaoId,
@@ -132,7 +180,18 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
 
     if (!resposta.ok) {
       const detalhe = await resposta.text();
-      throw new Error(`Falha ao criar assinatura no Asaas: ${detalhe}`);
+      let mensagemErro = detalhe;
+      try {
+        const jsonErro = JSON.parse(detalhe) as { errors?: { description: string }[] };
+        if (jsonErro.errors && jsonErro.errors.length > 0) {
+          mensagemErro = jsonErro.errors.map((e) => e.description).join("; ");
+        }
+      } catch {
+        if (detalhe.includes("<!DOCTYPE") || detalhe.includes("<html")) {
+          mensagemErro = `Servidor Asaas retornou HTTP ${resposta.status} (${resposta.statusText})`;
+        }
+      }
+      throw new Error(`Falha ao criar assinatura no Asaas: ${mensagemErro}`);
     }
 
     const dados = (await resposta.json()) as {
@@ -142,11 +201,46 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
       invoiceUrl?: string;
     };
 
+    let urlFatura = dados.invoiceUrl;
+    let cobrancaInicialId: string | undefined;
+
+    try {
+      const respostaCobrancas = await this.funcaoFetch(
+        `${this.urlBase}/subscriptions/${dados.id}/payments`,
+        {
+          method: "GET",
+          headers: {
+            access_token: this.chaveApi,
+          },
+        },
+      );
+      if (respostaCobrancas.ok) {
+        const contentType = respostaCobrancas.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const dadosCobrancas = (await respostaCobrancas.json()) as {
+            data?: readonly {
+              id?: string;
+              invoiceUrl?: string;
+              bankSlipUrl?: string;
+            }[];
+          };
+          const primeira = dadosCobrancas.data?.[0];
+          if (primeira) {
+            urlFatura = primeira.invoiceUrl || primeira.bankSlipUrl || urlFatura;
+            cobrancaInicialId = primeira.id;
+          }
+        }
+      }
+    } catch {
+      // Se a busca da cobrança inicial falhar, continua normalmente
+    }
+
     return {
       assinaturaAsaasId: dados.id,
-      urlFaturaOuCheckout: dados.invoiceUrl,
+      urlFaturaOuCheckout: urlFatura,
       proximoVencimento: dados.nextDueDate,
       situacao: dados.status,
+      cobrancaInicialId,
     };
   }
 
@@ -210,6 +304,28 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
     if (!resposta.ok) {
       const detalhe = await resposta.text();
       throw new Error(`Falha ao cancelar assinatura no Asaas: ${detalhe}`);
+    }
+  }
+
+  public async removerCobranca(cobrancaAsaasId: string): Promise<void> {
+    if (!this.chaveApi) {
+      return;
+    }
+
+    try {
+      const resposta = await this.funcaoFetch(`${this.urlBase}/payments/${cobrancaAsaasId}`, {
+        method: "DELETE",
+        headers: {
+          access_token: this.chaveApi,
+        },
+      });
+
+      if (!resposta.ok) {
+        const detalhe = await resposta.text();
+        console.warn(`Aviso ao remover cobrança pendente ${cobrancaAsaasId} no Asaas: ${detalhe}`);
+      }
+    } catch (erro) {
+      console.warn(`Erro de conexão ao remover cobrança ${cobrancaAsaasId} no Asaas:`, erro);
     }
   }
 }

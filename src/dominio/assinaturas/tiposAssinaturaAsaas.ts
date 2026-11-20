@@ -13,6 +13,7 @@ export type SituacaoCobrancaAsaas =
   | "CONFIRMED"
   | "OVERDUE"
   | "REFUNDED"
+  | "CANCELLED"
   | "RECEIVED_IN_CASH_UNDONE"
   | "CHARGEBACK_REQUESTED"
   | "CHARGEBACK_DISPUTE"
@@ -88,11 +89,11 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
     limiteEnviosEmailMensal: 300,
     valorImplantacaoAssistidaCentavos: 29700, // R$ 297 opcional
     destaques: [
-      "Página premium com as 3 composições editoriais",
-      "Experiências interativas com motor determinístico",
-      "Até 10 profissionais ativos com cartões digitais e QR Codes próprios",
-      "Catálogo compartilhado e direcionamento de solicitações por especialista",
-      "Notificações por e-mail com link direto para WhatsApp (300 envios/mês)",
+      "Vitrine pública com identidade visual autoral",
+      "Microfluxos e formulários para qualificação de visitantes",
+      "Até 10 profissionais com cartões digitais e QR Codes próprios",
+      "Catálogo de serviços e produtos integrado à vitrine",
+      "Notificações por e-mail com link de retorno ao WhatsApp (300 envios/mês)",
     ],
   },
   equipe: {
@@ -105,11 +106,11 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
     limiteEnviosEmailMensal: 300,
     valorImplantacaoAssistidaCentavos: 29700,
     destaques: [
-      "Página premium com as 3 composições editoriais",
-      "Experiências interativas com motor determinístico",
-      "Até 10 profissionais ativos com cartões digitais e QR Codes próprios",
-      "Catálogo compartilhado e direcionamento de solicitações por especialista",
-      "Notificações por e-mail com link direto para WhatsApp (300 envios/mês)",
+      "Vitrine pública com identidade visual autoral",
+      "Microfluxos e formulários para qualificação de visitantes",
+      "Até 10 profissionais com cartões digitais e QR Codes próprios",
+      "Catálogo de serviços e produtos integrado à vitrine",
+      "Notificações por e-mail com link de retorno ao WhatsApp (300 envios/mês)",
     ],
   },
   personalizado: {
@@ -133,7 +134,7 @@ export interface DadosCadastroFiscalAssinante {
   readonly nomeOuRazaoSocial: string;
   readonly cpfOuCnpj: string;
   readonly email: string;
-  readonly telefone: string;
+  readonly telefone?: string;
   readonly cep?: string;
   readonly enderecoNumero?: string;
 }
@@ -159,6 +160,8 @@ export interface RegistroAssinaturaAsaas {
   readonly contratouImplantacaoAssistida: boolean;
   readonly valorImplantacaoCentavos?: number;
   readonly proximoVencimentoIso?: string;
+  readonly canceladaEmIso?: string;
+  readonly vigenciaAteIso?: string;
   readonly criadoEmIso: string;
   readonly atualizadoEmIso: string;
 }

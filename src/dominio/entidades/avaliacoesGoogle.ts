@@ -1,7 +1,10 @@
+export type PosicaoAvaliacoesVitrine = "topo" | "rodape";
+
 export interface ConfiguracaoAvaliacoesGoogle {
   readonly habilitado: boolean;
   readonly identificadorLocal?: string;
   readonly modoExibicao: "resumo" | "carrossel";
+  readonly posicao?: PosicaoAvaliacoesVitrine;
 }
 
 export interface AtribuicaoAvaliacoesGoogle {
@@ -38,6 +41,7 @@ export interface ResumoAvaliacoesGoogle extends EstabelecimentoGoogle {
 export const CONFIGURACAO_AVALIACOES_GOOGLE_PADRAO: ConfiguracaoAvaliacoesGoogle = {
   habilitado: false,
   modoExibicao: "resumo",
+  posicao: "topo",
 };
 
 export function construirUrlLocalGoogle(identificadorLocal: string): string {
@@ -59,6 +63,7 @@ export function hidratarConfiguracaoAvaliacoesGoogle(
   return {
     habilitado: dados.habilitado === true,
     modoExibicao: dados.modoExibicao === "carrossel" ? "carrossel" : "resumo",
+    ...(dados.posicao === "rodape" ? { posicao: "rodape" } : dados.posicao === "topo" ? { posicao: "topo" } : {}),
     ...(typeof dados.identificadorLocal === "string"
       ? { identificadorLocal: dados.identificadorLocal.trim() }
       : {}),

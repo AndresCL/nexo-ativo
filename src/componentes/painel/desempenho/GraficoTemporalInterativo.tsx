@@ -14,7 +14,6 @@ import {
   Cell,
 } from "recharts";
 import type { MetricasDiariasOrganizacao } from "@/dominio/analytics/tiposMetricasAgregadas";
-import { CORES_METRICAS_DESEMPENHO } from "./coresMetricasDesempenho";
 
 export interface PropriedadesGraficoTemporalInterativo {
   readonly historicoDiario: readonly MetricasDiariasOrganizacao[];
@@ -30,6 +29,12 @@ interface ItemGraficoRecharts {
   readonly aberturas: number;
   readonly whatsapp: number;
 }
+
+const CORES_GRAFICO_FLAT = {
+  visitas: "#4F46E5", // Índigo
+  aberturas: "#0284C7", // Azul Celeste
+  whatsapp: "#10B981", // Esmeralda
+} as const;
 
 export function GraficoTemporalInterativo({
   historicoDiario,
@@ -86,7 +91,7 @@ export function GraficoTemporalInterativo({
 
   if (dadosCronologicos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-marfim-300 bg-white p-8 text-center text-xs text-mineral-500 shadow-xs">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200/80 bg-white p-8 text-center text-xs text-mineral-500 shadow-2xs">
         <Calendar className="mb-2 h-6 w-6 text-mineral-400" />
         <p>Nenhuma métrica registrada no período selecionado.</p>
       </div>
@@ -102,27 +107,27 @@ export function GraficoTemporalInterativo({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50/90 px-4 py-2.5 text-xs text-indigo-950 shadow-2xs"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-mineral-900 shadow-2xs"
           >
             <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
-              <span className="font-medium">
+              <span className="flex h-2 w-2 rounded-full bg-mineral-950 animate-pulse" />
+              <span className="font-medium text-mineral-700">
                 Filtrando métricas do dia:{" "}
-                <strong className="capitalize font-bold text-indigo-950">
+                <strong className="capitalize font-bold text-mineral-950">
                   {formatarDataCompleta(diaSelecionado)}
                 </strong>
               </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span className="text-[11px] text-indigo-800 font-semibold">
+              <span className="text-[11px] font-semibold text-mineral-600">
                 {diaAtivoObjeto.visualizacoesVitrine} visitas · {diaAtivoObjeto.aberturasMicrofluxo}{" "}
                 fluxos · {diaAtivoObjeto.cliquesWhatsapp} cliques no WhatsApp
               </span>
               <button
                 type="button"
                 onClick={() => aoSelecionarDia(null)}
-                className="inline-flex items-center gap-1 rounded-md bg-indigo-100 px-2 py-1 text-[11px] font-bold text-indigo-950 transition-colors hover:bg-indigo-200"
+                className="inline-flex items-center gap-1 rounded-md bg-mineral-950 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-neutral-800 shadow-2xs cursor-pointer"
               >
                 <X className="h-3 w-3" />
                 <span>Ver período completo</span>
@@ -132,7 +137,7 @@ export function GraficoTemporalInterativo({
         ) : null}
       </AnimatePresence>
 
-      {/* Cabeçalho da Seção (Fora do Card) */}
+      {/* Cabeçalho da Seção */}
       <div className="flex flex-wrap items-end justify-between gap-4 text-xs">
         <div>
           <h3 className="text-2xl font-bold tracking-tight text-mineral-950">
@@ -144,28 +149,28 @@ export function GraficoTemporalInterativo({
           </p>
         </div>
 
-        {/* Legenda de cores */}
+        {/* Legenda de cores Flat */}
         <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-mineral-700">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm bg-indigo-600 shadow-2xs" />
+            <span className="h-3 w-3 rounded-sm bg-[#4F46E5]" />
             <span>Visitas</span>
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm bg-sky-600 shadow-2xs" />
+            <span className="h-3 w-3 rounded-sm bg-[#0284C7]" />
             <span>Fluxos Iniciados</span>
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-sm bg-violet-600 shadow-2xs" />
+            <span className="h-3 w-3 rounded-sm bg-[#10B981]" />
             <span>Cliques no WhatsApp</span>
           </span>
         </div>
       </div>
 
-      {/* Área do Gráfico Interativo com Recharts BarChart */}
-      <div className="relative overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-b from-indigo-50/60 via-white to-white p-4 shadow-xs sm:p-6">
+      {/* Área do Gráfico Flat em Card Branco Sólido */}
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs sm:p-6">
         {/* Seletor rápido de dias em chips / botões acessíveis para teclado e testes */}
-        <div className="mb-4 flex flex-wrap items-center gap-1.5 border-b border-indigo-100 pb-3 text-xs">
-          <span className="font-semibold text-mineral-600 mr-1">Filtrar dia:</span>
+        <div className="mb-4 flex flex-wrap items-center gap-1.5 border-b border-slate-100 pb-3 text-xs">
+          <span className="font-semibold text-mineral-500 mr-1">Filtrar dia:</span>
           {dadosFormatados.map((d) => {
             const ativo = d.dataIso === diaSelecionado;
             return (
@@ -173,10 +178,10 @@ export function GraficoTemporalInterativo({
                 key={d.dataIso}
                 type="button"
                 onClick={() => aoSelecionarDia(ativo ? null : d.dataIso)}
-                className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-semibold transition-all ${
+                className={`rounded-lg px-2.5 py-1 font-mono text-[11px] font-semibold transition-all cursor-pointer ${
                   ativo
-                    ? "bg-indigo-600 text-white shadow-2xs"
-                    : "border border-indigo-200 bg-white text-indigo-950 hover:bg-indigo-50"
+                    ? "bg-mineral-950 text-white shadow-2xs"
+                    : "border border-slate-200 bg-white text-mineral-800 hover:bg-slate-50 hover:border-slate-300"
                 }`}
               >
                 {d.dataIso}
@@ -211,60 +216,60 @@ export function GraficoTemporalInterativo({
                 }}
                 className="cursor-pointer"
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0eee6" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                 <XAxis
                   dataKey="rotuloData"
                   tickLine={false}
-                  axisLine={{ stroke: "#e7e5e4" }}
-                  tick={{ fontSize: 11, fill: "#78716c", fontWeight: 500 }}
+                  axisLine={{ stroke: "#e2e8f0" }}
+                  tick={{ fontSize: 11, fill: "#64748b", fontWeight: 500 }}
                 />
                 <YAxis
                   allowDecimals={false}
                   tickLine={false}
-                  axisLine={{ stroke: "#e7e5e4" }}
-                  tick={{ fontSize: 11, fill: "#78716c" }}
+                  axisLine={{ stroke: "#e2e8f0" }}
+                  tick={{ fontSize: 11, fill: "#64748b" }}
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(79, 70, 229, 0.06)" }}
+                  cursor={{ fill: "rgba(15, 23, 42, 0.04)" }}
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       const item = payload[0]?.payload as ItemGraficoRecharts | undefined;
                       if (!item) return null;
                       return (
-                        <div className="rounded-xl border border-marfim-300 bg-white/95 backdrop-blur-sm p-3.5 shadow-xl text-xs min-w-[200px]">
-                          <p className="font-bold text-mineral-950 capitalize border-b border-marfim-200 pb-1.5">
+                        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-md text-xs min-w-[200px]">
+                          <p className="font-bold text-mineral-950 capitalize border-b border-slate-100 pb-1.5">
                             {item.dataCompleta}
                           </p>
                           <div className="mt-2 space-y-1.5">
                             <div className="flex items-center justify-between">
-                              <span className="flex items-center gap-1.5 text-indigo-800">
-                                <span className="h-2 w-2 rounded-full bg-indigo-600" />
+                              <span className="flex items-center gap-1.5 text-mineral-700">
+                                <span className="h-2 w-2 rounded-full bg-[#4F46E5]" />
                                 Visitas Vitrine:
                               </span>
-                              <strong className="text-sm font-bold text-indigo-950">
+                              <strong className="text-sm font-bold tabular-nums text-mineral-950">
                                 {item.visitas}
                               </strong>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="flex items-center gap-1.5 text-sky-800">
-                                <span className="h-2 w-2 rounded-full bg-sky-600" />
+                              <span className="flex items-center gap-1.5 text-mineral-700">
+                                <span className="h-2 w-2 rounded-full bg-[#0284C7]" />
                                 Fluxos Iniciados:
                               </span>
-                              <strong className="text-sm font-bold text-sky-950">
+                              <strong className="text-sm font-bold tabular-nums text-mineral-950">
                                 {item.aberturas}
                               </strong>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="flex items-center gap-1.5 text-violet-800">
-                                <span className="h-2 w-2 rounded-full bg-violet-600" />
+                              <span className="flex items-center gap-1.5 text-mineral-700">
+                                <span className="h-2 w-2 rounded-full bg-[#10B981]" />
                                 Cliques no WhatsApp:
                               </span>
-                              <strong className="text-sm font-bold text-violet-950">
+                              <strong className="text-sm font-bold tabular-nums text-mineral-950">
                                 {item.whatsapp}
                               </strong>
                             </div>
                           </div>
-                          <p className="mt-2 text-[10px] text-mineral-500 italic border-t border-marfim-150 pt-1">
+                          <p className="mt-2 text-[10px] text-mineral-400 italic border-t border-slate-100 pt-1">
                             Clique para isolar este dia no painel
                           </p>
                         </div>
@@ -278,12 +283,8 @@ export function GraficoTemporalInterativo({
                   {dadosFormatados.map((entry) => (
                     <Cell
                       key={`cell-v-${entry.dataIso}`}
-                      fill={
-                        entry.dataIso === diaSelecionado
-                          ? CORES_METRICAS_DESEMPENHO.visualizacoes.selecionada
-                          : CORES_METRICAS_DESEMPENHO.visualizacoes.principal
-                      }
-                      fillOpacity={diaSelecionado && entry.dataIso !== diaSelecionado ? 0.35 : 1}
+                      fill={CORES_GRAFICO_FLAT.visitas}
+                      fillOpacity={diaSelecionado && entry.dataIso !== diaSelecionado ? 0.25 : 1}
                     />
                   ))}
                 </Bar>
@@ -297,12 +298,8 @@ export function GraficoTemporalInterativo({
                   {dadosFormatados.map((entry) => (
                     <Cell
                       key={`cell-a-${entry.dataIso}`}
-                      fill={
-                        entry.dataIso === diaSelecionado
-                          ? CORES_METRICAS_DESEMPENHO.aberturas.selecionada
-                          : CORES_METRICAS_DESEMPENHO.aberturas.principal
-                      }
-                      fillOpacity={diaSelecionado && entry.dataIso !== diaSelecionado ? 0.35 : 1}
+                      fill={CORES_GRAFICO_FLAT.aberturas}
+                      fillOpacity={diaSelecionado && entry.dataIso !== diaSelecionado ? 0.25 : 1}
                     />
                   ))}
                 </Bar>
@@ -316,12 +313,8 @@ export function GraficoTemporalInterativo({
                   {dadosFormatados.map((entry) => (
                     <Cell
                       key={`cell-w-${entry.dataIso}`}
-                      fill={
-                        entry.dataIso === diaSelecionado
-                          ? CORES_METRICAS_DESEMPENHO.whatsapp.selecionada
-                          : CORES_METRICAS_DESEMPENHO.whatsapp.principal
-                      }
-                      fillOpacity={diaSelecionado && entry.dataIso !== diaSelecionado ? 0.35 : 1}
+                      fill={CORES_GRAFICO_FLAT.whatsapp}
+                      fillOpacity={diaSelecionado && entry.dataIso !== diaSelecionado ? 0.25 : 1}
                     />
                   ))}
                 </Bar>
@@ -329,7 +322,7 @@ export function GraficoTemporalInterativo({
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-72 w-full animate-pulse rounded-xl bg-marfim-100" />
+          <div className="h-72 w-full animate-pulse rounded-xl bg-slate-100" />
         )}
       </div>
     </div>

@@ -69,9 +69,14 @@ export function ComposicaoRetratoEditorial({
           className="min-h-24 flex-1 sm:min-h-36 @5xl:min-h-56"
         />
 
-        <div className="border-t border-white/14 pt-4 sm:pt-6 @5xl:grid @5xl:grid-cols-12 @5xl:items-end @5xl:gap-12 @5xl:pt-8">
-          <TransicaoEditorial atrasoSegundos={0.06} className="@5xl:col-span-7">
+        {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
+          <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0 max-w-7xl mx-auto mb-2">
             {complementoChamada}
+          </TransicaoEditorial>
+        ) : null}
+
+        <div className="border-t border-white/14 pt-4 sm:pt-6 @5xl:grid @5xl:grid-cols-12 @5xl:items-end @5xl:gap-12 @5xl:pt-8">
+          <TransicaoEditorial atrasoSegundos={0.06} className="hidden @5xl:col-span-7 @5xl:block">
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}
               previaEquipe={previaEquipe}
@@ -97,6 +102,12 @@ export function ComposicaoRetratoEditorial({
             />
           </TransicaoEditorial>
         </div>
+
+        {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
+          <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0 max-w-7xl mx-auto mt-4">
+            {complementoChamada}
+          </TransicaoEditorial>
+        ) : null}
 
         <RodapeEditorial
           identidade={pagina.identidade}

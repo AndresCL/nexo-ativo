@@ -214,7 +214,7 @@ export function gerarLinkRetornoWhatsappSolicitacao(
     ? ` (${solicitacao.demonstrativoComercialCongelado.resumoFormatado})`
     : "";
 
-  const textoMensagem = `Olá, ${solicitacao.nomeVisitante}! Aqui é de ${nomeOrganizacao}. Recebemos sua solicitação sobre "${itemContextual}"${trechoValor} e gostaríamos de dar andamento ao seu atendimento.`;
+  const textoMensagem = `Olá, ${solicitacao.nomeVisitante}! Aqui é da ${nomeOrganizacao} referente a "${itemContextual}"${trechoValor}.`;
 
   return `https://wa.me/${ddiTelefone}?text=${encodeURIComponent(textoMensagem)}`;
 }

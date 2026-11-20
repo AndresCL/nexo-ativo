@@ -283,12 +283,9 @@ export function GerenciadorSolicitacoesPainel({
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-6">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-3 sm:pb-4">
         <div>
-          <p className="text-xs tracking-[0.18em] text-mineral-500 uppercase">
-            Central Comercial · {nomeOrganizacao}
-          </p>
-          <h1 className="mt-1 text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
+          <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
             Solicitações Recebidas
           </h1>
           <p className="mt-1 text-xs text-mineral-600">
@@ -457,11 +454,13 @@ export function GerenciadorSolicitacoesPainel({
           data-testid="barra-saude-comercial-painel"
           className="grid grid-cols-1 gap-3 sm:grid-cols-3"
         >
-          <div className="flex items-center gap-3 rounded-xl border border-marfim-200 bg-white p-3.5 shadow-2xs">
+          <div className="flex items-center gap-3 rounded-xl bg-white p-3.5 shadow-2xs">
             <div
               className={combinarClasses(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white",
-                metricasSaude.novasPendentesUrgentes > 0 ? "bg-amber-600" : "bg-emerald-600",
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                metricasSaude.novasPendentesUrgentes > 0
+                  ? "bg-amber-50 text-amber-700"
+                  : "bg-mineral-100 text-mineral-700",
               )}
             >
               {metricasSaude.novasPendentesUrgentes > 0 ? (
@@ -480,8 +479,8 @@ export function GerenciadorSolicitacoesPainel({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl border border-marfim-200 bg-white p-3.5 shadow-2xs">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
+          <div className="flex items-center gap-3 rounded-xl bg-white p-3.5 shadow-2xs">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-mineral-100 text-mineral-700">
               <TrendingUp className="h-5 w-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">
@@ -496,8 +495,8 @@ export function GerenciadorSolicitacoesPainel({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl border border-marfim-200 bg-white p-3.5 shadow-2xs">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white">
+          <div className="flex items-center gap-3 rounded-xl bg-white p-3.5 shadow-2xs">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-mineral-100 text-mineral-700">
               <Flame className="h-5 w-5" aria-hidden="true" />
             </div>
             <div className="min-w-0">

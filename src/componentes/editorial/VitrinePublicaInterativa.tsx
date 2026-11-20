@@ -468,8 +468,8 @@ export function VitrinePublicaInterativa({
           }}
           complementoChamada={
             <BlocoAvaliacoesGoogle
-              key={pagina.avaliacoesGoogle?.identificadorLocal}
-              pagina={pagina}
+              key={paginaComAcoesResolvidas.avaliacoesGoogle?.identificadorLocal}
+              pagina={paginaComAcoesResolvidas}
             />
           }
         />

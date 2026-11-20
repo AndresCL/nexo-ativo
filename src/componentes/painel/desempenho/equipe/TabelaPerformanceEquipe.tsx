@@ -39,41 +39,33 @@ export function TabelaPerformanceEquipe({
     <section aria-labelledby="titulo-performance-equipe" className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-indigo-600 text-white shadow-2xs">
-              <Users className="h-3 w-3" />
-            </span>
-            <span className="text-[11px] font-semibold tracking-wider text-mineral-500 uppercase">
-              Ranking Comercial
-            </span>
-          </div>
           <h2
             id="titulo-performance-equipe"
-            className="mt-1 text-2xl font-bold tracking-tight text-mineral-950"
+            className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl"
           >
             Performance da Equipe & Cartões VIP
           </h2>
-          <p className="text-xs text-mineral-600">
+          <p className="mt-1 text-xs text-mineral-500">
             Acompanhe visitas aos cartões, cliques nas ações e no WhatsApp de cada consultor.
           </p>
         </div>
 
         <Link
           href="/painel/equipe"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-mineral-900 shadow-2xs transition-all hover:bg-sky-50 hover:border-sky-300"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-mineral-900 shadow-2xs transition-colors hover:border-slate-300 hover:text-mineral-950"
         >
           <UserPlus className="h-3.5 w-3.5 text-mineral-600" />
           <span>Gerenciar Equipe</span>
         </Link>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
         {membrosEquipeConsolidados.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-sky-100 bg-gradient-to-r from-indigo-50/70 to-sky-50/70 text-[11px] font-bold tracking-wider text-mineral-600 uppercase">
+              <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-medium text-mineral-500">
                 <tr>
-                  <th scope="col" className="px-5 py-3.5">
+                  <th scope="col" className="px-5 py-3">
                     <div className="flex items-center gap-1.5">
                       <TooltipInformativo
                         alinhamento="esquerda"
@@ -82,8 +74,8 @@ export function TabelaPerformanceEquipe({
                       <span>Consultor / Cartão VIP</span>
                     </div>
                   </th>
-                  <th scope="col" className="px-4 py-3.5 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
+                  <th scope="col" className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
                       <TooltipInformativo
                         alinhamento="centro"
                         texto="Acessos à página individual do consultor (via QR Code físico, bio de redes sociais ou envio direto)."
@@ -91,8 +83,8 @@ export function TabelaPerformanceEquipe({
                       <span>Visitas Cartão</span>
                     </div>
                   </th>
-                  <th scope="col" className="px-4 py-3.5 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
+                  <th scope="col" className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
                       <TooltipInformativo
                         alinhamento="centro"
                         texto="Cliques nas ações do cartão, como abrir a vitrine da loja, salvar o contato e iniciar uma experiência."
@@ -100,8 +92,8 @@ export function TabelaPerformanceEquipe({
                       <span>Ações do Cartão</span>
                     </div>
                   </th>
-                  <th scope="col" className="px-4 py-3.5 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
+                  <th scope="col" className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
                       <TooltipInformativo
                         alinhamento="centro"
                         texto="Microfluxos interativos iniciados no cartão somados a solicitações comerciais atribuídas ao consultor."
@@ -109,8 +101,8 @@ export function TabelaPerformanceEquipe({
                       <span>Fluxos Atribuídos</span>
                     </div>
                   </th>
-                  <th scope="col" className="px-4 py-3.5 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
+                  <th scope="col" className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
                       <TooltipInformativo
                         alinhamento="centro"
                         texto="Cliques no botão do WhatsApp a partir do cartão deste consultor. Uma visita pode gerar vários cliques."
@@ -118,7 +110,7 @@ export function TabelaPerformanceEquipe({
                       <span>Contatos WhatsApp</span>
                     </div>
                   </th>
-                  <th scope="col" className="px-5 py-3.5 text-right">
+                  <th scope="col" className="px-5 py-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       <TooltipInformativo
                         alinhamento="direita"
@@ -129,16 +121,16 @@ export function TabelaPerformanceEquipe({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-50">
                 {membrosEquipeConsolidados.map((item, index) => {
                   const urlCartao = `/${identificadorOrganizacao}/equipe/${item.identificadorCartao}`;
 
                   return (
-                    <tr key={item.id} className="group transition-colors hover:bg-sky-50/60">
-                      <td className="px-5 py-4">
+                    <tr key={item.id} className="group transition-colors hover:bg-slate-50/70">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           {/* Posição no Ranking */}
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-mineral-700">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-slate-200/60 bg-slate-50 text-[10px] font-bold text-mineral-700">
                             {index + 1}
                           </span>
 
@@ -147,17 +139,17 @@ export function TabelaPerformanceEquipe({
                             <img
                               src={item.avatarUrl}
                               alt={item.nome}
-                              className="h-9 w-9 rounded-xl object-cover shadow-2xs"
+                              className="h-8 w-8 rounded-lg object-cover shadow-2xs"
                             />
                           ) : (
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-sky-600 text-sm font-bold text-white shadow-xs">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200/80 bg-slate-100 text-xs font-bold text-mineral-800">
                               {item.nome.charAt(0)}
                             </div>
                           )}
 
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-mineral-950">{item.nome}</span>
+                              <span className="font-semibold text-mineral-950">{item.nome}</span>
                               <a
                                 href={urlCartao}
                                 target="_blank"
@@ -173,33 +165,24 @@ export function TabelaPerformanceEquipe({
                         </div>
                       </td>
 
-                      <td className="px-4 py-4 text-center text-sm font-bold text-indigo-900">
-                        {item.visualizacoes}
+                      <td className="px-4 py-3.5 text-right text-xs font-bold tabular-nums text-mineral-950">
+                        {item.visualizacoes.toLocaleString("pt-BR")}
                       </td>
 
-                      <td className="px-4 py-4 text-center text-sm font-bold text-indigo-900">
-                        {item.cliquesAcoes}
+                      <td className="px-4 py-3.5 text-right text-xs font-medium tabular-nums text-mineral-700">
+                        {item.cliquesAcoes.toLocaleString("pt-BR")}
                       </td>
 
-                      <td className="px-4 py-4 text-center text-sm font-bold text-sky-900">
-                        {item.fluxos}
+                      <td className="px-4 py-3.5 text-right text-xs font-medium tabular-nums text-mineral-700">
+                        {item.fluxos.toLocaleString("pt-BR")}
                       </td>
 
-                      <td className="px-4 py-4 text-center text-sm font-extrabold text-violet-900">
-                        {item.contatos}
+                      <td className="px-4 py-3.5 text-right text-xs font-bold tabular-nums text-mineral-950">
+                        {item.contatos.toLocaleString("pt-BR")}
                       </td>
 
-                      <td className="px-5 py-4 text-right">
-                        <span
-                          className={combinarClasses(
-                            "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold shadow-2xs",
-                            item.acoesPorVisita !== null && item.acoesPorVisita >= 1
-                              ? "bg-emerald-100 text-emerald-900 border border-emerald-200"
-                              : item.acoesPorVisita !== null && item.acoesPorVisita > 0
-                                ? "bg-sky-100 text-sky-900 border border-sky-200"
-                                : "bg-slate-100 text-mineral-600",
-                          )}
-                        >
+                      <td className="px-5 py-3.5 text-right">
+                        <span className="inline-flex items-center rounded-md border border-slate-200/70 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-mineral-800">
                           {item.acoesPorVisita === null
                             ? "—"
                             : item.acoesPorVisita.toLocaleString("pt-BR", {
@@ -216,21 +199,21 @@ export function TabelaPerformanceEquipe({
           </div>
         ) : (
           <div className="p-10 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-mineral-600 shadow-2xs">
-              <Users className="h-6 w-6" />
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-mineral-600 shadow-2xs">
+              <Users className="h-5 w-5" />
             </div>
-            <h3 className="mt-3 text-lg font-bold text-mineral-950">
+            <h3 className="mt-3 text-base font-bold text-mineral-950">
               Nenhum consultor cadastrado na equipe
             </h3>
-            <p className="mx-auto mt-1 max-w-sm text-xs text-mineral-600">
+            <p className="mx-auto mt-1 max-w-sm text-xs text-mineral-500">
               Cadastre os membros da sua equipe para que cada um receba um Cartão VIP com QR Code
               e link rastreável exclusivo.
             </p>
             <Link
               href="/painel/equipe"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-mineral-950 bg-mineral-950 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-mineral-900"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               <span>Adicionar Primeiro Membro</span>
             </Link>
           </div>

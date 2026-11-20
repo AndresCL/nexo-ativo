@@ -8,12 +8,23 @@ export interface ContextoAdminFuncoes {
   readonly bancoDados: Firestore;
 }
 
+let bancoDadosConfigurado: Firestore | undefined;
+
 export function obterAdminFuncoes(): ContextoAdminFuncoes {
   const app = getApps()[0] ?? initializeApp();
+
+  if (!bancoDadosConfigurado) {
+    bancoDadosConfigurado = getFirestore(app);
+    try {
+      bancoDadosConfigurado.settings({ ignoreUndefinedProperties: true });
+    } catch {
+      // Ignora caso as configurações já tenham sido travadas pela instância ativa
+    }
+  }
 
   return {
     app,
     autenticacao: getAuth(app),
-    bancoDados: getFirestore(app),
+    bancoDados: bancoDadosConfigurado,
   };
 }

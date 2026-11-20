@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEstadoInterfacePainel } from "@/estados/estadoInterfacePainel";
-import { BotaoEncerrarSessao } from "@/componentes/autenticacao/BotaoEncerrarSessao";
+import { MenuRodapeUsuario } from "@/componentes/painel/MenuRodapeUsuario";
 import { LogoNexoAtivo } from "@/componentes/interface/LogoNexoAtivo";
 import { Botao } from "@/componentes/interface/Botao";
 import { TransicaoPaginaPainel } from "@/componentes/interface/TransicaoPaginaPainel";
@@ -128,9 +128,9 @@ function ListaLinksNavegacao({
             href={item.caminho}
             onClick={aoSelecionar}
             aria-current={ativo ? "page" : undefined}
-            className={`flex min-h-10 items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-indigo-500 ${ativo
-                ? "bg-indigo-50 font-semibold text-indigo-700"
-                : "text-mineral-600 hover:bg-indigo-50/50 hover:text-indigo-700"
+            className={`flex min-h-10 items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-mineral-950 ${ativo
+                ? "bg-mineral-950 font-medium text-white shadow-2xs"
+                : "text-mineral-600 hover:bg-mineral-100/80 hover:text-mineral-950"
               }`}
           >
             <div className="flex items-center gap-3">
@@ -142,7 +142,7 @@ function ListaLinksNavegacao({
               <span
                 data-testid="badge-solicitacoes-novas"
                 aria-label={`${totalSolicitacoesNovas} novas solicitações`}
-                className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[11px] font-semibold text-white shadow-xs"
+                className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[11px] font-semibold text-white shadow-xs"
               >
                 {totalSolicitacoesNovas > 99 ? "99+" : totalSolicitacoesNovas}
               </span>
@@ -220,10 +220,10 @@ export function EstruturaNavegacaoPainel({
               </div>
 
               <div className="border-t border-slate-200/60 pt-4">
-                {emailUsuario ? (
-                  <p className="mb-2 truncate px-3 text-xs text-mineral-500">{emailUsuario}</p>
-                ) : null}
-                <BotaoEncerrarSessao />
+                <MenuRodapeUsuario
+                  emailUsuario={emailUsuario}
+                  aoClicarLink={fecharMenu}
+                />
               </div>
             </DialogoPrimitivo.Content>
           </DialogoPrimitivo.Portal>
@@ -242,7 +242,7 @@ export function EstruturaNavegacaoPainel({
             {ehFundador ? (
               <Link
                 href="/fundador"
-                className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/70 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 transition-colors hover:bg-indigo-100"
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-mineral-300 bg-mineral-100/90 px-2.5 py-1 text-[11px] font-semibold text-mineral-900 transition-colors hover:bg-mineral-200"
               >
                 <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Painel Fundador</span>
@@ -254,10 +254,7 @@ export function EstruturaNavegacaoPainel({
         </div>
 
         <div className="border-t border-slate-200/60 pt-4">
-          {emailUsuario ? (
-            <p className="mb-2 truncate px-3 text-xs text-mineral-500">{emailUsuario}</p>
-          ) : null}
-          <BotaoEncerrarSessao />
+          <MenuRodapeUsuario emailUsuario={emailUsuario} />
         </div>
       </aside>
 

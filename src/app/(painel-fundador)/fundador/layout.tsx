@@ -43,14 +43,14 @@ export default async function LayoutPainelFundador({ children }: { readonly chil
             <Link
               href="/fundador"
               aria-current="page"
-              className="flex min-h-10 items-center gap-3 rounded-lg bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 transition-colors duration-200"
+              className="flex min-h-10 items-center gap-3 rounded-lg bg-mineral-950 px-3 py-2 text-sm font-medium text-white shadow-2xs transition-colors duration-200"
             >
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               <span>Painel Fundador</span>
             </Link>
             <Link
               href="/painel"
-              className="flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm text-mineral-600 transition-colors duration-200 hover:bg-indigo-50/50 hover:text-indigo-700"
+              className="flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm text-mineral-600 transition-colors duration-200 hover:bg-mineral-100/80 hover:text-mineral-950"
             >
               <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
               <span>Painel do Assinante</span>

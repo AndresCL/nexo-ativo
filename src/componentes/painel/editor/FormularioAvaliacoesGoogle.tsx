@@ -12,6 +12,7 @@ import { Botao } from "@/componentes/interface/Botao";
 import { AvisoRecursoRestrito } from "@/componentes/painel/AvisosPublicidade";
 import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { SeletorEstabelecimentoGoogle } from "./SeletorEstabelecimentoGoogle";
+import { SeletorPosicaoAvaliacoes } from "@/componentes/editorial/avaliacoes/SeletorPosicaoAvaliacoes";
 
 export function FormularioAvaliacoesGoogle({
   somenteLeitura = false,
@@ -111,6 +112,11 @@ export function FormularioAvaliacoesGoogle({
           </label>
         ))}
       </fieldset>
+      <SeletorPosicaoAvaliacoes
+        posicao={configuracao.posicao ?? "topo"}
+        desativado={somenteLeitura}
+        aoAlterar={(posicao) => atualizar({ ...configuracao, posicao })}
+      />
       <p className="text-xs text-mineral-600">
         Os comentários são selecionados por relevância pelo Google. A nota representa todas as
         avaliações do estabelecimento.

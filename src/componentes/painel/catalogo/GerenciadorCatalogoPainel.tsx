@@ -246,80 +246,22 @@ export function GerenciadorCatalogoPainel({
         titulo="Produtos"
         subtitulo="Organize seus produtos, atualize preços e estoque e publique as novidades na vitrine."
         identificadorPublico={identificadorPublico}
-
         controle={publicacao}
       />
 
-      <section aria-label="Resumo do catálogo" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[
-          {
-            rotulo: "Itens cadastrados",
-            quantidade: produtos.length,
-            icone: Package,
-            cor: "border-indigo-200 from-indigo-50/80 text-indigo-950",
-            iconeCor: "bg-indigo-600",
-          },
-          {
-            rotulo: "Disponíveis",
-            quantidade: produtos.filter((p) => p.disponibilidade === "disponivel").length,
-            icone: Check,
-            cor: "border-emerald-200 from-emerald-50/80 text-emerald-950",
-            iconeCor: "bg-emerald-600",
-          },
-          {
-            rotulo: "Sob encomenda",
-            quantidade: produtos.filter((p) => p.disponibilidade === "sob_encomenda").length,
-            icone: Package,
-            cor: "border-sky-200 from-sky-50/80 text-sky-950",
-            iconeCor: "bg-sky-600",
-          },
-          {
-            rotulo: "Itens ocultos",
-            quantidade: produtos.filter((p) => !p.ativo).length,
-            icone: EyeOff,
-            cor: "border-violet-200 from-violet-50/80 text-violet-950",
-            iconeCor: "bg-violet-600",
-          },
-        ].map((item) => (
-          <div
-            key={item.rotulo}
-            className={combinarClasses(
-              "rounded-2xl border bg-gradient-to-b via-white to-white p-4 shadow-xs sm:p-5",
-              item.cor,
-            )}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-xs font-semibold">{item.rotulo}</p>
-              <span
-                className={combinarClasses(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white",
-                  item.iconeCor,
-                )}
-              >
-                <item.icone className="h-4 w-4" aria-hidden="true" />
-              </span>
-            </div>
-            <p className="mt-3 text-3xl font-extrabold tabular-nums">{item.quantidade}</p>
-          </div>
-        ))}
-      </section>
-
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <CartaoSuperficie className="min-w-0 rounded-2xl bg-gradient-to-b from-indigo-50/30 via-white to-white p-5 shadow-xs sm:p-6">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
-              <Package className="h-4 w-4" aria-hidden="true" />
-            </span>
+        <div className="min-w-0 space-y-4">
+          <div>
             <h2 className="text-base font-semibold text-mineral-950">
               {idProdutoEdicao ? "Editar produto" : "Novo produto"}
             </h2>
+            <p className="mt-1 text-xs text-mineral-500">
+              Preencha os dados e salve. Depois, publique para atualizar sua vitrine.
+            </p>
           </div>
 
-          <p className="mt-2 text-xs leading-relaxed text-mineral-500">
-            Preencha os dados e salve. Depois, publique para atualizar sua vitrine.
-          </p>
-
-          <form onSubmit={salvarFormularioProduto} className="mt-4 space-y-4">
+          <CartaoSuperficie className="min-w-0 rounded-2xl bg-white p-5 shadow-2xs sm:p-6">
+            <form onSubmit={salvarFormularioProduto} className="space-y-4">
             <CampoFormulario
               ref={referenciaNome}
               className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
@@ -458,13 +400,14 @@ export function GerenciadorCatalogoPainel({
             </div>
           </form>
         </CartaoSuperficie>
+      </div>
 
         <section aria-labelledby="titulo-itens-catalogo" className="min-w-0 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 id="titulo-itens-catalogo" className="text-base font-semibold text-mineral-950">
                 Seu catálogo{" "}
-                <span className="ml-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+                <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-mineral-800">
                   {produtos.length}
                 </span>
               </h2>
@@ -477,7 +420,7 @@ export function GerenciadorCatalogoPainel({
                 variante="operacional_secundario"
                 tamanho="compacto"
                 disabled={salvando}
-                className="rounded-lg border-indigo-200 bg-indigo-50 text-indigo-900 hover:bg-indigo-100"
+                className="rounded-lg border-neutral-300 bg-white text-mineral-900 hover:bg-neutral-50 shadow-2xs"
                 onClick={() => {
                   limparFormularioProduto();
                   referenciaNome.current?.focus();
@@ -488,7 +431,7 @@ export function GerenciadorCatalogoPainel({
               </Botao>
             ) : null}
           </div>
-          <div className="flex flex-col gap-2 rounded-xl border border-marfim-200 bg-white p-3 sm:flex-row">
+          <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-2xs sm:flex-row">
             <div className="relative min-w-0 flex-1">
               <Search
                 className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-mineral-400"
@@ -500,7 +443,7 @@ export function GerenciadorCatalogoPainel({
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar nome ou categoria…"
-                className="min-h-10 w-full rounded-lg border border-marfim-200 bg-white py-2 pr-3 pl-9 text-xs focus:border-indigo-400 focus:outline-none"
+                className="min-h-10 w-full rounded-lg border border-neutral-200 bg-white py-2 pr-3 pl-9 text-xs focus:border-mineral-950 focus:outline-none"
               />
             </div>
             <select

@@ -83,6 +83,7 @@ export const CATALOGO_COMPOSICOES_EDITORIAIS: Readonly<
   retrato_editorial: {
     codigo: "retrato_editorial",
     nome: "Retrato Editorial",
+    oculta: true,
     resumoParaCliente:
       "Você como protagonista, preservando o enquadramento do retrato e sua especialidade.",
     segmentosRecomendados: ["Advogados", "Médicos", "Dentistas", "Consultores", "Corretores"],

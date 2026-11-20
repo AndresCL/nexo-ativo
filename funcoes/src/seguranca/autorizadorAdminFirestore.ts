@@ -101,8 +101,10 @@ export function converterErroParaHttpsError(erro: unknown): HttpsError {
     return new HttpsError("failed-precondition", erro.message, { codigo: erro.codigo });
   }
 
-  return new HttpsError(
-    "internal",
-    "Ocorreu uma falha interna ao processar sua solicitação. Tente novamente.",
-  );
+  console.error("[ERRO_CALLABLE_INTERNO]", erro);
+
+  const mensagem =
+    erro instanceof Error ? erro.message : "Ocorreu uma falha interna ao processar sua solicitação.";
+
+  return new HttpsError("failed-precondition", mensagem);
 }

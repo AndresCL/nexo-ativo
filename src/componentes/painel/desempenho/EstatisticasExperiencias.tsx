@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3 } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -12,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TooltipInformativo } from "@/componentes/interface/TooltipInformativo";
 import type {
   MetricaGranularMicrofluxo,
   MetricasDiariasOrganizacao,
@@ -178,32 +178,31 @@ export function EstatisticasExperiencias({
   return (
     <section aria-labelledby="titulo-estatisticas-experiencias" className="space-y-4">
       {/* Cabeçalho da seção */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-mineral-500">
-            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-sky-600 text-white">
-              <BarChart3 className="h-3 w-3" aria-hidden="true" />
-            </span>
-            Percursos individuais
-          </div>
           <h2
             id="titulo-estatisticas-experiencias"
-            className="mt-1 text-2xl font-bold tracking-tight text-mineral-950"
+            className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl"
           >
             Desempenho por experiência
           </h2>
-          <p className="text-xs text-mineral-600">
+          <p className="mt-1 text-xs text-mineral-500">
             Compare a evolução temporal e analise o funil de cada percurso no mesmo gráfico.
           </p>
         </div>
 
         {/* Ações rápidas de seleção */}
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-mineral-500">Filtrar gráfico:</span>
+        <div className="flex items-center gap-1.5 text-xs">
+          <span className="text-[11px] font-medium text-mineral-500 mr-1">Filtrar gráfico:</span>
           <button
             type="button"
             onClick={selecionarTodas}
-            className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-medium text-mineral-700 hover:bg-slate-50 hover:text-mineral-900"
+            aria-pressed={selecionadas.size === itens.length}
+            className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer shadow-2xs ${
+              selecionadas.size === itens.length
+                ? "border-mineral-950 bg-mineral-950 text-white"
+                : "border-slate-200 bg-white text-mineral-700 hover:border-slate-300 hover:text-mineral-950"
+            }`}
           >
             Todas ({itens.length})
           </button>
@@ -211,7 +210,12 @@ export function EstatisticasExperiencias({
             <button
               type="button"
               onClick={selecionarTop3}
-              className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-medium text-mineral-700 hover:bg-slate-50 hover:text-mineral-900"
+              aria-pressed={selecionadas.size === 3}
+              className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer shadow-2xs ${
+                selecionadas.size === 3
+                  ? "border-mineral-950 bg-mineral-950 text-white"
+                  : "border-slate-200 bg-white text-mineral-700 hover:border-slate-300 hover:text-mineral-950"
+              }`}
             >
               Top 3
             </button>
@@ -219,28 +223,40 @@ export function EstatisticasExperiencias({
         </div>
       </div>
 
-      <div className="space-y-5 rounded-2xl border border-sky-100 bg-gradient-to-b from-sky-50/50 to-white p-4 shadow-xs sm:p-6">
+      <div className="space-y-5 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs sm:p-6">
         {/* Cards de Resumo Consolidado para a seleção atual */}
-        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            ["Aberturas", resumoAtivo.aberturas, "border-sky-100 text-sky-800"],
-            ["Conclusões", resumoAtivo.conclusoes, "border-emerald-100 text-emerald-800"],
-            ["Taxa de conclusão", resumoAtivo.taxa, "border-slate-200 text-slate-800"],
-            ["Via permalink", resumoAtivo.permalink, "border-indigo-100 text-indigo-800"],
-          ].map(([rotulo, valor, classes]) => (
-            <div key={rotulo} className={`rounded-xl border bg-white p-4 ${classes}`}>
-              <dt className="text-xs font-medium">{rotulo}</dt>
-              <dd className="mt-2 text-2xl font-bold tabular-nums">{valor}</dd>
+            ["Aberturas", resumoAtivo.aberturas.toLocaleString("pt-BR"), null],
+            ["Conclusões", resumoAtivo.conclusoes.toLocaleString("pt-BR"), null],
+            ["Taxa de conclusão", resumoAtivo.taxa, null],
+            [
+              "Via permalink",
+              resumoAtivo.permalink.toLocaleString("pt-BR"),
+              "Acessos diretos por link exclusivo da experiência (fazem parte do total de aberturas).",
+            ],
+          ].map(([rotulo, valor, tooltip]) => (
+            <div
+              key={rotulo as string}
+              className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4 transition-colors hover:bg-slate-50/80"
+            >
+              <div className="flex items-center gap-1.5 text-xs font-medium text-mineral-500">
+                <dt>{rotulo as string}</dt>
+                {tooltip ? (
+                  <TooltipInformativo texto={tooltip as string} tamanhoIcone={12} alinhamento="centro" />
+                ) : null}
+              </div>
+              <dd className="mt-1.5 text-2xl font-bold tabular-nums text-mineral-950">{valor}</dd>
             </div>
           ))}
         </dl>
 
         {/* Controles de métrica do gráfico */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-          <div className="text-xs font-semibold text-mineral-700">
+          <div className="text-xs font-semibold text-mineral-800">
             Comparação temporal: {rotulosMetrica[metricaSelecionada]}
           </div>
-          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100/70 p-0.5 text-xs">
+          <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100/80 p-0.5 text-xs">
             {(
               [
                 ["aberturas", "Aberturas"],
@@ -254,10 +270,11 @@ export function EstatisticasExperiencias({
                 type="button"
                 onClick={() => setMetricaSelecionada(tipo)}
                 aria-pressed={metricaSelecionada === tipo}
-                className={`rounded-md px-3 py-1 font-medium transition-all ${metricaSelecionada === tipo
-                    ? "bg-white text-mineral-950 shadow-xs"
-                    : "text-mineral-600 hover:text-mineral-900"
-                  }`}
+                className={`rounded-md px-3 py-1 font-medium transition-all cursor-pointer ${
+                  metricaSelecionada === tipo
+                    ? "bg-mineral-950 text-white shadow-2xs"
+                    : "text-mineral-600 hover:text-mineral-950"
+                }`}
               >
                 {rotulo}
               </button>
@@ -295,13 +312,6 @@ export function EstatisticasExperiencias({
                     return [valorFormatado, nomeFormatado];
                   }}
                 />
-                <Legend
-                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
-                  formatter={(value) => {
-                    const item = itens.find((i) => i.id === value);
-                    return item?.titulo ?? value;
-                  }}
-                />
                 {itens
                   .filter((item) => selecionadas.has(item.id))
                   .map((item) => (
@@ -325,43 +335,73 @@ export function EstatisticasExperiencias({
           )}
         </div>
 
-        <p className="text-xs text-mineral-500">
-          As aberturas via permalink fazem parte do total de aberturas. Essa identificação começa com
-          os novos acessos; o histórico anterior não é reclassificado.
-        </p>
+        {/* Legenda Flat Interativa (Chips com Cor da Linha) */}
+        {itens.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            <span className="text-[11px] font-medium text-mineral-400 mr-1">No gráfico:</span>
+            {itens.map((item) => {
+              const ativa = selecionadas.has(item.id);
+              const cor = mapaCores.get(item.id);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => alternarExperiencia(item.id)}
+                  aria-pressed={ativa}
+                  className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all cursor-pointer ${
+                    ativa
+                      ? "border-slate-300 bg-slate-50 text-mineral-950 shadow-2xs"
+                      : "border-slate-200/60 bg-white text-mineral-400 hover:text-mineral-700 opacity-60"
+                  }`}
+                >
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ backgroundColor: ativa ? cor?.borda : "#94a3b8" }}
+                    aria-hidden="true"
+                  />
+                  <span>{item.titulo}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Tabela com integração visual e controle de seleção */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-mineral-700">
+          <div className="flex items-center justify-between text-xs font-semibold text-mineral-900">
             <span>Tabela detalhada de experiências</span>
             <span className="text-[11px] font-normal text-mineral-500">
               Clique em uma linha para adicionar/remover do gráfico
             </span>
           </div>
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white">
             <table className="w-full text-left text-xs">
               <caption className="sr-only">
                 Comparação das experiências no período selecionado
               </caption>
-              <thead className="border-b border-sky-100 bg-sky-50/70 text-mineral-700">
+              <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-medium text-mineral-500">
                 <tr>
-                  <th scope="col" className="w-10 px-3 py-3 text-center">
+                  <th scope="col" className="w-12 px-3 py-2.5 text-center">
                     No gráfico
                   </th>
-                  {[
-                    "Experiência",
-                    "Aberturas",
-                    "Conclusões",
-                    "Via permalink",
-                    "Taxa de conclusão",
-                  ].map((rotulo) => (
-                    <th key={rotulo} scope="col" className="px-4 py-3">
-                      {rotulo}
-                    </th>
-                  ))}
+                  <th scope="col" className="px-4 py-2.5">
+                    Experiência
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Aberturas
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Conclusões
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Via permalink
+                  </th>
+                  <th scope="col" className="px-4 py-2.5 text-right">
+                    Taxa de conclusão
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-50">
                 {itens.map((item) => {
                   const ativa = selecionadas.has(item.id);
                   const cor = mapaCores.get(item.id);
@@ -369,37 +409,51 @@ export function EstatisticasExperiencias({
                     <tr
                       key={item.id}
                       onClick={() => alternarExperiencia(item.id)}
-                      className={`cursor-pointer transition-colors ${ativa ? "bg-sky-50/50 hover:bg-sky-50/80" : "hover:bg-slate-50 opacity-70"
-                        }`}
+                      className={`cursor-pointer transition-colors ${
+                        ativa ? "bg-slate-50/70 hover:bg-slate-100/60" : "hover:bg-slate-50/50 opacity-60"
+                      }`}
                     >
-                      <td className="px-3 py-3 text-center">
+                      <td className="px-3 py-2.5 text-center">
                         <span
-                          className={`inline-block h-3.5 w-3.5 rounded border ${ativa ? "border-transparent" : "border-slate-300 bg-white"
-                            }`}
+                          className={`inline-block h-3.5 w-3.5 rounded border transition-colors ${
+                            ativa ? "border-transparent" : "border-slate-300 bg-white"
+                          }`}
                           style={{ backgroundColor: ativa ? cor?.borda : undefined }}
                           aria-label={ativa ? "Ativa no gráfico" : "Desativada no gráfico"}
                         />
                       </td>
-                      <th scope="row" className="px-4 py-3 font-medium">
-                        <div className="flex items-center gap-2">
+                      <th scope="row" className="px-4 py-2.5 font-medium">
+                        <div className="flex items-center gap-2.5">
                           <span
-                            className="h-2 w-2 rounded-full"
+                            className="h-3.5 w-1 shrink-0 rounded-full"
                             style={{ backgroundColor: cor?.borda }}
                             aria-hidden="true"
                           />
-                          <span className={ativa ? "text-mineral-950 font-semibold" : "text-mineral-700"}>
+                          <span
+                            className={
+                              ativa
+                                ? "text-mineral-950 font-semibold"
+                                : "text-mineral-600 font-normal"
+                            }
+                          >
                             {item.titulo}
                           </span>
                         </div>
                       </th>
-                      <td className="px-4 py-3 tabular-nums text-sky-800">{item.aberturas}</td>
-                      <td className="px-4 py-3 tabular-nums text-emerald-800">{item.conclusoes}</td>
-                      <td className="px-4 py-3 tabular-nums text-indigo-800">
-                        {item.aberturasPermalink ?? 0}
+                      <td className="px-4 py-2.5 text-right font-bold tabular-nums text-mineral-950">
+                        {item.aberturas.toLocaleString("pt-BR")}
                       </td>
-                      <td className="px-4 py-3 tabular-nums font-medium">
+                      <td className="px-4 py-2.5 text-right font-medium tabular-nums text-mineral-700">
+                        {item.conclusoes.toLocaleString("pt-BR")}
+                      </td>
+                      <td className="px-4 py-2.5 text-right font-medium tabular-nums text-mineral-700">
+                        {(item.aberturasPermalink ?? 0).toLocaleString("pt-BR")}
+                      </td>
+                      <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-mineral-800">
                         {item.aberturas > 0
-                          ? `${((item.conclusoes / item.aberturas) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`
+                          ? `${((item.conclusoes / item.aberturas) * 100).toLocaleString("pt-BR", {
+                              maximumFractionDigits: 1,
+                            })}%`
                           : "—"}
                       </td>
                     </tr>

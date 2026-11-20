@@ -1,0 +1,40 @@
+"use client";
+
+import type { RascunhoConfiguracaoPagina } from "@/dominio/entidades/rascunhoConfiguracaoPagina";
+import { SeletorEspacamentoVitrine } from "./SeletorEspacamentoVitrine";
+import { SeletorPaletaCromatica } from "./SeletorPaletaCromatica";
+import { IndicadorTipografiaEditorial } from "./IndicadorTipografiaEditorial";
+
+export interface PropriedadesSecaoEstiloECores {
+  readonly rascunho: RascunhoConfiguracaoPagina;
+  readonly alterarEstiloVisual: (atualizacao: Partial<RascunhoConfiguracaoPagina>) => void;
+  readonly somenteLeitura?: boolean;
+}
+
+export function SecaoEstiloECores({
+  rascunho,
+  alterarEstiloVisual,
+  somenteLeitura = false,
+}: PropriedadesSecaoEstiloECores) {
+  return (
+    <div
+      id="painel-aba-estilo"
+      role="tabpanel"
+      aria-labelledby="aba-estilo"
+      className="space-y-6"
+    >
+      <SeletorEspacamentoVitrine
+        valorAtual={rascunho.espacamentoAcoes}
+        aoAlterar={(espacamentoAcoes) => alterarEstiloVisual({ espacamentoAcoes })}
+        somenteLeitura={somenteLeitura}
+      />
+
+      <SeletorPaletaCromatica
+        rascunho={rascunho}
+        alterarEstiloVisual={alterarEstiloVisual}
+        somenteLeitura={somenteLeitura}
+      />
+    </div>
+  );
+}
+

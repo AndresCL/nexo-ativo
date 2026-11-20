@@ -10,6 +10,7 @@ import { EstruturaNavegacaoPainel } from "@/componentes/painel/EstruturaNavegaca
 import { ProvedorPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { carregarPerfilPublicidadeOrganizacaoServidor } from "@/infraestrutura/painel/leitorPerfilPublicidadeServidor";
 import { contarSolicitacoesNovasOrganizacaoServidor } from "@/infraestrutura/painel/leitorSolicitacoesOrganizacaoServidor";
+import { ChatCrisp } from "@/componentes/interface/ChatCrisp";
 
 export async function generateMetadata(): Promise<Metadata> {
   const sessao = await exigirSessaoAutenticadaServidor();
@@ -49,6 +50,10 @@ export default async function LayoutPainelCliente({ children }: { readonly child
         >
           {children}
         </EstruturaNavegacaoPainel>
+        <ChatCrisp
+          emailUsuario={sessao.email}
+          nomeUsuario={organizacaoPrincipal?.nomeOrganizacao ?? sessao.nomeExibicao ?? null}
+        />
       </ProvedorPoliticaPublicidade>
     </ProvedorEstadoInterfacePainel>
   );

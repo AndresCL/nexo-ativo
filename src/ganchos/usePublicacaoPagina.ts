@@ -112,6 +112,7 @@ export function usePublicacaoPagina(opcoes: OpcoesPublicacaoPagina) {
     ocupado,
     podeSalvar,
     podePublicar,
+    permitePublicacao: opcoes.podePublicarPagina,
     salvarRascunho,
     publicarPagina,
     salvando: operacao === "salvando",

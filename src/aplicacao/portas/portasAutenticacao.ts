@@ -29,4 +29,7 @@ export interface PortaProvisionamentoOrganizacaoCliente {
   criarOrganizacaoInicial(
     dados: DadosCriarOrganizacaoInicial,
   ): Promise<ResultadoCriacaoOrganizacao>;
+  verificarDisponibilidadeIdentificador?(
+    identificadorPublico: string,
+  ): Promise<boolean>;
 }

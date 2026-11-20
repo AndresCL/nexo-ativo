@@ -7,6 +7,8 @@ import { AvisosPublicidade } from "@/componentes/painel/AvisosPublicidade";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { Palette } from "lucide-react";
 import type { ServicoEditorAparenciaPorta } from "@/aplicacao/portas/portasEditorAparencia";
 import type { ItemAcaoHome } from "@/dominio/entidades/paginaPublicada";
@@ -51,6 +53,21 @@ export function EditorGuiadoAparencia({
   const versaoPublicadaAtual = useEstadoEditorAparencia((e) => e.versaoPublicadaAtual);
   const marcarRascunhoSalvo = useEstadoEditorAparencia((e) => e.marcarRascunhoSalvo);
   const registrarNovaPublicacao = useEstadoEditorAparencia((e) => e.registrarNovaPublicacao);
+  const definirAbaAtiva = useEstadoEditorAparencia((e) => e.definirAbaAtiva);
+
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const abaParam = searchParams?.get?.("aba");
+    if (
+      abaParam === "identidade" ||
+      abaParam === "acoes" ||
+      abaParam === "midia" ||
+      abaParam === "estilo" ||
+      abaParam === "galeria_seo"
+    ) {
+      definirAbaAtiva(abaParam);
+    }
+  }, [searchParams, definirAbaAtiva]);
 
   const paginaPrevia = converterRascunhoParaConteudoPublicado(rascunho, {
     identificadorPublico,
@@ -92,13 +109,9 @@ export function EditorGuiadoAparencia({
 
   return (
     <div className="space-y-6">
-      <header className="border-b border-marfim-200/80 pb-6">
+      <header className="border-b border-marfim-200/80 pb-3 sm:pb-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="mb-2 flex items-center gap-2 text-[10px] font-semibold tracking-[0.16em] text-indigo-600 uppercase">
-              <Palette className="h-3.5 w-3.5" aria-hidden="true" />
-              Sua vitrine · {nomeOrganizacao}
-            </p>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
                 Aparência e publicação
@@ -136,7 +149,7 @@ export function EditorGuiadoAparencia({
       {pendenciasPublicacao.length > 0 ? (
         <CartaoSuperficie
           preenchimento="compacto"
-          className="rounded-2xl border-sky-200 bg-gradient-to-b from-sky-50/80 to-white shadow-xs"
+          className="rounded-2xl bg-white shadow-xs"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
@@ -159,14 +172,16 @@ export function EditorGuiadoAparencia({
         </CartaoSuperficie>
       ) : null}
 
-      <NavegacaoAparencia />
-
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)]">
-        <SecoesFormularioAparencia
-          servicoUpload={servicoEditor}
-          somenteLeitura={!podeEditarAparencia || controle.ocupado}
-          microfluxos={microfluxos}
-        />
+        <div className="min-w-0 space-y-5">
+          <NavegacaoAparencia />
+
+          <SecoesFormularioAparencia
+            servicoUpload={servicoEditor}
+            somenteLeitura={!podeEditarAparencia || controle.ocupado}
+            microfluxos={microfluxos}
+          />
+        </div>
 
         <div className="min-w-0 space-y-3 xl:sticky xl:top-6">
           <AlternadorPreviaDispositivo

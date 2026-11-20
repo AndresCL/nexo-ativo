@@ -1,4 +1,5 @@
 import type { ResumoDireitosPlano } from "./autenticacaoEOrganizacao";
+import { CATALOGO_PLANOS_FLUXO } from "../assinaturas/tiposAssinaturaAsaas";
 import type { CoordenadasPontoFocal } from "./paginaPublicada";
 import { ErroValidacaoDominio } from "../erros/errosDominio";
 import type { DefinicaoMicrofluxo } from "../microfluxos/tiposMicrofluxo";
@@ -166,6 +167,17 @@ export function ordenarItensAtivosCatalogo<
     .sort((a, b) => a.ordemExibicao - b.ordemExibicao || a.id.localeCompare(b.id));
 }
 
+export function obterLimiteProfissionaisPermitido(
+  resumoDireitosPlano: ResumoDireitosPlano,
+): number {
+  const padraoPlano =
+    CATALOGO_PLANOS_FLUXO[resumoDireitosPlano.planoCodigo]?.limiteProfissionaisAtivos;
+  if (typeof padraoPlano === "number" && padraoPlano > 0) {
+    return Math.max(padraoPlano, resumoDireitosPlano.limiteProfissionaisAtivos ?? 0);
+  }
+  return Math.max(resumoDireitosPlano.limiteProfissionaisAtivos ?? 1, 1);
+}
+
 /**
  * Garante o cumprimento da cota de profissionais ativos permitida pelo plano da organização
  * (Plano Pro: até 10 profissionais; Empresarial: sob medida).
@@ -180,12 +192,12 @@ export function validarLimiteProfissionaisPlano(parametros: {
     return;
   }
 
+  const limite = obterLimiteProfissionaisPermitido(parametros.resumoDireitosPlano);
   const ativosOutros = parametros.profissionaisExistentes.filter(
     (item) => item.ativo && item.id !== parametros.idProfissionalEmEdicao,
   ).length;
 
-  if (ativosOutros + 1 > parametros.resumoDireitosPlano.limiteProfissionaisAtivos) {
-    const limite = parametros.resumoDireitosPlano.limiteProfissionaisAtivos;
+  if (ativosOutros + 1 > limite) {
     throw new ErroValidacaoDominio(
       limite <= 1
         ? "Seu plano atual contempla 1 perfil profissional ativo. Para cadastrar equipe com múltiplos cartões digitais, contrate o Plano Pro."

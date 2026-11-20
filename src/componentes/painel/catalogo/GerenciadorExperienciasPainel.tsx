@@ -13,7 +13,6 @@ import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 import * as Dialogo from "@radix-ui/react-dialog";
 import { useRef, useState } from "react";
 import {
-  Check,
   ChevronLeft,
   ChevronRight,
   Compass,
@@ -28,7 +27,6 @@ import {
   Plus,
   Search,
   Star,
-  Workflow,
   X,
   Trash2,
 } from "lucide-react";
@@ -352,11 +350,8 @@ export function GerenciadorExperienciasPainel({
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-6">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-3 sm:pb-4">
         <div className="space-y-1">
-          <p className="mb-2 text-[10px] font-semibold tracking-[0.16em] text-indigo-600 uppercase">
-            Sua vitrine · Experiências
-          </p>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
               Experiências Interativas
@@ -379,70 +374,33 @@ export function GerenciadorExperienciasPainel({
         />
       </header>
 
-      <section
-        aria-label="Resumo das experiências"
-        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
-      >
-        {[
-          {
-            rotulo: "Experiências",
-            quantidade: microfluxos.length,
-            icone: Compass,
-            cor: "border-indigo-200 from-indigo-50/80 text-indigo-950",
-            iconeCor: "bg-indigo-600",
-          },
-          {
-            rotulo: "Visíveis",
-            quantidade: microfluxos.filter((f) => f.ativo).length,
-            icone: Check,
-            cor: "border-emerald-200 from-emerald-50/80 text-emerald-950",
-            iconeCor: "bg-emerald-600",
-          },
-          {
-            rotulo: "Percursos guiados",
-            quantidade: microfluxos.filter((f) => !f.tipoAcao || f.tipoAcao === "microfluxo")
-              .length,
-            icone: Workflow,
-            cor: "border-sky-200 from-sky-50/80 text-sky-950",
-            iconeCor: "bg-sky-600",
-          },
-          {
-            rotulo: "Ocultas",
-            quantidade: microfluxos.filter((f) => !f.ativo).length,
-            icone: EyeOff,
-            cor: "border-violet-200 from-violet-50/80 text-violet-950",
-            iconeCor: "bg-violet-600",
-          },
-        ].map((item) => (
-          <div
-            key={item.rotulo}
-            className={combinarClasses(
-              "rounded-2xl border bg-gradient-to-b via-white to-white p-4 shadow-xs sm:p-5",
-              item.cor,
-            )}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-xs font-semibold">{item.rotulo}</p>
-              <span
-                className={combinarClasses(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white",
-                  item.iconeCor,
-                )}
-              >
-                <item.icone className="h-4 w-4" aria-hidden="true" />
-              </span>
-            </div>
-            <p className="mt-3 text-3xl font-extrabold tabular-nums">{item.quantidade}</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-mineral-400"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              aria-label="Buscar experiências"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar título ou descrição…"
+              className="min-h-10 w-full rounded-lg border border-marfim-200 bg-white py-2 pr-3 pl-9 text-xs focus:border-indigo-400 focus:outline-none"
+            />
           </div>
-        ))}
-      </section>
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-mineral-950">Suas experiências</h2>
-          <p className="mt-1 text-xs text-mineral-500">
-            Selecione para editar. Use as setas para definir a ordem na vitrine.
-          </p>
+          <select
+            aria-label="Filtrar experiências por exibição"
+            value={filtroVisibilidade}
+            onChange={(e) => setFiltroVisibilidade(e.target.value as typeof filtroVisibilidade)}
+            className="min-h-10 min-w-0 rounded-lg border border-marfim-200 bg-white px-3 py-2 text-xs text-mineral-700 focus:border-indigo-400 focus:outline-none"
+          >
+            <option value="todas">Todas as experiências</option>
+            <option value="visiveis">Visíveis</option>
+            <option value="ocultas">Ocultas</option>
+            <option value="destaque">Em destaque</option>
+          </select>
         </div>
 
         <Botao
@@ -452,39 +410,11 @@ export function GerenciadorExperienciasPainel({
           ref={botaoNovaExperiencia}
           onClick={criarNovoFluxo}
           disabled={!podeAlterar}
-          className="inline-flex items-center gap-1.5 rounded-lg border-indigo-200 bg-indigo-50 text-indigo-900 hover:bg-indigo-100"
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg border-indigo-200 bg-indigo-50 text-indigo-900 hover:bg-indigo-100"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
           <span>Nova experiência</span>
         </Botao>
-      </div>
-
-      <div className="flex flex-col gap-2 rounded-xl border border-marfim-200 bg-white p-3 sm:flex-row">
-        <div className="relative min-w-0 flex-1">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-mineral-400"
-            aria-hidden="true"
-          />
-          <input
-            type="search"
-            aria-label="Buscar experiências"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar título ou descrição…"
-            className="min-h-10 w-full rounded-lg border border-marfim-200 bg-white py-2 pr-3 pl-9 text-xs focus:border-indigo-400 focus:outline-none"
-          />
-        </div>
-        <select
-          aria-label="Filtrar experiências por exibição"
-          value={filtroVisibilidade}
-          onChange={(e) => setFiltroVisibilidade(e.target.value as typeof filtroVisibilidade)}
-          className="min-h-10 min-w-0 rounded-lg border border-marfim-200 bg-white px-3 py-2 text-xs text-mineral-700 focus:border-indigo-400 focus:outline-none"
-        >
-          <option value="todas">Todas as experiências</option>
-          <option value="visiveis">Visíveis</option>
-          <option value="ocultas">Ocultas</option>
-          <option value="destaque">Em destaque</option>
-        </select>
       </div>
       {microfluxos.length > 0 && experienciasFiltradas.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-marfim-200 bg-white p-6 text-center">

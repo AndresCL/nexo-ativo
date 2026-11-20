@@ -11,7 +11,9 @@ import {
   updateProfile,
   type User as UsuarioFirebase,
 } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
+import { ehIdentificadorPublicoValido } from "@/dominio/objetos-valor/identificadorPublico";
 import type {
   PapelPlataforma,
   UsuarioAutenticado,
@@ -178,6 +180,24 @@ export class ServicoAutenticacaoFirebaseCliente
       return resposta.data;
     } catch (erro) {
       throw traduzirErroAutenticacaoFirebase(erro);
+    }
+  }
+
+  public async verificarDisponibilidadeIdentificador(
+    identificadorPublico: string,
+  ): Promise<boolean> {
+    const slugNormalizado = identificadorPublico.trim().toLowerCase();
+    if (!ehIdentificadorPublicoValido(slugNormalizado)) {
+      return false;
+    }
+
+    try {
+      const { bancoDados } = obterServicosClienteFirebase();
+      const refIdentificador = doc(bancoDados, "identificadoresPublicos", slugNormalizado);
+      const instantaneo = await getDoc(refIdentificador);
+      return !instantaneo.exists();
+    } catch {
+      return true;
     }
   }
 }

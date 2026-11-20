@@ -9,11 +9,21 @@ export interface ResultadoCriacaoAssinaturaCliente {
   readonly situacao: string;
 }
 
+export interface ResultadoContratacaoImplantacaoCliente {
+  readonly organizacaoId: string;
+  readonly cobrancaAsaasId: string;
+  readonly urlCheckout: string;
+}
+
 export interface PortaAssinaturasPainelCliente {
   criarAssinatura(
     dados: DadosSolicitacaoCriarAssinatura,
   ): Promise<ResultadoCriacaoAssinaturaCliente>;
   cancelarAssinatura(organizacaoId: string): Promise<void>;
+  restabelecerAssinatura(organizacaoId: string): Promise<void>;
+  contratarImplantacaoAssistida(
+    organizacaoId: string,
+  ): Promise<ResultadoContratacaoImplantacaoCliente>;
 }
 
 export class ServicoAssinaturasPainelCliente implements PortaAssinaturasPainelCliente {
@@ -37,6 +47,27 @@ export class ServicoAssinaturasPainelCliente implements PortaAssinaturasPainelCl
       "cancelarAssinaturaAsaas",
     );
     await chamada({ organizacaoId });
+  }
+
+  public async restabelecerAssinatura(organizacaoId: string): Promise<void> {
+    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const chamada = httpsCallable<{ readonly organizacaoId: string }, unknown>(
+      funcoesRemotas,
+      "restabelecerAssinaturaAsaas",
+    );
+    await chamada({ organizacaoId });
+  }
+
+  public async contratarImplantacaoAssistida(
+    organizacaoId: string,
+  ): Promise<ResultadoContratacaoImplantacaoCliente> {
+    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const chamada = httpsCallable<
+      { readonly organizacaoId: string },
+      ResultadoContratacaoImplantacaoCliente
+    >(funcoesRemotas, "contratarImplantacaoAssistidaAsaas");
+    const resposta = await chamada({ organizacaoId });
+    return resposta.data;
   }
 }
 

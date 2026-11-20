@@ -30,6 +30,7 @@ export default async function PaginaAssinaturaPainel() {
       assinaturaAtual={contexto.assinatura}
       cobrancas={contexto.cobrancas}
       podeGerenciarAssinatura={contexto.podeGerenciarAssinatura}
+      emailUsuario={sessao.email}
     />
   );
 }

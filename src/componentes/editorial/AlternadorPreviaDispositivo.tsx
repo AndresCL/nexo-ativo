@@ -7,7 +7,6 @@ import {
 } from "@/dominio/entidades/composicaoEditorial";
 import type { ConteudoPaginaPublicada, ItemAcaoHome } from "@/dominio/entidades/paginaPublicada";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
-import { MolduraSmartphone } from "./MolduraSmartphone";
 import { RenderizadorComposicaoEditorial } from "./RenderizadorComposicaoEditorial";
 import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 
@@ -83,23 +82,22 @@ export function AlternadorPreviaDispositivo({
         </div>
       ) : null}
 
-      <MolduraSmartphone
-        dataTestId="quadro-previa-dispositivo"
-        dataDispositivo="mobile"
-        classNameFundo={combinarClasses(
-          "rounded-2xl border",
-          clara ? "border-marfim-200 shadow-xs" : "border-marfim-100/12",
-        )}
-      >
-        <RenderizadorComposicaoEditorial
-          previaEquipe={previaEquipe}
-          pagina={paginaPrevia}
-          modoMobileForcado
-          aoAcionarItem={aoAcionarItem}
-          alturaContidaPrevia
-          complementoChamada={complementoChamada}
-        />
-      </MolduraSmartphone>
+      <div className="flex justify-center">
+        <div
+          data-testid="quadro-previa-dispositivo"
+          data-dispositivo="mobile"
+          className="w-full max-w-[390px] max-h-[min(840px,calc(100dvh-4rem))] overflow-x-hidden overflow-y-auto overscroll-contain rounded-[2rem] border-4 border-mineral-800 shadow-2xl scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none]"
+        >
+          <RenderizadorComposicaoEditorial
+            previaEquipe={previaEquipe}
+            pagina={paginaPrevia}
+            modoMobileForcado
+            aoAcionarItem={aoAcionarItem}
+            alturaContidaPrevia
+            complementoChamada={complementoChamada}
+          />
+        </div>
+      </div>
     </div>
   );
 }

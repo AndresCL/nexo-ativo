@@ -147,10 +147,12 @@ export function CamadaMidiaImersiva({
         >
           <source src={midiaResolvida.urlVideo} type="video/mp4" />
         </video>
-      ) : (
+      ) : midiaResolvida.urlImagemEstatica &&
+        midiaResolvida.urlImagemEstatica.trim() &&
+        !midiaResolvida.urlImagemEstatica.includes("imersivo-arquitetura-luz") ? (
         <Image
           src={midiaResolvida.urlImagemEstatica}
-          alt={midiaResolvida.textoAlternativo}
+          alt={midiaResolvida.textoAlternativo || "Fotografia de apresentação editorial"}
           fill
           priority
           sizes="100vw"
@@ -162,7 +164,7 @@ export function CamadaMidiaImersiva({
           )}
           style={{ objectPosition: midiaResolvida.posicaoObjetoCss }}
         />
-      )}
+      ) : null}
 
       <div aria-hidden="true" className={combinarClasses("absolute inset-0", classeVelo)} />
       {classeVeloRetratoSuperior ? (

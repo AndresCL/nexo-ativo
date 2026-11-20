@@ -15,10 +15,7 @@ export interface DefinicaoColunaKanban {
   readonly titulo: string;
   readonly descricao: string;
   readonly icone: LucideIcon;
-  readonly superficie: string;
-  readonly texto: string;
-  readonly distintivo: string;
-  readonly iconeCor: string;
+  readonly corBarra: string;
   readonly destaque: string;
 }
 
@@ -97,40 +94,25 @@ export function ColunaKanbanSolicitacoes({
       }}
       onDrop={(e) => aoSoltarItem(e, coluna.situacao)}
       className={combinarClasses(
-        "min-w-0 rounded-2xl border bg-gradient-to-b via-white to-white p-4 shadow-xs transition-shadow",
-        coluna.superficie,
+        "min-w-0 rounded-2xl border border-marfim-200/80 bg-marfim-50/50 p-3.5 shadow-2xs transition-shadow",
         etapaVisivelMobile !== coluna.situacao && "hidden md:block",
         ehAlvoArrasto && `ring-2 ${coluna.destaque}`,
       )}
     >
-      <header className="mb-4">
+      <header className="mb-3">
         <div className="flex items-center justify-between gap-2">
-          <div
-            className={combinarClasses(
-              "flex items-center gap-2 text-sm font-bold",
-              coluna.texto,
-            )}
-          >
+          <div className="flex items-center gap-2">
             <span
-              className={combinarClasses(
-                "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white shadow-2xs",
-                coluna.iconeCor,
-              )}
-            >
-              <Icone className="h-4 w-4" aria-hidden="true" />
-            </span>
-            <h2>{coluna.titulo}</h2>
+              className={combinarClasses("h-4 w-1 shrink-0 rounded-full", coluna.corBarra)}
+              aria-hidden="true"
+            />
+            <h2 className="text-xs font-bold text-mineral-950">{coluna.titulo}</h2>
           </div>
-          <span
-            className={combinarClasses(
-              "rounded-full px-2 py-0.5 text-xs font-bold tabular-nums",
-              coluna.distintivo,
-            )}
-          >
+          <span className="rounded-full bg-mineral-100 px-2 py-0.5 text-[11px] font-bold text-mineral-700 tabular-nums">
             {itens.length}
           </span>
         </div>
-        <p className="mt-2 text-[11px] text-mineral-500">{coluna.descricao}</p>
+        <p className="mt-1 pl-3 text-[11px] text-mineral-500">{coluna.descricao}</p>
       </header>
 
       <ul className="min-h-44 space-y-3">

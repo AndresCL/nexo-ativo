@@ -6,7 +6,6 @@ import type {
   MetricasDiariasOrganizacao,
   ResumoMetricasPeriodo,
 } from "@/dominio/analytics/tiposMetricasAgregadas";
-import { CORES_METRICAS_DESEMPENHO } from "../coresMetricasDesempenho";
 import { CardIndicadorCRO, type ItemSparkline } from "./CardIndicadorCRO";
 
 export interface PropriedadesGradeIndicadoresCRO {
@@ -80,15 +79,14 @@ export function GradeIndicadoresCRO({
       {/* Card 1: Audiência (Exposições / Visitas) */}
       <CardIndicadorCRO
         titulo="Audiência & Exposições"
-        valorPrincipal={resumoMetricas.totalVisualizacoes}
-        rotuloFormula={`${resumoMetricas.totalVisualizacoes} acessos na vitrine e cartões`}
+        valorPrincipal={resumoMetricas.totalVisualizacoes.toLocaleString("pt-BR")}
+        rotuloFormula={`${resumoMetricas.totalVisualizacoes.toLocaleString("pt-BR")} acessos na vitrine e cartões`}
         explicacao="Volume de pessoas e exposições recebidas na vitrine pública e nos cartões VIP dos consultores."
         badgeContexto={badgeTempo}
         icone={<Eye className="h-4 w-4" aria-hidden="true" />}
-        corLinha={CORES_METRICAS_DESEMPENHO.visualizacoes.principal}
+        corLinha="#4F46E5"
         gradienteId={idGradienteVisualizacoes}
         dadosSparkline={dadosVisualizacoesSparkline}
-        varianteCor="indigo"
         alinhamentoTooltip="esquerda"
       />
 
@@ -100,10 +98,9 @@ export function GradeIndicadoresCRO({
         explicacao="Click-Through Rate: Porcentagem de exposições que geraram ação (WhatsApp, abertura de fluxo ou botões da vitrine)."
         badgeContexto="Interesse"
         icone={<MousePointerClick className="h-4 w-4" aria-hidden="true" />}
-        corLinha={CORES_METRICAS_DESEMPENHO.aberturas.principal}
+        corLinha="#0284C7"
         gradienteId={idGradienteCTR}
         dadosSparkline={dadosAcoesSparkline}
-        varianteCor="sky"
         alinhamentoTooltip="centro"
       />
 
@@ -115,10 +112,9 @@ export function GradeIndicadoresCRO({
         explicacao="Conversion Rate a Contato: Porcentagem de visitantes que concluíram a jornada de contato ou formulário comercial."
         badgeContexto="Oportunidade"
         icone={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
-        corLinha={CORES_METRICAS_DESEMPENHO.conclusoes.principal}
+        corLinha="#8B5CF6"
         gradienteId={idGradienteCVR}
         dadosSparkline={dadosConclusoesSparkline}
-        varianteCor="emerald"
         alinhamentoTooltip="centro"
       />
 
@@ -134,10 +130,9 @@ export function GradeIndicadoresCRO({
         explicacao="Conversão a Venda: Porcentagem de contatos e solicitações que terminaram em negócio fechado no CRM."
         badgeContexto={`${cro?.entradas.vendasConcluidas ?? 0} ${cro?.entradas.vendasConcluidas === 1 ? "venda" : "vendas"}`}
         icone={<CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
-        corLinha={CORES_METRICAS_DESEMPENHO.whatsapp.principal}
+        corLinha="#10B981"
         gradienteId={idGradienteFechamento}
         dadosSparkline={dadosConclusoesSparkline}
-        varianteCor="violet"
         alinhamentoTooltip="direita"
       />
     </section>

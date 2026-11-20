@@ -21,7 +21,7 @@ export function CartaoSuperficie({
   return (
     <div
       className={combinarClasses(
-        "rounded-xl border border-marfim-200 bg-white shadow-2xs",
+        "rounded-2xl bg-white shadow-2xs",
         CLASSES_PREENCHIMENTO[preenchimento],
         className,
       )}

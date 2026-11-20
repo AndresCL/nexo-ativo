@@ -24,13 +24,8 @@ export function CabecalhoPublicacaoRapidaAcervo({
 
   return (
     <div className="space-y-4">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-6">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-3 sm:pb-4">
         <div>
-          {aparencia === "clara" ? (
-            <p className="mb-2 text-[10px] font-semibold tracking-[0.16em] text-indigo-600 uppercase">
-              Sua vitrine · Acervo comercial
-            </p>
-          ) : null}
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
               {titulo}

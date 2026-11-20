@@ -55,13 +55,16 @@ export async function executarCancelamentoAssinaturaAsaas(
   }
 
   const membro = docMembro.data() as MembroOrganizacao;
-  if (membro.situacao !== "ativo" || membro.papel !== "administrador") {
+  if (
+    membro.situacao !== "ativo" ||
+    (membro.papel !== "proprietario" && membro.papel !== "administrador")
+  ) {
     throw new ErroAcessoNegado(
-      "Apenas administradores ativos da organização podem cancelar a assinatura.",
+      "Apenas proprietários e administradores ativos da organização podem cancelar a assinatura.",
     );
   }
 
-  const refAssinatura = refOrg.collection("assinaturaAsaas").doc("atual");
+  const refAssinatura = bancoDados.collection("assinaturas").doc(organizacaoId);
   const docAssinatura = await refAssinatura.get();
   if (!docAssinatura.exists) {
     throw new ErroValidacaoDominio(
@@ -71,36 +74,50 @@ export async function executarCancelamentoAssinaturaAsaas(
   }
 
   const assinatura = docAssinatura.data() as RegistroAssinaturaAsaas;
-  await provedorAsaas.cancelarAssinatura(assinatura.assinaturaAsaasId);
+  if (assinatura.assinaturaAsaasId) {
+    await provedorAsaas.cancelarAssinatura(assinatura.assinaturaAsaasId);
+  }
 
-  const agoraIso = new Date().toISOString();
+  const agora = new Date();
+  const agoraIso = agora.toISOString();
   const organizacao = docOrg.data() as Organizacao;
 
+  // Ao cancelar a assinatura, a publicação pública é revogada imediatamente
+  // a menos que haja explicitamente vigência paga restante registrada.
+  // ProximoVencimento de fatura não paga NÃO concede vigência futura.
   const novoResumo = {
     planoCodigo: organizacao.resumoDireitosPlano.planoCodigo,
     situacaoAssinatura: "cancelada" as const,
     limiteProfissionaisAtivos: organizacao.resumoDireitosPlano.limiteProfissionaisAtivos,
     limiteEnviosEmailMensal: organizacao.resumoDireitosPlano.limiteEnviosEmailMensal,
     permitePublicacaoPublica: false,
+    canceladaEmIso: agoraIso,
   };
 
   const batch = bancoDados.batch();
+
+  // Cancela quaisquer cobranças pendentes futuras de ciclos que não serão mais usufruídos
+  const refCobrancas = refOrg.collection("cobrancasAsaas");
+  const snapCobrancasPendentes = await refCobrancas.where("situacao", "==", "PENDING").get();
+  for (const docCob of snapCobrancasPendentes.docs) {
+    const dadosCob = docCob.data();
+    batch.delete(docCob.ref);
+
+    if (dadosCob.cobrancaAsaasId) {
+      await provedorAsaas.removerCobranca(dadosCob.cobrancaAsaasId as string);
+    }
+  }
+
   batch.update(refOrg, {
     resumoDireitosPlano: novoResumo,
     atualizadoEmIso: agoraIso,
   });
   batch.update(refAssinatura, {
     situacaoAsaas: "INACTIVE",
+    situacaoInterna: "cancelada",
+    canceladaEmIso: agoraIso,
     atualizadoEmIso: agoraIso,
   });
-  batch.set(
-    bancoDados.collection("assinaturasAsaas").doc(assinatura.assinaturaAsaasId),
-    {
-      situacaoInterna: "cancelada",
-      atualizadoEmIso: agoraIso,
-    },
-    { merge: true },
-  );
   await batch.commit();
 
   return {

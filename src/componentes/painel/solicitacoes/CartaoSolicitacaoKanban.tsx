@@ -120,12 +120,11 @@ export function CartaoSolicitacaoKanban({
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          title={`Responder ${item.nomeVisitante} no WhatsApp`}
-          aria-label={`Responder ${item.nomeVisitante} no WhatsApp`}
-          className="inline-flex min-h-7 flex-1 items-center justify-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800 transition-colors hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-600"
+          title={`Conversar com ${item.nomeVisitante} no WhatsApp`}
+          aria-label={`Conversar com ${item.nomeVisitante} no WhatsApp`}
+          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-emerald-800 transition-colors hover:bg-emerald-100 focus-visible:outline-2 focus-visible:outline-emerald-600"
         >
-          <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>WhatsApp</span>
+          <MessageCircle className="h-4 w-4" aria-hidden="true" />
         </a>
         <button
           type="button"

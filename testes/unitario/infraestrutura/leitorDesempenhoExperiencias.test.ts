@@ -77,14 +77,18 @@ describe("Leitura do desempenho por experiência", () => {
       {
         id: experiencia.id,
         titulo: experiencia.titulo,
+        etapaInicialId: "etapa-catalogo",
         etapas: [
           {
             id: "etapa-catalogo",
             titulo: "Escolha o item ou modalidade de seu interesse",
+            tipoEtapa: "selecao_catalogo",
+            proximaEtapaPadraoId: "etapa-contato",
           },
           {
             id: "etapa-contato",
             titulo: "Para onde enviamos os detalhes e disponibilidade?",
+            tipoEtapa: "coleta_contato",
           },
         ],
       },

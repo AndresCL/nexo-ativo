@@ -22,9 +22,10 @@ export const esquemaDadosCadastroFiscalAssinante: z.ZodType<DadosCadastroFiscalA
       .string()
       .trim()
       .transform(apenasDigitos)
-      .refine((val) => val.length >= 10 && val.length <= 11, {
+      .refine((val) => val.length === 0 || (val.length >= 10 && val.length <= 11), {
         message: "Telefone deve conter DDD e ter 10 ou 11 dígitos.",
-      }),
+      })
+      .optional(),
     cep: z
       .string()
       .trim()

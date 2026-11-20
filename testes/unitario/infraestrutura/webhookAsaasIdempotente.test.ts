@@ -267,4 +267,110 @@ describe("Integração Asaas: Criação de Assinatura e Webhooks Idempotentes", 
     expect(orgAtualizada.resumoDireitosPlano.situacaoAssinatura).toBe("inadimplente");
     expect(orgAtualizada.resumoDireitosPlano.permitePublicacaoPublica).toBe(false);
   });
+
+  it("deve promover para Plano Pro e criar registro de assinatura quando receber pagamento de assinatura para organização em avaliação inicial sem assinatura prévia", async () => {
+    const { bancoDados, documentos } = criarBancoFirestoreEmMemoria({
+      "organizacoes/org-atelier": organizacaoInicial as unknown as Record<string, unknown>,
+    });
+
+    const payloadPagamentoAssinatura = {
+      id: "evt_rec_auto_1",
+      event: "PAYMENT_RECEIVED",
+      payment: {
+        id: "pay_rec_1",
+        customer: "cus_mock_123",
+        subscription: "sub_auto_1",
+        value: 87.0,
+        status: "RECEIVED",
+        billingType: "BOLETO",
+        dueDate: "2026-11-20",
+        paymentDate: "2026-11-19",
+        invoiceUrl: "https://sandbox.asaas.com/i/rec_1",
+        externalReference: "org-atelier",
+      },
+    };
+
+    const resultado = await executarProcessamentoWebhookAsaasTransacional(
+      bancoDados,
+      payloadPagamentoAssinatura,
+    );
+
+    expect(resultado.processado).toBe(true);
+    expect(resultado.situacaoAssinaturaAtualizada).toBe("ativa");
+
+    const orgAtualizada = documentos.get("organizacoes/org-atelier") as unknown as Organizacao;
+    expect(orgAtualizada.resumoDireitosPlano.planoCodigo).toBe("pro");
+    expect(orgAtualizada.resumoDireitosPlano.situacaoAssinatura).toBe("ativa");
+    expect(orgAtualizada.resumoDireitosPlano.limiteProfissionaisAtivos).toBe(10);
+    expect(orgAtualizada.resumoDireitosPlano.limiteEnviosEmailMensal).toBe(300);
+
+    const assinaturaCriada = documentos.get("assinaturas/org-atelier") as unknown as Record<string, unknown>;
+    expect(assinaturaCriada).toBeDefined();
+    expect(assinaturaCriada.planoCodigo).toBe("pro");
+    expect(assinaturaCriada.assinaturaAsaasId).toBe("sub_auto_1");
+    expect(assinaturaCriada.valorMensalCentavos).toBe(8700);
+    expect(assinaturaCriada.situacaoAsaas).toBe("ACTIVE");
+    expect(assinaturaCriada.situacaoInterna).toBe("ativa");
+  });
+
+  it("não deve rebaixar para pendente_contratacao quando receber webhook de fatura PENDING de próximo ciclo para assinatura já ativa", async () => {
+    const orgAtiva: Organizacao = {
+      ...organizacaoInicial,
+      resumoDireitosPlano: {
+        planoCodigo: "pro",
+        situacaoAssinatura: "ativa",
+        limiteProfissionaisAtivos: 10,
+        limiteEnviosEmailMensal: 300,
+        permitePublicacaoPublica: true,
+      },
+    };
+
+    const { bancoDados, documentos } = criarBancoFirestoreEmMemoria({
+      "organizacoes/org-atelier": orgAtiva as unknown as Record<string, unknown>,
+      "assinaturas/org-atelier": {
+        id: "org-atelier",
+        organizacaoId: "org-atelier",
+        assinaturaAsaasId: "sub_existente_1",
+        planoCodigo: "pro",
+        valorMensalCentavos: 8700,
+        situacaoAsaas: "ACTIVE",
+        situacaoInterna: "ativa",
+        proximoVencimentoIso: "2026-11-20",
+        criadoEmIso: "2026-11-20T00:00:00Z",
+      },
+    });
+
+    // Evento de geração da fatura do mês seguinte (ex: vencimento em 20/12/2026 com status PENDING)
+    const payloadFaturaProximoMes = {
+      id: "evt_created_proximo_mes",
+      event: "PAYMENT_CREATED",
+      payment: {
+        id: "pay_proximo_mes",
+        customer: "cus_mock_123",
+        subscription: "sub_existente_1",
+        value: 87.0,
+        status: "PENDING",
+        billingType: "UNDEFINED",
+        dueDate: "2026-12-20",
+        invoiceUrl: "https://sandbox.asaas.com/i/prox_mes",
+        externalReference: "org-atelier",
+      },
+    };
+
+    const resultado = await executarProcessamentoWebhookAsaasTransacional(
+      bancoDados,
+      payloadFaturaProximoMes,
+    );
+
+    expect(resultado.processado).toBe(true);
+    expect(resultado.situacaoAssinaturaAtualizada).toBe("ativa");
+
+    const orgAposWebhook = documentos.get("organizacoes/org-atelier") as unknown as Organizacao;
+    expect(orgAposWebhook.resumoDireitosPlano.situacaoAssinatura).toBe("ativa");
+    expect(orgAposWebhook.resumoDireitosPlano.permitePublicacaoPublica).toBe(true);
+
+    const assinaturaAposWebhook = documentos.get("assinaturas/org-atelier") as unknown as Record<string, unknown>;
+    expect(assinaturaAposWebhook.situacaoInterna).toBe("ativa");
+    expect(assinaturaAposWebhook.proximoVencimentoIso).toBe("2026-12-20");
+  });
 });

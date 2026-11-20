@@ -188,4 +188,93 @@ describe("DiagramaFunilCRO e ConectorAbandonoFunil", () => {
     expect(screen.getByText("2. Propostas Concluídas (CVR)")).toBeInTheDocument();
     expect(screen.getByLabelText("8 desistências entre as etapas")).toBeInTheDocument();
   });
+
+  it("renderiza nós ramificados com distribuição de rotas sem falsos gargalos no Padrão 1 Seguro", () => {
+    const resumoGarage88: ResumoMetricasPeriodo = {
+      ...resumoMetricasMock,
+      metricasPorMicrofluxo: [
+        {
+          id: "fluxo-financiamento",
+          titulo: "Simular financiamento com taxa 1,19%!",
+          aberturas: 38,
+          conclusoes: 7,
+          aberturasPermalink: 3,
+          porEtapa: {
+            "etapa-preferencias": 2,
+            "etapa-tipo-entrada": 2,
+          },
+        },
+      ],
+    };
+
+    render(
+      <DiagramaFunilCRO
+        resumoMetricas={resumoGarage88}
+        experiencias={[
+          {
+            id: "fluxo-financiamento",
+            titulo: "Simular financiamento com taxa 1,19%!",
+            etapaInicialId: "etapa-escolha-veiculo",
+            etapas: [
+              {
+                id: "etapa-escolha-veiculo",
+                titulo: "Você já escolheu um veículo?",
+                proximaEtapaPadraoId: "etapa-tipo-entrada",
+                opcoes: [
+                  {
+                    id: "estoque",
+                    rotulo: "Quero escolher no estoque",
+                    proximaEtapaIdOpcional: "etapa-catalogo",
+                  },
+                  {
+                    id: "preferencias",
+                    rotulo: "Quero informar o que procuro",
+                    proximaEtapaIdOpcional: "etapa-preferencias",
+                  },
+                ],
+              },
+              {
+                id: "etapa-catalogo",
+                titulo: "Escolha o veículo para simular",
+                proximaEtapaPadraoId: "etapa-tipo-entrada",
+              },
+              {
+                id: "etapa-preferencias",
+                titulo: "Qual veículo você procura?",
+                proximaEtapaPadraoId: "etapa-tipo-entrada",
+              },
+              {
+                id: "etapa-tipo-entrada",
+                titulo: "Como pretende compor a entrada?",
+                proximaEtapaPadraoId: "etapa-contato",
+              },
+              { id: "etapa-contato", titulo: "Como prefere receber o retorno?" },
+            ],
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "fluxo-financiamento" },
+    });
+
+    // 1. Início: Você já escolheu um veículo? (38)
+    expect(screen.getByText("1. Início: Você já escolheu um veículo?")).toBeInTheDocument();
+    expect(screen.getByText("38")).toBeInTheDocument();
+    expect(screen.getAllByText("Decisão de Rota").length).toBeGreaterThan(0);
+
+    // As rotas aparecem dentro da decisão
+    expect(screen.getByText("Quero escolher no estoque")).toBeInTheDocument();
+    expect(screen.getByText("Quero informar o que procuro")).toBeInTheDocument();
+
+    // Desistências na decisão: 38 - (0 + 2) = 36 desistências (94.7%)
+    expect(screen.getByLabelText("36 desistências entre as etapas")).toBeInTheDocument();
+
+    // 2. Como pretende compor a entrada? (2)
+    expect(screen.getByText("2. Como pretende compor a entrada?")).toBeInTheDocument();
+
+    // Conclusões finais (7)
+    expect(screen.getByText("4. Propostas Concluídas (CVR)")).toBeInTheDocument();
+  });
 });
