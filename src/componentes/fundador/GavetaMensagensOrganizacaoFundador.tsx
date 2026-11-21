@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as Dialogo from "@radix-ui/react-dialog";
 import { Clock, ExternalLink, MessageSquarePlus, Send, X } from "lucide-react";
+import { formatarRotuloSituacaoAssinatura } from "@/dominio/fundador/calculadoraMetricasFundador";
 import {
   DESCRITORES_ETAPA_KANBAN_FUNDADOR,
   type EtapaKanbanOrganizacaoFundador,
@@ -126,7 +127,11 @@ export function GavetaMensagensOrganizacaoFundador({
                     <p className="text-[11px] text-mineral-500">
                       {organizacao.segmentoAtividade} · Plano{" "}
                       <strong className="uppercase">{organizacao.planoCodigo}</strong> (
-                      {organizacao.situacaoAssinatura})
+                      {formatarRotuloSituacaoAssinatura(
+                        organizacao.situacaoAssinatura,
+                        organizacao.origemAssinatura,
+                      )}
+                      )
                     </p>
                   </div>
 

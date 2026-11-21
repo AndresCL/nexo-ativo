@@ -1,11 +1,16 @@
 import { obterPoliticaPublicidade } from "@/dominio/publicidade/registroPoliticasPublicidade";
-import { CATALOGO_PLANOS_FLUXO } from "@/dominio/assinaturas/tiposAssinaturaAsaas";
 import { extrairAnoMesReferenciaIso } from "@/dominio/email/tiposEmailTransacional";
 import type {
   Organizacao,
   RegistroAuditoria,
   UsuarioAutenticado,
 } from "@/dominio/entidades/autenticacaoEOrganizacao";
+import {
+  calcularMetricasAssinaturaFundador,
+  resolverOrigemAssinaturaEfetiva,
+  type AssinaturaRecorrenteAtiva,
+  type ResumoOrganizacaoParaMetricas,
+} from "@/dominio/fundador/calculadoraMetricasFundador";
 import {
   CODIGOS_ETAPA_KANBAN_FUNDADOR,
   type AcompanhamentoOrganizacaoFundador,
@@ -97,13 +102,36 @@ export async function carregarContextoPainelFundadorServidor(
   const { bancoDadosAdmin } = obterServicosAdminFirebase();
   const anoMesReferenciaEmail = extrairAnoMesReferenciaIso(new Date().toISOString());
 
-  const [snapOrganizacoes, snapAuditoria, snapAcompanhamentos, docMetricasEmailPlataforma] =
-    await Promise.all([
-      bancoDadosAdmin.collection("organizacoes").get(),
-      bancoDadosAdmin.collection("registrosAuditoria").orderBy("criadoEmIso", "desc").limit(100).get(),
-      bancoDadosAdmin.collection("acompanhamentoFundador").get(),
-      bancoDadosAdmin.collection("metricasPlataforma").doc(`email-${anoMesReferenciaEmail}`).get(),
-    ]);
+  const [
+    snapOrganizacoes,
+    snapAssinaturasAtivas,
+    snapAuditoria,
+    snapAcompanhamentos,
+    docMetricasEmailPlataforma,
+  ] = await Promise.all([
+    bancoDadosAdmin.collection("organizacoes").get(),
+    bancoDadosAdmin.collection("assinaturas").where("situacaoInterna", "==", "ativa").get(),
+    bancoDadosAdmin.collection("registrosAuditoria").orderBy("criadoEmIso", "desc").limit(100).get(),
+    bancoDadosAdmin.collection("acompanhamentoFundador").get(),
+    bancoDadosAdmin.collection("metricasPlataforma").doc(`email-${anoMesReferenciaEmail}`).get(),
+  ]);
+
+  const assinaturasAtivasPorOrg = new Map<string, AssinaturaRecorrenteAtiva>();
+  for (const docAssinatura of snapAssinaturasAtivas.docs) {
+    const bruto = docAssinatura.data() as Record<string, unknown>;
+    const organizacaoId =
+      typeof bruto.organizacaoId === "string" && bruto.organizacaoId.trim()
+        ? bruto.organizacaoId
+        : docAssinatura.id;
+    const valorBruto = Number(bruto.valorMensalCentavos ?? 0);
+    const valorMensalCentavos =
+      Number.isFinite(valorBruto) && valorBruto > 0 ? Math.round(valorBruto) : 0;
+
+    assinaturasAtivasPorOrg.set(organizacaoId, {
+      organizacaoId,
+      valorMensalCentavos,
+    });
+  }
 
   // Lê consumo mensal de e-mails de solicitações de todas as organizações em lote (sem N+1)
   const refsConsumoEmailOrgs = snapOrganizacoes.docs.map((docOrg) =>
@@ -164,15 +192,9 @@ export async function carregarContextoPainelFundadorServidor(
     });
   }
 
-  let totalOrganizacoes = 0;
-  let organizacoesAtivas = 0;
-  let organizacoesSuspensas = 0;
-  let assinaturasAtivas = 0;
-  let assinaturasInadimplentes = 0;
-  let assinaturasCanceladas = 0;
-  let receitaMensalRecorrenteCentavos = 0;
   const totalSolicitacoesComerciais = 0;
 
+  const resumosParaMetricas: ResumoOrganizacaoParaMetricas[] = [];
   const listaOrganizacoes: ItemVisaoGeralOrganizacaoFundador[] = [];
 
   for (const doc of snapOrganizacoes.docs) {
@@ -183,28 +205,21 @@ export async function carregarContextoPainelFundadorServidor(
 
     const orgId = dados.id || doc.id;
     const situacaoOrg = dados.situacao ?? "ativa";
-    totalOrganizacoes += 1;
-
-    if (situacaoOrg === "ativa") {
-      organizacoesAtivas += 1;
-    } else if (situacaoOrg === "suspensa") {
-      organizacoesSuspensas += 1;
-    }
-
     const situacaoAssinatura = dados.resumoDireitosPlano?.situacaoAssinatura;
     const planoCodigo = dados.resumoDireitosPlano?.planoCodigo;
+    const origemAssinaturaBruta = dados.resumoDireitosPlano?.origemAssinatura;
 
-    if (situacaoAssinatura === "ativa" && planoCodigo) {
-      assinaturasAtivas += 1;
-      const planoDef = CATALOGO_PLANOS_FLUXO[planoCodigo];
-      if (planoDef) {
-        receitaMensalRecorrenteCentavos += planoDef.mensalidadeCentavos;
-      }
-    } else if (situacaoAssinatura === "inadimplente") {
-      assinaturasInadimplentes += 1;
-    } else if (situacaoAssinatura === "cancelada") {
-      assinaturasCanceladas += 1;
-    }
+    const resumoMetricas: ResumoOrganizacaoParaMetricas = {
+      id: orgId,
+      situacao: situacaoOrg,
+      ...(planoCodigo ? { planoCodigo } : {}),
+      ...(situacaoAssinatura ? { situacaoAssinatura } : {}),
+      ...(origemAssinaturaBruta ? { origemAssinatura: origemAssinaturaBruta } : {}),
+    };
+    resumosParaMetricas.push(resumoMetricas);
+
+    const assinaturaAtiva = assinaturasAtivasPorOrg.get(orgId) ?? assinaturasAtivasPorOrg.get(doc.id);
+    const origemAssinaturaEfetiva = resolverOrigemAssinaturaEfetiva(resumoMetricas, assinaturaAtiva);
 
     const acompanhamento = acompanhamentosPorOrg.get(orgId);
     const msgsManuais = acompanhamento?.mensagens ?? [];
@@ -226,8 +241,9 @@ export async function carregarContextoPainelFundadorServidor(
       segmentoAtividade: dados.segmentoAtividade ?? "",
       perfilPublicidade: obterPoliticaPublicidade(dados.perfilPublicidade).codigo,
       situacao: situacaoOrg,
-      planoCodigo: dados.resumoDireitosPlano?.planoCodigo ?? "avaliacao_inicial",
-      situacaoAssinatura: dados.resumoDireitosPlano?.situacaoAssinatura ?? "pendente_contratacao",
+      planoCodigo: planoCodigo ?? "avaliacao_inicial",
+      situacaoAssinatura: situacaoAssinatura ?? "pendente_contratacao",
+      ...(origemAssinaturaEfetiva ? { origemAssinatura: origemAssinaturaEfetiva } : {}),
       limiteProfissionaisAtivos: dados.resumoDireitosPlano?.limiteProfissionaisAtivos ?? 10,
       limiteEnviosEmailMensal: dados.resumoDireitosPlano?.limiteEnviosEmailMensal ?? 5000,
       emailsEnviadosMesAtual: emailsPorOrg.get(doc.id) ?? emailsPorOrg.get(orgId) ?? 0,
@@ -241,14 +257,13 @@ export async function carregarContextoPainelFundadorServidor(
 
   listaOrganizacoes.sort((a, b) => (b.criadoEmIso ?? "").localeCompare(a.criadoEmIso ?? ""));
 
+  const metricasAssinatura = calcularMetricasAssinaturaFundador(
+    resumosParaMetricas,
+    assinaturasAtivasPorOrg,
+  );
+
   const metricas: MetricasOperacionaisFundador = {
-    totalOrganizacoes,
-    organizacoesAtivas,
-    organizacoesSuspensas,
-    assinaturasAtivas,
-    assinaturasInadimplentes,
-    assinaturasCanceladas,
-    receitaMensalRecorrenteCentavos,
+    ...metricasAssinatura,
     totalSolicitacoesComerciais,
     totalEmailsEnviadosMesAtual,
     emailsSolicitacoesMesAtual,

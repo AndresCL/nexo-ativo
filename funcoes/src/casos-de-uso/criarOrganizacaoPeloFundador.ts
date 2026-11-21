@@ -100,6 +100,7 @@ export async function executarCriacaoOrganizacaoPeloFundador(
   const resumoDireitosPlano: ResumoDireitosPlano = {
     planoCodigo: dados.planoCodigo,
     situacaoAssinatura: "ativa",
+    origemAssinatura: "cortesia",
     limiteProfissionaisAtivos: definicaoPlano.limiteProfissionaisAtivos,
     limiteEnviosEmailMensal: definicaoPlano.limiteEnviosEmailMensal,
     permitePublicacaoPublica: true,
@@ -248,6 +249,7 @@ export async function executarCriacaoOrganizacaoPeloFundador(
       situacao: "ativa",
       planoCodigo: dados.planoCodigo,
       situacaoAssinatura: "ativa",
+      origemAssinatura: "cortesia",
       limiteProfissionaisAtivos: resumoDireitosPlano.limiteProfissionaisAtivos,
       limiteEnviosEmailMensal: resumoDireitosPlano.limiteEnviosEmailMensal,
       totalMembros: vincularFundador ? 2 : 1,

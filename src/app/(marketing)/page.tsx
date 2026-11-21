@@ -14,6 +14,18 @@ export const metadata: Metadata = {
   title: "Nexo Ativo — O microsite que transforma visitas em clientes qualificados",
   description:
     "Serviços, portfólio, equipe e microfluxos comerciais em um único link para PMEs e profissionais.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "/",
+    siteName: "Nexo Ativo",
+    title: "Nexo Ativo — O microsite que transforma visitas em clientes qualificados",
+    description:
+      "Serviços, portfólio, equipe e microfluxos comerciais em um único link para PMEs e profissionais.",
+  },
 };
 
 export default function PaginaApresentacaoInicial() {

@@ -61,8 +61,12 @@ export async function executarCriacaoAssinaturaAsaas(
     throw new ErroValidacaoDominio("Plano selecionado inválido.", "PLANO_INVALIDO");
   }
 
-  // Se a organização já possui assinatura ativa e regular, não permite duplicar contratos
-  if (organizacao.resumoDireitosPlano.situacaoAssinatura === "ativa") {
+  // Se a organização já possui assinatura pagante ativa e regular, não permite duplicar contratos.
+  // Organizações em cortesia podem contratar uma assinatura recorrente normalmente.
+  if (
+    organizacao.resumoDireitosPlano.situacaoAssinatura === "ativa" &&
+    organizacao.resumoDireitosPlano.origemAssinatura !== "cortesia"
+  ) {
     throw new ErroValidacaoDominio(
       "A organização já possui uma assinatura ativa e regular.",
       "ASSINATURA_JA_ATIVA",
@@ -156,6 +160,7 @@ export async function executarCriacaoAssinaturaAsaas(
     transacao.update(refOrg, {
       "resumoDireitosPlano.planoCodigo": planoCodigo,
       "resumoDireitosPlano.situacaoAssinatura": "pendente_contratacao",
+      "resumoDireitosPlano.origemAssinatura": "gateway",
       "resumoDireitosPlano.limiteProfissionaisAtivos": definicaoPlano.limiteProfissionaisAtivos,
       "resumoDireitosPlano.limiteEnviosEmailMensal": definicaoPlano.limiteEnviosEmailMensal,
       "resumoDireitosPlano.permitePublicacaoPublica": false,

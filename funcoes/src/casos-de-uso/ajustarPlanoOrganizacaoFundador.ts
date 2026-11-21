@@ -36,22 +36,36 @@ export async function executarAjustePlanoOrganizacaoFundador(
 
   const agoraIso = new Date().toISOString();
   const refOrg = bancoDados.collection("organizacoes").doc(organizacaoId);
+  const refAssinatura = bancoDados.collection("assinaturas").doc(organizacaoId);
   const refAuditoria = bancoDados.collection("registrosAuditoria").doc();
 
   const definicaoCatalogo = CATALOGO_PLANOS_FLUXO[novoPlanoCodigo];
 
   await bancoDados.runTransaction(async (transacao) => {
-    const docOrg = await transacao.get(refOrg);
+    const [docOrg, docAssinatura] = await Promise.all([
+      transacao.get(refOrg),
+      transacao.get(refAssinatura),
+    ]);
     if (!docOrg.exists) {
       throw new ErroValidacaoDominio("Organização alvo não encontrada.", "ORGANIZACAO_INEXISTENTE");
     }
 
     const org = docOrg.data() as Organizacao;
     const planoAnterior = org.resumoDireitosPlano;
+    const possuiAssinaturaGatewayAtiva =
+      docAssinatura.exists && docAssinatura.data()?.situacaoInterna === "ativa";
+
+    const origemAssinatura =
+      novaSituacaoAssinatura === "ativa"
+        ? possuiAssinaturaGatewayAtiva
+          ? "gateway"
+          : "cortesia"
+        : planoAnterior.origemAssinatura;
 
     const novoResumo: ResumoDireitosPlano = {
       planoCodigo: novoPlanoCodigo,
       situacaoAssinatura: novaSituacaoAssinatura,
+      ...(origemAssinatura ? { origemAssinatura } : {}),
       limiteProfissionaisAtivos:
         limiteProfissionaisAtivos ?? definicaoCatalogo.limiteProfissionaisAtivos,
       limiteEnviosEmailMensal: limiteEnviosEmailMensal ?? definicaoCatalogo.limiteEnviosEmailMensal,

@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Rocket,
 } from "lucide-react";
+import { formatarRotuloSituacaoAssinatura } from "@/dominio/fundador/calculadoraMetricasFundador";
 import {
   DESCRITORES_ETAPA_KANBAN_FUNDADOR,
   type EtapaKanbanOrganizacaoFundador,
@@ -266,7 +267,11 @@ export function QuadroKanbanOrganizacoesFundador({
                           {org.planoCodigo}
                         </span>
                         <span className="text-[10px] text-mineral-500">
-                          · {org.situacaoAssinatura}
+                          ·{" "}
+                          {formatarRotuloSituacaoAssinatura(
+                            org.situacaoAssinatura,
+                            org.origemAssinatura,
+                          )}
                         </span>
                       </div>
 

@@ -49,10 +49,16 @@ export async function generateMetadata({
 
   const titulo = `${dados.profissional.nomeCompleto} — ${dados.paginaOrganizacao.identidade.nomeExibicao}`;
 
+  const indexavel =
+    dados.paginaOrganizacao.seo.indexavel === true &&
+    dados.paginaOrganizacao.publicado &&
+    dados.paginaOrganizacao.paginaAtiva;
+
   return {
     title: { absolute: titulo },
     description: dados.profissional.minibiografia,
     alternates: { canonical: urlCanonica },
+    robots: indexavel ? { index: true, follow: true } : { index: false, follow: false },
     openGraph: {
       type: "profile",
       locale: "pt_BR",

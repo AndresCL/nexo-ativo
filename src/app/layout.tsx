@@ -4,8 +4,12 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "@/estilos/globais.css";
 import type { ReactNode } from "react";
 import { CentralNotificacoes } from "@/componentes/interface/notificacoes/CentralNotificacoes";
+import { lerConfiguracaoAmbientePublico } from "@/validacoes/ambiente";
+
+const { urlBasePublica } = lerConfiguracaoAmbientePublico();
 
 export const metadata: Metadata = {
+  metadataBase: new URL(urlBasePublica),
   title: {
     default: "Nexo Ativo — Presença Digital Editorial e Microfluxos Comerciais",
     template: "%s | Nexo Ativo",

@@ -9,6 +9,7 @@ import { TransicaoPaginaPainel } from "@/componentes/interface/TransicaoPaginaPa
 
 export const metadata: Metadata = {
   title: "Painel Fundador",
+  robots: { index: false, follow: false },
 };
 
 export default async function LayoutPainelFundador({ children }: { readonly children: ReactNode }) {

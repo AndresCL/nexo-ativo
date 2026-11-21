@@ -23,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: totalSolicitacoesNovas > 0 ? `(${totalSolicitacoesNovas}) Painel` : "Painel",
+    robots: { index: false, follow: false },
   };
 }
 

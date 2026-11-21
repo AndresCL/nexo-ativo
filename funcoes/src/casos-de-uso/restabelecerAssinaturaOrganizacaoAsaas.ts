@@ -106,6 +106,7 @@ export async function executarRestabelecimentoAssinaturaAsaas(
 
   batch.update(refOrg, {
     "resumoDireitosPlano.situacaoAssinatura": "ativa",
+    "resumoDireitosPlano.origemAssinatura": "gateway",
     "resumoDireitosPlano.permitePublicacaoPublica": true,
     "resumoDireitosPlano.canceladaEmIso": null,
     atualizadoEmIso: agoraIso,

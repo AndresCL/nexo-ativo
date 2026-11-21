@@ -18,6 +18,8 @@ export type CodigoPlanoAssinatura = "avaliacao_inicial" | "pro" | "equipe" | "pe
 export type SituacaoResumoAssinatura =
   "pendente_contratacao" | "ativa" | "em_carencia" | "inadimplente" | "suspensa" | "cancelada";
 
+export type OrigemAssinatura = "gateway" | "cortesia";
+
 export interface ClaimsPlataforma {
   readonly papelPlataforma?: PapelPlataforma;
 }
@@ -35,6 +37,7 @@ export interface UsuarioAutenticado {
 export interface ResumoDireitosPlano {
   readonly planoCodigo: CodigoPlanoAssinatura;
   readonly situacaoAssinatura: SituacaoResumoAssinatura;
+  readonly origemAssinatura?: OrigemAssinatura;
   readonly limiteProfissionaisAtivos: number;
   readonly limiteEnviosEmailMensal: number;
   readonly permitePublicacaoPublica: boolean;

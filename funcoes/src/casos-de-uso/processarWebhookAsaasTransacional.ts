@@ -214,6 +214,7 @@ export async function executarProcessamentoWebhookAsaasTransacional(
     const novoResumoDireitosPlano: ResumoDireitosPlano = {
       planoCodigo,
       situacaoAssinatura: novaSituacaoAssinatura,
+      origemAssinatura: "gateway",
       limiteProfissionaisAtivos: planoDefinicao.limiteProfissionaisAtivos,
       limiteEnviosEmailMensal: planoDefinicao.limiteEnviosEmailMensal,
       permitePublicacaoPublica: permitePublicacao,

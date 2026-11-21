@@ -1,5 +1,6 @@
 import type {
   CodigoPlanoAssinatura,
+  OrigemAssinatura,
   RegistroAuditoria,
   SituacaoOrganizacao,
   SituacaoResumoAssinatura,
@@ -80,6 +81,7 @@ export interface ItemVisaoGeralOrganizacaoFundador {
   readonly situacao: SituacaoOrganizacao;
   readonly planoCodigo: CodigoPlanoAssinatura;
   readonly situacaoAssinatura: SituacaoResumoAssinatura;
+  readonly origemAssinatura?: OrigemAssinatura;
   readonly limiteProfissionaisAtivos?: number;
   readonly limiteEnviosEmailMensal?: number;
   readonly emailsEnviadosMesAtual?: number;

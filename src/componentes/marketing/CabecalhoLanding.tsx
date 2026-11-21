@@ -38,6 +38,9 @@ export function CabecalhoLanding() {
               {item.rotulo}
             </a>
           ))}
+          <Link href="/blog" className="transition-colors hover:text-mineral-950">
+            Guias
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-2.5">

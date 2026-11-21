@@ -17,3 +17,8 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: NEXT_PUBLIC_URL_BASE_PUBLICA
+    value: "https://nexoativo.com.br"
+    availability:
+      - BUILD
+      - RUNTIME

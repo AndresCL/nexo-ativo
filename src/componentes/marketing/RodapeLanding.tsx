@@ -28,6 +28,15 @@ export function RodapeLanding() {
           <a href="#perguntas" className="font-medium text-neutral-600 hover:text-mineral-950">
             Perguntas
           </a>
+          <Link href="/blog" className="font-medium text-neutral-600 hover:text-mineral-950">
+            Guias
+          </Link>
+          <Link href="/privacidade" className="font-medium text-neutral-600 hover:text-mineral-950">
+            Privacidade
+          </Link>
+          <Link href="/termos" className="font-medium text-neutral-600 hover:text-mineral-950">
+            Termos
+          </Link>
           <Link href="/entrar" className="font-medium text-neutral-600 hover:text-mineral-950">
             Entrar
           </Link>

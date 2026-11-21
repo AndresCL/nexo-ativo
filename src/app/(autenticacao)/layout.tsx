@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ScriptGoogleAnalytics } from "@/componentes/analytics/ScriptGoogleAnalytics";
 import { LogoNexoAtivo } from "@/componentes/interface/LogoNexoAtivo";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function LayoutAutenticacao({ children }: { readonly children: ReactNode }) {
   return (

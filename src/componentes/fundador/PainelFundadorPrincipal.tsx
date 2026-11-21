@@ -26,6 +26,7 @@ import type {
   SituacaoOrganizacao,
   SituacaoResumoAssinatura,
 } from "@/dominio/entidades/autenticacaoEOrganizacao";
+import { formatarRotuloSituacaoAssinatura } from "@/dominio/fundador/calculadoraMetricasFundador";
 import {
   DESCRITORES_ETAPA_KANBAN_FUNDADOR,
   type EtapaKanbanOrganizacaoFundador,
@@ -641,7 +642,12 @@ export function PainelFundadorPrincipal({
                         <td className="px-4 py-3 font-medium uppercase text-mineral-800">
                           {org.planoCodigo}
                         </td>
-                        <td className="px-4 py-3 text-mineral-700">{org.situacaoAssinatura}</td>
+                        <td className="px-4 py-3 text-mineral-700">
+                          {formatarRotuloSituacaoAssinatura(
+                            org.situacaoAssinatura,
+                            org.origemAssinatura,
+                          )}
+                        </td>
                         <td className="px-4 py-3 tabular-nums text-mineral-800">
                           <span className="font-semibold">{org.emailsEnviadosMesAtual ?? 0}</span>
                         </td>
@@ -944,7 +950,7 @@ export function PainelFundadorPrincipal({
                     <span>Novo Código do Plano</span>
                     <TooltipInformativo
                       alinhamento="esquerda"
-                      texto="Define a faixa comercial, o valor no MRR e os limites padrão de profissionais ativos e envios de e-mail por mês."
+                      texto="Define a faixa comercial e os limites padrão de profissionais ativos e envios de e-mail por mês. O MRR considera apenas assinaturas recorrentes ativas no gateway."
                     />
                   </label>
                   <select

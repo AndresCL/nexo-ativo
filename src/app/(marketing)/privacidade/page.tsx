@@ -6,6 +6,9 @@ import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 export const metadata: Metadata = {
   title: "Política de Privacidade",
   description: "Diretrizes de privacidade, segurança e conformidade LGPD da plataforma Nexo Ativo.",
+  alternates: {
+    canonical: "/privacidade",
+  },
 };
 
 export default function PaginaPoliticaDePrivacidade() {

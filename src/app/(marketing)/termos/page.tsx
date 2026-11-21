@@ -6,6 +6,9 @@ import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 export const metadata: Metadata = {
   title: "Termos de Uso",
   description: "Termos e condições gerais de uso da plataforma Nexo Ativo.",
+  alternates: {
+    canonical: "/termos",
+  },
 };
 
 export default function PaginaTermosDeUso() {
