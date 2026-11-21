@@ -12,3 +12,8 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: "G-ENHD6E997Z"
+    availability:
+      - BUILD
+      - RUNTIME

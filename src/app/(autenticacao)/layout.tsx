@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ScriptGoogleAnalytics } from "@/componentes/analytics/ScriptGoogleAnalytics";
 import { LogoNexoAtivo } from "@/componentes/interface/LogoNexoAtivo";
 
 export default function LayoutAutenticacao({ children }: { readonly children: ReactNode }) {
@@ -14,6 +15,7 @@ export default function LayoutAutenticacao({ children }: { readonly children: Re
       <footer className="mx-auto w-full max-w-md text-xs text-mineral-500">
         Ambiente protegido por isolamento multi-tenant.
       </footer>
+      <ScriptGoogleAnalytics />
     </div>
   );
 }

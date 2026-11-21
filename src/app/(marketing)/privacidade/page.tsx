@@ -73,8 +73,12 @@ export default function PaginaPoliticaDePrivacidade() {
                   comerciais do microfluxo. Finalidade: envio do alerta comercial para a organização contratante e geração de comprovante de atendimento.
                 </p>
                 <p>
-                  <strong>Telemetria e Métricas:</strong> Contabilização anônima e agregada de visualizações e cliques para o painel do assinante,
-                  sem o uso de cookies de rastreamento invasivo ou venda de perfis para redes de publicidade de terceiros.
+                  <strong>Telemetria e Métricas nas Vitrines dos Assinantes:</strong> Contabilização anônima e agregada de visualizações e cliques para o painel do assinante,
+                  sem o uso de cookies de rastreamento de terceiros ou venda de perfis para redes de publicidade.
+                </p>
+                <p>
+                  <strong>Métricas de Acesso no Site Institucional do Nexo Ativo:</strong> Nas páginas institucionais e de cadastro da plataforma, utilizamos o Google Analytics (GA4)
+                  para compreender o volume de acessos e melhorar a experiência comercial, sem comercialização de dados pessoais.
                 </p>
               </div>
             </section>
@@ -86,7 +90,7 @@ export default function PaginaPoliticaDePrivacidade() {
                 essenciais à operação do serviço:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-xs text-mineral-600">
-                <li><strong>Google Cloud / Firebase:</strong> Hospedagem, banco de dados criptografado e infraestrutura de autenticação.</li>
+                <li><strong>Google Cloud / Firebase / Google Analytics:</strong> Hospedagem, banco de dados criptografado, infraestrutura de autenticação e métricas de acesso do site institucional.</li>
                 <li><strong>Asaas Gestão Financeira:</strong> Processamento seguro de pagamentos e emissão de cobranças recorrentes.</li>
                 <li><strong>Resend Technologies:</strong> Disparo transacional idempotente de e-mails de segurança e alertas comerciais.</li>
               </ul>
