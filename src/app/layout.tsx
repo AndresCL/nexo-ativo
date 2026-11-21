@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   },
   description:
     "Plataforma brasileira de presença digital editorial premium com portfólio, cartões profissionais e microfluxos comerciais interativos.",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icon.png", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {

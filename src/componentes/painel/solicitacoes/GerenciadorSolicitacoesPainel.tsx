@@ -93,7 +93,7 @@ export function GerenciadorSolicitacoesPainel({
     configuracaoEmailInicial?.notificarEquipeNovasSolicitacoes ?? true,
   );
   const [confirmarVisitante, setConfirmarVisitante] = useState(
-    configuracaoEmailInicial?.enviarConfirmacaoVisitante ?? true,
+    configuracaoEmailInicial?.enviarConfirmacaoVisitante ?? false,
   );
   const [emailResposta, setEmailResposta] = useState(
     configuracaoEmailInicial?.emailRespostaOpcional ?? "",
@@ -339,24 +339,13 @@ export function GerenciadorSolicitacoesPainel({
           <div className="flex flex-wrap items-start justify-between gap-3 border-b border-amber-200/80 pb-4">
             <div>
               <h2 className="text-xl font-bold tracking-tight text-mineral-950">
-                Notificações por E-mail & Cota do Plano
+                Notificações por E-mail
               </h2>
               <p className="mt-0.5 text-xs text-mineral-600">
                 Configure alertas imediatos para sua equipe e confirmações de recebimento para o
                 visitante.
               </p>
             </div>
-            {consumoMensalEmailInicial ? (
-              <div className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-right text-xs">
-                <p className="text-[10px] tracking-wider text-mineral-500 uppercase">
-                  Consumo do mês ({consumoMensalEmailInicial.anoMesIso})
-                </p>
-                <p className="font-semibold text-mineral-950">
-                  {consumoMensalEmailInicial.enviosNoMesAtual} /{" "}
-                  {consumoMensalEmailInicial.limiteMensalPlano} envios
-                </p>
-              </div>
-            ) : null}
           </div>
 
           <form

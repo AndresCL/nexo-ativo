@@ -87,7 +87,7 @@ export function criarResumoDireitosPlanoInicial(): ResumoDireitosPlano {
     planoCodigo: "avaliacao_inicial",
     situacaoAssinatura: "pendente_contratacao",
     limiteProfissionaisAtivos: 1,
-    limiteEnviosEmailMensal: 50,
+    limiteEnviosEmailMensal: 500,
     permitePublicacaoPublica: false,
   };
 }

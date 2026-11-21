@@ -42,6 +42,8 @@ export function FormularioCriarConta({
       email: "",
       senha: "",
       confirmacaoSenha: "",
+      aceitouTermosEPrivacidade: false,
+      autorizouComunicacoes: false,
     },
   });
 
@@ -101,7 +103,7 @@ export function FormularioCriarConta({
         <CampoFormulario
           rotulo="Seu nome"
           autoComplete="name"
-          placeholder="Ex.: Dra. Helena Costa"
+          placeholder="Seu nome completo"
           required
           mensagemErro={errors.nomeExibicao?.message}
           {...register("nomeExibicao")}
@@ -111,7 +113,7 @@ export function FormularioCriarConta({
           rotulo="E-mail profissional"
           type="email"
           autoComplete="email"
-          placeholder="helena@clinica.com.br"
+          placeholder="contato@empresa.com.br"
           required
           mensagemErro={errors.email?.message}
           {...register("email")}
@@ -168,6 +170,51 @@ export function FormularioCriarConta({
           }
           {...register("confirmacaoSenha")}
         />
+
+        <div className="space-y-3 pt-1">
+          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-mineral-700 select-none">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 rounded border-marfim-300 text-mineral-950 focus:ring-mineral-900"
+              {...register("aceitouTermosEPrivacidade")}
+            />
+            <span className="leading-relaxed">
+              Li e concordo com os{" "}
+              <Link
+                href="/termos"
+                target="_blank"
+                className="font-medium text-mineral-950 underline underline-offset-2 hover:text-mineral-800"
+              >
+                Termos de Uso
+              </Link>{" "}
+              e com a{" "}
+              <Link
+                href="/privacidade"
+                target="_blank"
+                className="font-medium text-mineral-950 underline underline-offset-2 hover:text-mineral-800"
+              >
+                Política de Privacidade
+              </Link>
+              .
+            </span>
+          </label>
+          {errors.aceitouTermosEPrivacidade?.message && (
+            <p className="text-xs font-medium text-alerta-erro" role="alert">
+              {errors.aceitouTermosEPrivacidade.message}
+            </p>
+          )}
+
+          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-mineral-700 select-none">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 rounded border-marfim-300 text-mineral-950 focus:ring-mineral-900"
+              {...register("autorizouComunicacoes")}
+            />
+            <span className="leading-relaxed">
+              Desejo receber novidades sobre recursos editoriais, atualizações de produto e dicas de presença digital.
+            </span>
+          </label>
+        </div>
 
         <Botao
           type="submit"

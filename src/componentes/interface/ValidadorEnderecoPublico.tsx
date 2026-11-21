@@ -54,7 +54,7 @@ export function ValidadorEnderecoPublico({
     <form onSubmit={handleSubmit(submeterValidacao)} noValidate className="flex flex-col gap-4">
       <CampoFormulario
         rotulo="Nome da atuação ou empresa"
-        placeholder="Ex.: Atelier Helena Costa"
+        placeholder="Nome da sua clínica, escritório ou empresa"
         required
         mensagemErro={errors.nomeOrganizacao?.message}
         {...register("nomeOrganizacao", {
@@ -65,7 +65,7 @@ export function ValidadorEnderecoPublico({
       <CampoFormulario
         rotulo="Endereço público desejado"
         prefixoFixo="nexoativo.com.br/"
-        placeholder="atelier-helena-costa"
+        placeholder="sua-marca"
         textoAuxiliar="Letras minúsculas sem acento, números e hífens."
         required
         mensagemErro={errors.identificadorPublico?.message}

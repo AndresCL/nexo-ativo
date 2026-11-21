@@ -37,6 +37,7 @@ export default async function PaginaEditorAparenciaPainel() {
       }}
     >
       <EditorGuiadoAparencia
+        acervo={previa.acervo}
         previaEquipe={previa.previaEquipe}
         microfluxos={previa.microfluxos}
         identificadorPublico={contexto.organizacao.identificadorPublico}

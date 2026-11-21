@@ -14,7 +14,8 @@ export interface InconsistenciaGrafoMicrofluxo {
     | "ETAPA_ORFA_INALCANCAVEL"
     | "SELECAO_SEM_OPCOES"
     | "PIX_MANUAL_INCOMPLETO"
-    | "REGRA_CALCULO_COMERCIAL_INVALIDA";
+    | "REGRA_CALCULO_COMERCIAL_INVALIDA"
+    | "SEM_ETAPA_CONTATO";
   readonly mensagem: string;
 }
 
@@ -120,12 +121,20 @@ export function avaliarIntegridadeGrafoMicrofluxo(
     }
     mapaEtapas.set(etapa.id, etapa);
 
-    for (const opcao of obterOpcoesDeSaida(etapa))
-      if (opcao.desconectada)
+    const opcoesDesconectadas = obterOpcoesDeSaida(etapa).filter((o) => o.desconectada);
+    if (opcoesDesconectadas.length > 0) {
+      if (opcoesDesconectadas.length === 1) {
         inconsistencias.push({
           codigo: "SAIDA_DESCONECTADA",
-          mensagem: `Conecte a resposta “${opcao.rotulo}” da etapa “${etapa.titulo}” antes de publicar.`,
+          mensagem: `Conecte a resposta “${opcoesDesconectadas[0]!.rotulo}” da etapa “${etapa.titulo}” antes de publicar.`,
         });
+      } else {
+        inconsistencias.push({
+          codigo: "SAIDA_DESCONECTADA",
+          mensagem: `Conecte as ${opcoesDesconectadas.length} respostas pendentes da etapa “${etapa.titulo}” antes de publicar.`,
+        });
+      }
+    }
     if (etapa.saidaPadraoDesconectada && etapaUtilizaSaidaPadrao(etapa))
       inconsistencias.push({
         codigo: "SAIDA_DESCONECTADA",
@@ -284,6 +293,33 @@ export function avaliarIntegridadeGrafoMicrofluxo(
             : "A regra de cálculo comercial configurada é inválida.",
       });
     }
+  }
+
+  // Verifica se o microfluxo possui etapa de captura de contato para gerar lead
+  const possuiEtapaContato = microfluxo.etapas.some((etapa) => {
+    if (etapa.tipoEtapa === "coleta_contato" || etapa.modeloOrigem === "coleta_contato") {
+      return true;
+    }
+    if (etapa.tipoEtapa === "etapa_livre" && etapa.blocos) {
+      return etapa.blocos.some(
+        (bloco) =>
+          bloco.tipo === "campo" &&
+          (bloco.finalidade ||
+            bloco.campo.tipo === "telefone" ||
+            bloco.campo.tipo === "email" ||
+            bloco.campo.rotulo.toLowerCase().includes("whatsapp") ||
+            bloco.campo.rotulo.toLowerCase().includes("telefone") ||
+            bloco.campo.rotulo.toLowerCase().includes("email")),
+      );
+    }
+    return false;
+  });
+
+  if (!possuiEtapaContato) {
+    inconsistencias.push({
+      codigo: "SEM_ETAPA_CONTATO",
+      mensagem: `A experiência "${microfluxo.titulo}" precisa conter uma etapa de contato ("Dados para retorno" ou campos de WhatsApp/E-mail) para que você receba os leads e os alertas por e-mail.`,
+    });
   }
 
   return inconsistencias;

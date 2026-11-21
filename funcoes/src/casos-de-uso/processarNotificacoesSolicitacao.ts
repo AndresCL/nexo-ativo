@@ -35,7 +35,11 @@ export async function processarNotificacoesEmailSolicitacao(
 ): Promise<ResumoProcessamentoNotificacoesEmail> {
   const agoraIso = new Date().toISOString();
   const anoMesIso = extrairAnoMesReferenciaIso(solicitacao.criadoEmIso || agoraIso);
-  const limiteMensalPlano = Math.max(0, organizacao.resumoDireitosPlano.limiteEnviosEmailMensal);
+  const limiteSalvo = Math.max(0, organizacao.resumoDireitosPlano.limiteEnviosEmailMensal);
+  // Promove retroativamente tetos legados padrão (50/300) para fair use alto,
+  // preservando limites customizados pelo fundador (ex: 0 para suspensão ou valores de teste).
+  const limiteMensalPlano =
+    limiteSalvo === 300 ? 5000 : limiteSalvo === 50 ? 500 : limiteSalvo;
 
   const refOrg = bancoDados.collection("organizacoes").doc(organizacao.id);
   const refConfigEmail = refOrg.collection("configuracoes").doc("email");

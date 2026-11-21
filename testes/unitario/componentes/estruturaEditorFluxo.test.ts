@@ -35,6 +35,7 @@ const escolha = converterEtapaParaLivre({
 const etapa = (id: string): EtapaMicrofluxo => ({
   id,
   tipoEtapa: "etapa_livre",
+  modeloOrigem: "coleta_contato",
   titulo: id,
   obrigatoria: false,
   blocos: [],

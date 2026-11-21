@@ -36,14 +36,14 @@ export function CartaoAvaliacaoGoogle({
         ) : null}
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-semibold leading-tight">{avaliacao.autor}</p>
-          <div className="mt-1 flex items-center gap-1.5 leading-none">
-            <span className="font-bold text-amber-500 text-xs">
-              ★ {avaliacao.nota}
-            </span>
-            <span aria-hidden="true" className="text-amber-500 text-[10px]">
+          <div
+            aria-label={`${avaliacao.nota} de 5 estrelas`}
+            className="mt-1 flex items-center gap-0.5 leading-none"
+          >
+            <span aria-hidden="true" className="text-amber-500 text-[11px]">
               {"★".repeat(avaliacao.nota)}
             </span>
-            <span aria-hidden="true" className="opacity-25 text-[10px]">
+            <span aria-hidden="true" className="opacity-25 text-[11px]">
               {"☆".repeat(5 - avaliacao.nota)}
             </span>
           </div>

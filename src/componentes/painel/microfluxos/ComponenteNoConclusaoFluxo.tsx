@@ -17,21 +17,25 @@ export function ComponenteNoConclusaoFluxo({ data }: NodeProps<TipoNoConclusaoFl
   return (
     <div
       className={combinarClasses(
-        "w-72 rounded-xl border bg-white p-4 shadow-sm",
-        data.selecionado ? "border-mineral-950 ring-2 ring-mineral-950/20" : "border-marfim-300",
+        "w-72 rounded-lg border bg-white p-3.5 shadow-xs transition-all",
+        data.selecionado
+          ? "border-stone-900 ring-2 ring-stone-900/15 shadow-sm"
+          : "border-stone-200/90 hover:border-stone-400",
       )}
     >
       <Handle
         type="target"
         position={Position.Top}
-        className="!h-4 !w-4 !border-2 !border-white !bg-emerald-700"
+        className="!h-3.5 !w-3.5 !border-2 !border-white !bg-stone-900 transition-transform hover:scale-125"
       />
-      <div className="flex items-center gap-2 text-sm font-semibold text-mineral-950">
-        <CheckCircle2 className="h-5 w-5 text-emerald-700" aria-hidden="true" />
-        Finalização
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-900 tracking-tight">
+        <span className="flex h-4 w-4 items-center justify-center rounded bg-stone-100 text-stone-700">
+          <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+        </span>
+        Conclusão da experiência
       </div>
-      <p className="mt-2 truncate text-sm text-mineral-800">{data.titulo}</p>
-      <p className="mt-1 text-xs text-mineral-600">{data.descricao}</p>
+      <p className="mt-1.5 truncate text-xs font-medium text-stone-800">{data.titulo}</p>
+      <p className="mt-0.5 text-[11px] text-stone-500 leading-normal">{data.descricao}</p>
     </div>
   );
 }

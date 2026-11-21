@@ -30,6 +30,10 @@ export const esquemaCriarContaEmail = z
       .trim()
       .min(8, "Crie uma senha com pelo menos 8 caracteres."),
     confirmacaoSenha: z.string({ required_error: "Confirme sua senha." }).trim(),
+    aceitouTermosEPrivacidade: z.boolean().refine((val) => val === true, {
+      message: "Você deve aceitar os Termos de Uso e a Política de Privacidade para continuar.",
+    }),
+    autorizouComunicacoes: z.boolean(),
   })
   .refine((dados) => dados.senha === dados.confirmacaoSenha, {
     message: "A confirmação de senha não coincide com a senha digitada.",
@@ -46,6 +50,25 @@ export const esquemaRecuperarSenha = z.object({
 });
 
 export type DadosRecuperarSenha = z.infer<typeof esquemaRecuperarSenha>;
+
+export const esquemaRedefinirSenha = z
+  .object({
+    codigoAcao: z
+      .string({ required_error: "Código de redefinição inválido ou expirado." })
+      .trim()
+      .min(5, "Código de redefinição inválido."),
+    novaSenha: z
+      .string({ required_error: "Crie uma nova senha de acesso." })
+      .trim()
+      .min(8, "Crie uma senha com pelo menos 8 caracteres."),
+    confirmacaoSenha: z.string({ required_error: "Confirme a nova senha." }).trim(),
+  })
+  .refine((dados) => dados.novaSenha === dados.confirmacaoSenha, {
+    message: "A confirmação de senha não coincide com a nova senha digitada.",
+    path: ["confirmacaoSenha"],
+  });
+
+export type DadosRedefinirSenha = z.infer<typeof esquemaRedefinirSenha>;
 
 export const esquemaCriarOrganizacaoInicial = z.object({
   nome: z

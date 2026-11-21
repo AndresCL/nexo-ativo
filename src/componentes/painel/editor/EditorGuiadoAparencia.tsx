@@ -4,14 +4,12 @@ import { AcoesPublicacaoPagina } from "@/componentes/painel/AcoesPublicacaoPagin
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 
 import { AvisosPublicidade } from "@/componentes/painel/AvisosPublicidade";
-import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { Palette } from "lucide-react";
+import { useEffect, useMemo } from "react";
 import type { ServicoEditorAparenciaPorta } from "@/aplicacao/portas/portasEditorAparencia";
-import type { ItemAcaoHome } from "@/dominio/entidades/paginaPublicada";
+import type { AcervoPublicoVitrine } from "@/dominio/entidades/catalogoConteudo";
 import {
   avaliarProntidaoPublicacaoPagina,
   converterRascunhoParaConteudoPublicado,
@@ -22,12 +20,12 @@ import { AlternadorPreviaDispositivo } from "@/componentes/editorial/AlternadorP
 import { Botao } from "@/componentes/interface/Botao";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { NavegacaoAparencia, SecoesFormularioAparencia } from "./SecoesFormularioAparencia";
-import { BlocoAvaliacoesGoogle } from "@/componentes/editorial/avaliacoes/BlocoAvaliacoesGoogle";
 import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { resolverAcoesVitrineComMicrofluxos } from "@/dominio/entidades/paginaPublicada";
 
 export interface PropriedadesEditorGuiadoAparencia {
+  readonly acervo?: AcervoPublicoVitrine;
   readonly previaEquipe?: PreviaEquipeVitrine;
   readonly microfluxos?: readonly DefinicaoMicrofluxo[];
   readonly identificadorPublico: string;
@@ -39,10 +37,10 @@ export interface PropriedadesEditorGuiadoAparencia {
 }
 
 export function EditorGuiadoAparencia({
+  acervo,
   previaEquipe,
   microfluxos = [],
   identificadorPublico,
-  nomeOrganizacao,
   emailVerificado,
   podeEditarAparencia,
   podePublicarPagina,
@@ -69,13 +67,47 @@ export function EditorGuiadoAparencia({
     }
   }, [searchParams, definirAbaAtiva]);
 
+  const acervoPrevia = useMemo<AcervoPublicoVitrine>(() => {
+    if (acervo) {
+      return acervo;
+    }
+    const profissionaisFallback = (previaEquipe?.avatares ?? []).map((perfil, indice) => ({
+      id: perfil.id,
+      organizacaoId: rascunho.organizacaoId,
+      identificadorCartao: perfil.id,
+      nomeCompleto: perfil.nomeCompleto,
+      cargoOuEspecialidade: "",
+      minibiografia: "",
+      urlFotoPerfil: perfil.urlFotoPerfil,
+      pontoFocalFoto: perfil.pontoFocalFoto,
+      especialidades: [],
+      servicosVinculadosIds: [],
+      aceitaSolicitacoesDiretas: false,
+      ativo: true,
+      ordemExibicao: indice,
+      atualizadoEmIso: "",
+    }));
+    return {
+      servicos: [],
+      produtos: [],
+      projetosPortfolio: [],
+      profissionais: profissionaisFallback,
+      microfluxos,
+    };
+  }, [acervo, microfluxos, previaEquipe, rascunho.organizacaoId]);
+
+  const microfluxosEfetivos = acervo?.microfluxos ?? microfluxos;
+
   const paginaPrevia = converterRascunhoParaConteudoPublicado(rascunho, {
     identificadorPublico,
     versaoPublicada: versaoPublicadaAtual ?? 1,
   });
   const paginaComExperiencias = {
     ...paginaPrevia,
-    acoesPrincipais: resolverAcoesVitrineComMicrofluxos(paginaPrevia.acoesPrincipais, microfluxos),
+    acoesPrincipais: resolverAcoesVitrineComMicrofluxos(
+      paginaPrevia.acoesPrincipais,
+      microfluxosEfetivos,
+    ),
   };
 
   const pendenciasPublicacao = avaliarProntidaoPublicacaoPagina(rascunho, {
@@ -100,12 +132,6 @@ export function EditorGuiadoAparencia({
     aoPublicar: (resultado) =>
       registrarNovaPublicacao(resultado.versaoPublicada, resultado.publicadoEmIso),
   });
-
-  function aoAcionarItemPrevia(acao: ItemAcaoHome) {
-    notificar.informacao(
-      `Prévia da ação "${acao.rotulo}": conduzirá o visitante para ${acao.destino}.`,
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -187,21 +213,12 @@ export function EditorGuiadoAparencia({
           <AlternadorPreviaDispositivo
             aparencia="clara"
             paginaBase={paginaComExperiencias}
-            previaEquipe={previaEquipe}
-            aoAcionarItem={aoAcionarItemPrevia}
-            complementoChamada={
-              podeEditarAparencia ? (
-                <BlocoAvaliacoesGoogle
-                  key={rascunho.avaliacoesGoogle?.identificadorLocal}
-                  pagina={paginaPrevia}
-                  previa
-                />
-              ) : undefined
-            }
+            acervo={acervoPrevia}
+            exibirAvaliacoesGoogle={podeEditarAparencia}
           />
           <p className="px-1 text-[11px] leading-relaxed text-mineral-500">
-            As alterações aparecem aqui enquanto você edita. Use “Publicar página” para atualizar /
-            {identificadorPublico}.
+            Prévia interativa: teste botões, catálogos e experiências aqui enquanto edita. Use
+            “Publicar página” para atualizar /{identificadorPublico}.
           </p>
         </div>
       </div>

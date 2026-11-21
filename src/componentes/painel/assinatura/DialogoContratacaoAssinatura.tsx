@@ -43,7 +43,6 @@ export function DialogoContratacaoAssinatura({
   const [nomeRazaoSocial, setNomeRazaoSocial] = useState(nomePadrao);
   const [emailCobranca, setEmailCobranca] = useState(emailPadrao);
   const [telefone, setTelefone] = useState("");
-  const [incluirImplantacao, setIncluirImplantacao] = useState(false);
 
   async function manipularSubmissao(e: React.FormEvent) {
     e.preventDefault();
@@ -53,7 +52,7 @@ export function DialogoContratacaoAssinatura({
       cpfOuCnpj,
       emailCobranca,
       telefone,
-      incluirImplantacao,
+      incluirImplantacao: false,
     });
   }
 
@@ -124,16 +123,6 @@ export function DialogoContratacaoAssinatura({
                   /mês
                 </strong>
               </p>
-              {incluirImplantacao ? (
-                <p className="flex items-center justify-between gap-2">
-                  <span>Implantação · pagamento único</span>
-                  <strong className="text-violet-900">
-                    {ValorMonetarioCentavos.deCentavos(
-                      definicaoPlano.valorImplantacaoAssistidaCentavos ?? 0,
-                    ).formatarMoedaBrasileira()}
-                  </strong>
-                </p>
-              ) : null}
             </div>
 
             <fieldset disabled={processando} className="space-y-4">
@@ -204,22 +193,6 @@ export function DialogoContratacaoAssinatura({
                   className="mt-1 w-full min-h-10 rounded-lg border border-marfim-200 px-3 py-2 text-xs text-mineral-800 focus:border-indigo-400 focus:outline-none"
                 />
               </div>
-
-              <label className="flex items-start gap-3 rounded-xl border border-violet-200 bg-violet-50/40 p-3 text-xs leading-relaxed text-mineral-700">
-                <input
-                  type="checkbox"
-                  checked={incluirImplantacao}
-                  onChange={(e) => setIncluirImplantacao(e.target.checked)}
-                  className="mt-0.5 rounded border-marfim-200 accent-violet-600"
-                />
-                <span>
-                  <strong>Adicionar Implantação Editorial Assistida:</strong> Pagamento único de{" "}
-                  {ValorMonetarioCentavos.deCentavos(
-                    definicaoPlano.valorImplantacaoAssistidaCentavos ?? 0,
-                  ).formatarMoedaBrasileira()}{" "}
-                  com consultoria inicial da equipe do Nexo Ativo.
-                </span>
-              </label>
             </fieldset>
 
             <div className="flex flex-wrap justify-end gap-3 border-t border-marfim-100 pt-4">

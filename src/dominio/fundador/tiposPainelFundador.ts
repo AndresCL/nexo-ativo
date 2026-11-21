@@ -65,6 +65,10 @@ export interface MetricasOperacionaisFundador {
   readonly assinaturasCanceladas: number;
   readonly receitaMensalRecorrenteCentavos: number; // MRR em centavos inteiros
   readonly totalSolicitacoesComerciais: number;
+  readonly totalEmailsEnviadosMesAtual?: number;
+  readonly emailsSolicitacoesMesAtual?: number;
+  readonly emailsAutenticacaoMesAtual?: number;
+  readonly anoMesReferenciaEmail?: string;
 }
 
 export interface ItemVisaoGeralOrganizacaoFundador {
@@ -78,6 +82,7 @@ export interface ItemVisaoGeralOrganizacaoFundador {
   readonly situacaoAssinatura: SituacaoResumoAssinatura;
   readonly limiteProfissionaisAtivos?: number;
   readonly limiteEnviosEmailMensal?: number;
+  readonly emailsEnviadosMesAtual?: number;
   readonly totalMembros: number;
   readonly etapaKanban?: EtapaKanbanOrganizacaoFundador;
   readonly mensagensKanban?: readonly MensagemKanbanFundador[];

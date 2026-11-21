@@ -47,6 +47,7 @@ export const IDENTIFICADORES_RESERVADOS: ReadonlySet<string> = new Set([
   "precos",
   "privacidade",
   "recuperar-senha",
+  "redefinir-senha",
   "robots",
   "sair",
   "seguranca",

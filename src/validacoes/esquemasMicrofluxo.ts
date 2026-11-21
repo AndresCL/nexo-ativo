@@ -186,6 +186,12 @@ export const esquemaEtapaMicrofluxo: z.ZodType<EtapaMicrofluxo, z.ZodTypeDef, un
       tituloRecomendacaoPadrao: z.string().max(140).optional(),
       descricaoRecomendacaoPadrao: z.string().max(380).optional(),
       configuracaoPixManual: esquemaConfiguracaoPixManual.optional(),
+      posicaoCanvas: z
+        .object({
+          x: z.number(),
+          y: z.number(),
+        })
+        .optional(),
     }),
   );
 

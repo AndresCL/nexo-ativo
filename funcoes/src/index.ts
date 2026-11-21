@@ -14,6 +14,8 @@ import { executarCriacaoOrganizacaoInicial } from "./casos-de-uso/criarOrganizac
 import { executarPublicacaoPaginaEditorial } from "./casos-de-uso/publicarPaginaTransacional";
 import { atribuirPrivilegioFundadorAuditado } from "./casos-de-uso/provisionarFundadorPlataforma";
 import { executarRegistroSolicitacaoVisitante } from "./casos-de-uso/registrarSolicitacaoVisitanteTransacional";
+import { executarSolicitacaoRecuperacaoSenha } from "./casos-de-uso/solicitarRecuperacaoSenhaTransacional";
+import { criarProvedorEmailPadrao } from "./email/adaptadorResendEmail";
 import { executarCriacaoAssinaturaAsaas } from "./casos-de-uso/criarAssinaturaOrganizacaoAsaas";
 import { executarCancelamentoAssinaturaAsaas } from "./casos-de-uso/cancelarAssinaturaOrganizacaoAsaas";
 import { executarRestabelecimentoAssinaturaAsaas } from "./casos-de-uso/restabelecerAssinaturaOrganizacaoAsaas";
@@ -76,6 +78,24 @@ export const registrarSolicitacaoVisitante = onCall(
     try {
       const { bancoDados } = obterAdminFuncoes();
       return await executarRegistroSolicitacaoVisitante(bancoDados, requisicao.data);
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
+    }
+  }
+);
+
+export const solicitarRecuperacaoSenha = onCall(
+  { secrets: [chaveResend] },
+  async (requisicao) => {
+    try {
+      const { bancoDados, autenticacao } = obterAdminFuncoes();
+      const provedorEmail = criarProvedorEmailPadrao();
+      return await executarSolicitacaoRecuperacaoSenha(
+        bancoDados,
+        autenticacao,
+        provedorEmail,
+        requisicao.data,
+      );
     } catch (erro) {
       throw converterErroParaHttpsError(erro);
     }

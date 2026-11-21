@@ -4,46 +4,16 @@ import type {
   PacoteVitrinePublicada,
   PortaLeitorPaginaPublicada,
 } from "@/aplicacao/portas/portaLeitorPaginaPublicada";
-import {
-  ordenarItensAtivosCatalogo,
-  type ProdutoCatalogo,
-  type ProfissionalEquipe,
-  type ProjetoPortfolio,
-  type ServicoOrganizacao,
-} from "@/dominio/entidades/catalogoConteudo";
 import type { ConteudoPaginaPublicada } from "@/dominio/entidades/paginaPublicada";
-import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { ehIdentificadorPublicoValido } from "@/dominio/objetos-valor/identificadorPublico";
 import { aplicarPoliticaPublicidadeAVitrine } from "@/dominio/publicidade/aplicadorPoliticaPublicidade";
 import { obterPoliticaPublicidade } from "@/dominio/publicidade/registroPoliticasPublicidade";
 import { obterServicosAdminFirebase } from "@/infraestrutura/firebase/adminFirebase";
-import {
-  esquemaProdutoCatalogo,
-  esquemaProfissionalEquipe,
-  esquemaProjetoPortfolio,
-  esquemaServicoOrganizacao,
-} from "@/validacoes/esquemasCatalogoConteudo";
-import { esquemaDefinicaoMicrofluxo } from "@/validacoes/esquemasMicrofluxo";
 import { esquemaConteudoPaginaPublicada } from "@/validacoes/esquemaPaginaPublicada";
+import { montarAcervoVitrineDeDocumentos } from "./montadorAcervoVitrineFirestore";
 
 export function obterTagCachePaginaPublicada(identificadorPublico: string): string {
   return `pagina-publicada:${identificadorPublico}`;
-}
-
-function extrairItensPublicadosValidos<
-  T extends { readonly id: string; readonly ativo: boolean; readonly ordemExibicao: number },
->(
-  documentos: ReadonlyArray<{ data: () => unknown }>,
-  parseSeguro: (entrada: unknown) => { success: true; data: T } | { success: false },
-): readonly T[] {
-  const validos: T[] = [];
-  for (const doc of documentos) {
-    const validacao = parseSeguro(doc.data());
-    if (validacao.success && validacao.data.ativo) {
-      validos.push(validacao.data);
-    }
-  }
-  return ordenarItensAtivosCatalogo(validos);
 }
 
 async function consultarVitrineCompletaDiretoNoFirestore(
@@ -99,46 +69,20 @@ async function consultarVitrineCompletaDiretoNoFirestore(
           const validacao = esquemaConteudoPaginaPublicada.safeParse(dadosBrutos);
 
           if (validacao.success && validacao.data.publicado && validacao.data.paginaAtiva) {
-            const servicos = extrairItensPublicadosValidos<ServicoOrganizacao>(
-              snapServicos.docs,
-              (d) => esquemaServicoOrganizacao.safeParse(d),
-            );
-            const produtos = extrairItensPublicadosValidos<ProdutoCatalogo>(
-              snapProdutos.docs,
-              (d) => esquemaProdutoCatalogo.safeParse(d),
-            );
-            const profissionais = extrairItensPublicadosValidos<ProfissionalEquipe>(
-              snapProfissionais.docs,
-              (d) => esquemaProfissionalEquipe.safeParse(d),
-            );
-            const microfluxosPersistidos: DefinicaoMicrofluxo[] = [];
-            for (const doc of snapMicrofluxos.docs) {
-              const valFluxo = esquemaDefinicaoMicrofluxo.safeParse(doc.data());
-              if (valFluxo.success && valFluxo.data.ativo) {
-                microfluxosPersistidos.push(valFluxo.data);
-              }
-            }
-            const microfluxos = microfluxosPersistidos;
+            const acervo = montarAcervoVitrineDeDocumentos({
+              servicos: snapServicos.docs,
+              produtos: snapProdutos.docs,
+              projetosPortfolio: snapProjetos.docs,
+              profissionais: snapProfissionais.docs,
+              microfluxos: snapMicrofluxos.docs,
+              dadosVideos: docVideos.data(),
+            });
 
             return aplicarPoliticaPublicidadeAVitrine(
               obterPoliticaPublicidade(validacao.data.perfilPublicidade),
               {
                 pagina: validacao.data,
-                acervo: {
-                  servicos,
-                  produtos,
-                  projetosPortfolio: extrairItensPublicadosValidos<ProjetoPortfolio>(
-                    snapProjetos.docs,
-                    (d) => esquemaProjetoPortfolio.safeParse(d),
-                  ),
-                  profissionais,
-                  microfluxos,
-                  videos: Array.isArray(docVideos.data()?.videos) ? docVideos.data()?.videos : [],
-                  modoExibicaoVideos:
-                    docVideos.data()?.modoExibicaoVideos === "fila" ? "fila" : "carrossel",
-                  autoplayVideos: Boolean(docVideos.data()?.autoplayVideos),
-                  ocultarTituloVideos: Boolean(docVideos.data()?.ocultarTituloVideos),
-                },
+                acervo,
               },
             );
           }

@@ -51,7 +51,7 @@ export function criarConfiguracaoEmailPadraoOrganizacao(
     organizacaoId,
     notificarEquipeNovasSolicitacoes: true,
     emailsDestinatariosEquipe: emailLimpo ? [emailLimpo] : [],
-    enviarConfirmacaoVisitante: true,
+    enviarConfirmacaoVisitante: false,
     ...(emailLimpo ? { emailRespostaOpcional: emailLimpo } : {}),
     atualizadoEmIso: agoraIso,
   };

@@ -56,6 +56,9 @@ export class AdaptadorResendEmailHttp implements PortaProvedorEmailTransacional 
 
     // Modo simulado seguro para emulador local quando RESEND_API_KEY não está definida
     if (!this.chaveApi) {
+      console.warn(
+        `[Resend Modo Simulado] RESEND_API_KEY ausente. E-mail "${mensagem.assunto}" para [${mensagem.para.join(", ")}] marcado como simulado.`,
+      );
       return {
         enviado: true,
         idProvedor: `simulado-${mensagem.chaveIdempotencia}`,
@@ -97,10 +100,16 @@ export class AdaptadorResendEmailHttp implements PortaProvedorEmailTransacional 
         // Ignora erro de parse de corpo não-JSON
       }
 
+      console.error(
+        `[Resend Erro API] Falha no envio para [${mensagem.para.join(", ")}]: ${detalheErro} (de: ${mensagem.de})`,
+      );
       throw new Error(`Falha ao enviar e-mail transacional via Resend: ${detalheErro}`);
     }
 
     const dados = (await resposta.json()) as RespostaSucessoResendApi;
+    console.log(
+      `[Resend Sucesso] E-mail "${mensagem.assunto}" entregue à API Resend. ID: ${dados.id ?? "sem-id"} | Destinatários: ${mensagem.para.join(", ")}`,
+    );
 
     return {
       enviado: true,

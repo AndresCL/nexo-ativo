@@ -146,7 +146,7 @@ export function SecoesFormularioAparencia({
                   disabled={somenteLeitura}
                   value={rascunho.identidade.nomeExibicao}
                   onChange={(evento) => atualizarIdentidade({ nomeExibicao: evento.target.value })}
-                  placeholder="Ex.: Estúdio Alvorada ou Dra. Helena Vasconcelos"
+                  placeholder="Nome da sua marca ou atuação"
                 />
                 <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-mineral-700">
                   <input

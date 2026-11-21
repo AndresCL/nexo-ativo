@@ -19,11 +19,11 @@ import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numero
 import type { ContextoOrigemMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { TransicaoAlternancia } from "@/componentes/interface/TransicaoAlternancia";
 import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
-import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvatarProfissional } from "./AvatarProfissional";
 import { PainelEditorialPublico } from "./PainelEditorialPublico";
+import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export type SecaoAcervoAberta = "produtos" | "servicos" | "portfolio" | "equipe" | null;
 
@@ -55,6 +55,7 @@ export function GavetaEditorialPublica({
   consultorPadraoId: _consultorPadraoId,
   aoAbrirCartao,
 }: PropriedadesGavetaEditorialPublica) {
+  const { registrarEventoTelemetria } = useAmbienteVitrine();
   const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
   const tipografia = obterDescritorTipografiaEditorial(pagina.tipografiaId);
   const tituloGaveta = useMemo(() => {
@@ -334,7 +335,7 @@ export function GavetaEditorialPublica({
                             rel="noopener noreferrer"
                             onClick={() => {
                               const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-                              void servicoTelemetriaAnonimaPadrao.registrarEvento({
+                              void registrarEventoTelemetria({
                                 organizacaoId: pagina.organizacaoId,
                                 tipoEvento: "clique_whatsapp",
                                 canalOrigem: origem.canalOrigem,

@@ -255,8 +255,10 @@ export function GerenciadorExperienciasPainel({
         const problemas = avaliarIntegridadeGrafoMicrofluxo(fluxo);
         if (problemas.length) {
           setFluxoSelecionadoId(fluxo.id);
+          const primeira = problemas[0]!;
+          const complemento = problemas.length > 1 ? ` (+${problemas.length - 1} pendência${problemas.length > 2 ? "s" : ""})` : "";
           throw new Error(
-            `Revise “${fluxo.titulo}” antes de publicar: ${problemas.map((p) => p.mensagem).join(" ")}`,
+            `**Experiência:** “${fluxo.titulo}”\n${primeira.mensagem}${complemento}`,
           );
         }
       }
@@ -1141,17 +1143,20 @@ export function GerenciadorExperienciasPainel({
           </div>
 
           {!grafoIntegro ? (
-            <details className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-              <summary className="cursor-pointer font-medium">
-                Conexões pendentes para publicar
+            <details
+              open={!grafoIntegro}
+              className="rounded-md border border-amber-300 bg-amber-50/80 p-3 text-xs text-amber-900 shadow-xs"
+            >
+              <summary className="cursor-pointer font-semibold flex items-center gap-1.5 text-amber-950">
+                <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                Conexões pendentes em “{fluxoAtual.titulo}” ({inconsistenciasGrafo.length})
               </summary>
-              <p className="mt-2">
-                Você pode salvar o rascunho e continuar a montagem depois. Conecte o Início à
-                primeira etapa e defina os caminhos.
+              <p className="mt-2 text-amber-800 leading-relaxed">
+                Você pode salvar o rascunho a qualquer momento. Para publicar na vitrine, conecte os caminhos destacados abaixo no canvas:
               </p>
-              <ul className="mt-2 space-y-1.5">
+              <ul className="mt-2.5 space-y-1.5 pl-2 border-l-2 border-amber-300">
                 {inconsistenciasGrafo.map((prob, idx) => (
-                  <li key={`${prob.codigo}-${idx}`}>{prob.mensagem}</li>
+                  <li key={`${prob.codigo}-${idx}`} className="leading-relaxed">{prob.mensagem}</li>
                 ))}
               </ul>
             </details>

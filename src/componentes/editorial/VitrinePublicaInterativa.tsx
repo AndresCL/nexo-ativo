@@ -23,7 +23,6 @@ import { CURVA_EDITORIAL, DURACOES_SEGUNDOS } from "@/componentes/interface/cons
 import { CartaoDigitalProfissionalPublico } from "./CartaoDigitalProfissionalPublico";
 import { TelaCarregamentoEditorial } from "./TelaCarregamentoEditorial";
 import type { PortaSubmissaoSolicitacaoVisitante } from "@/aplicacao/portas/portasSolicitacoesComerciais";
-import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import { ExecutorMicrofluxoVisitante } from "./ExecutorMicrofluxoVisitante";
 import { GavetaEditorialPublica, type SecaoAcervoAberta } from "./GavetaEditorialPublica";
@@ -36,12 +35,15 @@ import { ContextoApresentacaoEquipe } from "@/ganchos/contextoApresentacaoEquipe
 import { BottomSheetDetalhesItemAcervo } from "./acervo/BottomSheetDetalhesItemAcervo";
 import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
 import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
+import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export interface PropriedadesVitrinePublicaInterativa {
   readonly pagina: ConteudoPaginaPublicada;
   readonly acervo: AcervoPublicoVitrine;
   readonly servicoSubmissao?: PortaSubmissaoSolicitacaoVisitante;
   readonly duracaoMinimaLoaderMs?: number;
+  readonly alturaContidaPrevia?: boolean;
+  readonly exibirAvaliacoesGoogle?: boolean;
 }
 
 export function VitrinePublicaInterativa({
@@ -49,7 +51,18 @@ export function VitrinePublicaInterativa({
   acervo,
   servicoSubmissao,
   duracaoMinimaLoaderMs = process.env.NODE_ENV === "test" ? 0 : 3000,
+  alturaContidaPrevia = false,
+  exibirAvaliacoesGoogle = true,
 }: PropriedadesVitrinePublicaInterativa) {
+  const {
+    containerPortal,
+    modoPrevia,
+    sincronizarHistoricoNavegador,
+    registrarEventoTelemetria,
+    aoNavegarEmPrevia,
+  } = useAmbienteVitrine();
+  const estaContido = containerPortal !== null;
+  const duracaoLoaderEfetiva = modoPrevia ? 0 : duracaoMinimaLoaderMs;
   const ultimaEntradaDireta = useRef<string | null>(null);
   const acionadorGaveta = useRef<HTMLButtonElement | null>(null);
   const previaEquipe = useMemo(
@@ -72,7 +85,7 @@ export function VitrinePublicaInterativa({
   const [contextoMicrofluxo, setContextoMicrofluxo] = useState<
     ContextoOrigemMicrofluxo | undefined
   >(undefined);
-  const [loaderVisivel, setLoaderVisivel] = useState(true);
+  const [loaderVisivel, setLoaderVisivel] = useState(() => duracaoLoaderEfetiva > 0);
   const [desvanecendoLoader, setDesvanecendoLoader] = useState(false);
 
   const variaveisPaleta = useMemo(
@@ -86,40 +99,43 @@ export function VitrinePublicaInterativa({
   );
 
   useEffect(() => {
-    try {
-      const dadosArmazenar = JSON.stringify({
-        urlLogotipo: pagina.identidade.urlLogotipoOpcional ?? null,
-        formatoBordaLogotipo: pagina.identidade.formatoBordaLogotipo ?? null,
-        nomeCliente: pagina.identidade.nomeExibicao,
-        variaveisCssPaleta: variaveisPaleta,
-      });
-      localStorage.setItem(`fluxo_marca_${pagina.identificadorPublico}`, dadosArmazenar);
-      localStorage.setItem(`fluxo_marca_${pagina.organizacaoId}`, dadosArmazenar);
-      sessionStorage.setItem(`fluxo_marca_${pagina.identificadorPublico}`, dadosArmazenar);
-      sessionStorage.setItem(`fluxo_marca_${pagina.organizacaoId}`, dadosArmazenar);
-    } catch {
-      // Ignora indisponibilidade do storage no ambiente
+    if (!modoPrevia) {
+      try {
+        const dadosArmazenar = JSON.stringify({
+          urlLogotipo: pagina.identidade.urlLogotipoOpcional ?? null,
+          formatoBordaLogotipo: pagina.identidade.formatoBordaLogotipo ?? null,
+          nomeCliente: pagina.identidade.nomeExibicao,
+          variaveisCssPaleta: variaveisPaleta,
+        });
+        localStorage.setItem(`fluxo_marca_${pagina.identificadorPublico}`, dadosArmazenar);
+        localStorage.setItem(`fluxo_marca_${pagina.organizacaoId}`, dadosArmazenar);
+        sessionStorage.setItem(`fluxo_marca_${pagina.identificadorPublico}`, dadosArmazenar);
+        sessionStorage.setItem(`fluxo_marca_${pagina.organizacaoId}`, dadosArmazenar);
+      } catch {
+        // Ignora indisponibilidade do storage no ambiente
+      }
     }
 
-    if (duracaoMinimaLoaderMs <= 0) {
+    if (duracaoLoaderEfetiva <= 0) {
       setLoaderVisivel(false);
       return;
     }
 
     const timerDesvanecer = setTimeout(() => {
       setDesvanecendoLoader(true);
-    }, duracaoMinimaLoaderMs);
+    }, duracaoLoaderEfetiva);
 
     const timerRemover = setTimeout(() => {
       setLoaderVisivel(false);
-    }, duracaoMinimaLoaderMs + 500);
+    }, duracaoLoaderEfetiva + 500);
 
     return () => {
       clearTimeout(timerDesvanecer);
       clearTimeout(timerRemover);
     };
   }, [
-    duracaoMinimaLoaderMs,
+    duracaoLoaderEfetiva,
+    modoPrevia,
     pagina.identificadorPublico,
     pagina.organizacaoId,
     pagina.identidade.nomeExibicao,
@@ -134,16 +150,18 @@ export function VitrinePublicaInterativa({
 
   useEffect(() => {
     const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "visualizacao_vitrine",
       canalOrigem: origem.canalOrigem,
       ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
       ...(origem.cartaoProfissionalId ? { cartaoProfissionalId: origem.cartaoProfissionalId } : {}),
     });
-  }, [pagina.organizacaoId]);
+  }, [pagina.organizacaoId, registrarEventoTelemetria]);
 
   useEffect(() => {
+    if (!sincronizarHistoricoNavegador) return;
+
     function sincronizarComHash() {
       const hashAtual = window.location.hash;
       const secao = identificarSecaoPorHash(hashAtual);
@@ -175,7 +193,7 @@ export function VitrinePublicaInterativa({
           profissional ? { profissionalPreSelecionadoId: profissional.id } : undefined,
         );
         setMicrofluxoAtivo(resolucaoFluxo.microfluxo);
-        void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        void registrarEventoTelemetria({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "abertura_microfluxo",
           canalOrigem: origem.canalOrigem,
@@ -197,13 +215,19 @@ export function VitrinePublicaInterativa({
     sincronizarComHash();
     window.addEventListener("hashchange", sincronizarComHash);
     return () => window.removeEventListener("hashchange", sincronizarComHash);
-  }, [microfluxosDisponiveis, pagina.organizacaoId, acervo.profissionais]);
+  }, [
+    microfluxosDisponiveis,
+    pagina.organizacaoId,
+    acervo.profissionais,
+    sincronizarHistoricoNavegador,
+    registrarEventoTelemetria,
+  ]);
 
   function abrirCartao(profissional: ProfissionalEquipe) {
     acionadorGaveta.current = null;
     setSecaoAberta(null);
     setCartaoProfissionalAtivo(profissional);
-    if (typeof window !== "undefined") {
+    if (sincronizarHistoricoNavegador && typeof window !== "undefined") {
       window.history.pushState(
         { tipo: "cartao_equipe", identificadorCartao: profissional.identificadorCartao },
         "",
@@ -214,7 +238,7 @@ export function VitrinePublicaInterativa({
 
   function fecharCartao() {
     setCartaoProfissionalAtivo(null);
-    if (typeof window !== "undefined") {
+    if (sincronizarHistoricoNavegador && typeof window !== "undefined") {
       if (window.history.state?.tipo === "cartao_equipe") {
         window.history.back();
       } else {
@@ -224,6 +248,8 @@ export function VitrinePublicaInterativa({
   }
 
   useEffect(() => {
+    if (!sincronizarHistoricoNavegador) return;
+
     function tratarPopState(evento: PopStateEvent) {
       if (evento.state?.tipo === "cartao_equipe") {
         const profissional = acervo.profissionais.find(
@@ -239,7 +265,7 @@ export function VitrinePublicaInterativa({
 
     window.addEventListener("popstate", tratarPopState);
     return () => window.removeEventListener("popstate", tratarPopState);
-  }, [acervo.profissionais]);
+  }, [acervo.profissionais, sincronizarHistoricoNavegador]);
 
   function abrirExperienciaComContexto(
     tipoPreferencial: string,
@@ -277,7 +303,7 @@ export function VitrinePublicaInterativa({
     setMicrofluxoAtivo(escolhido);
 
     const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "abertura_microfluxo",
       canalOrigem: origem.canalOrigem,
@@ -300,7 +326,7 @@ export function VitrinePublicaInterativa({
   function aoAcionarItemHome(acao: ItemAcaoHome, acionador?: HTMLButtonElement) {
     acionadorGaveta.current = acionador ?? null;
     const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "clique_acao_home",
       canalOrigem: origem.canalOrigem,
@@ -348,7 +374,7 @@ export function VitrinePublicaInterativa({
         : acao.id.replace(/^acao-fluxo-/, "");
       const fluxoPost = microfluxosDisponiveis.find((m) => m.id === idExperienciaPost);
 
-      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+      void registrarEventoTelemetria({
         organizacaoId: pagina.organizacaoId,
         tipoEvento: "abertura_microfluxo",
         canalOrigem: origem.canalOrigem,
@@ -371,7 +397,7 @@ export function VitrinePublicaInterativa({
         setContextoMicrofluxo(resolucaoFluxo?.contextoOrigem);
         setMicrofluxoAtivo(fluxoAlvo);
 
-        void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        void registrarEventoTelemetria({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "abertura_microfluxo",
           canalOrigem: origem.canalOrigem,
@@ -397,10 +423,14 @@ export function VitrinePublicaInterativa({
 
     if (acao.tipoDestino === "telefone") {
       const telefoneLimpo = acao.destino.replace(/[^\d+]/g, "");
-      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+      void registrarEventoTelemetria({
         organizacaoId: pagina.organizacaoId,
         tipoEvento: "clique_ligacao",
       });
+      if (!sincronizarHistoricoNavegador) {
+        aoNavegarEmPrevia?.(acao.destino, "telefone");
+        return;
+      }
       window.location.assign(`tel:${telefoneLimpo}`);
       return;
     }
@@ -411,10 +441,18 @@ export function VitrinePublicaInterativa({
     }
 
     if (acao.destino.startsWith("#")) {
+      if (!sincronizarHistoricoNavegador) {
+        aoNavegarEmPrevia?.(acao.destino, "interno");
+        return;
+      }
       window.location.hash = acao.destino;
       return;
     }
 
+    if (!sincronizarHistoricoNavegador) {
+      aoNavegarEmPrevia?.(acao.destino, "interno");
+      return;
+    }
     window.location.assign(acao.destino);
   }
 
@@ -451,6 +489,7 @@ export function VitrinePublicaInterativa({
           servicos={acervo.servicos}
           pagina={paginaComAcoesResolvidas}
           modoMobileForcado
+          alturaContidaPrevia={alturaContidaPrevia}
           aoAcionarItem={aoAcionarItemHome}
           aoSelecionarItemAcervo={(tipo, itemId) => {
             const acaoCorrespondente = paginaComAcoesResolvidas.acoesPrincipais.find(
@@ -467,10 +506,13 @@ export function VitrinePublicaInterativa({
             }
           }}
           complementoChamada={
-            <BlocoAvaliacoesGoogle
-              key={paginaComAcoesResolvidas.avaliacoesGoogle?.identificadorLocal}
-              pagina={paginaComAcoesResolvidas}
-            />
+            exibirAvaliacoesGoogle ? (
+              <BlocoAvaliacoesGoogle
+                key={paginaComAcoesResolvidas.avaliacoesGoogle?.identificadorLocal}
+                pagina={paginaComAcoesResolvidas}
+                previa={modoPrevia}
+              />
+            ) : undefined
           }
         />
       </ContextoApresentacaoEquipe.Provider>
@@ -482,7 +524,7 @@ export function VitrinePublicaInterativa({
             setMicrofluxoAtivo(null);
             setContextoMicrofluxo(undefined);
             ultimaEntradaDireta.current = null;
-            if (window.location.hash.startsWith("#experiencia=")) {
+            if (sincronizarHistoricoNavegador && window.location.hash.startsWith("#experiencia=")) {
               window.history.replaceState(
                 window.history.state,
                 "",
@@ -562,7 +604,11 @@ export function VitrinePublicaInterativa({
               duration: DURACOES_SEGUNDOS.transicaoEtapa,
               ease: CURVA_EDITORIAL,
             }}
-            className="fixed inset-0 z-[60] overflow-y-auto bg-[var(--editorial-fundo)] shadow-2xl"
+            className={
+              estaContido
+                ? "absolute inset-0 z-[60] overflow-y-auto bg-[var(--editorial-fundo)] shadow-2xl"
+                : "fixed inset-0 z-[60] overflow-y-auto bg-[var(--editorial-fundo)] shadow-2xl"
+            }
           >
             <CartaoDigitalProfissionalPublico
               paginaOrganizacao={pagina}

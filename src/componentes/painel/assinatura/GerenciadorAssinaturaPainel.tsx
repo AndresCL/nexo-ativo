@@ -1,6 +1,5 @@
 "use client";
 
-import { CreditCard, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import {
@@ -25,7 +24,6 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BannerCicloAssinatura } from "./BannerCicloAssinatura";
 import { SecaoMetricasAssinatura } from "./SecaoMetricasAssinatura";
 import { SecaoPlanosDisponiveis } from "./SecaoPlanosDisponiveis";
-import { CartaoImplantacaoAssistida } from "./CartaoImplantacaoAssistida";
 import { TabelaHistoricoCobrancas } from "./TabelaHistoricoCobrancas";
 import { SecaoCancelamentoAssinatura } from "./SecaoCancelamentoAssinatura";
 import {
@@ -60,7 +58,6 @@ export function GerenciadorAssinaturaPainel({
 
   const [modalContratacaoAberto, setModalContratacaoAberto] = useState(false);
   const [processando, setProcessando] = useState(false);
-  const [contratandoImplantacao, setContratandoImplantacao] = useState(false);
   const contratacaoEmCurso = useRef(false);
 
   const [urlCheckoutGerado, setUrlCheckoutGerado] = useState<string | null>(
@@ -116,12 +113,6 @@ export function GerenciadorAssinaturaPainel({
         ? "Nenhuma cobrança ativa"
         : "Valor mensal do plano";
 
-  const apoioEmails = estaSemPlanoAtivo
-    ? "Franquia gratuita"
-    : assinaturaAtual?.criadoEmIso
-      ? `Franquia de notificações · Início: ${formatarData(assinaturaAtual.criadoEmIso)}`
-      : "Franquia de notificações";
-
   async function submeterContratacao(dados: DadosSubmissaoContratacao) {
     if (!podeGerenciarAssinatura || contratacaoEmCurso.current) return;
 
@@ -153,26 +144,6 @@ export function GerenciadorAssinaturaPainel({
     } finally {
       contratacaoEmCurso.current = false;
       setProcessando(false);
-    }
-  }
-
-  async function aoContratarImplantacaoAvulsa() {
-    if (!podeGerenciarAssinatura || contratandoImplantacao) return;
-    setContratandoImplantacao(true);
-    try {
-      const resultado = await servicoAssinaturas.contratarImplantacaoAssistida(organizacao.id);
-      if (resultado.urlCheckout) {
-        window.open(resultado.urlCheckout, "_blank");
-      }
-      notificar.sucesso("Cobrança de implantação gerada com sucesso! Acesse a fatura para concluir.");
-    } catch (erro) {
-      notificar.erro(
-        erro instanceof Error
-          ? erro.message
-          : "Não foi possível gerar a contratação da implantação.",
-      );
-    } finally {
-      setContratandoImplantacao(false);
     }
   }
 
@@ -240,8 +211,6 @@ export function GerenciadorAssinaturaPainel({
         mensalidadeFormatada={temVigenciaRestante ? "Sem renovação" : mensalidadeAtual}
         apoioMensalidade={apoioMensalidade}
         limiteProfissionais={organizacao.resumoDireitosPlano.limiteProfissionaisAtivos}
-        limiteEmails={organizacao.resumoDireitosPlano.limiteEnviosEmailMensal}
-        apoioEmails={apoioEmails}
       />
 
       <SecaoPlanosDisponiveis
@@ -255,14 +224,6 @@ export function GerenciadorAssinaturaPainel({
         podeGerenciar={podeGerenciarAssinatura}
         processando={processando}
         aoAbrirModalContratacao={() => setModalContratacaoAberto(true)}
-      />
-
-      <CartaoImplantacaoAssistida
-        organizacaoNome={organizacao.nome}
-        contratouImplantacao={Boolean(assinaturaAtual?.contratouImplantacaoAssistida)}
-        podeGerenciar={podeGerenciarAssinatura}
-        contratando={contratandoImplantacao}
-        aoContratar={aoContratarImplantacaoAvulsa}
       />
 
       <TabelaHistoricoCobrancas

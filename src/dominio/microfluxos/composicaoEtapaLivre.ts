@@ -228,23 +228,40 @@ export function obterRespostaLegivelBloco(
   return texto || undefined;
 }
 
-/** Reconstitui contato somente a partir dos campos presentes no caminho atual. */
+/** Reconstitui contato a partir dos campos preenchidos nas etapas livres. */
 export function resolverContatoEtapasLivres(
   etapas: readonly EtapaMicrofluxo[],
   respostas: RespostasExecucaoMicrofluxo,
 ) {
   const contato: Partial<Record<FinalidadeCampoContato, string>> = {};
-  for (const etapa of etapas)
-    for (const bloco of etapa.blocos ?? [])
-      if (bloco.tipo === "campo" && bloco.finalidade) {
+  for (const etapa of etapas) {
+    for (const bloco of etapa.blocos ?? []) {
+      if (bloco.tipo === "campo") {
         const valor = obterValorBloco(etapa, bloco, respostas);
-        if (valor !== undefined) contato[bloco.finalidade] = String(valor).trim();
+        if (valor !== undefined && String(valor).trim().length > 0) {
+          const valorLimpo = String(valor).trim();
+          if (bloco.finalidade) {
+            contato[bloco.finalidade] = valorLimpo;
+          } else if (bloco.campo.tipo === "email" || bloco.campo.rotulo.toLowerCase().includes("e-mail") || bloco.campo.rotulo.toLowerCase().includes("email")) {
+            contato.email = valorLimpo;
+          } else if (bloco.campo.tipo === "telefone" || bloco.campo.rotulo.toLowerCase().includes("whatsapp") || bloco.campo.rotulo.toLowerCase().includes("telefone")) {
+            contato.telefoneOuWhatsapp = valorLimpo;
+          } else if (bloco.campo.rotulo.toLowerCase().includes("nome")) {
+            contato.nomeCompleto = valorLimpo;
+          }
+        }
       }
-  return contato.nomeCompleto && contato.telefoneOuWhatsapp
+    }
+  }
+
+  const nome = contato.nomeCompleto || "Visitante";
+  const telefone = contato.telefoneOuWhatsapp || (contato.email ? "Não informado" : undefined);
+
+  return telefone
     ? {
         ...contato,
-        nomeCompleto: contato.nomeCompleto,
-        telefoneOuWhatsapp: contato.telefoneOuWhatsapp,
+        nomeCompleto: nome,
+        telefoneOuWhatsapp: telefone,
       }
     : undefined;
 }

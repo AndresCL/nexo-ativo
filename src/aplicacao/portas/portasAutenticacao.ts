@@ -14,6 +14,8 @@ export interface PortaAutenticacaoCliente {
   ): Promise<UsuarioAutenticado>;
   entrarComGoogle(): Promise<UsuarioAutenticado>;
   solicitarRecuperacaoSenha(email: string): Promise<void>;
+  confirmarRedefinicaoSenha(codigoAcao: string, novaSenha: string): Promise<void>;
+  validarCodigoRedefinicaoSenha(codigoAcao: string): Promise<string>;
   reenviarVerificacaoEmail(): Promise<void>;
   recarregarEstadoUsuario(): Promise<UsuarioAutenticado | null>;
   forcarAtualizacaoTokenSessao(): Promise<void>;

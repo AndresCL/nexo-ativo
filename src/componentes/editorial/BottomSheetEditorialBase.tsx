@@ -18,6 +18,7 @@ import {
   type ConteudoPaginaPublicada,
 } from "@/dominio/entidades/paginaPublicada";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
+import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export interface PropriedadesBottomSheetEditorialBase {
   readonly aberto: boolean;
@@ -99,6 +100,9 @@ export function BottomSheetEditorialBase({
     }
   }
 
+  const { containerPortal } = useAmbienteVitrine();
+  const estaContido = containerPortal !== null;
+
   const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
   const tipografia = obterDescritorTipografiaEditorial(pagina.tipografiaId);
   const variaveisPaleta = gerarVariaveisCssPaletaEditorial(
@@ -108,15 +112,28 @@ export function BottomSheetEditorialBase({
   ) as CSSProperties;
 
   return (
-    <DialogoPrimitivo.Root open={aberto} onOpenChange={(abrir) => !abrir && aoFechar()}>
-      <DialogoPrimitivo.Portal>
-        <DialogoPrimitivo.Overlay asChild>
+    <DialogoPrimitivo.Root
+      open={aberto}
+      modal={!estaContido}
+      onOpenChange={(abrir) => !abrir && aoFechar()}
+    >
+      <DialogoPrimitivo.Portal container={containerPortal ?? undefined}>
+        {estaContido ? (
           <motion.div
             style={{ opacity: opacidadeOverlay }}
             onClick={aoFechar}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
+            aria-hidden="true"
+            className="absolute inset-0 z-40 bg-black/60 backdrop-blur-xs"
           />
-        </DialogoPrimitivo.Overlay>
+        ) : (
+          <DialogoPrimitivo.Overlay asChild>
+            <motion.div
+              style={{ opacity: opacidadeOverlay }}
+              onClick={aoFechar}
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
+            />
+          </DialogoPrimitivo.Overlay>
+        )}
 
         <DialogoPrimitivo.Content
           asChild
@@ -158,7 +175,9 @@ export function BottomSheetEditorialBase({
               }
             }}
             className={combinarClasses(
-              "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t shadow-2xl sm:animacao-painel-responsivo sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-full sm:w-[28rem] sm:rounded-none sm:border-l sm:border-t-0",
+              estaContido
+                ? "absolute inset-x-0 bottom-0 z-50 flex max-h-[92%] w-full flex-col overflow-hidden rounded-t-3xl border-t shadow-2xl"
+                : "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t shadow-2xl sm:animacao-painel-responsivo sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-full sm:w-[28rem] sm:rounded-none sm:border-l sm:border-t-0",
               paleta.temaEscuro
                 ? "border-white/15 bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]"
                 : "border-black/10 bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]",
@@ -169,7 +188,10 @@ export function BottomSheetEditorialBase({
             <motion.div
               style={{ opacity: opacidadeHandle }}
               onPointerDown={(e) => dragControls.start(e)}
-              className="absolute top-0 inset-x-0 z-40 flex h-8 items-center justify-center pointer-events-auto cursor-grab active:cursor-grabbing sm:hidden touch-none"
+              className={combinarClasses(
+                "absolute top-0 inset-x-0 z-40 flex h-8 items-center justify-center pointer-events-auto cursor-grab active:cursor-grabbing touch-none",
+                !estaContido && "sm:hidden",
+              )}
             >
               <div
                 className="h-1.5 w-12 rounded-full bg-white/80 shadow-md backdrop-blur-md ring-1 ring-black/10"
@@ -207,7 +229,7 @@ export function BottomSheetEditorialBase({
                   iniciarArrastePeloTopo(e);
                 }
               }}
-              className="flex-1 overflow-y-auto overscroll-contain"
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]"
             >
               {/* Mídia Sangrada Opcional no Topo */}
               {midiaTopoSangrada ? (

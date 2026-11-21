@@ -35,7 +35,6 @@ import type {
   ContextoOrigemMicrofluxo,
   DefinicaoMicrofluxo,
 } from "@/dominio/microfluxos/tiposMicrofluxo";
-import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { gravarAtribuicaoOrigem } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import { contextualizarAcoesParaCartao } from "@/dominio/editorial/contextualizadorAcoesCartao";
 import {
@@ -52,6 +51,7 @@ import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
 import { renderizarIconeAcao } from "./NavegacaoAcoesHome";
 import { RodapeEditorial } from "./RodapeEditorial";
 import { identificarSecaoPorHash, resolverMicrofluxoPorDestino } from "./roteadorAcoesPublicas";
+import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export interface PropriedadesCartaoDigitalProfissionalPublico {
   readonly paginaOrganizacao: ConteudoPaginaPublicada;
@@ -70,6 +70,14 @@ export function CartaoDigitalProfissionalPublico({
   urlPublicaCartao,
   aoVoltar,
 }: PropriedadesCartaoDigitalProfissionalPublico) {
+  const {
+    containerPortal,
+    modoPrevia,
+    sincronizarHistoricoNavegador,
+    registrarEventoTelemetria,
+    aoNavegarEmPrevia,
+  } = useAmbienteVitrine();
+  const estaContido = containerPortal !== null;
   const [contatoSalvo, setContatoSalvo] = useState(false);
   const [acordeaoAcoesAberto, setAcordeaoAcoesAberto] = useState(true);
   const ultimaVisualizacaoRegistrada = useRef<string | null>(null);
@@ -175,13 +183,15 @@ export function CartaoDigitalProfissionalPublico({
         ? (params.get("utm_content") ?? `profissional_${profissional.identificadorCartao}`)
         : undefined;
 
-    gravarAtribuicaoOrigem(paginaOrganizacao.organizacaoId, {
-      canalOrigem: "cartao_equipe",
-      cartaoProfissionalId: profissional.id,
-      ...(qrCodeOrigem ? { qrCodeOrigem } : {}),
-    });
+    if (!modoPrevia) {
+      gravarAtribuicaoOrigem(paginaOrganizacao.organizacaoId, {
+        canalOrigem: "cartao_equipe",
+        cartaoProfissionalId: profissional.id,
+        ...(qrCodeOrigem ? { qrCodeOrigem } : {}),
+      });
+    }
 
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: paginaOrganizacao.organizacaoId,
       tipoEvento: "visualizacao_cartao",
       canalOrigem: "cartao_equipe",
@@ -191,10 +201,18 @@ export function CartaoDigitalProfissionalPublico({
       profissionalId: profissional.id,
       profissionalNome: profissional.nomeCompleto,
     });
-  }, [paginaOrganizacao.organizacaoId, profissional.id, profissional.nomeCompleto]);
+  }, [
+    paginaOrganizacao.organizacaoId,
+    profissional.id,
+    profissional.nomeCompleto,
+    modoPrevia,
+    registrarEventoTelemetria,
+  ]);
 
   // Sincronizar hash da URL para abrir gavetas ou microfluxos diretamente
   useEffect(() => {
+    if (!sincronizarHistoricoNavegador) return;
+
     function sincronizarComHash() {
       const hashAtual = window.location.hash;
       const secao = identificarSecaoPorHash(hashAtual);
@@ -243,7 +261,7 @@ export function CartaoDigitalProfissionalPublico({
   }
 
   function handleSalvarContato() {
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: paginaOrganizacao.organizacaoId,
       tipoEvento: "clique_acao_home",
       canalOrigem: "cartao_equipe",
@@ -319,7 +337,7 @@ export function CartaoDigitalProfissionalPublico({
     });
     setMicrofluxoAtivo(escolhido);
 
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: paginaOrganizacao.organizacaoId,
       tipoEvento: "abertura_microfluxo",
       canalOrigem: "cartao_equipe",
@@ -338,7 +356,7 @@ export function CartaoDigitalProfissionalPublico({
   }
 
   function aoAcionarAcaoHome(acao: ItemAcaoHome) {
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: paginaOrganizacao.organizacaoId,
       tipoEvento: "clique_acao_home",
       canalOrigem: "cartao_equipe",
@@ -352,7 +370,7 @@ export function CartaoDigitalProfissionalPublico({
       acao.tipoDestino === "whatsapp" ||
       (acao.rotulo === "Falar comigo no WhatsApp" && urlWhatsappLimpa)
     ) {
-      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+      void registrarEventoTelemetria({
         organizacaoId: paginaOrganizacao.organizacaoId,
         tipoEvento: "clique_whatsapp",
         canalOrigem: "cartao_equipe",
@@ -403,7 +421,7 @@ export function CartaoDigitalProfissionalPublico({
         : acao.id.replace(/^acao-fluxo-/, "");
       const fluxoPost = microfluxosDisponiveis.find((m) => m.id === idExperienciaPost);
 
-      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+      void registrarEventoTelemetria({
         organizacaoId: paginaOrganizacao.organizacaoId,
         tipoEvento: "abertura_microfluxo",
         canalOrigem: "cartao_equipe",
@@ -428,7 +446,7 @@ export function CartaoDigitalProfissionalPublico({
         });
         setMicrofluxoAtivo(fluxoAlvo);
 
-        void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        void registrarEventoTelemetria({
           organizacaoId: paginaOrganizacao.organizacaoId,
           tipoEvento: "abertura_microfluxo",
           canalOrigem: "cartao_equipe",
@@ -444,6 +462,11 @@ export function CartaoDigitalProfissionalPublico({
 
     if (/^https?:\/\//i.test(acao.destino)) {
       window.open(acao.destino, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (!sincronizarHistoricoNavegador) {
+      aoNavegarEmPrevia?.(acao.destino, "interno");
       return;
     }
 
@@ -541,7 +564,7 @@ export function CartaoDigitalProfissionalPublico({
         midia={paginaOrganizacao.midiaFundo}
         paletaId={paginaOrganizacao.paletaId}
         estiloEnquadramento="tela_cheia"
-        className="fixed inset-0"
+        className={estaContido ? "absolute inset-0" : "fixed inset-0"}
       />
 
       {/* Conteúdo Centralizado e Responsivo (Web em 2 colunas com botões na lateral / Mobile fluindo naturalmente) */}
@@ -566,7 +589,7 @@ export function CartaoDigitalProfissionalPublico({
             <Link
               href={`/${paginaOrganizacao.identificadorPublico}?origem=cartao_equipe&consultor=${profissional.id}`}
               onClick={() => {
-                void servicoTelemetriaAnonimaPadrao.registrarEvento({
+                void registrarEventoTelemetria({
                   organizacaoId: paginaOrganizacao.organizacaoId,
                   tipoEvento: "clique_acao_home",
                   canalOrigem: "cartao_equipe",
@@ -746,7 +769,7 @@ export function CartaoDigitalProfissionalPublico({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
-                      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+                      void registrarEventoTelemetria({
                         organizacaoId: paginaOrganizacao.organizacaoId,
                         tipoEvento: "clique_whatsapp",
                         canalOrigem: "cartao_equipe",

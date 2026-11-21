@@ -153,9 +153,14 @@ export function CanvasEditorVisualFluxos({
     const posicoes = new Map<string, { x: number; y: number }>();
     let y = 190;
     for (const [, ids] of [...grupos.entries()].sort(([a], [b]) => a - b)) {
-      ids.forEach((id, indice) =>
-        posicoes.set(id, { x: 180 + (indice - (ids.length - 1) / 2) * 360, y }),
-      );
+      ids.forEach((id, indice) => {
+        const etapa = fluxo.etapas.find((e) => e.id === id);
+        if (etapa?.posicaoCanvas) {
+          posicoes.set(id, { x: etapa.posicaoCanvas.x, y: etapa.posicaoCanvas.y });
+        } else {
+          posicoes.set(id, { x: 180 + (indice - (ids.length - 1) / 2) * 360, y });
+        }
+      });
       y +=
         Math.max(
           210,
@@ -170,28 +175,36 @@ export function CanvasEditorVisualFluxos({
 
   // Converter etapas para nós (Nodes) do React Flow
   const nosIniciais: TipoNoEditorFluxo[] = useMemo(() => {
-    const etapas: TipoNoFluxo[] = fluxo.etapas.map((etapa, index) => ({
-      id: etapa.id,
-      type: "etapaFluxo",
-      position: posicoesEtapas.get(etapa.id)!,
-      data: {
+    const etapas: TipoNoFluxo[] = fluxo.etapas.map((etapa, index) => {
+      const saidas = listarSaidasOpcoesEditor(etapa);
+      const temOpcaoDesconectada = saidas.some((s) => !s.conectada);
+      const temSaidaPadraoDesconectada = Boolean(etapa.saidaPadraoDesconectada);
+      const possuiPendencia = temOpcaoDesconectada || temSaidaPadraoDesconectada;
+
+      return {
         id: etapa.id,
-        indice: index + 1,
-        tipoEtapa: etapa.tipoEtapa,
-        rotuloTipo: descreverTipoCardEtapa(etapa).tipo,
-        rotuloModelo: descreverTipoCardEtapa(etapa).modelo,
-        saidas: listarSaidasOpcoesEditor(etapa),
-        titulo: etapa.titulo,
-        subtituloOpcional: etapa.subtituloOpcional,
-        ehInicial: etapa.id === fluxo.etapaInicialId,
-        selecionado: etapa.id === etapaSelecionadaId,
-        quantidadeOpcoes: etapa.opcoes?.length ?? 0,
-        quantidadeCampos:
-          etapa.tipoEtapa === "etapa_livre"
-            ? (etapa.blocos?.length ?? 0)
-            : (etapa.campos?.length ?? 0),
-      },
-    }));
+        type: "etapaFluxo",
+        position: posicoesEtapas.get(etapa.id)!,
+        data: {
+          id: etapa.id,
+          indice: index + 1,
+          tipoEtapa: etapa.tipoEtapa,
+          rotuloTipo: descreverTipoCardEtapa(etapa).tipo,
+          rotuloModelo: descreverTipoCardEtapa(etapa).modelo,
+          saidas,
+          titulo: etapa.titulo,
+          subtituloOpcional: etapa.subtituloOpcional,
+          ehInicial: etapa.id === fluxo.etapaInicialId,
+          selecionado: etapa.id === etapaSelecionadaId,
+          quantidadeOpcoes: etapa.opcoes?.length ?? 0,
+          quantidadeCampos:
+            etapa.tipoEtapa === "etapa_livre"
+              ? (etapa.blocos?.length ?? 0)
+              : (etapa.campos?.length ?? 0),
+          possuiPendencia,
+        },
+      };
+    });
     return [
       {
         id: idInicio,
@@ -300,6 +313,32 @@ export function CanvasEditorVisualFluxos({
   useEffect(() => {
     setEdges(arestasIniciais);
   }, [arestasIniciais, setEdges]);
+
+  const onNodeDragStop: NonNullable<ReactFlowProps<TipoNoEditorFluxo>["onNodeDragStop"]> = useCallback(
+    (_event, node) => {
+      if (!podeEditar || node.id === idInicio || node.id === idConclusao) return;
+      const etapaAlvo = fluxo.etapas.find((e) => e.id === node.id);
+      if (!etapaAlvo) return;
+
+      const etapasAtualizadas = fluxo.etapas.map((etapa) =>
+        etapa.id === node.id
+          ? {
+              ...etapa,
+              posicaoCanvas: {
+                x: Math.round(node.position.x),
+                y: Math.round(node.position.y),
+              },
+            }
+          : etapa,
+      );
+
+      aoSalvarFluxo({
+        ...fluxo,
+        etapas: etapasAtualizadas,
+      });
+    },
+    [aoSalvarFluxo, fluxo, idInicio, idConclusao, podeEditar],
+  );
 
   const onConnect = useCallback(
     (conexao: Connection) => {
@@ -644,6 +683,7 @@ export function CanvasEditorVisualFluxos({
             onReconnect={onReconnect}
             onReconnectEnd={onReconnectEnd}
             onEdgesDelete={onEdgesDelete}
+            onNodeDragStop={onNodeDragStop}
             deleteKeyCode={["Backspace", "Delete"]}
             onNodeClick={(_event, node) =>
               setEtapaSelecionadaId(node.id === idInicio ? null : node.id)

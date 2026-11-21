@@ -330,7 +330,7 @@ export function GerenciadorEquipePainel({
                     setIdentificadorCartao(normalizarSugestaoIdentificador(novoNome));
                   }
                 }}
-                placeholder="Ex.: Dra. Helena Vasconcelos"
+                placeholder="Nome do profissional"
               />
 
               <CampoFormulario
@@ -344,7 +344,7 @@ export function GerenciadorEquipePainel({
                   setIdentificadorEditadoManualmente(true);
                   setIdentificadorCartao(e.target.value.toLowerCase());
                 }}
-                placeholder="helena-vasconcelos"
+                placeholder="identificador-profissional"
               />
 
               <CampoFormulario

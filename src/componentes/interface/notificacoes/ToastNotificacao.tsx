@@ -13,6 +13,20 @@ const APARENCIA = {
   aviso: { icone: TriangleAlert, classe: "border-amber-400 bg-amber-300 text-amber-950" },
 } as const;
 
+function renderizarTextoSeguroComNegrito(texto: string) {
+  const partes = texto.split(/(\*\*.*?\*\*)/g);
+  return partes.map((parte, indice) => {
+    if (parte.startsWith("**") && parte.endsWith("**") && parte.length >= 4) {
+      return (
+        <strong key={indice} className="font-semibold underline decoration-white/30 decoration-1 underline-offset-2">
+          {parte.slice(2, -2)}
+        </strong>
+      );
+    }
+    return parte;
+  });
+}
+
 export function ToastNotificacao({ notificacao }: { readonly notificacao: Notificacao }) {
   const [ponteiroDentro, setPonteiroDentro] = useState(false);
   const [focoDentro, setFocoDentro] = useState(false);
@@ -36,7 +50,7 @@ export function ToastNotificacao({ notificacao }: { readonly notificacao: Notifi
     >
       <Icone className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
       <p className="min-w-0 flex-1 text-sm leading-relaxed whitespace-pre-line wrap-anywhere">
-        {notificacao.mensagem}
+        {renderizarTextoSeguroComNegrito(notificacao.mensagem)}
       </p>
       <button
         type="button"

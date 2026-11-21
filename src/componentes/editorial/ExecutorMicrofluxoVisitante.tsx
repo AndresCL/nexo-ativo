@@ -38,7 +38,6 @@ import { montarLinkWhatsapp } from "@/dominio/servicos/numeroWhatsappInternacion
 import { calcularDemonstrativoComercialMicrofluxo } from "@/dominio/comercial/calculadoraComercialCentavos";
 import { ValorMonetarioCentavos } from "@/dominio/objetos-valor/valorMonetarioCentavos";
 import { servicoSubmissaoSolicitacaoVisitantePadrao } from "@/infraestrutura/vitrine/servicoSubmissaoSolicitacaoVisitante";
-import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import {
   deveIgnorarOtimizadorImagem,
@@ -63,6 +62,7 @@ import { TransicaoAlternancia } from "@/componentes/interface/TransicaoAlternanc
 import { AvatarProfissional } from "./AvatarProfissional";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BottomSheetEditorialBase } from "./BottomSheetEditorialBase";
+import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export interface PropriedadesExecutorMicrofluxoVisitante {
   readonly aberto: boolean;
@@ -81,8 +81,12 @@ export function ExecutorMicrofluxoVisitante({
   contextoOrigem,
   pagina,
   acervo,
-  servicoSubmissao = servicoSubmissaoSolicitacaoVisitantePadrao,
+  servicoSubmissao,
 }: PropriedadesExecutorMicrofluxoVisitante) {
+  const { registrarEventoTelemetria, servicoSubmissao: servicoSubmissaoAmbiente } =
+    useAmbienteVitrine();
+  const servicoSubmissaoEfetivo =
+    servicoSubmissao ?? servicoSubmissaoAmbiente ?? servicoSubmissaoSolicitacaoVisitantePadrao;
   const [estado, setEstado] = useState<EstadoExecucaoMicrofluxo | null>(null);
   const [mensagemErro, setMensagemErro] = useState<string | null>(null);
   const [campoArmadilhaBot, setCampoArmadilhaBot] = useState("");
@@ -201,7 +205,7 @@ export function ExecutorMicrofluxoVisitante({
   }
   function registrarCliqueWhatsappConclusao() {
     const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "clique_whatsapp",
       canalOrigem: origem.canalOrigem,
@@ -238,7 +242,7 @@ export function ExecutorMicrofluxoVisitante({
             : {}),
         });
 
-        const resultadoSubmissao = await servicoSubmissao
+        const resultadoSubmissao = await servicoSubmissaoEfetivo
           .enviarSolicitacaoVisitante({
             organizacaoId: pagina.organizacaoId,
             identificadorPublicoOrganizacao: pagina.identificadorPublico,
@@ -294,7 +298,7 @@ export function ExecutorMicrofluxoVisitante({
       if (proximo.concluido && !conclusaoRegistrada.current) {
         conclusaoRegistrada.current = true;
         const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-        void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        void registrarEventoTelemetria({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "conclusao_microfluxo",
           canalOrigem: origem.canalOrigem,
@@ -321,7 +325,7 @@ export function ExecutorMicrofluxoVisitante({
 
       if (estado && !proximo.concluido && proximo.etapaAtualId !== estado.etapaAtualId) {
         // Registra o avanço real para a próxima etapa no funil de abandono
-        void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        void registrarEventoTelemetria({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "avanco_etapa_microfluxo",
           microfluxoId: microfluxo.id,

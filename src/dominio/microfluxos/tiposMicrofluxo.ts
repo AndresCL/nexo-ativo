@@ -114,6 +114,11 @@ export type TipoEtapaMicrofluxo =
   | "selecao_produto"
   | "selecao_servico";
 
+export interface PosicaoCanvasEtapa {
+  readonly x: number;
+  readonly y: number;
+}
+
 export interface EtapaMicrofluxo {
   readonly saidaPadraoDesconectada?: boolean;
   readonly finalizacaoExplicita?: boolean;
@@ -132,6 +137,7 @@ export interface EtapaMicrofluxo {
   readonly tituloRecomendacaoPadrao?: string;
   readonly descricaoRecomendacaoPadrao?: string;
   readonly configuracaoPixManual?: ConfiguracaoPixManualInformada;
+  readonly posicaoCanvas?: PosicaoCanvasEtapa;
 }
 
 export type TipoAcaoVitrine =

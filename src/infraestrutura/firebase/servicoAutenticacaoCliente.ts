@@ -1,14 +1,15 @@
 "use client";
 
 import {
+  confirmPasswordReset,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   sendEmailVerification,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
   updateProfile,
+  verifyPasswordResetCode,
   type User as UsuarioFirebase,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -119,8 +120,30 @@ export class ServicoAutenticacaoFirebaseCliente
 
   public async solicitarRecuperacaoSenha(email: string): Promise<void> {
     try {
+      const { funcoesRemotas } = obterServicosClienteFirebase();
+      const chamarSolicitacao = httpsCallable<{ email: string }, { sucesso: boolean }>(
+        funcoesRemotas,
+        "solicitarRecuperacaoSenha",
+      );
+      await chamarSolicitacao({ email });
+    } catch (erro) {
+      throw traduzirErroAutenticacaoFirebase(erro);
+    }
+  }
+
+  public async validarCodigoRedefinicaoSenha(codigoAcao: string): Promise<string> {
+    try {
       const { autenticacao } = obterServicosClienteFirebase();
-      await sendPasswordResetEmail(autenticacao, email);
+      return await verifyPasswordResetCode(autenticacao, codigoAcao);
+    } catch (erro) {
+      throw traduzirErroAutenticacaoFirebase(erro);
+    }
+  }
+
+  public async confirmarRedefinicaoSenha(codigoAcao: string, novaSenha: string): Promise<void> {
+    try {
+      const { autenticacao } = obterServicosClienteFirebase();
+      await confirmPasswordReset(autenticacao, codigoAcao, novaSenha);
     } catch (erro) {
       throw traduzirErroAutenticacaoFirebase(erro);
     }

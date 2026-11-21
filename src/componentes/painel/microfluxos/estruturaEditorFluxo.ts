@@ -12,6 +12,7 @@ export interface SaidaOpcaoEditor {
   readonly destino?: string;
   readonly encerrar?: boolean;
   readonly desconectada?: boolean;
+  readonly conectada?: boolean;
 }
 export interface ArestaEditorFluxo {
   readonly id: string;
@@ -33,16 +34,29 @@ export function listarSaidasOpcoesEditor(etapa: EtapaMicrofluxo): readonly Saida
       : etapa.tipoEtapa === "selecao_unica"
         ? [{ blocoId: undefined, opcoes: etapa.opcoes ?? [] }]
         : [];
+  const temSaidaPadraoConectada =
+    !etapa.saidaPadraoDesconectada &&
+    (Boolean(etapa.proximaEtapaPadraoId?.trim()) || Boolean(etapa.finalizacaoExplicita));
+
   return grupos.flatMap(({ blocoId, opcoes }) =>
-    opcoes.map((opcao) => ({
-      id: `opcao:${encodeURIComponent(blocoId ?? "")}:${encodeURIComponent(opcao.id)}`,
-      rotulo: opcao.rotulo,
-      opcaoId: opcao.id,
-      blocoId,
-      destino: opcao.proximaEtapaIdOpcional,
-      encerrar: opcao.encerrarPercurso,
-      desconectada: opcao.desconectada,
-    })),
+    opcoes.map((opcao) => {
+      const explicitamenteConectada = Boolean(
+        opcao.encerrarPercurso || opcao.proximaEtapaIdOpcional?.trim(),
+      );
+      const conectada =
+        explicitamenteConectada || (!opcao.desconectada && temSaidaPadraoConectada);
+
+      return {
+        id: `opcao:${encodeURIComponent(blocoId ?? "")}:${encodeURIComponent(opcao.id)}`,
+        rotulo: opcao.rotulo,
+        opcaoId: opcao.id,
+        blocoId,
+        destino: opcao.proximaEtapaIdOpcional,
+        encerrar: opcao.encerrarPercurso,
+        desconectada: opcao.desconectada,
+        conectada,
+      };
+    }),
   );
 }
 

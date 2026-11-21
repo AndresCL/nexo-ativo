@@ -1,5 +1,6 @@
 import { obterPoliticaPublicidade } from "@/dominio/publicidade/registroPoliticasPublicidade";
 import { CATALOGO_PLANOS_FLUXO } from "@/dominio/assinaturas/tiposAssinaturaAsaas";
+import { extrairAnoMesReferenciaIso } from "@/dominio/email/tiposEmailTransacional";
 import type {
   Organizacao,
   RegistroAuditoria,
@@ -94,12 +95,43 @@ export async function carregarContextoPainelFundadorServidor(
   exigirPrivilegioFundador(fundador);
 
   const { bancoDadosAdmin } = obterServicosAdminFirebase();
+  const anoMesReferenciaEmail = extrairAnoMesReferenciaIso(new Date().toISOString());
 
-  const [snapOrganizacoes, snapAuditoria, snapAcompanhamentos] = await Promise.all([
-    bancoDadosAdmin.collection("organizacoes").get(),
-    bancoDadosAdmin.collection("registrosAuditoria").orderBy("criadoEmIso", "desc").limit(100).get(),
-    bancoDadosAdmin.collection("acompanhamentoFundador").get(),
-  ]);
+  const [snapOrganizacoes, snapAuditoria, snapAcompanhamentos, docMetricasEmailPlataforma] =
+    await Promise.all([
+      bancoDadosAdmin.collection("organizacoes").get(),
+      bancoDadosAdmin.collection("registrosAuditoria").orderBy("criadoEmIso", "desc").limit(100).get(),
+      bancoDadosAdmin.collection("acompanhamentoFundador").get(),
+      bancoDadosAdmin.collection("metricasPlataforma").doc(`email-${anoMesReferenciaEmail}`).get(),
+    ]);
+
+  // Lê consumo mensal de e-mails de solicitações de todas as organizações em lote (sem N+1)
+  const refsConsumoEmailOrgs = snapOrganizacoes.docs.map((docOrg) =>
+    bancoDadosAdmin
+      .collection("organizacoes")
+      .doc(docOrg.id)
+      .collection("metricasDiarias")
+      .doc(`email-${anoMesReferenciaEmail}`),
+  );
+  const emailsPorOrg = new Map<string, number>();
+  let emailsSolicitacoesMesAtual = 0;
+
+  if (refsConsumoEmailOrgs.length > 0) {
+    const docsConsumo = await bancoDadosAdmin.getAll(...refsConsumoEmailOrgs);
+    docsConsumo.forEach((docConsumo, indice) => {
+      const orgDocId = snapOrganizacoes.docs[indice]?.id;
+      if (!orgDocId || !docConsumo.exists) return;
+      const envios = Number(docConsumo.data()?.enviosNoMesAtual ?? 0);
+      const enviosValidos = Number.isFinite(envios) && envios > 0 ? Math.floor(envios) : 0;
+      emailsPorOrg.set(orgDocId, enviosValidos);
+      emailsSolicitacoesMesAtual += enviosValidos;
+    });
+  }
+
+  const enviosAuthBruto = Number(docMetricasEmailPlataforma.data()?.enviosAutenticacao ?? 0);
+  const emailsAutenticacaoMesAtual =
+    Number.isFinite(enviosAuthBruto) && enviosAuthBruto > 0 ? Math.floor(enviosAuthBruto) : 0;
+  const totalEmailsEnviadosMesAtual = emailsSolicitacoesMesAtual + emailsAutenticacaoMesAtual;
 
   const auditoriaRecente: RegistroAuditoria[] = [];
   const mensagensAuditoriaPorOrg = new Map<string, MensagemKanbanFundador[]>();
@@ -197,7 +229,8 @@ export async function carregarContextoPainelFundadorServidor(
       planoCodigo: dados.resumoDireitosPlano?.planoCodigo ?? "avaliacao_inicial",
       situacaoAssinatura: dados.resumoDireitosPlano?.situacaoAssinatura ?? "pendente_contratacao",
       limiteProfissionaisAtivos: dados.resumoDireitosPlano?.limiteProfissionaisAtivos ?? 10,
-      limiteEnviosEmailMensal: dados.resumoDireitosPlano?.limiteEnviosEmailMensal ?? 300,
+      limiteEnviosEmailMensal: dados.resumoDireitosPlano?.limiteEnviosEmailMensal ?? 5000,
+      emailsEnviadosMesAtual: emailsPorOrg.get(doc.id) ?? emailsPorOrg.get(orgId) ?? 0,
       totalMembros: 1, // Projeção padrão inicial
       etapaKanban: acompanhamento?.etapaKanban ?? "onboarding",
       mensagensKanban: mensagensMescladas,
@@ -217,6 +250,10 @@ export async function carregarContextoPainelFundadorServidor(
     assinaturasCanceladas,
     receitaMensalRecorrenteCentavos,
     totalSolicitacoesComerciais,
+    totalEmailsEnviadosMesAtual,
+    emailsSolicitacoesMesAtual,
+    emailsAutenticacaoMesAtual,
+    anoMesReferenciaEmail,
   };
 
   return {

@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, Mail, Users, Wallet } from "lucide-react";
+import { CreditCard, Users, Wallet } from "lucide-react";
 
 export interface PropriedadesSecaoMetricasAssinatura {
   readonly estaSemPlanoAtivo: boolean;
@@ -9,8 +9,6 @@ export interface PropriedadesSecaoMetricasAssinatura {
   readonly mensalidadeFormatada: string;
   readonly apoioMensalidade: string;
   readonly limiteProfissionais: number;
-  readonly limiteEmails: number;
-  readonly apoioEmails: string;
 }
 
 export function SecaoMetricasAssinatura({
@@ -20,8 +18,6 @@ export function SecaoMetricasAssinatura({
   mensalidadeFormatada,
   apoioMensalidade,
   limiteProfissionais,
-  limiteEmails,
-  apoioEmails,
 }: PropriedadesSecaoMetricasAssinatura) {
   const metricas = [
     {
@@ -42,16 +38,10 @@ export function SecaoMetricasAssinatura({
       apoio: estaSemPlanoAtivo ? "Limite gratuito" : "Limite incluído no seu plano",
       icone: Users,
     },
-    {
-      rotulo: "E-mails por mês",
-      valor: String(limiteEmails),
-      apoio: apoioEmails,
-      icone: Mail,
-    },
   ];
 
   return (
-    <section aria-label="Resumo da assinatura" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <section aria-label="Resumo da assinatura" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       {metricas.map((item) => (
         <div
           key={item.rotulo}

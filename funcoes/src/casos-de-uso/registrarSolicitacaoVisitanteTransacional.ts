@@ -183,8 +183,14 @@ export async function executarRegistroSolicitacaoVisitante(
       resultadoTransacional.organizacao,
       resultadoTransacional.solicitacao,
     );
-  } catch {
-    // Falha transitória do provedor externo de e-mail nunca deve descartar a solicitação já salva
+    console.log(
+      `[Notificações Email] Solicitação ${resultadoTransacional.solicitacaoId}: equipe=${resumoNotificacoesEmail.emailEquipeEnviado}, visitante=${resumoNotificacoesEmail.emailVisitanteEnviado}, cota=${resumoNotificacoesEmail.enviosNoMesAtual}/${resumoNotificacoesEmail.limiteMensalPlano}`,
+    );
+  } catch (erro) {
+    console.error(
+      `[Notificações Email Erro] Falha ao despachar e-mails para a solicitação ${resultadoTransacional.solicitacaoId}:`,
+      erro,
+    );
   }
 
   return {

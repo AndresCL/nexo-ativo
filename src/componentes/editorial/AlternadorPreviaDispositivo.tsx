@@ -1,41 +1,75 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
+import type { AcervoPublicoVitrine } from "@/dominio/entidades/catalogoConteudo";
 import {
   obterComposicoesEditoriaisAtivas,
   type TipoComposicaoEditorial,
 } from "@/dominio/entidades/composicaoEditorial";
-import type { ConteudoPaginaPublicada, ItemAcaoHome } from "@/dominio/entidades/paginaPublicada";
+import type { ConteudoPaginaPublicada } from "@/dominio/entidades/paginaPublicada";
+import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
-import { RenderizadorComposicaoEditorial } from "./RenderizadorComposicaoEditorial";
-import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
+import {
+  ContextoAmbienteVitrine,
+  criarServicoSubmissaoDemonstracao,
+  type ValorContextoAmbienteVitrine,
+} from "./contextoAmbienteVitrine";
+import { VitrinePublicaInterativa } from "./VitrinePublicaInterativa";
 
 export type ModoDispositivoPrevia = "mobile";
 
+const ACERVO_VAZIO: AcervoPublicoVitrine = {
+  servicos: [],
+  produtos: [],
+  projetosPortfolio: [],
+  profissionais: [],
+  microfluxos: [],
+};
+
 export interface PropriedadesAlternadorPreviaDispositivo {
   readonly aparencia?: "escura" | "clara";
-  readonly previaEquipe?: PreviaEquipeVitrine;
-  readonly complementoChamada?: ReactNode;
+  readonly acervo?: AcervoPublicoVitrine;
+  readonly exibirAvaliacoesGoogle?: boolean;
   readonly paginaBase: ConteudoPaginaPublicada;
   readonly permitirTrocarComposicao?: boolean;
-  readonly aoAcionarItem?: (acao: ItemAcaoHome) => void;
 }
 
 /**
- * Contêiner interativo reutilizável (marketing e editor guiado do painel) para pré-visualizar
- * qualquer página editorial em formato Mobile (390px) dentro de uma moldura de smartphone.
+ * Moldura de smartphone Mobile (390px) que hospeda a própria VitrinePublicaInterativa
+ * em modo demonstração 100% funcional, com Portais contidos, navegação isolada,
+ * telemetria desativada e submissão simulada (DRY + SOLID).
  */
 export function AlternadorPreviaDispositivo({
   aparencia = "escura",
-  previaEquipe,
+  acervo = ACERVO_VAZIO,
+  exibirAvaliacoesGoogle = true,
   paginaBase,
   permitirTrocarComposicao = false,
-  aoAcionarItem,
-  complementoChamada,
 }: PropriedadesAlternadorPreviaDispositivo) {
   const clara = aparencia === "clara";
+  const [containerMoldura, setContainerMoldura] = useState<HTMLDivElement | null>(null);
   const [composicaoSelecionada, setComposicaoSelecionada] = useState<TipoComposicaoEditorial>(
     paginaBase.composicaoVisual,
+  );
+
+  const servicoSubmissaoDemo = useMemo(() => criarServicoSubmissaoDemonstracao(), []);
+
+  const valorAmbientePrevia = useMemo<ValorContextoAmbienteVitrine>(
+    () => ({
+      containerPortal: containerMoldura,
+      modoPrevia: true,
+      sincronizarHistoricoNavegador: false,
+      registrarEventoTelemetria: async () => {},
+      servicoSubmissao: servicoSubmissaoDemo,
+      aoNavegarEmPrevia: (destino, tipo) => {
+        if (tipo === "telefone") {
+          notificar.informacao(`Prévia de ligação: o visitante discará para ${destino}.`);
+        } else {
+          notificar.informacao(`Prévia de navegação: o visitante será levado para ${destino}.`);
+        }
+      },
+    }),
+    [containerMoldura, servicoSubmissaoDemo],
   );
 
   const paginaPrevia: ConteudoPaginaPublicada = permitirTrocarComposicao
@@ -83,19 +117,25 @@ export function AlternadorPreviaDispositivo({
       ) : null}
 
       <div className="flex justify-center">
+        {/* Casca externa relative + overflow-hidden funciona como container dos Portais (BottomSheets e Cartão Digital) */}
         <div
+          ref={setContainerMoldura}
           data-testid="quadro-previa-dispositivo"
           data-dispositivo="mobile"
-          className="w-full max-w-[390px] max-h-[min(840px,calc(100dvh-4rem))] overflow-x-hidden overflow-y-auto overscroll-contain rounded-[2rem] border-4 border-mineral-800 shadow-2xl scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none]"
+          className="relative flex w-full max-w-[390px] h-[min(840px,calc(100dvh-4rem))] flex-col overflow-hidden rounded-[2rem] border-4 border-mineral-800 shadow-2xl"
         >
-          <RenderizadorComposicaoEditorial
-            previaEquipe={previaEquipe}
-            pagina={paginaPrevia}
-            modoMobileForcado
-            aoAcionarItem={aoAcionarItem}
-            alturaContidaPrevia
-            complementoChamada={complementoChamada}
-          />
+          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+            <ContextoAmbienteVitrine.Provider value={valorAmbientePrevia}>
+              <VitrinePublicaInterativa
+                pagina={paginaPrevia}
+                acervo={acervo}
+                servicoSubmissao={servicoSubmissaoDemo}
+                duracaoMinimaLoaderMs={0}
+                alturaContidaPrevia
+                exibirAvaliacoesGoogle={exibirAvaliacoesGoogle}
+              />
+            </ContextoAmbienteVitrine.Provider>
+          </div>
         </div>
       </div>
     </div>

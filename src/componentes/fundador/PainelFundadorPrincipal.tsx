@@ -11,6 +11,7 @@ import {
   ExternalLink,
   History,
   Kanban,
+  Mail,
   MessageSquare,
   MoreVertical,
   Plus,
@@ -94,7 +95,7 @@ export function PainelFundadorPrincipal({
   const [novaSituacaoAssinatura, setNovaSituacaoAssinatura] =
     useState<SituacaoResumoAssinatura>("ativa");
   const [limiteProfissionais, setLimiteProfissionais] = useState<number>(10);
-  const [limiteEmailsMensal, setLimiteEmailsMensal] = useState<number>(300);
+  const [limiteEmailsMensal, setLimiteEmailsMensal] = useState<number>(5000);
   const [justificativa, setJustificativa] = useState("");
 
   const [salvando, setSalvando] = useState(false);
@@ -376,7 +377,7 @@ export function PainelFundadorPrincipal({
 
       {abaAtiva === "metricas" ? (
         <section aria-label="Métricas da plataforma" className="space-y-6">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
             {[
               {
                 titulo: "Receita Recorrente Mensal (MRR)",
@@ -411,6 +412,14 @@ export function PainelFundadorPrincipal({
                 icone: AlertTriangle,
                 cor: "border-amber-200 from-amber-50/80 text-amber-950",
                 iconeCor: "bg-amber-600",
+              },
+              {
+                titulo: "E-mails Enviados (Mês)",
+                valor: String(metricasIniciais.totalEmailsEnviadosMesAtual ?? 0),
+                apoio: `${metricasIniciais.emailsSolicitacoesMesAtual ?? 0} leads · ${metricasIniciais.emailsAutenticacaoMesAtual ?? 0} auth${metricasIniciais.anoMesReferenciaEmail ? ` (${metricasIniciais.anoMesReferenciaEmail})` : ""}`,
+                icone: Mail,
+                cor: "border-violet-200 from-violet-50/80 text-violet-950",
+                iconeCor: "bg-violet-600",
               },
             ].map((item) => (
               <div
@@ -578,6 +587,15 @@ export function PainelFundadorPrincipal({
                         />
                       </span>
                     </th>
+                    <th scope="col" className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1">
+                        <span>E-mails (Mês)</span>
+                        <TooltipInformativo
+                          alinhamento="direita"
+                          texto="Quantidade de e-mails transacionais de solicitações enviados por esta organização no mês atual."
+                        />
+                      </span>
+                    </th>
                     <th scope="col" className="px-4 py-3 text-right">
                       Ações Fundador
                     </th>
@@ -624,6 +642,9 @@ export function PainelFundadorPrincipal({
                           {org.planoCodigo}
                         </td>
                         <td className="px-4 py-3 text-mineral-700">{org.situacaoAssinatura}</td>
+                        <td className="px-4 py-3 tabular-nums text-mineral-800">
+                          <span className="font-semibold">{org.emailsEnviadosMesAtual ?? 0}</span>
+                        </td>
                         <td className="px-4 py-3 text-right">
                           <div className="relative inline-flex items-center justify-end gap-1.5">
                             <button

@@ -11,11 +11,11 @@ import {
 } from "@/dominio/entidades/paginaPublicada";
 import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numeroWhatsappInternacional";
 import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
-import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BottomSheetEditorialBase } from "../BottomSheetEditorialBase";
 import { RenderizadorTextoRicoEditorial } from "../RenderizadorTextoRicoEditorial";
+import { useAmbienteVitrine } from "../contextoAmbienteVitrine";
 
 export interface PropriedadesBottomSheetPostVitrine {
   readonly aberto: boolean;
@@ -34,6 +34,9 @@ export function BottomSheetPostVitrine({
   whatsappFallbackOpcional,
   aoIniciarMicrofluxo,
 }: PropriedadesBottomSheetPostVitrine) {
+  const { registrarEventoTelemetria, sincronizarHistoricoNavegador, aoNavegarEmPrevia } =
+    useAmbienteVitrine();
+
   if (!acaoPost) return null;
 
   const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
@@ -68,7 +71,7 @@ export function BottomSheetPostVitrine({
       ? acaoPost.destino.slice("#post-".length)
       : acaoPost.id.replace(/^acao-fluxo-/, "");
 
-    void servicoTelemetriaAnonimaPadrao.registrarEvento({
+    void registrarEventoTelemetria({
       organizacaoId: pagina.organizacaoId,
       tipoEvento: "conclusao_microfluxo",
       canalOrigem: origem.canalOrigem,
@@ -100,11 +103,15 @@ export function BottomSheetPostVitrine({
         "";
       const limpo = bruto.replace(/[^\d+]/g, "");
       if (limpo) {
-        void servicoTelemetriaAnonimaPadrao.registrarEvento({
+        void registrarEventoTelemetria({
           organizacaoId: pagina.organizacaoId,
           tipoEvento: "clique_ligacao",
           canalOrigem: origem.canalOrigem,
         });
+        if (!sincronizarHistoricoNavegador) {
+          aoNavegarEmPrevia?.(bruto, "telefone");
+          return;
+        }
         window.location.assign(`tel:${limpo}`);
       }
       return;
@@ -130,7 +137,7 @@ export function BottomSheetPostVitrine({
         })();
 
     if (linkWhatsapp) {
-      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+      void registrarEventoTelemetria({
         organizacaoId: pagina.organizacaoId,
         tipoEvento: "clique_whatsapp",
         canalOrigem: origem.canalOrigem,

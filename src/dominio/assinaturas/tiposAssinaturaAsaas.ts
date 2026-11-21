@@ -72,7 +72,7 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
     descricao: "Período de boas-vindas para estruturação da presença digital e catálogo.",
     mensalidadeCentavos: 0,
     limiteProfissionaisAtivos: 1,
-    limiteEnviosEmailMensal: 50,
+    limiteEnviosEmailMensal: 500,
     destaques: [
       "Acesso completo ao editor visual e microfluxos",
       "Estruturação de portfólio, serviços e produtos",
@@ -86,14 +86,14 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
       "Para profissionais autônomos, clínicas, estúdios e equipes que exigem presença digital autoral, cartões individuais e conversão de excelência.",
     mensalidadeCentavos: 8700, // R$ 87/mês
     limiteProfissionaisAtivos: 10,
-    limiteEnviosEmailMensal: 300,
+    limiteEnviosEmailMensal: 5000,
     valorImplantacaoAssistidaCentavos: 29700, // R$ 297 opcional
     destaques: [
       "Vitrine pública com identidade visual autoral",
       "Microfluxos e formulários para qualificação de visitantes",
       "Até 10 profissionais com cartões digitais e QR Codes próprios",
       "Catálogo de serviços e produtos integrado à vitrine",
-      "Notificações por e-mail com link de retorno ao WhatsApp (300 envios/mês)",
+      "Notificações automáticas por e-mail com link direto para o WhatsApp",
     ],
   },
   equipe: {
@@ -103,14 +103,14 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
       "Para profissionais autônomos, clínicas, estúdios e equipes que exigem presença digital autoral, cartões individuais e conversão de excelência.",
     mensalidadeCentavos: 8700, // R$ 87/mês (legado compatível com Pro)
     limiteProfissionaisAtivos: 10,
-    limiteEnviosEmailMensal: 300,
+    limiteEnviosEmailMensal: 5000,
     valorImplantacaoAssistidaCentavos: 29700,
     destaques: [
       "Vitrine pública com identidade visual autoral",
       "Microfluxos e formulários para qualificação de visitantes",
       "Até 10 profissionais com cartões digitais e QR Codes próprios",
       "Catálogo de serviços e produtos integrado à vitrine",
-      "Notificações por e-mail com link de retorno ao WhatsApp (300 envios/mês)",
+      "Notificações automáticas por e-mail com link direto para o WhatsApp",
     ],
   },
   personalizado: {
@@ -120,10 +120,10 @@ export const CATALOGO_PLANOS_FLUXO: Readonly<
       "Projetos e integrações sob medida para redes, concessionárias e operações com fluxos personalizados.",
     mensalidadeCentavos: 0,
     limiteProfissionaisAtivos: 999,
-    limiteEnviosEmailMensal: 1000,
+    limiteEnviosEmailMensal: 10000,
     destaques: [
       "Integrações sob medida com CRM, ERP, APIs e webhooks",
-      "Limites personalizados de especialistas, unidades e envios de e-mail",
+      "Limites personalizados de especialistas e unidades",
       "Onboarding dedicado e consultoria de identidade editorial",
       "Atendimento prioritário e acompanhamento pela equipe fundadora",
     ],

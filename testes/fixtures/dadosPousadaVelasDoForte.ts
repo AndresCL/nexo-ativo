@@ -7,7 +7,7 @@ import type {
   DefinicaoMicrofluxo,
   EtapaMicrofluxo,
 } from "@/dominio/microfluxos/tiposMicrofluxo";
-import { converterEtapaParaLivre } from "@/dominio/microfluxos/composicaoEtapaLivre";
+import { converterEtapaParaLivre, criarEtapaDadosRetorno } from "@/dominio/microfluxos/composicaoEtapaLivre";
 import { listarCamposResumoConclusao } from "@/dominio/microfluxos/conclusaoMicrofluxo";
 
 export const ORGANIZACAO_POUSADA_VELAS_DO_FORTE_ID = "org-pousada-velas-do-forte";
@@ -136,20 +136,24 @@ const FLUXO_CONSULTAR_DISPONIBILIDADE: DefinicaoMicrofluxo = anexarConclusaoWhat
             id: "pref-hidro-varanda",
             rotulo: "Varanda privativa ou Banheira de Hidromassagem",
             descricaoCurta: "Mais conforto e relaxamento após o dia de praia",
+            proximaEtapaIdOpcional: "etapa-contato-hospede",
           },
           {
             id: "pref-lazer-piscina",
             rotulo: "Piscina ao ar livre & Café da manhã caprichado",
             descricaoCurta: "Aproveite a área externa ensolarada com café da manhã incluso",
+            proximaEtapaIdOpcional: "etapa-contato-hospede",
           },
           {
             id: "pref-acessibilidade",
             rotulo: "Acessibilidade total / Mobilidade reduzida",
             descricaoCurta: "Quartos e banheiros adaptados com barras de apoio",
+            proximaEtapaIdOpcional: "etapa-contato-hospede",
           },
         ],
         "Nossa recepção já receberá sua prioridade para verificar a melhor suíte disponível.",
       ),
+      criarEtapaDadosRetorno("etapa-contato-hospede"),
     ],
   },
   "Enviar preferências no WhatsApp",

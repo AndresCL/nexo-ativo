@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   construirEmailConfirmacaoVisitante,
   construirEmailNovaSolicitacaoEquipe,
+  construirEmailRecuperacaoSenha,
   escaparHtmlSeguro,
+  URL_LOGO_PADRAO_NEXO_ATIVO,
 } from "@/dominio/email/templatesEmailEditorial";
 import type { SolicitacaoComercial } from "@/dominio/entidades/solicitacaoComercial";
 
@@ -98,5 +100,19 @@ describe("Templates de E-mail Editorial e Sanitização HTML", () => {
     expect(emailVisitante.html).toContain("R$ 3.000,00");
     expect(emailVisitante.textoPuro).toContain(solicitacaoBase.id);
     expect(emailVisitante.textoPuro).toContain("R$ 3.000,00");
+  });
+
+  it("deve construir e-mail minimalista de recuperação de senha com logo e link seguro", () => {
+    const emailRecuperacao = construirEmailRecuperacaoSenha({
+      emailDestinatario: "usuario@exemplo.com.br",
+      linkRedefinicao: "http://localhost:3000/redefinir-senha?oobCode=codigoSeguro123",
+    });
+
+    expect(emailRecuperacao.para).toEqual(["usuario@exemplo.com.br"]);
+    expect(emailRecuperacao.assunto).toContain("Redefinição de senha de acesso");
+    expect(emailRecuperacao.html).toContain(URL_LOGO_PADRAO_NEXO_ATIVO);
+    expect(emailRecuperacao.html).toContain("http://localhost:3000/redefinir-senha?oobCode=codigoSeguro123");
+    expect(emailRecuperacao.html).toContain("Redefinir minha senha");
+    expect(emailRecuperacao.textoPuro).toContain("http://localhost:3000/redefinir-senha?oobCode=codigoSeguro123");
   });
 });

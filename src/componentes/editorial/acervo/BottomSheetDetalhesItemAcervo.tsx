@@ -16,10 +16,10 @@ import {
 } from "@/dominio/entidades/paginaPublicada";
 import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numeroWhatsappInternacional";
 import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
-import { servicoTelemetriaAnonimaPadrao } from "@/infraestrutura/analytics/servicoTelemetriaAnonima";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BottomSheetEditorialBase } from "../BottomSheetEditorialBase";
+import { useAmbienteVitrine } from "../contextoAmbienteVitrine";
 
 interface PropriedadesBottomSheetDetalhesItemAcervo {
   readonly aberto: boolean;
@@ -43,6 +43,8 @@ export function BottomSheetDetalhesItemAcervo({
   configuracaoCta,
   aoIniciarMicrofluxo,
 }: PropriedadesBottomSheetDetalhesItemAcervo) {
+  const { registrarEventoTelemetria } = useAmbienteVitrine();
+
   if (!item) return null;
 
   const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
@@ -100,7 +102,7 @@ export function BottomSheetDetalhesItemAcervo({
 
     if (linkWhatsapp) {
       const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-      void servicoTelemetriaAnonimaPadrao.registrarEvento({
+      void registrarEventoTelemetria({
         organizacaoId: pagina.organizacaoId,
         tipoEvento: "clique_whatsapp",
         canalOrigem: origem.canalOrigem,
