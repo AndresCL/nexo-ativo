@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CreditCard, ExternalLink } from "lucide-react";
+import { Check, ExternalLink } from "lucide-react";
 import { CATALOGO_PLANOS_FLUXO } from "@/dominio/assinaturas/tiposAssinaturaAsaas";
 import type { SituacaoResumoAssinatura } from "@/dominio/entidades/autenticacaoEOrganizacao";
 import { ValorMonetarioCentavos } from "@/dominio/objetos-valor/valorMonetarioCentavos";
@@ -32,7 +32,7 @@ export function SecaoPlanosDisponiveis({
   temVigenciaRestante,
   vigenciaAteIso,
   temFaturaPendente,
-  urlCheckoutGerado,
+  urlCheckoutGerado: _urlCheckoutGerado,
   podeGerenciar,
   processando,
   aoAbrirModalContratacao,

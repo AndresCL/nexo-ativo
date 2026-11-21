@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, User } from "lucide-react";
+import { Check } from "lucide-react";
 import { Botao } from "@/componentes/interface/Botao";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import {

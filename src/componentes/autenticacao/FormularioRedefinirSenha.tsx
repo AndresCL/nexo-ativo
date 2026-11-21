@@ -38,7 +38,7 @@ export function FormularioRedefinirSenha({
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors, isSubmitting },
   } = useForm<DadosRedefinirSenha>({
     resolver: zodResolver(esquemaRedefinirSenha),
     mode: "onChange",

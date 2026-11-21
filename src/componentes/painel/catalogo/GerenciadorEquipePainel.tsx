@@ -29,7 +29,6 @@ import { CampoTelefoneComDdi } from "@/componentes/interface/CampoTelefoneComDdi
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { CampoUploadMidiaStorage } from "@/componentes/painel/editor/CampoUploadMidiaStorage";
 import { SeletorPontoFocalMidia } from "@/componentes/painel/editor/SeletorPontoFocalMidia";
-import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { CabecalhoPublicacaoRapidaAcervo } from "./CabecalhoPublicacaoRapidaAcervo";
 
 export interface PropriedadesGerenciadorEquipePainel {

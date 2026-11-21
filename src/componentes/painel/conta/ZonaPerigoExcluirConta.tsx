@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import * as Dialogo from "@radix-ui/react-dialog";
-import { AlertTriangle, Trash2, X, ExternalLink } from "lucide-react";
+import { AlertTriangle, X, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Botao } from "@/componentes/interface/Botao";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";

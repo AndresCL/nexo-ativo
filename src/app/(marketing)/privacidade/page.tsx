@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, Lock } from "lucide-react";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 
 export const metadata: Metadata = {

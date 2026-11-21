@@ -64,7 +64,7 @@ export function GerenciadorSolicitacoesPainel({
   solicitacoesIniciais,
   profissionaisAtivos,
   configuracaoEmailInicial,
-  consumoMensalEmailInicial,
+  consumoMensalEmailInicial: _consumoMensalEmailInicial,
   identificadorLocalGoogle,
   podeGerenciarSolicitacoes,
   podeConfigurarEmail = false,

@@ -3,30 +3,17 @@
 import {
   ArrowDown,
   ArrowUp,
-  ChevronDown,
-  Image,
-  Palette,
   Plus,
-  Search,
-  Share2,
   Trash2,
-  Type,
 } from "lucide-react";
 import type { PortaUploadMidiaEditorial } from "@/aplicacao/portas/portasEditorAparencia";
-import {
-  CATALOGO_PALETAS_EDITORIAIS,
-  CATALOGO_TIPOGRAFIAS_EDITORIAIS,
-  obterComposicoesEditoriaisAtivas,
-  type IdentificadorPaletaEditorial,
-  type IdentificadorTipografiaEditorial,
-} from "@/dominio/entidades/composicaoEditorial";
 import {
   type IntensidadeVeloEscuro,
   type TipoEfeitoCantosEditorial,
   type TomDotsCantosEditorial,
   type TipoRedeSocial,
 } from "@/dominio/entidades/paginaPublicada";
-import { useEstadoEditorAparencia, type AbaEditorAparencia } from "@/estados/estadoEditorAparencia";
+import { useEstadoEditorAparencia } from "@/estados/estadoEditorAparencia";
 import { Botao } from "@/componentes/interface/Botao";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
@@ -40,44 +27,6 @@ import { SecaoEstiloECores } from "./secoes/SecaoEstiloECores";
 import { SeletorEtapasEditorAparencia } from "./secoes/SeletorEtapasEditorAparencia";
 
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
-
-const ABAS_EDITOR: readonly {
-  readonly id: AbaEditorAparencia;
-  readonly rotulo: string;
-  readonly descricao: string;
-  readonly icone: typeof Palette;
-}[] = [
-    {
-      id: "estilo",
-      rotulo: "1. Estilo e cores",
-      descricao: "Composição e paleta",
-      icone: Palette,
-    },
-    {
-      id: "identidade",
-      rotulo: "2. Identidade e texto",
-      descricao: "Sua marca e mensagem",
-      icone: Type,
-    },
-    {
-      id: "midia",
-      rotulo: "3. Mídia e foco",
-      descricao: "Fotos e vídeos",
-      icone: Image,
-    },
-    {
-      id: "acoes",
-      rotulo: "4. Redes sociais",
-      descricao: "Seus canais de contato",
-      icone: Share2,
-    },
-    {
-      id: "galeria_seo",
-      rotulo: "5. Google e SEO",
-      descricao: "Busca e avaliações",
-      icone: Search,
-    },
-  ];
 
 const OPCOES_REDE_SOCIAL: readonly { readonly valor: TipoRedeSocial; readonly nome: string }[] = [
   { valor: "instagram", nome: "Instagram" },

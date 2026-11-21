@@ -10,7 +10,6 @@ import type {
 } from "@/dominio/analytics/tiposMetricasAgregadas";
 import { consolidarDesempenhoEquipe } from "@/dominio/analytics/consolidarDesempenhoEquipe";
 import { TooltipInformativo } from "@/componentes/interface/TooltipInformativo";
-import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 export interface PropriedadesTabelaPerformanceEquipe {
   readonly profissionais: readonly ProfissionalEquipe[];

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { KeyRound, ShieldAlert } from "lucide-react";
 import { Botao } from "@/componentes/interface/Botao";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import {

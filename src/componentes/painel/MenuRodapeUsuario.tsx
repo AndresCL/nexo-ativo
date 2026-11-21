@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { User, LogOut } from "lucide-react";
+import { User } from "lucide-react";
 import { BotaoEncerrarSessao } from "@/componentes/autenticacao/BotaoEncerrarSessao";
 
 export interface PropriedadesMenuRodapeUsuario {

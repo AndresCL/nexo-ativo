@@ -1,6 +1,5 @@
 "use client";
 
-import { LogOut } from "lucide-react";
 import { BotaoEncerrarSessao } from "@/componentes/autenticacao/BotaoEncerrarSessao";
 
 export function SecaoSessaoLogout() {

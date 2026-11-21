@@ -7,7 +7,7 @@ import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import { useRef, useState, type FormEvent } from "react";
-import { Check, Edit3, Eye, EyeOff, Package, Plus, Save, Search } from "lucide-react";
+import { Edit3, Eye, EyeOff, Package, Plus, Save, Search } from "lucide-react";
 import type { ServicoCatalogoConteudoPorta } from "@/aplicacao/portas/portasCatalogoConteudo";
 import {
   converterTextoMoedaParaCentavos,

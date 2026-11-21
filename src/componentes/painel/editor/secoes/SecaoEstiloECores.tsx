@@ -3,7 +3,6 @@
 import type { RascunhoConfiguracaoPagina } from "@/dominio/entidades/rascunhoConfiguracaoPagina";
 import { SeletorEspacamentoVitrine } from "./SeletorEspacamentoVitrine";
 import { SeletorPaletaCromatica } from "./SeletorPaletaCromatica";
-import { IndicadorTipografiaEditorial } from "./IndicadorTipografiaEditorial";
 
 export interface PropriedadesSecaoEstiloECores {
   readonly rascunho: RascunhoConfiguracaoPagina;

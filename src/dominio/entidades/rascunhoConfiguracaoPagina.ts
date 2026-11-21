@@ -9,7 +9,6 @@ import {
   hidratarConfiguracaoAvaliacoesGoogle,
   type ConfiguracaoAvaliacoesGoogle,
 } from "./avaliacoesGoogle";
-import { DEGRADADO_EDITORIAL_PADRAO } from "../objetos-valor/degradadoEditorial";
 import {
   type ConteudoPaginaPublicada,
   type CustomizacaoTokensEditorial,

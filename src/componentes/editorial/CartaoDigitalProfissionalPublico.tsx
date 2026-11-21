@@ -204,6 +204,7 @@ export function CartaoDigitalProfissionalPublico({
   }, [
     paginaOrganizacao.organizacaoId,
     profissional.id,
+    profissional.identificadorCartao,
     profissional.nomeCompleto,
     modoPrevia,
     registrarEventoTelemetria,
@@ -239,7 +240,7 @@ export function CartaoDigitalProfissionalPublico({
 
     window.addEventListener("hashchange", sincronizarComHash);
     return () => window.removeEventListener("hashchange", sincronizarComHash);
-  }, [microfluxosDisponiveis, profissional.id]);
+  }, [microfluxosDisponiveis, profissional.id, sincronizarHistoricoNavegador]);
 
   async function handleCompartilhar() {
     const dadosCompartilhamento = {

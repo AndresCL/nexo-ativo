@@ -6,12 +6,10 @@ import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import { useRef, useState, type FormEvent } from "react";
 import {
-  Check,
   Edit3,
   Eye,
   EyeOff,
   Images,
-  Layers,
   MapPin,
   Plus,
   Save,

@@ -3,7 +3,6 @@
 import { useEffect, useMemo } from "react";
 import { Handle, Position, useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
 import {
-  AlertCircle,
   AlertTriangle,
   CheckCircle2,
   DollarSign,
