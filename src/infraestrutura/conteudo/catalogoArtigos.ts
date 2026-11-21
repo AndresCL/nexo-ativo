@@ -8,6 +8,10 @@ export const CATALOGO_ARTIGOS_EDITORIAIS: readonly ArtigoEditorial[] = [
       "Aprenda a estruturar uma triagem rápida antes do WhatsApp para receber mensagens completas, reduzir idas e vindas e priorizar orçamentos reais.",
     resumoCard:
       "Estruture 3 a 5 perguntas curtas antes da conversa no WhatsApp para receber contexto completo logo na primeira mensagem.",
+    imagemCapa: {
+      url: "/blog/como-qualificar-clientes-antes-do-whatsapp.jpg",
+      alt: "Empreendedora em escritório com luz natural respondendo clientes pelo celular ao lado de um caderno e xícara de café",
+    },
     cluster: "atendimento-whatsapp",
     rotuloCluster: "Atendimento no WhatsApp",
     publicadoEmIso: "2026-11-21",
@@ -71,6 +75,10 @@ export const CATALOGO_ARTIGOS_EDITORIAIS: readonly ArtigoEditorial[] = [
       "Veja quais perguntas realmente importam antes de precificar um serviço e confira roteiros práticos para clínicas, oficinas, corretoras e escritórios.",
     resumoCard:
       "Roteiros práticos de perguntas objetivas para coletar o essencial antes de calcular preço, sem cansar o cliente.",
+    imagemCapa: {
+      url: "/blog/perguntas-antes-de-enviar-orcamento.jpg",
+      alt: "Especialista em estúdio conversando com cliente sobre amostras de materiais e anotações de orçamento",
+    },
     cluster: "atendimento-whatsapp",
     rotuloCluster: "Atendimento no WhatsApp",
     publicadoEmIso: "2026-11-21",
@@ -128,6 +136,10 @@ export const CATALOGO_ARTIGOS_EDITORIAIS: readonly ArtigoEditorial[] = [
       "Descubra como organizar o link da bio do Instagram e do Google para transformar visitas rápidas no celular em pedidos de orçamento completos.",
     resumoCard:
       "Organize o caminho entre o clique no perfil social e o pedido de orçamento para aproveitar melhor cada visita no celular.",
+    imagemCapa: {
+      url: "/blog/pedidos-de-orcamento-estruturados-link-da-bio.jpg",
+      alt: "Mãos segurando um smartphone em mesa de cafeteria iluminada pelo sol durante navegação rápida no celular",
+    },
     cluster: "atendimento-whatsapp",
     rotuloCluster: "Atendimento no WhatsApp",
     publicadoEmIso: "2026-11-21",
@@ -184,6 +196,10 @@ export const CATALOGO_ARTIGOS_EDITORIAIS: readonly ArtigoEditorial[] = [
       "Veja como padronizar cartões digitais individuais com QR Code e salvamento rápido de contato (vCard) para vendedores, consultores e especialistas.",
     resumoCard:
       "Padronize a apresentação da sua equipe em reuniões, eventos e visitas técnicas com cartões individuais ligados à marca.",
+    imagemCapa: {
+      url: "/blog/cartao-de-visita-digital-qr-code-equipes.jpg",
+      alt: "Dois profissionais compartilhando contato digital pelo celular durante encontro presencial em escritório iluminado",
+    },
     cluster: "presenca-comercial",
     rotuloCluster: "Presença Comercial e Equipe",
     publicadoEmIso: "2026-11-21",
@@ -244,6 +260,10 @@ export const CATALOGO_ARTIGOS_EDITORIAIS: readonly ArtigoEditorial[] = [
       "Boas práticas de hierarquia visual e organização editorial para exibir serviços, fotos de projetos e vídeos no celular sem poluir a tela.",
     resumoCard:
       "Estruture serviços, fotos de trabalhos reais e vídeos curtos em uma navegação leve pensada primeiro para telas pequenas.",
+    imagemCapa: {
+      url: "/blog/apresentar-servicos-portfolio-videos-um-link-celular.jpg",
+      alt: "Profissional em ateliê iluminado fotografando uma peça finalizada com smartphone para montar portfólio",
+    },
     cluster: "presenca-comercial",
     rotuloCluster: "Presença Comercial e Equipe",
     publicadoEmIso: "2026-11-21",
@@ -299,6 +319,10 @@ export const CATALOGO_ARTIGOS_EDITORIAIS: readonly ArtigoEditorial[] = [
       "Checklist prático dos elementos essenciais em uma presença digital comercial para PMEs e profissionais: posicionamento, provas, canais e chamada clara.",
     resumoCard:
       "Checklist direto dos elementos que fazem um visitante no celular entender seu trabalho e confiar para pedir orçamento.",
+    imagemCapa: {
+      url: "/blog/o-que-colocar-no-link-comercial-empresas-de-servico.jpg",
+      alt: "Recepção acolhedora com luz natural de empresa de serviços onde profissional atende cliente com cordialidade",
+    },
     cluster: "presenca-comercial",
     rotuloCluster: "Presença Comercial e Equipe",
     publicadoEmIso: "2026-11-21",

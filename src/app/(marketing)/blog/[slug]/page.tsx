@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 import { Botao } from "@/componentes/interface/Botao";
-import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { LogoNexoAtivo } from "@/componentes/interface/LogoNexoAtivo";
 import {
   formatarDataEditorialPtBr,
@@ -54,6 +54,18 @@ export async function generateMetadata({ params }: PropriedadesPaginaArtigo): Pr
       description: artigo.descricaoSeo,
       publishedTime: artigo.publicadoEmIso,
       modifiedTime: artigo.atualizadoEmIso,
+      images: [
+        {
+          url: artigo.imagemCapa.url,
+          alt: artigo.imagemCapa.alt,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: artigo.titulo,
+      description: artigo.descricaoSeo,
+      images: [artigo.imagemCapa.url],
     },
   };
 }
@@ -72,7 +84,7 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
   const jsonLdSeguro = serializarJsonLdArtigoSeguro(artigo, urlBasePublica);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-marfim-100/60 text-mineral-950">
+    <div className="flex min-h-dvh flex-col bg-marfim-50 text-mineral-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro }} />
 
       <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-white/90 backdrop-blur-md">
@@ -108,7 +120,10 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
       </header>
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-10 sm:px-8 sm:py-14">
-        <nav aria-label="Trilha de navegação" className="mb-6 flex flex-wrap items-center gap-2 text-xs text-mineral-500">
+        <nav
+          aria-label="Trilha de navegação"
+          className="mb-6 flex flex-wrap items-center gap-2 text-xs text-neutral-500"
+        >
           <Link href="/" className="transition-colors hover:text-mineral-950">
             Início
           </Link>
@@ -120,10 +135,21 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
           <span className="font-medium text-mineral-800">{artigo.rotuloCluster}</span>
         </nav>
 
-        <article>
-          <CartaoSuperficie preenchimento="amplo" className="space-y-8 bg-white shadow-xs">
-            <header className="border-b border-marfim-200 pb-6">
-              <div className="flex flex-wrap items-center gap-2.5 text-xs text-mineral-500">
+        <article className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-xs">
+          <div className="relative aspect-[3/2] w-full bg-marfim-100 sm:aspect-[16/9]">
+            <Image
+              src={artigo.imagemCapa.url}
+              alt={artigo.imagemCapa.alt}
+              fill
+              priority
+              sizes="(max-width: 896px) 100vw, 896px"
+              className="object-cover"
+            />
+          </div>
+
+          <div className="space-y-8 p-6 sm:p-10">
+            <header className="border-b border-neutral-200/80 pb-6">
+              <div className="flex flex-wrap items-center gap-2.5 text-xs text-neutral-500">
                 <span className="rounded-full bg-marfim-100 px-3 py-1 font-semibold text-mineral-800">
                   {artigo.rotuloCluster}
                 </span>
@@ -140,10 +166,10 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
                 </span>
               </div>
 
-              <h1 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight text-mineral-950 sm:text-4xl">
+              <h1 className="mt-4 text-3xl leading-[1.12] font-bold tracking-tight text-mineral-950 sm:text-4xl">
                 {artigo.titulo}
               </h1>
-              <p className="mt-3 text-base leading-relaxed text-mineral-600">
+              <p className="mt-3 text-base leading-relaxed text-neutral-600">
                 {artigo.descricaoSeo}
               </p>
             </header>
@@ -157,7 +183,7 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
             <div className="space-y-8">
               {artigo.secoes.map((secao) => (
                 <section key={secao.subtitulo} className="space-y-3">
-                  <h2 className="font-serif text-2xl font-bold tracking-tight text-mineral-950">
+                  <h2 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
                     {secao.subtitulo}
                   </h2>
                   {secao.paragrafos.map((paragrafo, indice) => (
@@ -166,7 +192,7 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
                     </p>
                   ))}
                   {secao.pontosChave && secao.pontosChave.length > 0 ? (
-                    <ul className="mt-3 space-y-2.5 rounded-xl bg-marfim-100/70 p-4 sm:p-5">
+                    <ul className="mt-3 space-y-2.5 rounded-2xl bg-marfim-100/70 p-4 sm:p-5">
                       {secao.pontosChave.map((ponto) => (
                         <li
                           key={ponto}
@@ -185,13 +211,13 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
               ))}
             </div>
 
-            <section className="border-t border-marfim-200 pt-6">
-              <h2 className="font-serif text-xl font-bold text-mineral-950">Em resumo</h2>
-              <p className="mt-2 text-base leading-relaxed text-mineral-700">{artigo.conclusao}</p>
+            <section className="border-t border-neutral-200/80 pt-6">
+              <h2 className="text-lg font-bold tracking-tight text-mineral-950">Em resumo</h2>
+              <p className="mt-2 text-base leading-relaxed text-neutral-700">{artigo.conclusao}</p>
             </section>
 
             <aside className="rounded-2xl bg-mineral-950 p-6 text-white sm:p-8">
-              <h2 className="font-serif text-2xl font-bold tracking-tight">{artigo.ctaTitulo}</h2>
+              <h2 className="text-xl font-bold tracking-tight sm:text-2xl">{artigo.ctaTitulo}</h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-marfim-200">
                 {artigo.ctaDescricao}
               </p>
@@ -215,46 +241,52 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
                 </Link>
               </div>
             </aside>
-          </CartaoSuperficie>
+          </div>
         </article>
 
         {relacionados.length > 0 ? (
-          <section aria-labelledby="titulo-relacionados" className="mt-12">
+          <section aria-labelledby="titulo-relacionados" className="mt-14">
             <div className="flex items-center justify-between gap-4">
               <h2
                 id="titulo-relacionados"
-                className="font-serif text-2xl font-bold tracking-tight text-mineral-950"
+                className="text-2xl font-bold tracking-tight text-mineral-950"
               >
                 Continue lendo
               </h2>
               <Link
                 href="/blog"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-mineral-700 hover:text-mineral-950"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-600 hover:text-mineral-950"
               >
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
                 Ver todos os guias
               </Link>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
+            <div className="mt-5 grid gap-5 md:grid-cols-3">
               {relacionados.map((relacionado) => (
                 <Link
                   key={relacionado.slug}
                   href={`/blog/${relacionado.slug}`}
-                  className="group block h-full"
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-md"
                 >
-                  <CartaoSuperficie
-                    preenchimento="padrao"
-                    className="flex h-full flex-col justify-between bg-white shadow-2xs transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-mineral-300 group-hover:shadow-md"
-                  >
+                  <div className="relative aspect-[3/2] w-full overflow-hidden bg-marfim-100">
+                    <Image
+                      src={relacionado.imagemCapa.url}
+                      alt={relacionado.imagemCapa.alt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col justify-between p-5">
                     <div>
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-mineral-500">
+                      <span className="text-[11px] font-semibold tracking-wide text-neutral-500">
                         {relacionado.rotuloCluster}
                       </span>
-                      <h3 className="mt-2 font-serif text-lg font-bold leading-snug text-mineral-950 group-hover:text-mineral-700">
+                      <h3 className="mt-1.5 text-base leading-snug font-bold tracking-tight text-mineral-950 group-hover:text-mineral-700">
                         {relacionado.titulo}
                       </h3>
-                      <p className="mt-2 text-xs leading-relaxed text-mineral-600">
+                      <p className="mt-2 text-xs leading-relaxed text-neutral-600">
                         {relacionado.resumoCard}
                       </p>
                     </div>
@@ -265,7 +297,7 @@ export default async function PaginaArtigoEditorial({ params }: PropriedadesPagi
                         aria-hidden="true"
                       />
                     </span>
-                  </CartaoSuperficie>
+                  </div>
                 </Link>
               ))}
             </div>

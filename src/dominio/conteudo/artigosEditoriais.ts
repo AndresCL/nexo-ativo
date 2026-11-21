@@ -15,11 +15,17 @@ export interface SecaoArtigoEditorial {
   readonly pontosChave?: readonly string[];
 }
 
+export interface ImagemCapaEditorial {
+  readonly url: string;
+  readonly alt: string;
+}
+
 export interface ArtigoEditorial {
   readonly slug: string;
   readonly titulo: string;
   readonly descricaoSeo: string;
   readonly resumoCard: string;
+  readonly imagemCapa: ImagemCapaEditorial;
   readonly cluster: ClusterEditorial;
   readonly rotuloCluster: string;
   readonly publicadoEmIso: string;
@@ -126,6 +132,7 @@ export function construirJsonLdArtigo(
         "@type": "Article",
         headline: artigo.titulo,
         description: artigo.descricaoSeo,
+        image: [`${base}${artigo.imagemCapa.url}`],
         inLanguage: "pt-BR",
         datePublished: artigo.publicadoEmIso,
         dateModified: artigo.atualizadoEmIso,

@@ -20,6 +20,8 @@ describe("artigosEditoriais", () => {
       expect(Number.isNaN(new Date(artigo.publicadoEmIso).getTime())).toBe(false);
       expect(Number.isNaN(new Date(artigo.atualizadoEmIso).getTime())).toBe(false);
       expect(artigo.secoes.length).toBeGreaterThan(0);
+      expect(artigo.imagemCapa.url.startsWith("/blog/")).toBe(true);
+      expect(artigo.imagemCapa.alt.trim().length).toBeGreaterThan(10);
 
       for (const slugRelacionado of artigo.slugsRelacionados) {
         expect(slugRelacionado).not.toBe(artigo.slug);
