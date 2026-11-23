@@ -5,13 +5,16 @@ import {
   obterDescritorFaixaInicioExperiencias,
   resolverPosicaoCabecalhoMarca,
 } from "@/dominio/editorial/faixaInicioExperiencias";
+import {
+  blocoSistemaEstaVisivel,
+  marcaEstaFixaNoTopo,
+} from "@/dominio/editorial/ordemBlocosVitrine";
 import { TransicaoEditorial } from "@/componentes/interface/TransicaoEditorial";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
-import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
 import { CamadaMidiaImersiva } from "./CamadaMidiaImersiva";
 import type { PropriedadesComposicaoEditorial } from "./ComposicaoImersiva";
 import { CabecalhoMarcaDiscreta } from "./IdentidadeETituloEditorial";
-import { NavegacaoAcoesHome } from "./NavegacaoAcoesHome";
+import { ListaBlocosVitrine } from "./ListaBlocosVitrine";
 import { RodapeEditorial } from "./RodapeEditorial";
 import { BlocoEquipeAposHero } from "./BlocoEquipeAposHero";
 
@@ -42,7 +45,8 @@ export function ComposicaoRetratoEditorial({
   ) as CSSProperties;
   const descritorFaixa = obterDescritorFaixaInicioExperiencias(pagina.faixaInicioExperiencias);
   const posicaoCabecalho = resolverPosicaoCabecalhoMarca(pagina.identidade.posicaoCabecalho);
-  const marcaNoTopo = posicaoCabecalho === "topo";
+  const marcaNoTopo =
+    marcaEstaFixaNoTopo(pagina.identidade) && blocoSistemaEstaVisivel("bloco:marca", pagina);
   const classeRespiroAbertura = obterClasseRespiroAberturaExperiencias(
     pagina.faixaInicioExperiencias,
     { alturaContidaPrevia, marcaNoTopo },
@@ -86,12 +90,6 @@ export function ComposicaoRetratoEditorial({
             classeRespiroAbertura,
           )}
         >
-          {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
-            <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0 max-w-7xl mx-auto mb-2">
-              {complementoChamada}
-            </TransicaoEditorial>
-          ) : null}
-
           <div
             className={combinarClasses(
               "border-t border-white/14 pt-4 sm:pt-6 @5xl:flex-1 @5xl:grid @5xl:grid-cols-12 @5xl:items-end @5xl:gap-12 @5xl:pt-8",
@@ -105,40 +103,24 @@ export function ComposicaoRetratoEditorial({
                 modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
                 aoAcionarItem={aoAcionarItem}
               />
-              <BarraRedesSociaisDiscreta redes={pagina.redesSociais} className="mt-4" />
             </TransicaoEditorial>
 
             <TransicaoEditorial atrasoSegundos={0.12} className="mt-7 @5xl:col-span-5 @5xl:mt-0">
-              {!marcaNoTopo ? (
-                <CabecalhoMarcaDiscreta
-                  identidade={pagina.identidade}
-                  tipografiaId={pagina.tipografiaId}
-                  varianteEspacamento="slot_experiencias"
-                />
-              ) : null}
-              <NavegacaoAcoesHome
-                acoes={pagina.acoesPrincipais}
-                espacamentoAcoes={pagina.espacamentoAcoes}
+              <ListaBlocosVitrine
+                pagina={pagina}
+                complementoChamada={complementoChamada}
                 previaEquipe={previaEquipe}
-                modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
                 videosYoutube={videosYoutube}
                 modoExibicaoVideos={modoExibicaoVideos}
                 autoplayVideos={autoplayVideos}
                 ocultarTituloVideos={ocultarTituloVideos}
                 produtos={produtos}
                 servicos={servicos}
-                paletaId={pagina.paletaId}
                 aoAcionarItem={aoAcionarItem}
                 aoSelecionarItemAcervo={aoSelecionarItemAcervo}
               />
             </TransicaoEditorial>
           </div>
-
-          {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
-            <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0 max-w-7xl mx-auto mt-4">
-              {complementoChamada}
-            </TransicaoEditorial>
-          ) : null}
         </div>
 
         <RodapeEditorial

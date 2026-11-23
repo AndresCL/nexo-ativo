@@ -1,11 +1,10 @@
 import type { DefinicaoMicrofluxo } from "./tiposMicrofluxo";
 
 /**
- * Ordena determinística e prioritariamente uma lista de microfluxos:
- * 1. O microfluxo com `destaquePrimarioHome === true` fica SEMPRE em 1º lugar (índice 0).
- * 2. Em caso de múltiplos itens marcados com destaque (dados legados), o primeiro prevalece.
- * 3. Os demais microfluxos são ordenados crescentemente por `ordemHome`.
- * 4. Normaliza as propriedades `ordemHome` para uma sequência contínua (0, 1, 2, ...).
+ * Ordena determinística e estavelmente uma lista de microfluxos por `ordemHome`:
+ * 1. Garante unicidade do destaque visual (`destaquePrimarioHome === true`), sem alterar a posição.
+ * 2. Ordena crescentemente por `ordemHome` (desempate determinístico por `id`).
+ * 3. Normaliza as propriedades `ordemHome` para uma sequência contínua (0, 1, 2, ...).
  */
 export function ordenarMicrofluxosPorPrioridadeEOrdem(
   microfluxos: readonly DefinicaoMicrofluxo[],
@@ -14,38 +13,29 @@ export function ordenarMicrofluxosPorPrioridadeEOrdem(
     return microfluxos.map((m, idx) => ({ ...m, ordemHome: idx }));
   }
 
-  const indiceDestaque = microfluxos.findIndex((m) => m.destaquePrimarioHome === true);
-
-  let destaque: DefinicaoMicrofluxo | null = null;
-  const restantes: DefinicaoMicrofluxo[] = [];
-
-  microfluxos.forEach((fluxo, idx) => {
-    if (idx === indiceDestaque) {
-      destaque = { ...fluxo, destaquePrimarioHome: true };
-    } else {
-      restantes.push({
-        ...fluxo,
-        ...(fluxo.destaquePrimarioHome ? { destaquePrimarioHome: false } : {}),
-      });
+  let destaqueEncontrado = false;
+  const normalizados = microfluxos.map((fluxo) => {
+    if (fluxo.destaquePrimarioHome === true) {
+      if (!destaqueEncontrado) {
+        destaqueEncontrado = true;
+        return { ...fluxo, destaquePrimarioHome: true };
+      }
+      return { ...fluxo, destaquePrimarioHome: false };
     }
+    return fluxo;
   });
 
-  restantes.sort((a, b) => (a.ordemHome ?? 0) - (b.ordemHome ?? 0) || a.id.localeCompare(b.id));
+  normalizados.sort((a, b) => (a.ordemHome ?? 0) - (b.ordemHome ?? 0) || a.id.localeCompare(b.id));
 
-  const resultadoFinal = destaque ? [destaque, ...restantes] : restantes;
-
-  return resultadoFinal.map((item, idx) => ({
+  return normalizados.map((item, idx) => ({
     ...item,
     ordemHome: idx,
   }));
 }
 
 /**
- * Move um microfluxo para a esquerda/antes (-1) ou para a direita/depois (+1).
- * Regras:
- * - O item destacado na posição 0 nunca pode ser movido de lugar (fica fixo no topo).
- * - Nenhum outro item pode se mover para a posição 0 enquanto houver um item destacado.
- * - Troca as posições e reindexa `ordemHome` (0, 1, 2, ...).
+ * Move um microfluxo para cima/antes (-1) ou para baixo/depois (+1) livremente,
+ * reindexando `ordemHome` (0, 1, 2, ...).
  */
 export function reordenarPosicaoMicrofluxo(
   microfluxos: readonly DefinicaoMicrofluxo[],
@@ -53,16 +43,14 @@ export function reordenarPosicaoMicrofluxo(
   direcao: -1 | 1,
 ): DefinicaoMicrofluxo[] {
   const listaOrdenada = ordenarMicrofluxosPorPrioridadeEOrdem(microfluxos);
-  const temDestaqueNoTopo = listaOrdenada[0]?.destaquePrimarioHome === true;
-  const indiceMinimoMovel = temDestaqueNoTopo ? 1 : 0;
 
-  if (indiceOrigem < indiceMinimoMovel || indiceOrigem >= listaOrdenada.length) {
+  if (indiceOrigem < 0 || indiceOrigem >= listaOrdenada.length) {
     return listaOrdenada;
   }
 
   const indiceDestino = indiceOrigem + direcao;
 
-  if (indiceDestino < indiceMinimoMovel || indiceDestino >= listaOrdenada.length) {
+  if (indiceDestino < 0 || indiceDestino >= listaOrdenada.length) {
     return listaOrdenada;
   }
 
@@ -81,11 +69,7 @@ export function reordenarPosicaoMicrofluxo(
 }
 
 /**
- * Define ou remove o destaque prioritário de um microfluxo com garantia de unicidade comercial.
- * Ao marcar como destaque:
- * - O fluxo alvo ganha `destaquePrimarioHome: true`.
- * - Qualquer outro fluxo perde o destaque prioritário.
- * - O fluxo destacado é imediatamente promovido ao topo (índice 0).
+ * Define ou remove o destaque visual exclusivo de um microfluxo, preservando sua posição atual.
  */
 export function definirDestaqueExclusivoMicrofluxo(
   microfluxos: readonly DefinicaoMicrofluxo[],

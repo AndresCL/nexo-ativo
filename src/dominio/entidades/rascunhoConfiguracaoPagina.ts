@@ -7,6 +7,14 @@ import {
 } from "../editorial/faixaInicioExperiencias";
 import { ehTamanhoCabecalhoMarcaValido } from "../editorial/tamanhoCabecalhoMarca";
 import {
+  ehTamanhoRedesSociaisValido,
+  type TamanhoRedesSociais,
+} from "../editorial/configuracaoRedesSociais";
+import {
+  ehIdentificadorBlocoSistemaVitrine,
+  type IdentificadorBlocoSistemaVitrine,
+} from "../editorial/ordemBlocosVitrine";
+import {
   LIMITE_MAXIMO_CHAMADAS_EDITORIAIS,
   hidratarChamadasEditoriaisAdicionais,
   type ConjuntoChamadasEditoriais,
@@ -56,6 +64,9 @@ export interface RascunhoConfiguracaoPagina extends ConjuntoChamadasEditoriais {
   readonly midiaFundo: MidiaFundoEditorial;
   readonly acoesPrincipais: readonly ItemAcaoHome[];
   readonly redesSociais: readonly LinkRedeSocial[];
+  readonly tamanhoRedesSociais?: TamanhoRedesSociais;
+  readonly ordemBlocosVitrine?: readonly string[];
+  readonly blocosSistemaOcultos?: readonly IdentificadorBlocoSistemaVitrine[];
   readonly obrasDestaqueGaleria: readonly DestaqueObraGaleria[];
   readonly seo: MetadadosSeoPublicos;
   readonly atualizadoEmIso: string;
@@ -398,6 +409,23 @@ export function hidratarRascunhoConfiguracaoPagina(
     redesSociais: Array.isArray(dadosBrutos.redesSociais)
       ? (dadosBrutos.redesSociais as LinkRedeSocial[])
       : [],
+    ...(ehTamanhoRedesSociaisValido(dadosBrutos.tamanhoRedesSociais)
+      ? { tamanhoRedesSociais: dadosBrutos.tamanhoRedesSociais }
+      : {}),
+    ...(Array.isArray(dadosBrutos.ordemBlocosVitrine)
+      ? {
+          ordemBlocosVitrine: dadosBrutos.ordemBlocosVitrine.filter(
+            (item): item is string => typeof item === "string" && item.trim().length > 0,
+          ),
+        }
+      : {}),
+    ...(Array.isArray(dadosBrutos.blocosSistemaOcultos)
+      ? {
+          blocosSistemaOcultos: dadosBrutos.blocosSistemaOcultos.filter(
+            ehIdentificadorBlocoSistemaVitrine,
+          ),
+        }
+      : {}),
     obrasDestaqueGaleria: Array.isArray(dadosBrutos.obrasDestaqueGaleria)
       ? (dadosBrutos.obrasDestaqueGaleria as DestaqueObraGaleria[])
       : [],
@@ -462,6 +490,15 @@ export function converterRascunhoParaConteudoPublicado(
     ...(rascunho.avaliacoesGoogle ? { avaliacoesGoogle: rascunho.avaliacoesGoogle } : {}),
     acoesPrincipais: rascunho.acoesPrincipais,
     redesSociais: rascunho.redesSociais,
+    ...(rascunho.tamanhoRedesSociais
+      ? { tamanhoRedesSociais: rascunho.tamanhoRedesSociais }
+      : {}),
+    ...(rascunho.ordemBlocosVitrine
+      ? { ordemBlocosVitrine: rascunho.ordemBlocosVitrine }
+      : {}),
+    ...(rascunho.blocosSistemaOcultos
+      ? { blocosSistemaOcultos: rascunho.blocosSistemaOcultos }
+      : {}),
     obrasDestaqueGaleria: rascunho.obrasDestaqueGaleria,
     seo: rascunho.seo,
   };

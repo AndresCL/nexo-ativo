@@ -11,8 +11,8 @@ import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { Botao } from "@/componentes/interface/Botao";
 import { AvisoRecursoRestrito } from "@/componentes/painel/AvisosPublicidade";
 import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
+import Link from "next/link";
 import { SeletorEstabelecimentoGoogle } from "./SeletorEstabelecimentoGoogle";
-import { SeletorPosicaoAvaliacoes } from "@/componentes/editorial/avaliacoes/SeletorPosicaoAvaliacoes";
 
 export function FormularioAvaliacoesGoogle({
   somenteLeitura = false,
@@ -112,14 +112,12 @@ export function FormularioAvaliacoesGoogle({
           </label>
         ))}
       </fieldset>
-      <SeletorPosicaoAvaliacoes
-        posicao={configuracao.posicao ?? "topo"}
-        desativado={somenteLeitura}
-        aoAlterar={(posicao) => atualizar({ ...configuracao, posicao })}
-      />
       <p className="text-xs text-mineral-600">
-        Os comentários são selecionados por relevância pelo Google. A nota representa todas as
-        avaliações do estabelecimento.
+        A posição das avaliações em relação à marca, ícones sociais e botões é organizada em{" "}
+        <Link href="/painel/experiencias" className="font-medium text-mineral-950 underline underline-offset-2">
+          Experiências
+        </Link>
+        . Os comentários são selecionados por relevância pelo Google.
       </p>
     </CartaoSuperficie>
   );

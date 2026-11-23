@@ -1,6 +1,10 @@
 import * as copiaTexto from "@/componentes/interface/notificacoes/copiarTextoComAviso";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
 import type { ServicoCatalogoConteudoPorta } from "@/aplicacao/portas/portasCatalogoConteudo";
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { GerenciadorExperienciasPainel } from "@/componentes/painel/catalogo/GerenciadorExperienciasPainel";

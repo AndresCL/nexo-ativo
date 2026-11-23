@@ -8,12 +8,15 @@ import {
   obterDescritorFaixaInicioExperiencias,
   resolverPosicaoCabecalhoMarca,
 } from "@/dominio/editorial/faixaInicioExperiencias";
+import {
+  blocoSistemaEstaVisivel,
+  marcaEstaFixaNoTopo,
+} from "@/dominio/editorial/ordemBlocosVitrine";
 import { TransicaoEditorial } from "@/componentes/interface/TransicaoEditorial";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
-import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
 import { CamadaMidiaImersiva } from "./CamadaMidiaImersiva";
 import { CabecalhoMarcaDiscreta } from "./IdentidadeETituloEditorial";
-import { NavegacaoAcoesHome } from "./NavegacaoAcoesHome";
+import { ListaBlocosVitrine } from "./ListaBlocosVitrine";
 import { RodapeEditorial } from "./RodapeEditorial";
 import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 import type { ManipuladorAcaoHome } from "./AcaoEquipeVitrine";
@@ -59,7 +62,8 @@ export function ComposicaoImersiva({
   ) as CSSProperties;
   const descritorFaixa = obterDescritorFaixaInicioExperiencias(pagina.faixaInicioExperiencias);
   const posicaoCabecalho = resolverPosicaoCabecalhoMarca(pagina.identidade.posicaoCabecalho);
-  const marcaNoTopo = posicaoCabecalho === "topo";
+  const marcaNoTopo =
+    marcaEstaFixaNoTopo(pagina.identidade) && blocoSistemaEstaVisivel("bloco:marca", pagina);
   const classeRespiroAbertura = obterClasseRespiroAberturaExperiencias(
     pagina.faixaInicioExperiencias,
     { alturaContidaPrevia, marcaNoTopo },
@@ -103,12 +107,6 @@ export function ComposicaoImersiva({
             classeRespiroAbertura,
           )}
         >
-          {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
-            <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0 max-w-7xl mx-auto mb-2">
-              {complementoChamada}
-            </TransicaoEditorial>
-          ) : null}
-
           <div
             className={combinarClasses(
               "grid items-center gap-5 @5xl:flex-1 @5xl:grid-cols-12 @5xl:gap-x-12 @5xl:gap-y-4 @5xl:py-4",
@@ -125,49 +123,21 @@ export function ComposicaoImersiva({
             </TransicaoEditorial>
 
             <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5 @5xl:col-start-8">
-              {!marcaNoTopo ? (
-                <CabecalhoMarcaDiscreta
-                  identidade={pagina.identidade}
-                  tipografiaId={pagina.tipografiaId}
-                  varianteEspacamento="slot_experiencias"
-                />
-              ) : null}
-              <NavegacaoAcoesHome
-                acoes={pagina.acoesPrincipais}
-                espacamentoAcoes={pagina.espacamentoAcoes}
+              <ListaBlocosVitrine
+                pagina={pagina}
+                complementoChamada={complementoChamada}
                 previaEquipe={previaEquipe}
-                modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
                 videosYoutube={videosYoutube}
                 modoExibicaoVideos={modoExibicaoVideos}
                 autoplayVideos={autoplayVideos}
                 ocultarTituloVideos={ocultarTituloVideos}
                 produtos={produtos}
                 servicos={servicos}
-                paletaId={pagina.paletaId}
                 aoAcionarItem={aoAcionarItem}
                 aoSelecionarItemAcervo={aoSelecionarItemAcervo}
               />
             </TransicaoEditorial>
-
-            {pagina.redesSociais && pagina.redesSociais.length > 0 ? (
-              <TransicaoEditorial
-                atrasoSegundos={0.12}
-                className="-mt-2 @5xl:col-span-5 @5xl:col-start-8 @5xl:mt-0"
-              >
-                <BarraRedesSociaisDiscreta
-                  redes={pagina.redesSociais}
-                  alinharCentroNoMobile={false}
-                  className="justify-center @5xl:justify-end"
-                />
-              </TransicaoEditorial>
-            ) : null}
           </div>
-
-          {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
-            <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0 max-w-7xl mx-auto mt-4">
-              {complementoChamada}
-            </TransicaoEditorial>
-          ) : null}
         </div>
 
         <RodapeEditorial

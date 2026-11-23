@@ -15,6 +15,42 @@ interface EstadoConsulta {
   readonly erro?: string;
 }
 
+const cacheResultadosSessao = new Map<string, ResumoAvaliacoesGoogle>();
+const consultasEmAndamentoSessao = new Map<string, Promise<ResumoAvaliacoesGoogle>>();
+
+function consultarComCacheSessao(
+  chave: string,
+  consulta: OrigemConsultaAvaliacoesGoogle,
+  servico: PortaAvaliacoesGoogleCliente,
+): Promise<ResumoAvaliacoesGoogle> {
+  if (servico !== servicoAvaliacoesGoogleCliente) {
+    return servico.consultar(consulta);
+  }
+
+  const emCache = cacheResultadosSessao.get(chave);
+  if (emCache) {
+    return Promise.resolve(emCache);
+  }
+
+  const emAndamento = consultasEmAndamentoSessao.get(chave);
+  if (emAndamento) {
+    return emAndamento;
+  }
+
+  const promessa = servico
+    .consultar(consulta)
+    .then((dados) => {
+      cacheResultadosSessao.set(chave, dados);
+      return dados;
+    })
+    .finally(() => {
+      consultasEmAndamentoSessao.delete(chave);
+    });
+
+  consultasEmAndamentoSessao.set(chave, promessa);
+  return promessa;
+}
+
 export function useAvaliacoesGoogle(
   origem: OrigemConsultaAvaliacoesGoogle | undefined,
   servico: PortaAvaliacoesGoogleCliente = servicoAvaliacoesGoogleCliente,
@@ -24,39 +60,32 @@ export function useAvaliacoesGoogle(
   const identificadorLocal = origem?.tipo === "previa" ? origem.identificadorLocal : "";
   const identificadorPublico = origem?.tipo === "publicada" ? origem.identificadorPublico : "";
   const chave = JSON.stringify([tipo, organizacaoId, identificadorLocal, identificadorPublico]);
-  const [elemento, definirElemento] = useState<HTMLElement | null>(null);
-  const [visivel, definirVisivel] = useState(false);
-  const [estado, definirEstado] = useState<EstadoConsulta>({ chave: "", carregando: false });
+  const dadosEmCache =
+    tipo && servico === servicoAvaliacoesGoogleCliente
+      ? cacheResultadosSessao.get(chave)
+      : undefined;
+  const [estado, definirEstado] = useState<EstadoConsulta>(() =>
+    dadosEmCache
+      ? { chave, carregando: false, dados: dadosEmCache }
+      : { chave: "", carregando: false },
+  );
 
   useEffect(() => {
-    if (!elemento) return;
-    if (typeof IntersectionObserver === "undefined") {
-      definirVisivel(true);
+    if (!tipo) return;
+    const emCache =
+      servico === servicoAvaliacoesGoogleCliente ? cacheResultadosSessao.get(chave) : undefined;
+    if (emCache) {
+      definirEstado({ chave, carregando: false, dados: emCache });
       return;
     }
-    const observador = new IntersectionObserver(
-      (entradas) => {
-        if (entradas.some((entrada) => entrada.isIntersecting)) {
-          definirVisivel(true);
-          observador.disconnect();
-        }
-      },
-      { rootMargin: "100px" },
-    );
-    observador.observe(elemento);
-    return () => observador.disconnect();
-  }, [elemento]);
 
-  useEffect(() => {
-    if (!tipo || !visivel) return;
     let atual = true;
     definirEstado({ chave, carregando: true });
     const consulta: OrigemConsultaAvaliacoesGoogle =
       tipo === "previa"
         ? { tipo, organizacaoId, identificadorLocal }
         : { tipo, identificadorPublico };
-    void servico
-      .consultar(consulta)
+    void consultarComCacheSessao(chave, consulta, servico)
       .then((dados) => {
         if (atual) definirEstado({ chave, carregando: false, dados });
       })
@@ -72,9 +101,13 @@ export function useAvaliacoesGoogle(
     return () => {
       atual = false;
     };
-  }, [tipo, organizacaoId, identificadorLocal, identificadorPublico, chave, visivel, servico]);
+  }, [tipo, organizacaoId, identificadorLocal, identificadorPublico, chave, servico]);
 
   const estadoAtual: EstadoConsulta =
-    estado.chave === chave && tipo ? estado : { chave, carregando: Boolean(tipo) };
-  return { ...estadoAtual, definirElemento };
+    estado.chave === chave && tipo
+      ? estado
+      : dadosEmCache
+        ? { chave, carregando: false, dados: dadosEmCache }
+        : { chave, carregando: Boolean(tipo) };
+  return estadoAtual;
 }

@@ -1,7 +1,10 @@
 "use client";
 
 import { deleteDoc, doc, setDoc, writeBatch } from "firebase/firestore";
-import type { ServicoCatalogoConteudoPorta } from "@/aplicacao/portas/portasCatalogoConteudo";
+import type {
+  ParcialBlocosSistemaVitrine,
+  ServicoCatalogoConteudoPorta,
+} from "@/aplicacao/portas/portasCatalogoConteudo";
 import type {
   OpcoesUploadMidiaEditorial,
   ResultadoPublicacaoPagina,
@@ -158,6 +161,39 @@ export class ServicoCatalogoConteudoFirebaseCliente implements ServicoCatalogoCo
         lote.delete(doc(bancoDados, "organizacoes", organizacaoId, "microfluxos", id));
       }
       await lote.commit();
+    } catch (erro) {
+      throw traduzirErroAutenticacaoFirebase(erro);
+    }
+  }
+
+  public async salvarOrdemEBlocosSistemaVitrine(
+    organizacaoId: string,
+    parcial: ParcialBlocosSistemaVitrine,
+  ): Promise<void> {
+    try {
+      const { bancoDados } = obterServicosClienteFirebase();
+      const referencia = doc(
+        bancoDados,
+        "organizacoes",
+        organizacaoId,
+        "configuracaoPagina",
+        "rascunho",
+      );
+      const payload: Record<string, unknown> = {
+        organizacaoId,
+        ordemBlocosVitrine: [...parcial.ordemBlocosVitrine],
+        blocosSistemaOcultos: [...parcial.blocosSistemaOcultos],
+        identidade: {
+          posicaoCabecalho: parcial.posicaoCabecalhoMarca,
+        },
+        atualizadoEmIso: new Date().toISOString(),
+      };
+      if (parcial.avaliacoesGoogleHabilitado !== undefined) {
+        payload.avaliacoesGoogle = {
+          habilitado: parcial.avaliacoesGoogleHabilitado,
+        };
+      }
+      await setDoc(referencia, payload, { merge: true });
     } catch (erro) {
       throw traduzirErroAutenticacaoFirebase(erro);
     }

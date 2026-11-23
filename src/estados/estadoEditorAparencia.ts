@@ -16,6 +16,7 @@ import type {
   LinkRedeSocial,
   MetadadosSeoPublicos,
   MidiaFundoEditorial,
+  TamanhoRedesSociais,
   TipoComposicaoEditorial,
 } from "@/dominio/entidades/paginaPublicada";
 import {
@@ -66,6 +67,9 @@ export interface EstadoEditorAparencia {
   atualizarRedeSocial: (redeId: string, parcial: Partial<LinkRedeSocial>) => void;
   moverRedeSocial: (redeId: string, direcao: "cima" | "baixo") => void;
   removerRedeSocial: (redeId: string) => void;
+  atualizarConfiguracaoRedesSociais: (parcial: {
+    readonly tamanhoRedesSociais?: TamanhoRedesSociais;
+  }) => void;
   adicionarObraGaleria: () => void;
   atualizarObraGaleria: (obraId: string, parcial: Partial<DestaqueObraGaleria>) => void;
   removerObraGaleria: (obraId: string) => void;
@@ -337,6 +341,17 @@ function criarStoreEditorAparencia(dadosIniciais?: DadosIniciaisEditorAparencia)
         rascunho: {
           ...estado.rascunho,
           redesSociais: estado.rascunho.redesSociais.filter((item) => item.id !== redeId),
+        },
+      })),
+
+    atualizarConfiguracaoRedesSociais: (parcial) =>
+      set((estado) => ({
+        possuiAlteracoesNaoSalvas: true,
+        rascunho: {
+          ...estado.rascunho,
+          ...(parcial.tamanhoRedesSociais
+            ? { tamanhoRedesSociais: parcial.tamanhoRedesSociais }
+            : {}),
         },
       })),
 

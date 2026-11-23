@@ -32,24 +32,20 @@ describe("Bloco público de avaliações do Google", () => {
     expect(consultar).not.toHaveBeenCalled();
   });
 
-  it("aguarda o bloco se aproximar da área visível antes de consultar", async () => {
-    let notificar!: () => void;
+  it("consulta imediatamente na montagem sem aguardar IntersectionObserver", async () => {
+    const observar = vi.fn();
     vi.stubGlobal(
       "IntersectionObserver",
       class {
-        constructor(retornar: (entradas: Array<{ isIntersecting: boolean }>) => void) {
-          notificar = () => retornar([{ isIntersecting: true }]);
-        }
-        observe() {}
+        observe = observar;
         disconnect() {}
       },
     );
     try {
       render(<BlocoAvaliacoesGoogle pagina={pagina} servico={servico} />);
-      expect(consultar).not.toHaveBeenCalled();
-      act(() => notificar());
-      await screen.findByRole("button", { name: /128 avaliações no Google/ });
       expect(consultar).toHaveBeenCalledTimes(1);
+      expect(observar).not.toHaveBeenCalled();
+      await screen.findByRole("button", { name: /128 avaliações no Google/ });
     } finally {
       vi.unstubAllGlobals();
     }

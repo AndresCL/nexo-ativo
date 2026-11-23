@@ -1,20 +1,12 @@
 "use client";
 
-import {
-  ArrowDown,
-  ArrowUp,
-  Plus,
-  Trash2,
-} from "lucide-react";
 import type { PortaUploadMidiaEditorial } from "@/aplicacao/portas/portasEditorAparencia";
 import {
   type IntensidadeVeloEscuro,
   type TipoEfeitoCantosEditorial,
   type TomDotsCantosEditorial,
-  type TipoRedeSocial,
 } from "@/dominio/entidades/paginaPublicada";
 import { useEstadoEditorAparencia } from "@/estados/estadoEditorAparencia";
-import { Botao } from "@/componentes/interface/Botao";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { TransicaoAlternancia } from "@/componentes/interface/TransicaoAlternancia";
@@ -28,22 +20,11 @@ import {
 } from "@/dominio/editorial/faixaInicioExperiencias";
 import { FormularioAvaliacoesGoogle } from "./FormularioAvaliacoesGoogle";
 import { SecaoEstiloECores } from "./secoes/SecaoEstiloECores";
+import { SecaoRedesSociais } from "./secoes/SecaoRedesSociais";
 import { SeletorEtapasEditorAparencia } from "./secoes/SeletorEtapasEditorAparencia";
 import { SeletorTamanhoCabecalhoMarca } from "./secoes/SeletorTamanhoCabecalhoMarca";
 
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
-
-const OPCOES_REDE_SOCIAL: readonly { readonly valor: TipoRedeSocial; readonly nome: string }[] = [
-  { valor: "instagram", nome: "Instagram" },
-  { valor: "linkedin", nome: "LinkedIn" },
-  { valor: "whatsapp", nome: "WhatsApp" },
-  { valor: "youtube", nome: "YouTube" },
-  { valor: "behance", nome: "Behance" },
-  { valor: "pinterest", nome: "Pinterest" },
-  { valor: "tiktok", nome: "TikTok" },
-  { valor: "facebook", nome: "Facebook" },
-  { valor: "site", nome: "Site institucional" },
-];
 
 export interface PropriedadesSecoesFormularioAparencia {
   readonly servicoUpload: PortaUploadMidiaEditorial;
@@ -65,6 +46,9 @@ export function SecoesFormularioAparencia({
   const atualizarRedeSocial = useEstadoEditorAparencia((e) => e.atualizarRedeSocial);
   const moverRedeSocial = useEstadoEditorAparencia((e) => e.moverRedeSocial);
   const removerRedeSocial = useEstadoEditorAparencia((e) => e.removerRedeSocial);
+  const atualizarConfiguracaoRedesSociais = useEstadoEditorAparencia(
+    (e) => e.atualizarConfiguracaoRedesSociais,
+  );
   const atualizarSeo = useEstadoEditorAparencia((e) => e.atualizarSeo);
 
   return (
@@ -631,121 +615,16 @@ export function SecoesFormularioAparencia({
         ) : null}
 
         {abaAtiva === "acoes" ? (
-          <div
-            id="painel-aba-acoes"
-            role="tabpanel"
-            aria-labelledby="aba-acoes"
-            className="space-y-6"
-          >
-            <CartaoSuperficie className="space-y-5 rounded-2xl bg-white p-5 shadow-xs sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-semibold text-mineral-950">
-                    Redes sociais discretas
-                  </h2>
-                  <p className="mt-0.5 text-xs text-mineral-600">
-                    Exibidas de forma minimalista no rodapé da composição, sem competir com suas
-                    ações principais.
-                  </p>
-                </div>
-
-                <Botao
-                  variante="operacional_secundario"
-                  tamanho="compacto"
-                  disabled={somenteLeitura || rascunho.redesSociais.length >= 9}
-                  onClick={adicionarRedeSocial}
-                >
-                  <Plus className="h-4 w-4" aria-hidden="true" />
-                  <span>Adicionar rede</span>
-                </Botao>
-              </div>
-
-              {rascunho.redesSociais.length === 0 ? (
-                <p className="text-xs text-mineral-500">Nenhuma rede social cadastrada.</p>
-              ) : (
-                <div className="space-y-3">
-                  {rascunho.redesSociais.map((item, indice) => (
-                    <div
-                      key={item.id}
-                      className="flex flex-col gap-3 rounded-lg border border-marfim-200 bg-white p-4"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <label
-                          htmlFor={`rede-tipo-${item.id}`}
-                          className="text-xs font-medium text-mineral-800"
-                        >
-                          Rede
-                        </label>
-                        <select
-                          id={`rede-tipo-${item.id}`}
-                          disabled={somenteLeitura}
-                          value={item.rede}
-                          onChange={(evento) =>
-                            atualizarRedeSocial(item.id, {
-                              rede: evento.target.value as TipoRedeSocial,
-                            })
-                          }
-                          className="min-h-11 rounded-md border border-marfim-300 bg-white px-2.5 py-2 text-sm text-mineral-950 focus:border-mineral-950 focus:outline-none"
-                        >
-                          {OPCOES_REDE_SOCIAL.map((opcao) => (
-                            <option key={opcao.valor} value={opcao.valor}>
-                              {opcao.nome}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <CampoFormulario
-                        rotulo="URL"
-                        aria-label="URL (Endereço completo)"
-                        placeholder="https://..."
-                        disabled={somenteLeitura}
-                        value={item.url}
-                        onChange={(evento) =>
-                          atualizarRedeSocial(item.id, { url: evento.target.value })
-                        }
-                      />
-
-                      <div className="flex items-center justify-end gap-1 border-t border-marfim-100 pt-1">
-                        <Botao
-                          variante="fantasma"
-                          tamanho="compacto"
-                          disabled={somenteLeitura || indice === 0}
-                          aria-label={`Mover rede ${item.rede} para cima`}
-                          title="Mover para cima"
-                          onClick={() => moverRedeSocial(item.id, "cima")}
-                        >
-                          <ArrowUp className="h-4 w-4 text-mineral-700" aria-hidden="true" />
-                        </Botao>
-
-                        <Botao
-                          variante="fantasma"
-                          tamanho="compacto"
-                          disabled={somenteLeitura || indice === rascunho.redesSociais.length - 1}
-                          aria-label={`Mover rede ${item.rede} para baixo`}
-                          title="Mover para baixo"
-                          onClick={() => moverRedeSocial(item.id, "baixo")}
-                        >
-                          <ArrowDown className="h-4 w-4 text-mineral-700" aria-hidden="true" />
-                        </Botao>
-
-                        <Botao
-                          variante="fantasma"
-                          tamanho="compacto"
-                          disabled={somenteLeitura}
-                          aria-label={`Remover rede ${item.rede}`}
-                          title="Remover rede"
-                          onClick={() => removerRedeSocial(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-alerta-erro" aria-hidden="true" />
-                        </Botao>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CartaoSuperficie>
-          </div>
+          <SecaoRedesSociais
+            redesSociais={rascunho.redesSociais}
+            tamanhoRedesSociais={rascunho.tamanhoRedesSociais}
+            somenteLeitura={somenteLeitura}
+            adicionarRedeSocial={adicionarRedeSocial}
+            atualizarRedeSocial={atualizarRedeSocial}
+            moverRedeSocial={moverRedeSocial}
+            removerRedeSocial={removerRedeSocial}
+            atualizarConfiguracaoRedesSociais={atualizarConfiguracaoRedesSociais}
+          />
         ) : null}
 
         {abaAtiva === "galeria_seo" ? (

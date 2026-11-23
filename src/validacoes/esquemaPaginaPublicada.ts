@@ -5,6 +5,8 @@ import {
   POSICOES_CABECALHO_MARCA,
 } from "../dominio/editorial/faixaInicioExperiencias";
 import { TAMANHOS_CABECALHO_MARCA } from "../dominio/editorial/tamanhoCabecalhoMarca";
+import { TAMANHOS_REDES_SOCIAIS } from "../dominio/editorial/configuracaoRedesSociais";
+import { IDENTIFICADORES_BLOCOS_SISTEMA_VITRINE } from "../dominio/editorial/ordemBlocosVitrine";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaConfiguracaoAgendaVitrine } from "./esquemasAgenda";
@@ -198,6 +200,9 @@ export const esquemaConteudoPaginaPublicada: z.ZodType<ConteudoPaginaPublicada> 
   midiaFundo: esquemaMidiaFundoEditorial,
   acoesPrincipais: z.array(esquemaItemAcaoHome),
   redesSociais: z.array(esquemaLinkRedeSocial).max(9),
+  tamanhoRedesSociais: z.enum(TAMANHOS_REDES_SOCIAIS).optional(),
+  ordemBlocosVitrine: z.array(z.string().min(1).max(120)).max(60).optional(),
+  blocosSistemaOcultos: z.array(z.enum(IDENTIFICADORES_BLOCOS_SISTEMA_VITRINE)).max(3).optional(),
   obrasDestaqueGaleria: z.array(esquemaDestaqueObraGaleria).max(8),
   seo: esquemaMetadadosSeoPublicos,
 });

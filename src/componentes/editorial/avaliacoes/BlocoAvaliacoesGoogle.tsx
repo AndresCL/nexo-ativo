@@ -32,7 +32,7 @@ export function BlocoAvaliacoesGoogle({
       ? { tipo: "previa", organizacaoId: pagina.organizacaoId, identificadorLocal }
       : { tipo: "publicada", identificadorPublico: pagina.identificadorPublico };
 
-  const { dados, erro, carregando, definirElemento } = useAvaliacoesGoogle(origem, servico);
+  const { dados, erro, carregando } = useAvaliacoesGoogle(origem, servico);
   const [aberto, alterarAbertura] = useState(false);
   const referenciaBotao = useRef<HTMLButtonElement>(null);
 
@@ -49,7 +49,6 @@ export function BlocoAvaliacoesGoogle({
 
   return (
     <div
-      ref={definirElemento}
       className={combinarClasses("w-full max-w-xl text-left", className)}
       aria-busy={carregando}
     >

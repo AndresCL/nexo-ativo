@@ -9,6 +9,10 @@ import type {
   ProjetoPortfolio,
   ServicoOrganizacao,
 } from "@/dominio/entidades/catalogoConteudo";
+import {
+  hidratarRascunhoConfiguracaoPagina,
+  type RascunhoConfiguracaoPagina,
+} from "@/dominio/entidades/rascunhoConfiguracaoPagina";
 import { ordenarMicrofluxosPorPrioridadeEOrdem } from "@/dominio/microfluxos/ordenacaoMicrofluxos";
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { verificarPermissaoOrganizacao } from "@/dominio/permissoes/autorizadorOrganizacao";
@@ -29,6 +33,7 @@ export interface ContextoCatalogoOrganizacaoServidor {
   readonly projetosPortfolio: readonly ProjetoPortfolio[];
   readonly profissionais: readonly ProfissionalEquipe[];
   readonly microfluxos: readonly DefinicaoMicrofluxo[];
+  readonly rascunhoPagina: RascunhoConfiguracaoPagina;
   readonly versaoPublicadaAtual: number | null;
   readonly podeEditarConteudo: boolean;
   readonly podePublicarPagina: boolean;
@@ -55,11 +60,13 @@ export async function carregarContextoCatalogoOrganizacaoServidor(
   const { bancoDadosAdmin } = obterServicosAdminFirebase();
   const refOrg = bancoDadosAdmin.collection("organizacoes").doc(organizacaoId);
   const refMembro = refOrg.collection("membros").doc(usuario.uid);
+  const refRascunho = refOrg.collection("configuracaoPagina").doc("rascunho");
   const refPublicada = bancoDadosAdmin.collection("paginasPublicadas").doc(organizacaoId);
 
   const [
     docOrg,
     docMembro,
+    docRascunho,
     docPublicada,
     snapServicos,
     snapProdutos,
@@ -69,6 +76,7 @@ export async function carregarContextoCatalogoOrganizacaoServidor(
   ] = await Promise.all([
     refOrg.get(),
     refMembro.get(),
+    refRascunho.get(),
     refPublicada.get(),
     refOrg.collection("servicos").get(),
     refOrg.collection("produtos").get(),
@@ -127,6 +135,14 @@ export async function carregarContextoCatalogoOrganizacaoServidor(
       ? ordenarMicrofluxosPorPrioridadeEOrdem(microfluxosPersistidos)
       : [];
 
+  const rascunhoPagina = hidratarRascunhoConfiguracaoPagina(
+    docRascunho.exists ? (docRascunho.data() as Record<string, unknown>) : undefined,
+    {
+      organizacaoId,
+      nomeOrganizacao: organizacao.nome,
+    },
+  );
+
   return {
     organizacao,
     membro,
@@ -135,6 +151,7 @@ export async function carregarContextoCatalogoOrganizacaoServidor(
     projetosPortfolio,
     profissionais,
     microfluxos,
+    rascunhoPagina,
     versaoPublicadaAtual,
     podeEditarConteudo,
     podePublicarPagina,

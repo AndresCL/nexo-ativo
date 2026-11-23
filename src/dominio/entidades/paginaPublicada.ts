@@ -12,6 +12,10 @@ export type {
 } from "../editorial/faixaInicioExperiencias";
 import type { TamanhoCabecalhoMarca } from "../editorial/tamanhoCabecalhoMarca";
 export type { TamanhoCabecalhoMarca } from "../editorial/tamanhoCabecalhoMarca";
+import type { TamanhoRedesSociais } from "../editorial/configuracaoRedesSociais";
+export type { TamanhoRedesSociais } from "../editorial/configuracaoRedesSociais";
+import type { IdentificadorBlocoSistemaVitrine } from "../editorial/ordemBlocosVitrine";
+export type { IdentificadorBlocoSistemaVitrine } from "../editorial/ordemBlocosVitrine";
 import type { ConjuntoChamadasEditoriais } from "./chamadasEditoriais";
 export type { ChamadaPrincipalEditorial } from "./chamadasEditoriais";
 import {
@@ -196,6 +200,9 @@ export interface ConteudoPaginaPublicada extends ConjuntoChamadasEditoriais {
   readonly midiaFundo: MidiaFundoEditorial;
   readonly acoesPrincipais: readonly ItemAcaoHome[];
   readonly redesSociais: readonly LinkRedeSocial[];
+  readonly tamanhoRedesSociais?: TamanhoRedesSociais;
+  readonly ordemBlocosVitrine?: readonly string[];
+  readonly blocosSistemaOcultos?: readonly IdentificadorBlocoSistemaVitrine[];
   readonly obrasDestaqueGaleria: readonly DestaqueObraGaleria[];
   readonly seo: MetadadosSeoPublicos;
 }

@@ -8,6 +8,8 @@ import { carregarContextoEditorOrganizacaoServidor } from "@/infraestrutura/pain
 import { EditorGuiadoAparencia } from "@/componentes/painel/editor/EditorGuiadoAparencia";
 import { carregarPreviaVitrineServidor } from "@/infraestrutura/painel/leitorPreviaVitrineServidor";
 
+export const dynamic = "force-dynamic";
+
 export default async function PaginaEditorAparenciaPainel() {
   const sessao = await exigirSessaoAutenticadaServidor();
   const vinculos = await listarVinculosOrganizacaoServidor(sessao.uid);
@@ -30,6 +32,7 @@ export default async function PaginaEditorAparenciaPainel() {
 
   return (
     <ProvedorEstadoEditorAparencia
+      key={contexto.rascunho.atualizadoEmIso}
       dadosIniciais={{
         rascunhoInicial: contexto.rascunho,
         versaoPublicadaInicial: contexto.versaoPublicadaAtual,

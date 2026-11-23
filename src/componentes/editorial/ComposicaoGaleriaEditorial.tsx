@@ -9,13 +9,16 @@ import {
   gerarVariaveisCssPaletaEditorial,
   type DestaqueObraGaleria,
 } from "@/dominio/entidades/paginaPublicada";
+import {
+  blocoSistemaEstaVisivel,
+  marcaEstaFixaNoTopo,
+} from "@/dominio/editorial/ordemBlocosVitrine";
 import { PontoFocalMidia } from "@/dominio/objetos-valor/pontoFocalMidia";
 import { TransicaoEditorial } from "@/componentes/interface/TransicaoEditorial";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
-import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
 import type { PropriedadesComposicaoEditorial } from "./ComposicaoImersiva";
 import { CabecalhoMarcaDiscreta } from "./IdentidadeETituloEditorial";
-import { NavegacaoAcoesHome } from "./NavegacaoAcoesHome";
+import { ListaBlocosVitrine } from "./ListaBlocosVitrine";
 import { RodapeEditorial } from "./RodapeEditorial";
 import { BlocoEquipeAposHero } from "./BlocoEquipeAposHero";
 
@@ -77,6 +80,9 @@ export function ComposicaoGaleriaEditorial({
     obraAtiva.pontoFocal.yPercentual,
   ).gerarPosicaoObjetoCss();
 
+  const marcaNoTopo =
+    marcaEstaFixaNoTopo(pagina.identidade) && blocoSistemaEstaVisivel("bloco:marca", pagina);
+
   return (
     <section
       data-composicao="galeria_editorial"
@@ -88,12 +94,14 @@ export function ComposicaoGaleriaEditorial({
       )}
     >
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-6 pt-7 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] @3xl:px-10 @5xl:px-14 @5xl:py-10">
-        <TransicaoEditorial>
-          <CabecalhoMarcaDiscreta
-            identidade={pagina.identidade}
-            tipografiaId={pagina.tipografiaId}
-          />
-        </TransicaoEditorial>
+        {marcaNoTopo ? (
+          <TransicaoEditorial>
+            <CabecalhoMarcaDiscreta
+              identidade={pagina.identidade}
+              tipografiaId={pagina.tipografiaId}
+            />
+          </TransicaoEditorial>
+        ) : null}
 
         <div className="my-8 grid items-center gap-8 @5xl:my-10 @5xl:grid-cols-12 @5xl:gap-12">
           <TransicaoEditorial atrasoSegundos={0.05} className="@5xl:col-span-7">
@@ -180,41 +188,19 @@ export function ComposicaoGaleriaEditorial({
               aoAcionarItem={aoAcionarItem}
             />
 
-            {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
-              <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0">
-                {complementoChamada}
-              </TransicaoEditorial>
-            ) : null}
-
-            <NavegacaoAcoesHome
-              acoes={pagina.acoesPrincipais}
-              espacamentoAcoes={pagina.espacamentoAcoes}
+            <ListaBlocosVitrine
+              pagina={pagina}
+              complementoChamada={complementoChamada}
               previaEquipe={previaEquipe}
-              modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
               videosYoutube={videosYoutube}
               modoExibicaoVideos={modoExibicaoVideos}
               autoplayVideos={autoplayVideos}
               ocultarTituloVideos={ocultarTituloVideos}
               produtos={produtos}
               servicos={servicos}
-              paletaId={pagina.paletaId}
               aoAcionarItem={aoAcionarItem}
               aoSelecionarItemAcervo={aoSelecionarItemAcervo}
             />
-
-            {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
-              <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0">
-                {complementoChamada}
-              </TransicaoEditorial>
-            ) : null}
-
-            <div className="flex justify-center @5xl:justify-end">
-              <BarraRedesSociaisDiscreta
-                redes={pagina.redesSociais}
-                alinharCentroNoMobile
-                className="@5xl:justify-end"
-              />
-            </div>
           </TransicaoEditorial>
         </div>
 

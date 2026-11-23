@@ -9,6 +9,15 @@ import type {
   ServicoOrganizacao,
 } from "@/dominio/entidades/catalogoConteudo";
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
+import type { PosicaoCabecalhoMarca } from "@/dominio/editorial/faixaInicioExperiencias";
+import type { IdentificadorBlocoSistemaVitrine } from "@/dominio/editorial/ordemBlocosVitrine";
+
+export interface ParcialBlocosSistemaVitrine {
+  readonly ordemBlocosVitrine: readonly string[];
+  readonly blocosSistemaOcultos: readonly IdentificadorBlocoSistemaVitrine[];
+  readonly posicaoCabecalhoMarca: PosicaoCabecalhoMarca;
+  readonly avaliacoesGoogleHabilitado?: boolean;
+}
 
 export interface PortaPersistenciaServicosCliente {
   salvarServico(servico: ServicoOrganizacao): Promise<void>;
@@ -34,6 +43,10 @@ export interface PortaPersistenciaMicrofluxosCliente {
     organizacaoId: string,
     alteradas: readonly DefinicaoMicrofluxo[],
     idsExcluidos: readonly string[],
+  ): Promise<void>;
+  salvarOrdemEBlocosSistemaVitrine?(
+    organizacaoId: string,
+    parcial: ParcialBlocosSistemaVitrine,
   ): Promise<void>;
 }
 
