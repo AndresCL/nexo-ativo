@@ -95,7 +95,7 @@ function criarStoreEditorAparencia(dadosIniciais?: DadosIniciaisEditorAparencia)
 
   return createStore<EstadoEditorAparencia>()((set) => ({
     rascunho: rascunhoBase,
-    abaAtiva: "estilo",
+    abaAtiva: "identidade",
     possuiAlteracoesNaoSalvas: false,
     versaoPublicadaAtual: dadosIniciais?.versaoPublicadaInicial ?? null,
     ultimoPublicadoEmIso: dadosIniciais?.ultimoPublicadoEmIsoInicial ?? null,

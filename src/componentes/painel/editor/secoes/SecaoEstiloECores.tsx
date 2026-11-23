@@ -26,6 +26,7 @@ export function SecaoEstiloECores({
       <SeletorFaixaInicioVitrine
         valorAtual={rascunho.faixaInicioExperiencias}
         aoAlterar={(faixaInicioExperiencias) => alterarEstiloVisual({ faixaInicioExperiencias })}
+        posicaoCabecalhoAtual={rascunho.identidade.posicaoCabecalho}
         somenteLeitura={somenteLeitura}
       />
 

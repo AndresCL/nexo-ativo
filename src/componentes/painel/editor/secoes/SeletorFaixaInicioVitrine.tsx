@@ -6,21 +6,26 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 import {
   LISTA_FAIXAS_INICIO_EXPERIENCIAS,
   resolverFaixaInicioExperiencias,
+  resolverPosicaoCabecalhoMarca,
   type FaixaInicioExperiencias,
+  type PosicaoCabecalhoMarca,
 } from "@/dominio/editorial/faixaInicioExperiencias";
 
 export interface PropriedadesSeletorFaixaInicioVitrine {
   readonly valorAtual?: FaixaInicioExperiencias;
   readonly aoAlterar: (faixa: FaixaInicioExperiencias) => void;
+  readonly posicaoCabecalhoAtual?: PosicaoCabecalhoMarca;
   readonly somenteLeitura?: boolean;
 }
 
 export function SeletorFaixaInicioVitrine({
   valorAtual,
   aoAlterar,
+  posicaoCabecalhoAtual,
   somenteLeitura = false,
 }: PropriedadesSeletorFaixaInicioVitrine) {
   const faixaResolvida = resolverFaixaInicioExperiencias(valorAtual);
+  const marcaNoTopo = resolverPosicaoCabecalhoMarca(posicaoCabecalhoAtual) === "topo";
 
   return (
     <div className="space-y-2.5">
@@ -82,7 +87,7 @@ export function SeletorFaixaInicioVitrine({
                   </p>
                 </div>
 
-                {/* Prévia ilustrativa: faixa fixa da marca no topo + ponto de início dos blocos */}
+                {/* Prévia ilustrativa: marca fixa no topo ou acompanhando os blocos */}
                 <div
                   className={combinarClasses(
                     "mt-3 flex h-16 w-full flex-col rounded-lg p-1.5",
@@ -90,20 +95,32 @@ export function SeletorFaixaInicioVitrine({
                   )}
                   aria-hidden="true"
                 >
-                  <div className="flex h-3 shrink-0 items-center justify-center border-b border-current/15 pb-1">
-                    <div
-                      className={combinarClasses(
-                        "h-1 w-8 rounded-full",
-                        ativo ? "bg-white/40" : "bg-mineral-400/50",
-                      )}
-                    />
-                  </div>
+                  {marcaNoTopo ? (
+                    <div className="flex h-3 shrink-0 items-center justify-center border-b border-current/15 pb-1">
+                      <div
+                        className={combinarClasses(
+                          "h-1 w-8 rounded-full",
+                          ativo ? "bg-white/40" : "bg-mineral-400/50",
+                        )}
+                      />
+                    </div>
+                  ) : null}
                   <div
                     className={combinarClasses(
                       "flex flex-1 flex-col gap-1 pt-1",
                       opcao.classePreviaAlinhamento,
                     )}
                   >
+                    {!marcaNoTopo ? (
+                      <div className="flex justify-center pb-0.5">
+                        <div
+                          className={combinarClasses(
+                            "h-1 w-8 rounded-full",
+                            ativo ? "bg-white/45" : "bg-mineral-400/60",
+                          )}
+                        />
+                      </div>
+                    ) : null}
                     <div
                       className={combinarClasses(
                         "h-1.5 w-full rounded-full",

@@ -1,8 +1,14 @@
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 import type { ConfiguracaoAvaliacoesGoogle } from "./avaliacoesGoogle";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
-import type { FaixaInicioExperiencias } from "../editorial/faixaInicioExperiencias";
-export type { FaixaInicioExperiencias } from "../editorial/faixaInicioExperiencias";
+import type {
+  FaixaInicioExperiencias,
+  PosicaoCabecalhoMarca,
+} from "../editorial/faixaInicioExperiencias";
+export type {
+  FaixaInicioExperiencias,
+  PosicaoCabecalhoMarca,
+} from "../editorial/faixaInicioExperiencias";
 import type { ConjuntoChamadasEditoriais } from "./chamadasEditoriais";
 export type { ChamadaPrincipalEditorial } from "./chamadasEditoriais";
 import {
@@ -95,6 +101,7 @@ export interface IdentidadeMarcaEditorial {
   readonly subtituloCurto?: string;
   readonly mostrarSubtituloCurto?: boolean;
   readonly alinhamentoCabecalho?: "esquerda" | "centro" | "direita";
+  readonly posicaoCabecalho?: PosicaoCabecalhoMarca;
   readonly urlLogotipoOpcional?: string;
   readonly formatoBordaLogotipo?: FormatoBordaLogotipo;
   readonly cidadeEstado?: string;

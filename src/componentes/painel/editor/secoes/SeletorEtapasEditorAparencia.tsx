@@ -7,16 +7,16 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 export const ETAPAS_EDITOR_APARENCIA = [
   {
-    id: "estilo" as AbaEditorAparencia,
-    rotulo: "1. Estilo e cores",
-    descricao: "Composição e paleta",
-    icone: Palette,
-  },
-  {
     id: "identidade" as AbaEditorAparencia,
-    rotulo: "2. Identidade e texto",
+    rotulo: "1. Identidade e texto",
     descricao: "Sua marca e mensagem",
     icone: Type,
+  },
+  {
+    id: "estilo" as AbaEditorAparencia,
+    rotulo: "2. Estilo e cores",
+    descricao: "Composição e paleta",
+    icone: Palette,
   },
   {
     id: "midia" as AbaEditorAparencia,

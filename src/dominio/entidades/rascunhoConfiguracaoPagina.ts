@@ -2,6 +2,7 @@ import { ErroValidacaoDominio } from "../erros/errosDominio";
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 import {
   ehFaixaInicioExperienciasValida,
+  ehPosicaoCabecalhoMarcaValida,
   type FaixaInicioExperiencias,
 } from "../editorial/faixaInicioExperiencias";
 import {
@@ -243,6 +244,9 @@ export function hidratarRascunhoConfiguracaoPagina(
       identidadeBruta.alinhamentoCabecalho === "centro" ||
       identidadeBruta.alinhamentoCabecalho === "direita"
         ? { alinhamentoCabecalho: identidadeBruta.alinhamentoCabecalho }
+        : {}),
+      ...(ehPosicaoCabecalhoMarcaValida(identidadeBruta.posicaoCabecalho)
+        ? { posicaoCabecalho: identidadeBruta.posicaoCabecalho }
         : {}),
       ...(typeof identidadeBruta.urlLogotipoOpcional === "string" &&
       identidadeBruta.urlLogotipoOpcional

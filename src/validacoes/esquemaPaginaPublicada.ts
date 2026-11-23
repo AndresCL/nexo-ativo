@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { CODIGOS_PERFIL_PUBLICIDADE } from "../dominio/publicidade/tiposPerfilPublicidade";
-import { FAIXAS_INICIO_EXPERIENCIAS } from "../dominio/editorial/faixaInicioExperiencias";
+import {
+  FAIXAS_INICIO_EXPERIENCIAS,
+  POSICOES_CABECALHO_MARCA,
+} from "../dominio/editorial/faixaInicioExperiencias";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaConfiguracaoPostVitrine } from "./esquemasMicrofluxo";
@@ -55,6 +58,7 @@ const esquemaIdentidadeMarcaEditorial = z.object({
   subtituloCurto: z.string().max(120).optional(),
   mostrarSubtituloCurto: z.boolean().optional(),
   alinhamentoCabecalho: z.enum(["esquerda", "centro", "direita"]).optional(),
+  posicaoCabecalho: z.enum(POSICOES_CABECALHO_MARCA).optional(),
   urlLogotipoOpcional: z.string().min(1).optional(),
   formatoBordaLogotipo: z.enum(["natural", "suave", "arredondado", "circulo"]).optional(),
   cidadeEstado: z.string().max(80).optional(),

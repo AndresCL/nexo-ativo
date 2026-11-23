@@ -22,6 +22,10 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { CampoUploadMidiaStorage } from "./CampoUploadMidiaStorage";
 import { SeletorDegradadoMidia } from "./SeletorDegradadoMidia";
 import { DEGRADADO_EDITORIAL_PADRAO } from "@/dominio/objetos-valor/degradadoEditorial";
+import {
+  LISTA_POSICOES_CABECALHO_MARCA,
+  resolverPosicaoCabecalhoMarca,
+} from "@/dominio/editorial/faixaInicioExperiencias";
 import { FormularioAvaliacoesGoogle } from "./FormularioAvaliacoesGoogle";
 import { SecaoEstiloECores } from "./secoes/SecaoEstiloECores";
 import { SeletorEtapasEditorAparencia } from "./secoes/SeletorEtapasEditorAparencia";
@@ -84,7 +88,7 @@ export function SecoesFormularioAparencia({
               <div>
                 <h2 className="text-base font-semibold text-mineral-950">Identidade da marca</h2>
                 <p className="mt-0.5 text-xs text-mineral-600">
-                  Como seu nome profissional, escritório ou empresa é apresentado no topo da página.
+                  Como seu nome profissional, escritório ou empresa é apresentado na página.
                 </p>
               </div>
 
@@ -190,7 +194,7 @@ export function SecoesFormularioAparencia({
 
                   <div className="space-y-1.5">
                     <label className="block text-xs font-medium text-mineral-800">
-                      Alinhamento no topo da vitrine
+                      Alinhamento da marca na vitrine
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {(
@@ -216,6 +220,44 @@ export function SecoesFormularioAparencia({
                               }`}
                           >
                             {opcao.rotulo}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-medium text-mineral-800">
+                      Posição da marca na vitrine
+                    </label>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {LISTA_POSICOES_CABECALHO_MARCA.map((opcao) => {
+                        const ativo =
+                          resolverPosicaoCabecalhoMarca(rascunho.identidade.posicaoCabecalho) ===
+                          opcao.codigo;
+                        return (
+                          <button
+                            key={opcao.codigo}
+                            type="button"
+                            disabled={somenteLeitura}
+                            aria-pressed={ativo}
+                            onClick={() =>
+                              atualizarIdentidade({ posicaoCabecalho: opcao.codigo })
+                            }
+                            className={`rounded-lg border px-3 py-2 text-left transition-colors ${
+                              ativo
+                                ? "border-mineral-950 bg-mineral-950 text-white"
+                                : "border-marfim-300 bg-white text-mineral-700 hover:bg-marfim-50"
+                            }`}
+                          >
+                            <span className="block text-xs font-semibold">{opcao.nome}</span>
+                            <span
+                              className={`mt-0.5 block text-[11px] leading-snug ${
+                                ativo ? "text-white/80" : "text-mineral-500"
+                              }`}
+                            >
+                              {opcao.resumo}
+                            </span>
                           </button>
                         );
                       })}

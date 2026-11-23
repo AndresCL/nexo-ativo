@@ -6,6 +6,7 @@ import {
 import {
   obterClasseRespiroAberturaExperiencias,
   obterDescritorFaixaInicioExperiencias,
+  resolverPosicaoCabecalhoMarca,
 } from "@/dominio/editorial/faixaInicioExperiencias";
 import { TransicaoEditorial } from "@/componentes/interface/TransicaoEditorial";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
@@ -57,15 +58,18 @@ export function ComposicaoImersiva({
     pagina.customizacaoTokens,
   ) as CSSProperties;
   const descritorFaixa = obterDescritorFaixaInicioExperiencias(pagina.faixaInicioExperiencias);
+  const posicaoCabecalho = resolverPosicaoCabecalhoMarca(pagina.identidade.posicaoCabecalho);
+  const marcaNoTopo = posicaoCabecalho === "topo";
   const classeRespiroAbertura = obterClasseRespiroAberturaExperiencias(
     pagina.faixaInicioExperiencias,
-    { alturaContidaPrevia },
+    { alturaContidaPrevia, marcaNoTopo },
   );
 
   return (
     <section
       data-composicao="imersivo"
       data-faixa-inicio={descritorFaixa.codigo}
+      data-posicao-cabecalho={posicaoCabecalho}
       suppressHydrationWarning
       aria-label={`Apresentação editorial de ${pagina.identidade.nomeExibicao}`}
       style={variaveisPaleta}
@@ -82,12 +86,15 @@ export function ComposicaoImersiva({
       />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 py-4 @3xl:px-10 @5xl:px-14 @5xl:py-6">
-        <TransicaoEditorial className="shrink-0">
-          <CabecalhoMarcaDiscreta
-            identidade={pagina.identidade}
-            tipografiaId={pagina.tipografiaId}
-          />
-        </TransicaoEditorial>
+        {marcaNoTopo ? (
+          <TransicaoEditorial className="shrink-0">
+            <CabecalhoMarcaDiscreta
+              identidade={pagina.identidade}
+              tipografiaId={pagina.tipografiaId}
+              varianteEspacamento="faixa_topo"
+            />
+          </TransicaoEditorial>
+        ) : null}
 
         <div
           data-testid="palco-experiencias-vitrine"
@@ -117,6 +124,13 @@ export function ComposicaoImersiva({
             </TransicaoEditorial>
 
             <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5 @5xl:col-start-8">
+              {!marcaNoTopo ? (
+                <CabecalhoMarcaDiscreta
+                  identidade={pagina.identidade}
+                  tipografiaId={pagina.tipografiaId}
+                  varianteEspacamento="slot_experiencias"
+                />
+              ) : null}
               <NavegacaoAcoesHome
                 acoes={pagina.acoesPrincipais}
                 espacamentoAcoes={pagina.espacamentoAcoes}

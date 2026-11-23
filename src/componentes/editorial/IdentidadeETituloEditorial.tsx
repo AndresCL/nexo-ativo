@@ -12,6 +12,7 @@ export interface PropriedadesCabecalhoMarcaDiscreta {
   readonly identidade: IdentidadeMarcaEditorial;
   readonly tipografiaId: IdentificadorTipografiaEditorial;
   readonly alinharCentroNoMobile?: boolean;
+  readonly varianteEspacamento?: "faixa_topo" | "slot_experiencias";
   readonly className?: string;
 }
 
@@ -33,6 +34,7 @@ export function CabecalhoMarcaDiscreta({
   identidade,
   tipografiaId,
   alinharCentroNoMobile = true,
+  varianteEspacamento = "faixa_topo",
   className,
 }: PropriedadesCabecalhoMarcaDiscreta) {
   const tipografia = obterDescritorTipografiaEditorial(tipografiaId);
@@ -41,6 +43,7 @@ export function CabecalhoMarcaDiscreta({
   const exibirSubtitulo =
     (identidade.mostrarSubtituloCurto ?? true) && Boolean(identidade.subtituloCurto);
   const alinhamento = identidade.alinhamentoCabecalho;
+  const ehSlotExperiencias = varianteEspacamento === "slot_experiencias";
 
   const classeAlinhamentoContainer =
     alinhamento === "centro"
@@ -49,19 +52,26 @@ export function CabecalhoMarcaDiscreta({
         ? "w-full justify-end text-right"
         : alinhamento === "esquerda"
           ? "w-full justify-start text-left"
-          : alinharCentroNoMobile
-            ? "w-full justify-center @5xl:w-auto @5xl:justify-start @5xl:gap-3"
-            : "justify-start gap-3";
+          : ehSlotExperiencias
+            ? "w-full justify-center @5xl:justify-end"
+            : alinharCentroNoMobile
+              ? "w-full justify-center @5xl:w-auto @5xl:justify-start @5xl:gap-3"
+              : "justify-start gap-3";
 
   return (
     <header
+      data-variante-cabecalho={varianteEspacamento}
       className={combinarClasses(
-        "min-h-[8.5rem] py-10 flex flex-col justify-center gap-1.5",
+        ehSlotExperiencias
+          ? "pt-1 pb-4 flex flex-col justify-center gap-1.5"
+          : "min-h-[8.5rem] py-10 flex flex-col justify-center gap-1.5",
         alinhamento
           ? "w-full"
-          : alinharCentroNoMobile
-            ? "w-full items-center justify-center text-center @5xl:flex-row @5xl:items-center @5xl:justify-between @5xl:text-left"
-            : "items-start text-left @5xl:flex-row @5xl:items-center @5xl:justify-between",
+          : ehSlotExperiencias
+            ? "w-full items-center text-center @5xl:items-end @5xl:text-right"
+            : alinharCentroNoMobile
+              ? "w-full items-center justify-center text-center @5xl:flex-row @5xl:items-center @5xl:justify-between @5xl:text-left"
+              : "items-start text-left @5xl:flex-row @5xl:items-center @5xl:justify-between",
         className,
       )}
     >

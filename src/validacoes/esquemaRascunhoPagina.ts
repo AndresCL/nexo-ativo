@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { FAIXAS_INICIO_EXPERIENCIAS } from "../dominio/editorial/faixaInicioExperiencias";
+import {
+  FAIXAS_INICIO_EXPERIENCIAS,
+  POSICOES_CABECALHO_MARCA,
+} from "../dominio/editorial/faixaInicioExperiencias";
 import {
   esquemaChamadaEditorial,
   esquemaChamadasEditoriaisAdicionais,
@@ -62,6 +65,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
     subtituloCurto: z.string().max(120).optional(),
     mostrarSubtituloCurto: z.boolean().optional(),
     alinhamentoCabecalho: z.enum(["esquerda", "centro", "direita"]).optional(),
+    posicaoCabecalho: z.enum(POSICOES_CABECALHO_MARCA).optional(),
     urlLogotipoOpcional: z.string().max(600).optional(),
     formatoBordaLogotipo: z.enum(["natural", "suave", "arredondado", "circulo"]).optional(),
     cidadeEstado: z.string().max(80).optional(),

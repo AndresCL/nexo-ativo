@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   FAIXA_INICIO_EXPERIENCIAS_PADRAO,
+  POSICAO_CABECALHO_MARCA_PADRAO,
   ehFaixaInicioExperienciasValida,
+  ehPosicaoCabecalhoMarcaValida,
   obterClasseRespiroAberturaExperiencias,
   obterDescritorFaixaInicioExperiencias,
   resolverFaixaInicioExperiencias,
+  resolverPosicaoCabecalhoMarca,
 } from "@/dominio/editorial/faixaInicioExperiencias";
 import {
   converterRascunhoParaConteudoPublicado,
@@ -56,10 +59,15 @@ describe("faixaInicioExperiencias", () => {
     });
 
     const hidratado = hidratarRascunhoConfiguracaoPagina(
-      { ...base, faixaInicioExperiencias: "centro" },
+      {
+        ...base,
+        faixaInicioExperiencias: "centro",
+        identidade: { ...base.identidade, posicaoCabecalho: "acima_experiencias" },
+      },
       { organizacaoId: "org-1", nomeOrganizacao: "Clínica Exemplo" },
     );
     expect(hidratado.faixaInicioExperiencias).toBe("centro");
+    expect(hidratado.identidade.posicaoCabecalho).toBe("acima_experiencias");
     expect(esquemaRascunhoConfiguracaoPagina.safeParse(hidratado).success).toBe(true);
 
     const publicada = converterRascunhoParaConteudoPublicado(hidratado, {
@@ -67,6 +75,24 @@ describe("faixaInicioExperiencias", () => {
       versaoPublicada: 1,
     });
     expect(publicada.faixaInicioExperiencias).toBe("centro");
+    expect(publicada.identidade.posicaoCabecalho).toBe("acima_experiencias");
     expect(esquemaConteudoPaginaPublicada.safeParse(publicada).success).toBe(true);
+  });
+
+  it("valida posição do cabeçalho da marca e preserva respiro mínimo em Alto sem marca no topo", () => {
+    expect(ehPosicaoCabecalhoMarcaValida("topo")).toBe(true);
+    expect(ehPosicaoCabecalhoMarcaValida("acima_experiencias")).toBe(true);
+    expect(ehPosicaoCabecalhoMarcaValida("rodape")).toBe(false);
+    expect(resolverPosicaoCabecalhoMarca(undefined)).toBe(POSICAO_CABECALHO_MARCA_PADRAO);
+
+    expect(
+      obterClasseRespiroAberturaExperiencias("alto", { marcaNoTopo: false }),
+    ).toContain("pt-10");
+    expect(
+      obterClasseRespiroAberturaExperiencias("baixo", {
+        marcaNoTopo: false,
+        alturaContidaPrevia: true,
+      }),
+    ).toContain("pt-72");
   });
 });
