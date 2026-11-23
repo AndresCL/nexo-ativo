@@ -3,12 +3,23 @@ import { obterSessaoAutenticadaServidor } from "@/infraestrutura/firebase/sessao
 import { PainelVerificacaoEmail } from "@/componentes/autenticacao/PainelVerificacaoEmail";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 
-export default async function PaginaVerificarEmail() {
-  const sessao = await obterSessaoAutenticadaServidor();
+interface PropriedadesPaginaVerificarEmail {
+  readonly searchParams: Promise<{ oobCode?: string }>;
+}
+
+export default async function PaginaVerificarEmail({
+  searchParams,
+}: PropriedadesPaginaVerificarEmail) {
+  const [sessao, parametros] = await Promise.all([
+    obterSessaoAutenticadaServidor(),
+    searchParams,
+  ]);
 
   if (sessao?.emailVerificado) {
     redirect("/painel");
   }
+
+  const codigoAcao = parametros.oobCode?.trim() || undefined;
 
   return (
     <CartaoSuperficie preenchimento="amplo">
@@ -17,7 +28,7 @@ export default async function PaginaVerificarEmail() {
         Confirme seu endereço de e-mail
       </h1>
 
-      <PainelVerificacaoEmail emailAtual={sessao?.email ?? null} />
+      <PainelVerificacaoEmail emailAtual={sessao?.email ?? null} codigoAcao={codigoAcao} />
     </CartaoSuperficie>
   );
 }

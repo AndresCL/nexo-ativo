@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 import { ProvedorEstadoInterfacePainel } from "@/estados/estadoInterfacePainel";
 import {
   exigirSessaoAutenticadaServidor,
@@ -29,6 +30,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function LayoutPainelCliente({ children }: { readonly children: ReactNode }) {
   const sessao = await exigirSessaoAutenticadaServidor();
+
+  if (!sessao.emailVerificado && !verificarPrivilegioFundador(sessao)) {
+    redirect("/verificar-email");
+  }
+
   const vinculos = await listarVinculosOrganizacaoServidor(sessao.uid);
   const organizacaoPrincipal = vinculos[0];
 

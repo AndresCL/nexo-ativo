@@ -16,6 +16,7 @@ export interface PortaAutenticacaoCliente {
   solicitarRecuperacaoSenha(email: string): Promise<void>;
   confirmarRedefinicaoSenha(codigoAcao: string, novaSenha: string): Promise<void>;
   validarCodigoRedefinicaoSenha(codigoAcao: string): Promise<string>;
+  confirmarVerificacaoEmail(codigoAcao: string): Promise<UsuarioAutenticado | null>;
   reenviarVerificacaoEmail(): Promise<void>;
   recarregarEstadoUsuario(): Promise<UsuarioAutenticado | null>;
   forcarAtualizacaoTokenSessao(): Promise<void>;

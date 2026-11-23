@@ -18,6 +18,7 @@ import { executarConsultaDisponibilidadeAgenda } from "./casos-de-uso/consultarD
 import { executarRegistroAgendamentoVisitante } from "./casos-de-uso/registrarAgendamentoVisitanteTransacional";
 import { executarAtualizacaoSituacaoAgendamento } from "./casos-de-uso/atualizarSituacaoAgendamentoTransacional";
 import { executarSolicitacaoRecuperacaoSenha } from "./casos-de-uso/solicitarRecuperacaoSenhaTransacional";
+import { executarEnvioVerificacaoEmail } from "./casos-de-uso/enviarVerificacaoEmailTransacional";
 import { criarProvedorEmailPadrao } from "./email/adaptadorResendEmail";
 import { executarCriacaoAssinaturaAsaas } from "./casos-de-uso/criarAssinaturaOrganizacaoAsaas";
 import { executarCancelamentoAssinaturaAsaas } from "./casos-de-uso/cancelarAssinaturaOrganizacaoAsaas";
@@ -129,6 +130,25 @@ export const solicitarRecuperacaoSenha = onCall(
         autenticacao,
         provedorEmail,
         requisicao.data,
+      );
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
+    }
+  }
+);
+
+export const enviarVerificacaoEmail = onCall(
+  { secrets: [chaveResend] },
+  async (requisicao) => {
+    try {
+      const { bancoDados, autenticacao } = obterAdminFuncoes();
+      const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+      const provedorEmail = criarProvedorEmailPadrao();
+      return await executarEnvioVerificacaoEmail(
+        bancoDados,
+        autenticacao,
+        provedorEmail,
+        usuario,
       );
     } catch (erro) {
       throw converterErroParaHttpsError(erro);

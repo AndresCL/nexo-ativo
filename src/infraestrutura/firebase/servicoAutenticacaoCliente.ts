@@ -1,10 +1,10 @@
 "use client";
 
 import {
+  applyActionCode,
   confirmPasswordReset,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -99,8 +99,19 @@ export class ServicoAutenticacaoFirebaseCliente
         senha.trim(),
       );
       await updateProfile(credencial.user, { displayName: nomeExibicao.trim() });
-      await sendEmailVerification(credencial.user);
-      return await converterUsuarioFirebaseParaDominio(credencial.user, true);
+      const usuarioDominio = await converterUsuarioFirebaseParaDominio(credencial.user, true);
+
+      try {
+        await this.solicitarEnvioVerificacaoEmailServidor();
+      } catch (erroEnvio) {
+        // Não aborta o cadastro se o envio inicial falhar de forma transitória;
+        // o usuário segue para /verificar-email e pode acionar o reenvio imediatamente.
+        if (process.env.NODE_ENV !== "production") {
+          console.error("[VerificacaoEmail] Falha no disparo inicial pós-cadastro:", erroEnvio);
+        }
+      }
+
+      return usuarioDominio;
     } catch (erro) {
       throw traduzirErroAutenticacaoFirebase(erro);
     }
@@ -149,13 +160,35 @@ export class ServicoAutenticacaoFirebaseCliente
     }
   }
 
+  private async solicitarEnvioVerificacaoEmailServidor(): Promise<void> {
+    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const chamarEnvio = httpsCallable<
+      Record<string, never>,
+      { enviado: boolean; jaVerificado: boolean; mensagem: string }
+    >(funcoesRemotas, "enviarVerificacaoEmail");
+    await chamarEnvio({});
+  }
+
+  public async confirmarVerificacaoEmail(codigoAcao: string): Promise<UsuarioAutenticado | null> {
+    try {
+      const { autenticacao } = obterServicosClienteFirebase();
+      await applyActionCode(autenticacao, codigoAcao.trim());
+      if (!autenticacao.currentUser) {
+        return null;
+      }
+      return await this.recarregarEstadoUsuario();
+    } catch (erro) {
+      throw traduzirErroAutenticacaoFirebase(erro);
+    }
+  }
+
   public async reenviarVerificacaoEmail(): Promise<void> {
     try {
       const { autenticacao } = obterServicosClienteFirebase();
       if (!autenticacao.currentUser) {
         throw new ErroNaoAutenticado();
       }
-      await sendEmailVerification(autenticacao.currentUser);
+      await this.solicitarEnvioVerificacaoEmailServidor();
     } catch (erro) {
       throw traduzirErroAutenticacaoFirebase(erro);
     }

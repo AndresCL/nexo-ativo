@@ -43,8 +43,11 @@ export function FormularioLogin({
     try {
       const emailHigienizado = dados.email.trim().toLowerCase();
       const senhaHigienizada = dados.senha.trim();
-      await servicoAutenticacao.entrarComEmailESenha(emailHigienizado, senhaHigienizada);
-      navegador.push("/painel");
+      const usuario = await servicoAutenticacao.entrarComEmailESenha(
+        emailHigienizado,
+        senhaHigienizada,
+      );
+      navegador.push(usuario.emailVerificado ? "/painel" : "/verificar-email");
       navegador.refresh();
     } catch (erro) {
       notificar.erro(

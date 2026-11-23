@@ -43,6 +43,18 @@ export function traduzirErroAutenticacaoFirebase(erroDesconhecido: unknown): Err
         "Escolha uma senha mais segura, com pelo menos 8 caracteres.",
       );
 
+    case "auth/expired-action-code":
+      return new ErroDominio(
+        "LINK_ACAO_EXPIRADO",
+        "Este link de confirmação expirou. Solicite um novo e-mail de confirmação.",
+      );
+
+    case "auth/invalid-action-code":
+      return new ErroDominio(
+        "LINK_ACAO_INVALIDO",
+        "Este link de confirmação é inválido ou já foi utilizado.",
+      );
+
     case "auth/too-many-requests":
       return new ErroDominio(
         "LIMITE_TENTATIVAS_EXCEDIDO",
