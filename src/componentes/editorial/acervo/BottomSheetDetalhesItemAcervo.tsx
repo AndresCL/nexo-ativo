@@ -1,8 +1,7 @@
 "use client";
 
 import * as DialogoPrimitivo from "@radix-ui/react-dialog";
-import { Sparkles, Clock } from "lucide-react";
-import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
+import { Clock } from "lucide-react";
 import {
   formatarApresentacaoPrecoItem,
   obterListaImagensMidia,
@@ -14,12 +13,9 @@ import {
   type ConteudoPaginaPublicada,
   type ConfiguracaoCtaAcervo,
 } from "@/dominio/entidades/paginaPublicada";
-import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numeroWhatsappInternacional";
 import { GaleriaImagensComThumbs } from "@/componentes/interface/GaleriaImagensComThumbs";
-import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
-import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BottomSheetEditorialBase } from "../BottomSheetEditorialBase";
-import { useAmbienteVitrine } from "../contextoAmbienteVitrine";
+import { BotaoCtaItemAcervo, resolverCtaItemAcervo } from "./BotaoCtaItemAcervo";
 
 interface PropriedadesBottomSheetDetalhesItemAcervo {
   readonly aberto: boolean;
@@ -43,8 +39,6 @@ export function BottomSheetDetalhesItemAcervo({
   configuracaoCta,
   aoIniciarMicrofluxo,
 }: PropriedadesBottomSheetDetalhesItemAcervo) {
-  const { registrarEventoTelemetria } = useAmbienteVitrine();
-
   if (!item) return null;
 
   const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
@@ -55,17 +49,17 @@ export function BottomSheetDetalhesItemAcervo({
   const imagemPrincipal = ehProduto
     ? produto?.urlImagemPrincipal
       ? {
-          url: produto.urlImagemPrincipal,
-          textoAlternativo: produto.nome,
-          pontoFocal: produto.pontoFocalImagem,
-        }
+        url: produto.urlImagemPrincipal,
+        textoAlternativo: produto.nome,
+        pontoFocal: produto.pontoFocalImagem,
+      }
       : null
     : servico?.urlImagemOpcional
       ? {
-          url: servico.urlImagemOpcional,
-          textoAlternativo: servico.nome,
-          pontoFocal: servico.pontoFocalImagem,
-        }
+        url: servico.urlImagemOpcional,
+        textoAlternativo: servico.nome,
+        pontoFocal: servico.pontoFocalImagem,
+      }
       : null;
 
   const imagensGaleria = obterListaImagensMidia(imagemPrincipal, item.imagens);
@@ -76,42 +70,14 @@ export function BottomSheetDetalhesItemAcervo({
     rotuloOpcional: item.rotuloPrecoOpcional,
   });
 
-  const tipoCta = configuracaoCta?.tipoAcao ?? "whatsapp";
-  const rotuloBotaoPersonalizado = configuracaoCta?.rotuloBotao?.trim();
-
-  const whatsappDisponivel =
-    pagina.identidade.celularOpcional || pagina.identidade.telefonePrincipalOpcional;
-  const numeroWhatsappLimpo = normalizarNumeroWhatsappInternacional(whatsappDisponivel);
-
-  const mensagemWhatsapp = encodeURIComponent(
-    `Olá, vi o anúncio de "${item.nome}" na vitrine da ${pagina.identidade.nomeExibicao} e gostaria de mais informações.`,
-  );
-  const linkWhatsapp = numeroWhatsappLimpo
-    ? `https://wa.me/${numeroWhatsappLimpo}?text=${mensagemWhatsapp}`
-    : null;
-
-  function executarAcaoCta() {
-    if (!item) return;
-    if (tipoCta === "microfluxo" && configuracaoCta?.microfluxoId && aoIniciarMicrofluxo) {
-      aoFechar();
-      aoIniciarMicrofluxo(configuracaoCta.microfluxoId, {
-        ...(ehProduto ? { produtoId: item.id } : { servicoId: item.id }),
-      });
-      return;
-    }
-
-    if (linkWhatsapp) {
-      const origem = obterOuDetectarOrigemSessao(pagina.organizacaoId);
-      void registrarEventoTelemetria({
-        organizacaoId: pagina.organizacaoId,
-        tipoEvento: "clique_whatsapp",
-        canalOrigem: origem.canalOrigem,
-        ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
-        ...(origem.cartaoProfissionalId ? { cartaoProfissionalId: origem.cartaoProfissionalId } : {}),
-      });
-      window.open(linkWhatsapp, "_blank", "noopener,noreferrer");
-    }
-  }
+  const possuiCta =
+    resolverCtaItemAcervo({
+      pagina,
+      tipo,
+      itemNome: item.nome,
+      configuracaoCta,
+      possuiHandlerMicrofluxo: Boolean(aoIniciarMicrofluxo),
+    }) !== null;
 
   return (
     <BottomSheetEditorialBase
@@ -131,28 +97,18 @@ export function BottomSheetDetalhesItemAcervo({
         ) : undefined
       }
       rodapeFixo={
-        <button
-          type="button"
-          onClick={executarAcaoCta}
-          className={combinarClasses(
-            "flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-center text-sm font-bold shadow-md transition active:scale-[0.99] cursor-pointer",
-            tipoCta === "microfluxo"
-              ? "bg-[var(--editorial-cta-fundo)] text-[var(--editorial-cta-texto)] hover:opacity-95"
-              : "bg-[#25D366] text-white hover:opacity-95",
-          )}
-        >
-          {tipoCta === "microfluxo" ? (
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <IconeWhatsapp className="h-4 w-4 shrink-0" aria-hidden="true" />
-          )}
-          <span>
-            {rotuloBotaoPersonalizado ||
-              (tipoCta === "microfluxo"
-                ? `Iniciar experiência deste ${ehProduto ? "produto" : "serviço"}`
-                : `Conversar sobre este ${ehProduto ? "produto" : "serviço"}`)}
-          </span>
-        </button>
+        possuiCta ? (
+          <BotaoCtaItemAcervo
+            pagina={pagina}
+            tipo={tipo}
+            itemId={item.id}
+            itemNome={item.nome}
+            configuracaoCta={configuracaoCta}
+            aoAntesExecutarMicrofluxo={aoFechar}
+            aoIniciarMicrofluxo={aoIniciarMicrofluxo}
+            tamanho="padrao"
+          />
+        ) : undefined
       }
     >
       <div className="flex flex-wrap items-center justify-between gap-2">

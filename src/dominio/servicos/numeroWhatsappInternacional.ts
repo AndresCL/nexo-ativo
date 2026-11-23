@@ -99,22 +99,48 @@ export function comporNumeroComDdi(ddi: string, numeroNacional: string): string 
   return digitos ? `+${ddi.replace(/\D/g, "")}${digitos}` : "";
 }
 
+function encontrarOpcaoDdiPorPrefixo(digitos: string): OpcaoDdiPais | undefined {
+  return [...OPCOES_DDI_PAISES]
+    .sort((a, b) => b.ddi.length - a.ddi.length)
+    .find((opcao) => digitos.startsWith(opcao.ddi));
+}
+
 /**
  * Separa um valor armazenado em DDI + número nacional.
+ * Valores com prefixo explícito ("+" ou "00") têm o DDI extraído mesmo durante digitação parcial.
  * Valores legados sem "+" seguem as mesmas regras de `normalizarNumeroWhatsappInternacional`.
  */
 export function separarDdiENumero(valor: string | null | undefined): {
   readonly ddi: string | null;
   readonly numeroNacional: string;
 } {
+  const texto = (valor ?? "").trim();
+  const digitosBrutos = texto.replace(/\D/g, "");
+  if (!digitosBrutos) {
+    return { ddi: null, numeroNacional: "" };
+  }
+
+  const temPrefixoMais = texto.startsWith("+");
+  const temPrefixoDuploZero = !temPrefixoMais && digitosBrutos.startsWith("00");
+  if (temPrefixoMais || temPrefixoDuploZero) {
+    const digitosSemPrefixo = temPrefixoMais
+      ? texto.slice(1).replace(/\D/g, "")
+      : digitosBrutos.replace(/^00/, "");
+    const escolhido = encontrarOpcaoDdiPorPrefixo(digitosSemPrefixo);
+    if (escolhido) {
+      return {
+        ddi: escolhido.ddi,
+        numeroNacional: digitosSemPrefixo.slice(escolhido.ddi.length),
+      };
+    }
+    return { ddi: null, numeroNacional: digitosSemPrefixo };
+  }
+
   const normalizado = normalizarNumeroWhatsappInternacional(valor);
   if (!normalizado) {
-    return { ddi: null, numeroNacional: (valor ?? "").replace(/\D/g, "") };
+    return { ddi: null, numeroNacional: digitosBrutos };
   }
-  const candidatos = [...OPCOES_DDI_PAISES]
-    .sort((a, b) => b.ddi.length - a.ddi.length)
-    .filter((o) => normalizado.startsWith(o.ddi));
-  const escolhido = candidatos[0];
+  const escolhido = encontrarOpcaoDdiPorPrefixo(normalizado);
   if (!escolhido) return { ddi: null, numeroNacional: normalizado };
   return { ddi: escolhido.ddi, numeroNacional: normalizado.slice(escolhido.ddi.length) };
 }

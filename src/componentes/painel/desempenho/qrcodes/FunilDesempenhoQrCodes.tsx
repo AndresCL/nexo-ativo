@@ -3,20 +3,15 @@
 import { useMemo, useState } from "react";
 import { Filter, Layers } from "lucide-react";
 import type { MetricaQrCode } from "@/dominio/analytics/tiposMetricasAgregadas";
+import {
+  calcularResumoQrCode,
+  formatarRotuloQrCode,
+} from "@/dominio/analytics/resumoQrCodeEOrigem";
 import { TooltipInformativo } from "@/componentes/interface/TooltipInformativo";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 export interface PropriedadesFunilDesempenhoQrCodes {
   readonly qrCodes: readonly MetricaQrCode[];
-}
-
-function formatarRotuloQrCode(codigo: string): string {
-  if (codigo === "vitrine") return "Vitrine Principal (Home)";
-  if (codigo.startsWith("fluxo_")) return `Fluxo: ${codigo.replace("fluxo_", "")}`;
-  if (codigo.startsWith("profissional_")) {
-    return `Profissional: ${codigo.replace("profissional_", "")}`;
-  }
-  return codigo;
 }
 
 export function FunilDesempenhoQrCodes({ qrCodes }: PropriedadesFunilDesempenhoQrCodes) {
@@ -38,20 +33,16 @@ export function FunilDesempenhoQrCodes({ qrCodes }: PropriedadesFunilDesempenhoQ
   // Números do contexto atual (geral ou filtrado por destino)
   const contexto = useMemo(() => {
     if (itemAtivo) {
-      const conv = itemAtivo.conclusoesFluxo + itemAtivo.contatosWhatsapp;
-      const taxa =
-        itemAtivo.visualizacoes > 0
-          ? Math.round((conv / itemAtivo.visualizacoes) * 1000) / 10
-          : 0;
+      const resumo = calcularResumoQrCode(itemAtivo);
       return {
-        visitas: itemAtivo.visualizacoes,
-        fluxos: itemAtivo.aberturasFluxo,
-        conclusoes: itemAtivo.conclusoesFluxo,
-        whatsapp: itemAtivo.contatosWhatsapp,
-        conversoes: conv,
-        taxa,
-        rotulo: formatarRotuloQrCode(itemAtivo.codigo),
-        ehFluxoDireto: itemAtivo.codigo.startsWith("fluxo_"),
+        visitas: resumo.visitas,
+        fluxos: resumo.fluxos,
+        conclusoes: resumo.conclusoes,
+        whatsapp: resumo.whatsapp,
+        conversoes: resumo.conversoes,
+        taxa: resumo.taxaConversao,
+        rotulo: resumo.rotulo,
+        ehFluxoDireto: resumo.ehFluxoDireto,
       };
     }
 

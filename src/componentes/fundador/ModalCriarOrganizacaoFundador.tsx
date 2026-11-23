@@ -98,7 +98,7 @@ export function ModalCriarOrganizacaoFundador({
         <form onSubmit={(e) => void submeterCriacao(e)} className="mt-4 space-y-4">
           <CampoFormulario
             rotulo="Nome da organização ou cliente"
-            placeholder="Ex.: Garage 88"
+            placeholder="Ex.: Studio Aurora"
             required
             value={nome}
             onChange={(e) => setNome(e.target.value)}
@@ -109,7 +109,7 @@ export function ModalCriarOrganizacaoFundador({
             <CampoFormulario
               rotulo="Endereço público"
               prefixoFixo="nexoativo.com.br/"
-              placeholder="garage-88"
+              placeholder="studio-aurora"
               required
               value={identificadorPublico}
               onChange={(e) => setIdentificadorPublico(e.target.value)}
@@ -117,7 +117,7 @@ export function ModalCriarOrganizacaoFundador({
 
             <CampoFormulario
               rotulo="Segmento de atuação"
-              placeholder="Ex.: Concessionária de veículos"
+              placeholder="Ex.: Arquitetura e Interiores"
               required
               value={segmentoAtividade}
               onChange={(e) => setSegmentoAtividade(e.target.value)}
@@ -127,7 +127,7 @@ export function ModalCriarOrganizacaoFundador({
           <div className="grid gap-3 border-t border-marfim-200 pt-4 sm:grid-cols-2">
             <CampoFormulario
               rotulo="Nome do proprietário"
-              placeholder="Ex.: Admin Garage 88"
+              placeholder="Ex.: Ana Clara Souza"
               required
               value={nomeProprietario}
               onChange={(e) => setNomeProprietario(e.target.value)}

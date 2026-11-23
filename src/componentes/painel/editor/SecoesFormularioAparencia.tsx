@@ -228,7 +228,7 @@ export function SecoesFormularioAparencia({
                   disabled={somenteLeitura}
                   value={rascunho.identidade.cidadeEstado ?? ""}
                   onChange={(evento) => atualizarIdentidade({ cidadeEstado: evento.target.value })}
-                  placeholder="Ex.: Cabo Frio · RJ ou Av. Central, 100"
+                  placeholder="Ex.: São Paulo · SP ou Av. Paulista, 1000"
                 />
               </div>
 
@@ -257,7 +257,7 @@ export function SecoesFormularioAparencia({
                       telefonePrincipalOpcional: evento.target.value.trim() || undefined,
                     })
                   }
-                  placeholder="Ex.: (22) 2644-8800"
+                  placeholder="Ex.: (11) 3000-0000"
                 />
 
                 <CampoFormulario
@@ -272,7 +272,7 @@ export function SecoesFormularioAparencia({
                       celularOpcional: evento.target.value.trim() || undefined,
                     })
                   }
-                  placeholder="Ex.: (22) 99999-8800"
+                  placeholder="Ex.: (11) 99999-0000"
                 />
               </div>
 

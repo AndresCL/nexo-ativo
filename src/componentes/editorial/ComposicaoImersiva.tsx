@@ -3,6 +3,10 @@ import {
   gerarVariaveisCssPaletaEditorial,
   type ConteudoPaginaPublicada,
 } from "@/dominio/entidades/paginaPublicada";
+import {
+  obterClasseRespiroAberturaExperiencias,
+  obterDescritorFaixaInicioExperiencias,
+} from "@/dominio/editorial/faixaInicioExperiencias";
 import { TransicaoEditorial } from "@/componentes/interface/TransicaoEditorial";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
@@ -52,16 +56,22 @@ export function ComposicaoImersiva({
     pagina.corPersonalizadaHex,
     pagina.customizacaoTokens,
   ) as CSSProperties;
+  const descritorFaixa = obterDescritorFaixaInicioExperiencias(pagina.faixaInicioExperiencias);
+  const classeRespiroAbertura = obterClasseRespiroAberturaExperiencias(
+    pagina.faixaInicioExperiencias,
+    { alturaContidaPrevia },
+  );
 
   return (
     <section
       data-composicao="imersivo"
+      data-faixa-inicio={descritorFaixa.codigo}
       suppressHydrationWarning
       aria-label={`Apresentação editorial de ${pagina.identidade.nomeExibicao}`}
       style={variaveisPaleta}
       className={combinarClasses(
-        "@container animacao-suave-entrada relative isolate flex w-full flex-col justify-between overflow-hidden bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]",
-        alturaContidaPrevia ? "min-h-[44rem]" : "min-h-dvh",
+        "@container animacao-suave-entrada relative isolate flex w-full flex-col overflow-hidden bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]",
+        alturaContidaPrevia ? "min-h-[44rem]" : "min-h-svh",
       )}
     >
       <CamadaMidiaImersiva
@@ -71,7 +81,7 @@ export function ComposicaoImersiva({
         estiloEnquadramento="tela_cheia"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-5 py-4 @3xl:px-10 @5xl:px-14 @5xl:py-6">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 py-4 @3xl:px-10 @5xl:px-14 @5xl:py-6">
         <TransicaoEditorial className="shrink-0">
           <CabecalhoMarcaDiscreta
             identidade={pagina.identidade}
@@ -79,63 +89,74 @@ export function ComposicaoImersiva({
           />
         </TransicaoEditorial>
 
-        <div aria-hidden="true" className="min-h-10 flex-1 @5xl:hidden sm:min-h-12" />
+        <div
+          data-testid="palco-experiencias-vitrine"
+          className={combinarClasses(
+            "flex w-full flex-col pb-10 @5xl:flex-1 @5xl:pb-0",
+            classeRespiroAbertura,
+          )}
+        >
+          {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
+            <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0 max-w-7xl mx-auto mb-2">
+              {complementoChamada}
+            </TransicaoEditorial>
+          ) : null}
 
-        {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "topo" && complementoChamada ? (
-          <TransicaoEditorial atrasoSegundos={0.06} className="w-full min-w-0 max-w-7xl mx-auto mb-2">
-            {complementoChamada}
-          </TransicaoEditorial>
-        ) : null}
-
-        <div className="grid items-center gap-5 @5xl:flex-1 @5xl:content-center @5xl:grid-cols-12 @5xl:gap-x-12 @5xl:gap-y-4 @5xl:py-4">
-          <TransicaoEditorial atrasoSegundos={0.06} className="hidden @5xl:col-span-7 @5xl:block">
-            <BlocoEquipeAposHero
-              acoes={pagina.acoesPrincipais}
-              previaEquipe={previaEquipe}
-              aoAcionarItem={aoAcionarItem}
-            />
-          </TransicaoEditorial>
-
-          <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5 @5xl:col-start-8">
-            <NavegacaoAcoesHome
-              acoes={pagina.acoesPrincipais}
-              espacamentoAcoes={pagina.espacamentoAcoes}
-              previaEquipe={previaEquipe}
-              videosYoutube={videosYoutube}
-              modoExibicaoVideos={modoExibicaoVideos}
-              autoplayVideos={autoplayVideos}
-              ocultarTituloVideos={ocultarTituloVideos}
-              produtos={produtos}
-              servicos={servicos}
-              paletaId={pagina.paletaId}
-              aoAcionarItem={aoAcionarItem}
-              aoSelecionarItemAcervo={aoSelecionarItemAcervo}
-            />
-          </TransicaoEditorial>
-
-          {pagina.redesSociais && pagina.redesSociais.length > 0 ? (
-            <TransicaoEditorial
-              atrasoSegundos={0.12}
-              className="-mt-2 @5xl:col-span-5 @5xl:col-start-8 @5xl:mt-0"
-            >
-              <BarraRedesSociaisDiscreta
-                redes={pagina.redesSociais}
-                alinharCentroNoMobile={false}
-                className="justify-center @5xl:justify-end"
+          <div
+            className={combinarClasses(
+              "grid items-center gap-5 @5xl:flex-1 @5xl:grid-cols-12 @5xl:gap-x-12 @5xl:gap-y-4 @5xl:py-4",
+              descritorFaixa.classeAlinhamentoDesktop,
+            )}
+          >
+            <TransicaoEditorial atrasoSegundos={0.06} className="hidden @5xl:col-span-7 @5xl:block">
+              <BlocoEquipeAposHero
+                acoes={pagina.acoesPrincipais}
+                previaEquipe={previaEquipe}
+                aoAcionarItem={aoAcionarItem}
               />
+            </TransicaoEditorial>
+
+            <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5 @5xl:col-start-8">
+              <NavegacaoAcoesHome
+                acoes={pagina.acoesPrincipais}
+                espacamentoAcoes={pagina.espacamentoAcoes}
+                previaEquipe={previaEquipe}
+                videosYoutube={videosYoutube}
+                modoExibicaoVideos={modoExibicaoVideos}
+                autoplayVideos={autoplayVideos}
+                ocultarTituloVideos={ocultarTituloVideos}
+                produtos={produtos}
+                servicos={servicos}
+                paletaId={pagina.paletaId}
+                aoAcionarItem={aoAcionarItem}
+                aoSelecionarItemAcervo={aoSelecionarItemAcervo}
+              />
+            </TransicaoEditorial>
+
+            {pagina.redesSociais && pagina.redesSociais.length > 0 ? (
+              <TransicaoEditorial
+                atrasoSegundos={0.12}
+                className="-mt-2 @5xl:col-span-5 @5xl:col-start-8 @5xl:mt-0"
+              >
+                <BarraRedesSociaisDiscreta
+                  redes={pagina.redesSociais}
+                  alinharCentroNoMobile={false}
+                  className="justify-center @5xl:justify-end"
+                />
+              </TransicaoEditorial>
+            ) : null}
+          </div>
+
+          {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
+            <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0 max-w-7xl mx-auto mt-4">
+              {complementoChamada}
             </TransicaoEditorial>
           ) : null}
         </div>
 
-        {(pagina.avaliacoesGoogle?.posicao ?? "topo") === "rodape" && complementoChamada ? (
-          <TransicaoEditorial atrasoSegundos={0.14} className="w-full min-w-0 max-w-7xl mx-auto mt-4">
-            {complementoChamada}
-          </TransicaoEditorial>
-        ) : null}
-
         <RodapeEditorial
           identidade={pagina.identidade}
-          className="mt-10 shrink-0 border-t border-[var(--editorial-borda)]/50 pt-4.5 @5xl:mt-0"
+          className="mt-auto shrink-0 border-t border-[var(--editorial-borda)]/50 pt-4.5"
         />
       </div>
     </section>

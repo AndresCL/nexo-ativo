@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CODIGOS_PERFIL_PUBLICIDADE } from "../dominio/publicidade/tiposPerfilPublicidade";
+import { FAIXAS_INICIO_EXPERIENCIAS } from "../dominio/editorial/faixaInicioExperiencias";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaConfiguracaoPostVitrine } from "./esquemasMicrofluxo";
@@ -156,6 +157,7 @@ export const esquemaConteudoPaginaPublicada: z.ZodType<ConteudoPaginaPublicada> 
   atualizadoEmIso: z.string().min(1),
   composicaoVisual: z.enum(["imersivo", "retrato_editorial", "galeria_editorial"]),
   espacamentoAcoes: z.enum(["compacto", "medio", "amplo"]).optional(),
+  faixaInicioExperiencias: z.enum(FAIXAS_INICIO_EXPERIENCIAS).optional(),
   paletaId: z.enum([
     "noite_mineral",
     "marfim_editorial",

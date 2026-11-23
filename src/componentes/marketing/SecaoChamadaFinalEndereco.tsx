@@ -39,7 +39,7 @@ export function SecaoChamadaFinalEndereco() {
       return;
     }
 
-    // Se a digitação atual for intermediária inválida (ex: termina com hífen 'garage-')
+    // Se a digitação atual for intermediária inválida (ex: termina com hífen 'sua-marca-')
     // ou não atender o formato do regex, não dispara requisição desnecessária à rede
     if (!ehIdentificadorPublicoValido(identificadorFormatado)) {
       setEstadoVerificacao({

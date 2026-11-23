@@ -27,6 +27,7 @@ import {
   gerarVariaveisCssPaletaEditorial,
   obterDescritorTipografiaEditorial,
   resolverAcoesVitrineComMicrofluxos,
+  type ConfiguracaoCtaAcervo,
   type ConteudoPaginaPublicada,
   type ItemAcaoHome,
 } from "@/dominio/entidades/paginaPublicada";
@@ -83,6 +84,9 @@ export function CartaoDigitalProfissionalPublico({
   const ultimaVisualizacaoRegistrada = useRef<string | null>(null);
   const [secaoAberta, setSecaoAberta] = useState<SecaoAcervoAberta>(null);
   const [tituloSecaoAberta, setTituloSecaoAberta] = useState<string | undefined>();
+  const [configuracaoCtaSecaoAberta, setConfiguracaoCtaSecaoAberta] = useState<
+    ConfiguracaoCtaAcervo | undefined
+  >();
   const [acaoPostAberta, setAcaoPostAberta] = useState<ItemAcaoHome | null>(null);
   const [microfluxoAtivo, setMicrofluxoAtivo] = useState<DefinicaoMicrofluxo | null>(null);
   const [contextoMicrofluxo, setContextoMicrofluxo] = useState<
@@ -141,6 +145,14 @@ export function CartaoDigitalProfissionalPublico({
     profissional.nomeCompleto,
     profissional.whatsappOpcional,
   ]);
+
+  const configuracaoCtaGavetaEfetiva = useMemo(() => {
+    if (configuracaoCtaSecaoAberta) return configuracaoCtaSecaoAberta;
+    if (secaoAberta !== "produtos" && secaoAberta !== "servicos") return undefined;
+    const tipoAlvo = secaoAberta === "produtos" ? "secao_produtos" : "secao_servicos";
+    return acoesResolvidasParaCartao.find((a) => a.tipoDestino === tipoAlvo)
+      ?.configuracaoCtaAcervo;
+  }, [configuracaoCtaSecaoAberta, secaoAberta, acoesResolvidasParaCartao]);
 
   const urlWhatsappLimpa = montarLinkWhatsapp(
     profissional.whatsappOpcional,
@@ -387,6 +399,7 @@ export function CartaoDigitalProfissionalPublico({
     if (acao.tipoDestino === "secao_produtos" || acao.destino === "#produtos") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(acao.configuracaoCtaAcervo);
       setSecaoAberta("produtos");
       return;
     }
@@ -394,6 +407,7 @@ export function CartaoDigitalProfissionalPublico({
     if (acao.tipoDestino === "secao_servicos" || acao.destino === "#servicos") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(acao.configuracaoCtaAcervo);
       setSecaoAberta("servicos");
       return;
     }
@@ -401,6 +415,7 @@ export function CartaoDigitalProfissionalPublico({
     if (acao.tipoDestino === "secao_portfolio" || acao.destino === "#portfolio") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(undefined);
       setSecaoAberta("portfolio");
       return;
     }
@@ -408,6 +423,7 @@ export function CartaoDigitalProfissionalPublico({
     if (acao.tipoDestino === "secao_equipe" || acao.destino === "#equipe") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(undefined);
       setSecaoAberta("equipe");
       return;
     }
@@ -907,10 +923,13 @@ export function CartaoDigitalProfissionalPublico({
         aoAlterarAbertura={(aberta) => {
           if (!aberta) {
             setSecaoAberta(null);
+            setConfiguracaoCtaSecaoAberta(undefined);
           }
         }}
         secaoAberta={secaoAberta}
         tituloPersonalizado={tituloSecaoAberta}
+        configuracaoCta={configuracaoCtaGavetaEfetiva}
+        whatsappFallbackOpcional={profissional.whatsappOpcional}
         pagina={paginaOrganizacao}
         acervo={acervoConsolidado}
         aoSolicitarExperiencia={abrirExperienciaComContexto}

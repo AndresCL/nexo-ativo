@@ -9,6 +9,7 @@ import type {
   CustomizacaoTokensEditorial,
   DestaqueObraGaleria,
   EspacamentoAcoesHome,
+  FaixaInicioExperiencias,
   IdentidadeMarcaEditorial,
   IdentificadorPaletaEditorial,
   IdentificadorTipografiaEditorial,
@@ -43,6 +44,7 @@ export interface EstadoEditorAparencia {
   alterarEstiloVisual: (parcial: {
     readonly composicaoVisual?: TipoComposicaoEditorial;
     readonly espacamentoAcoes?: EspacamentoAcoesHome;
+    readonly faixaInicioExperiencias?: FaixaInicioExperiencias;
     readonly paletaId?: IdentificadorPaletaEditorial;
     readonly corPersonalizadaHex?: string;
     readonly customizacaoTokens?: CustomizacaoTokensEditorial | null;
@@ -114,6 +116,9 @@ function criarStoreEditorAparencia(dadosIniciais?: DadosIniciaisEditorAparencia)
           ...estado.rascunho,
           ...(parcial.composicaoVisual ? { composicaoVisual: parcial.composicaoVisual } : {}),
           ...(parcial.espacamentoAcoes ? { espacamentoAcoes: parcial.espacamentoAcoes } : {}),
+          ...(parcial.faixaInicioExperiencias
+            ? { faixaInicioExperiencias: parcial.faixaInicioExperiencias }
+            : {}),
           ...(parcial.paletaId ? { paletaId: parcial.paletaId } : {}),
           ...(parcial.corPersonalizadaHex !== undefined
             ? { corPersonalizadaHex: parcial.corPersonalizadaHex || undefined }

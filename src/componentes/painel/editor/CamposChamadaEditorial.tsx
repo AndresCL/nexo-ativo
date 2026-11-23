@@ -55,7 +55,7 @@ export function CamposChamadaEditorial({
         maxLength={90}
         value={chamada.sobretituloOpcional ?? ""}
         onChange={(evento) => aoAtualizar({ sobretituloOpcional: evento.target.value })}
-        placeholder="Ex.: Feirão Acelera Garage 88"
+        placeholder="Ex.: Campanha de lançamento"
       />
       <CampoFormulario
         rotulo="Título editorial principal"

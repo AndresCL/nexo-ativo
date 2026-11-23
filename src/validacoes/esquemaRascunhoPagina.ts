@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FAIXAS_INICIO_EXPERIENCIAS } from "../dominio/editorial/faixaInicioExperiencias";
 import {
   esquemaChamadaEditorial,
   esquemaChamadasEditoriaisAdicionais,
@@ -16,6 +17,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
   organizacaoId: z.string().min(1),
   composicaoVisual: z.enum(["imersivo", "retrato_editorial", "galeria_editorial"]),
   espacamentoAcoes: z.enum(["compacto", "medio", "amplo"]).optional(),
+  faixaInicioExperiencias: z.enum(FAIXAS_INICIO_EXPERIENCIAS).optional(),
   paletaId: z.enum([
     "noite_mineral",
     "marfim_editorial",

@@ -71,6 +71,9 @@ export function VitrinePublicaInterativa({
   );
   const [secaoAberta, setSecaoAberta] = useState<SecaoAcervoAberta>(null);
   const [tituloSecaoAberta, setTituloSecaoAberta] = useState<string | undefined>();
+  const [configuracaoCtaSecaoAberta, setConfiguracaoCtaSecaoAberta] = useState<
+    ConfiguracaoCtaAcervo | undefined
+  >();
   const [itemDetalhado, setItemDetalhado] = useState<{
     tipo: "produtos" | "servicos";
     item: ProdutoCatalogo | ServicoOrganizacao;
@@ -168,6 +171,7 @@ export function VitrinePublicaInterativa({
       if (secao) {
         ultimaEntradaDireta.current = null;
         setMicrofluxoAtivo(null);
+        setConfiguracaoCtaSecaoAberta(undefined);
         setSecaoAberta(secao);
         return;
       }
@@ -339,6 +343,7 @@ export function VitrinePublicaInterativa({
     if (acao.tipoDestino === "secao_produtos" || acao.destino === "#produtos") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(acao.configuracaoCtaAcervo);
       setSecaoAberta("produtos");
       return;
     }
@@ -346,6 +351,7 @@ export function VitrinePublicaInterativa({
     if (acao.tipoDestino === "secao_servicos" || acao.destino === "#servicos") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(acao.configuracaoCtaAcervo);
       setSecaoAberta("servicos");
       return;
     }
@@ -353,6 +359,7 @@ export function VitrinePublicaInterativa({
     if (acao.tipoDestino === "secao_portfolio" || acao.destino === "#portfolio") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(undefined);
       setSecaoAberta("portfolio");
       return;
     }
@@ -360,6 +367,7 @@ export function VitrinePublicaInterativa({
     if (acao.tipoDestino === "secao_equipe" || acao.destino === "#equipe") {
       setMicrofluxoAtivo(null);
       setTituloSecaoAberta(acao.tituloSecao);
+      setConfiguracaoCtaSecaoAberta(undefined);
       setSecaoAberta("equipe");
       return;
     }
@@ -467,6 +475,14 @@ export function VitrinePublicaInterativa({
     };
   }, [pagina, microfluxosDisponiveis]);
 
+  const configuracaoCtaGavetaEfetiva = useMemo(() => {
+    if (configuracaoCtaSecaoAberta) return configuracaoCtaSecaoAberta;
+    if (secaoAberta !== "produtos" && secaoAberta !== "servicos") return undefined;
+    const tipoAlvo = secaoAberta === "produtos" ? "secao_produtos" : "secao_servicos";
+    return paginaComAcoesResolvidas.acoesPrincipais.find((a) => a.tipoDestino === tipoAlvo)
+      ?.configuracaoCtaAcervo;
+  }, [configuracaoCtaSecaoAberta, secaoAberta, paginaComAcoesResolvidas.acoesPrincipais]);
+
   return (
     <>
       {loaderVisivel ? (
@@ -546,10 +562,12 @@ export function VitrinePublicaInterativa({
         aoAlterarAbertura={(aberta) => {
           if (!aberta) {
             setSecaoAberta(null);
+            setConfiguracaoCtaSecaoAberta(undefined);
           }
         }}
         secaoAberta={secaoAberta}
         tituloPersonalizado={tituloSecaoAberta}
+        configuracaoCta={configuracaoCtaGavetaEfetiva}
         pagina={pagina}
         acervo={acervo}
         aoSolicitarExperiencia={abrirExperienciaComContexto}

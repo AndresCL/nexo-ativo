@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import {
   DDI_PADRAO,
   OPCOES_DDI_PAISES,
   comporNumeroComDdi,
-  obterDdiPadraoPorLocale,
   separarDdiENumero,
 } from "@/dominio/servicos/numeroWhatsappInternacional";
 
@@ -20,7 +19,7 @@ export interface PropriedadesCampoTelefoneComDdi {
 
 /**
  * Campo de telefone com seletor de DDI. O DDI inicial vem do número já salvo;
- * sem número, usa o locale do navegador (fallback: Brasil, 55).
+ * sem número, usa Brasil (55) como padrão.
  */
 export function CampoTelefoneComDdi({
   rotulo,
@@ -33,12 +32,8 @@ export function CampoTelefoneComDdi({
   const separado = separarDdiENumero(value);
   const [ddiLocal, setDdiLocal] = useState<string>(DDI_PADRAO);
 
-  useEffect(() => {
-    setDdiLocal(obterDdiPadraoPorLocale(navigator.language));
-  }, []);
-
   const ddiAtual = separado.ddi ?? ddiLocal;
-  const numeroNacional = separado.ddi ? separado.numeroNacional : separado.numeroNacional;
+  const numeroNacional = separado.numeroNacional;
 
   return (
     <div className="flex flex-col gap-1.5">

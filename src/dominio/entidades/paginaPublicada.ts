@@ -1,6 +1,8 @@
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 import type { ConfiguracaoAvaliacoesGoogle } from "./avaliacoesGoogle";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
+import type { FaixaInicioExperiencias } from "../editorial/faixaInicioExperiencias";
+export type { FaixaInicioExperiencias } from "../editorial/faixaInicioExperiencias";
 import type { ConjuntoChamadasEditoriais } from "./chamadasEditoriais";
 export type { ChamadaPrincipalEditorial } from "./chamadasEditoriais";
 import {
@@ -167,6 +169,7 @@ export interface ConteudoPaginaPublicada extends ConjuntoChamadasEditoriais {
   readonly atualizadoEmIso: string;
   readonly composicaoVisual: TipoComposicaoEditorial;
   readonly espacamentoAcoes?: EspacamentoAcoesHome;
+  readonly faixaInicioExperiencias?: FaixaInicioExperiencias;
   readonly paletaId: IdentificadorPaletaEditorial;
   readonly corPersonalizadaHex?: string;
   readonly customizacaoTokens?: CustomizacaoTokensEditorial;

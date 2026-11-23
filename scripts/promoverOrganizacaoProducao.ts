@@ -53,7 +53,16 @@ interface PacoteOrganizacaoEmulador {
 
 function extrairArgumento(prefixo: string): string | undefined {
   const arg = process.argv.find((item) => item.startsWith(`${prefixo}=`));
-  return arg ? arg.slice(prefixo.length + 1).trim() : undefined;
+  const valor = arg ? arg.slice(prefixo.length + 1).trim() : "";
+  return valor.length > 0 ? valor : undefined;
+}
+
+function exigirArgumento(prefixo: string): string {
+  const valor = extrairArgumento(prefixo);
+  if (!valor) {
+    throw new Error(`Argumento obrigatório ausente: informe ${prefixo}=<valor>.`);
+  }
+  return valor;
 }
 
 function extrairPacoteDeFixtureLocal(
@@ -300,10 +309,10 @@ async function garantirUsuarioNoAuthProducao(
 async function promoverOrganizacaoProducao(): Promise<void> {
   loadEnvConfig(process.cwd());
 
-  const slug = extrairArgumento("--slug") ?? "garage-88";
-  const emailProprietario = extrairArgumento("--email") ?? "admin@garage88.com.br";
-  const nomeProprietario = extrairArgumento("--nome") ?? "Admin Garage 88";
-  const senhaProprietario = extrairArgumento("--senha") ?? "garage88@123";
+  const slug = exigirArgumento("--slug");
+  const emailProprietario = exigirArgumento("--email");
+  const nomeProprietario = exigirArgumento("--nome");
+  const senhaProprietario = exigirArgumento("--senha");
   const emailFundador = extrairArgumento("--fundador") ?? "aecontrerasl@gmail.com";
   const planoCodigo = (extrairArgumento("--plano") ?? "pro") as CodigoPlanoAssinatura;
   const caminhoCredencial = extrairArgumento("--credencial") ?? CAMINHO_CREDENCIAL_PADRAO;

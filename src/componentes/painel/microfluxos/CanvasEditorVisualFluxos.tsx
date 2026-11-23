@@ -755,7 +755,7 @@ export function CanvasEditorVisualFluxos({
                 value={etapaSelecionada.titulo}
                 disabled={!podeEditar}
                 onChange={(e) => atualizarCampoEtapaSelecionada("titulo", e.target.value)}
-                placeholder="Ex.: Selecione a condição de financiamento"
+                placeholder="Ex.: Selecione o tipo de atendimento"
               />
 
               <CampoFormulario
@@ -765,7 +765,7 @@ export function CanvasEditorVisualFluxos({
                 onChange={(e) =>
                   atualizarCampoEtapaSelecionada("subtituloOpcional", e.target.value)
                 }
-                placeholder="Ex.: Taxa reduzida para o Feirão Acelera"
+                placeholder="Ex.: Resposta em até 1 dia útil"
               />
 
               {etapaSelecionada.tipoEtapa === "etapa_livre" ? (
@@ -893,7 +893,7 @@ export function CanvasEditorVisualFluxos({
                             onChange={(e) =>
                               atualizarCampoDinamico(campo.id, { rotulo: e.target.value })
                             }
-                            placeholder="Ex.: Modelo do veículo"
+                            placeholder="Ex.: Serviço ou item de interesse"
                             className="mt-1 w-full rounded border border-marfim-300 bg-white px-2 py-1 text-xs text-mineral-950"
                           />
                         </div>

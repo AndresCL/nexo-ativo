@@ -829,7 +829,7 @@ export function GerenciadorExperienciasPainel({
                   placeholder={
                     fluxoAtual.tipoAcao === "secao_equipe"
                       ? "Ex.: Encontre quem pode ajudar você"
-                      : "Ex.: Primeira parcela para 150 dias e aprovação rápida"
+                      : "Ex.: Atendimento rápido e sob medida"
                   }
                   className="mt-1 w-full rounded-lg border border-marfim-200 bg-white px-2.5 py-1.5 text-xs text-mineral-950 placeholder:text-mineral-400 focus:border-indigo-400 focus:outline-none"
                 />
@@ -971,7 +971,7 @@ export function GerenciadorExperienciasPainel({
                       value={fluxoAtual.configuracaoCtaAcervo?.rotuloBotao ?? ""}
                       placeholder={
                         fluxoAtual.configuracaoCtaAcervo?.tipoAcao === "microfluxo"
-                          ? "Ex.: Simular financiamento deste item"
+                          ? "Ex.: Solicitar proposta deste item"
                           : "Ex.: Tenho interesse neste item"
                       }
                       onChange={(e) =>
@@ -1065,7 +1065,7 @@ export function GerenciadorExperienciasPainel({
                         urlDestinoOpcional: e.target.value,
                       }))
                     }
-                    placeholder="https://exemplo.com.br/estoque"
+                    placeholder="https://exemplo.com.br/catalogo"
                     className="w-full rounded-lg border border-marfim-200 bg-white pl-8 pr-2.5 py-1.5 text-xs text-mineral-950 placeholder:text-mineral-400 focus:border-indigo-400 focus:outline-none"
                   />
                 </div>
@@ -1094,7 +1094,7 @@ export function GerenciadorExperienciasPainel({
                         urlDestinoOpcional: e.target.value,
                       }))
                     }
-                    placeholder="5522981038549 ou https://wa.me/5522981038549"
+                    placeholder="5511999990000 ou https://wa.me/5511999990000"
                     className="w-full rounded-lg border border-marfim-200 bg-white pl-8 pr-2.5 py-1.5 text-xs text-mineral-950 placeholder:text-mineral-400 focus:border-indigo-400 focus:outline-none"
                   />
                 </div>
@@ -1123,7 +1123,7 @@ export function GerenciadorExperienciasPainel({
                         urlDestinoOpcional: e.target.value,
                       }))
                     }
-                    placeholder="(22) 2645-8888 ou 2226458888"
+                    placeholder="(11) 3000-0000 ou 1130000000"
                     className="w-full rounded-lg border border-marfim-200 bg-white pl-8 pr-2.5 py-1.5 text-xs text-mineral-950 placeholder:text-mineral-400 focus:border-indigo-400 focus:outline-none"
                   />
                 </div>

@@ -2,6 +2,7 @@
 
 import type { RascunhoConfiguracaoPagina } from "@/dominio/entidades/rascunhoConfiguracaoPagina";
 import { SeletorEspacamentoVitrine } from "./SeletorEspacamentoVitrine";
+import { SeletorFaixaInicioVitrine } from "./SeletorFaixaInicioVitrine";
 import { SeletorPaletaCromatica } from "./SeletorPaletaCromatica";
 
 export interface PropriedadesSecaoEstiloECores {
@@ -22,6 +23,12 @@ export function SecaoEstiloECores({
       aria-labelledby="aba-estilo"
       className="space-y-6"
     >
+      <SeletorFaixaInicioVitrine
+        valorAtual={rascunho.faixaInicioExperiencias}
+        aoAlterar={(faixaInicioExperiencias) => alterarEstiloVisual({ faixaInicioExperiencias })}
+        somenteLeitura={somenteLeitura}
+      />
+
       <SeletorEspacamentoVitrine
         valorAtual={rascunho.espacamentoAcoes}
         aoAlterar={(espacamentoAcoes) => alterarEstiloVisual({ espacamentoAcoes })}

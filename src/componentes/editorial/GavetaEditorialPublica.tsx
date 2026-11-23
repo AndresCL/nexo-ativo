@@ -13,6 +13,7 @@ import {
 import {
   obterDescritorPaletaEditorial,
   obterDescritorTipografiaEditorial,
+  type ConfiguracaoCtaAcervo,
   type ConteudoPaginaPublicada,
 } from "@/dominio/entidades/paginaPublicada";
 import { normalizarNumeroWhatsappInternacional } from "@/dominio/servicos/numeroWhatsappInternacional";
@@ -23,6 +24,7 @@ import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastread
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvatarProfissional } from "./AvatarProfissional";
 import { PainelEditorialPublico } from "./PainelEditorialPublico";
+import { BotaoCtaItemAcervo, resolverCtaItemAcervo } from "./acervo/BotaoCtaItemAcervo";
 import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export type SecaoAcervoAberta = "produtos" | "servicos" | "portfolio" | "equipe" | null;
@@ -33,6 +35,8 @@ export interface PropriedadesGavetaEditorialPublica {
   readonly aoAlterarAbertura: (aberto: boolean) => void;
   readonly secaoAberta: SecaoAcervoAberta;
   readonly tituloPersonalizado?: string;
+  readonly configuracaoCta?: ConfiguracaoCtaAcervo;
+  readonly whatsappFallbackOpcional?: string;
   readonly pagina: ConteudoPaginaPublicada;
   readonly acervo: AcervoPublicoVitrine;
   readonly aoSolicitarExperiencia: (
@@ -49,15 +53,28 @@ export function GavetaEditorialPublica({
   aoAlterarAbertura,
   secaoAberta,
   tituloPersonalizado,
+  configuracaoCta,
+  whatsappFallbackOpcional,
   pagina,
   acervo,
-  aoSolicitarExperiencia: _aoSolicitarExperiencia,
-  consultorPadraoId: _consultorPadraoId,
+  aoSolicitarExperiencia,
+  consultorPadraoId,
   aoAbrirCartao,
 }: PropriedadesGavetaEditorialPublica) {
   const { registrarEventoTelemetria } = useAmbienteVitrine();
   const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
   const tipografia = obterDescritorTipografiaEditorial(pagina.tipografiaId);
+
+  function iniciarMicrofluxoDoItem(
+    microfluxoId: string,
+    contextoItem: { produtoId?: string; servicoId?: string },
+  ) {
+    aoSolicitarExperiencia(microfluxoId, {
+      ...(consultorPadraoId ? { profissionalPreSelecionadoId: consultorPadraoId } : {}),
+      ...(contextoItem.produtoId ? { produtoPreSelecionadoId: contextoItem.produtoId } : {}),
+      ...(contextoItem.servicoId ? { servicoPreSelecionadoId: contextoItem.servicoId } : {}),
+    });
+  }
   const tituloGaveta = useMemo(() => {
     if (tituloPersonalizado?.trim()) return tituloPersonalizado.trim();
     switch (secaoAberta) {
@@ -93,51 +110,79 @@ export function GavetaEditorialPublica({
 
             {acervo.produtos.length > 0 ? (
               <section aria-label="Lista de produtos" className="space-y-4 sm:space-y-3">
-                {acervo.produtos.map((produto) => (
-                  <article
-                    key={produto.id}
-                    className={combinarClasses(
-                      "group rounded-2xl border p-5 transition-all duration-300 hover:border-current/35 sm:p-4",
-                      paleta.temaEscuro
-                        ? "border-white/12 bg-[var(--editorial-superficie)]/70 backdrop-blur-md hover:bg-[var(--editorial-superficie)]"
-                        : "border-black/10 bg-[var(--editorial-superficie)]/80 backdrop-blur-md hover:bg-[var(--editorial-superficie)]",
-                    )}
-                  >
-                    <GaleriaImagensComThumbs
-                      imagens={obterListaImagensMidia(
-                        produto.urlImagemPrincipal
-                          ? {
+                {acervo.produtos.map((produto) => {
+                  const possuiCtaProduto =
+                    resolverCtaItemAcervo({
+                      pagina,
+                      tipo: "produtos",
+                      itemNome: produto.nome,
+                      configuracaoCta,
+                      whatsappFallbackOpcional,
+                      possuiHandlerMicrofluxo: true,
+                    }) !== null;
+
+                  return (
+                    <article
+                      key={produto.id}
+                      className={combinarClasses(
+                        "group rounded-2xl border p-5 transition-all duration-300 hover:border-current/35 sm:p-4",
+                        paleta.temaEscuro
+                          ? "border-white/12 bg-[var(--editorial-superficie)]/70 backdrop-blur-md hover:bg-[var(--editorial-superficie)]"
+                          : "border-black/10 bg-[var(--editorial-superficie)]/80 backdrop-blur-md hover:bg-[var(--editorial-superficie)]",
+                      )}
+                    >
+                      <GaleriaImagensComThumbs
+                        imagens={obterListaImagensMidia(
+                          produto.urlImagemPrincipal
+                            ? {
                               url: produto.urlImagemPrincipal,
                               textoAlternativo: produto.nome,
                               pontoFocal: produto.pontoFocalImagem,
                             }
-                          : null,
-                        produto.imagens,
-                      )}
-                      tituloFallback={produto.nome}
-                      temaEscuro={paleta.temaEscuro}
-                      className="mb-4"
-                    />
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="rounded-full bg-current/8 px-2.5 py-0.5 text-[11px] font-medium tracking-[0.12em] text-[var(--editorial-texto-secundario)] uppercase">
-                        {produto.categoria}
-                      </span>
-                      <span className="text-xs font-semibold text-[var(--editorial-texto-secundario)]">
-                        {formatarApresentacaoPrecoItem({
-                          centavos: produto.precoCentavos,
-                          rotuloOpcional: produto.rotuloPrecoOpcional,
-                        })}
-                      </span>
-                    </div>
+                            : null,
+                          produto.imagens,
+                        )}
+                        tituloFallback={produto.nome}
+                        temaEscuro={paleta.temaEscuro}
+                        className="mb-4"
+                      />
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <span className="rounded-full bg-current/8 px-2.5 py-0.5 text-[11px] font-medium tracking-[0.12em] text-[var(--editorial-texto-secundario)] uppercase">
+                          {produto.categoria}
+                        </span>
+                        <span className="text-xs font-semibold text-[var(--editorial-texto-secundario)]">
+                          {formatarApresentacaoPrecoItem({
+                            centavos: produto.precoCentavos,
+                            rotuloOpcional: produto.rotuloPrecoOpcional,
+                          })}
+                        </span>
+                      </div>
 
-                    <h3 className="mt-2.5 text-base font-semibold sm:text-lg text-[var(--editorial-texto)]">
-                      {produto.nome}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--editorial-texto-secundario)]">
-                      {produto.resumo}
-                    </p>
-                  </article>
-                ))}
+                      <h3 className="mt-2.5 text-base font-semibold sm:text-lg text-[var(--editorial-texto)]">
+                        {produto.nome}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--editorial-texto-secundario)]">
+                        {produto.resumo}
+                      </p>
+
+                      {possuiCtaProduto ? (
+                        <div className="mt-4 border-t border-current/10 pt-3">
+                          <BotaoCtaItemAcervo
+                            pagina={pagina}
+                            tipo="produtos"
+                            itemId={produto.id}
+                            itemNome={produto.nome}
+                            configuracaoCta={configuracaoCta}
+                            whatsappFallbackOpcional={whatsappFallbackOpcional}
+                            aoIniciarMicrofluxo={iniciarMicrofluxoDoItem}
+                            tamanho="compacto"
+                            className="sm:w-full"
+                          />
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
               </section>
             ) : null}
           </div>
@@ -153,67 +198,93 @@ export function GavetaEditorialPublica({
 
             {acervo.servicos.length > 0 ? (
               <section aria-label="Lista de serviços" className="space-y-4 sm:space-y-3">
-                {acervo.servicos.map((servico) => (
-                  <article
-                    key={servico.id}
-                    className={combinarClasses(
-                      "group rounded-2xl border p-5 transition-all duration-300 hover:border-current/35 sm:p-4",
-                      paleta.temaEscuro
-                        ? "border-white/12 bg-[var(--editorial-superficie)]/70 backdrop-blur-md hover:bg-[var(--editorial-superficie)]"
-                        : "border-black/10 bg-[var(--editorial-superficie)]/80 backdrop-blur-md hover:bg-[var(--editorial-superficie)]",
-                    )}
-                  >
-                    <GaleriaImagensComThumbs
-                      imagens={obterListaImagensMidia(
-                        servico.urlImagemOpcional
-                          ? {
-                            url: servico.urlImagemOpcional,
-                            textoAlternativo: servico.nome,
-                            pontoFocal: servico.pontoFocalImagem,
-                          }
-                          : null,
-                        servico.imagens,
-                      )}
-                      tituloFallback={servico.nome}
-                      temaEscuro={paleta.temaEscuro}
-                      className="mb-4"
-                    />
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="rounded-full bg-current/8 px-2.5 py-0.5 text-[11px] font-medium tracking-[0.12em] text-[var(--editorial-texto-secundario)] uppercase">
-                        {servico.categoria}
-                      </span>
-                      <span className="text-xs font-semibold text-[var(--editorial-destaque)]">
-                        {formatarApresentacaoPrecoItem({
-                          centavos: servico.precoBaseCentavos,
-                          rotuloOpcional: servico.rotuloPrecoOpcional,
-                        })}
-                      </span>
-                    </div>
+                {acervo.servicos.map((servico) => {
+                  const possuiCtaServico =
+                    resolverCtaItemAcervo({
+                      pagina,
+                      tipo: "servicos",
+                      itemNome: servico.nome,
+                      configuracaoCta,
+                      whatsappFallbackOpcional,
+                      possuiHandlerMicrofluxo: true,
+                    }) !== null;
 
-                    <h3
+                  return (
+                    <article
+                      key={servico.id}
                       className={combinarClasses(
-                        "mt-2.5 text-xl font-medium sm:text-lg",
-                        tipografia.classeTitulo,
+                        "group rounded-2xl border p-5 transition-all duration-300 hover:border-current/35 sm:p-4",
+                        paleta.temaEscuro
+                          ? "border-white/12 bg-[var(--editorial-superficie)]/70 backdrop-blur-md hover:bg-[var(--editorial-superficie)]"
+                          : "border-black/10 bg-[var(--editorial-superficie)]/80 backdrop-blur-md hover:bg-[var(--editorial-superficie)]",
                       )}
                     >
-                      {servico.nome}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--editorial-texto-secundario)]">
-                      {servico.resumo}
-                    </p>
+                      <GaleriaImagensComThumbs
+                        imagens={obterListaImagensMidia(
+                          servico.urlImagemOpcional
+                            ? {
+                              url: servico.urlImagemOpcional,
+                              textoAlternativo: servico.nome,
+                              pontoFocal: servico.pontoFocalImagem,
+                            }
+                            : null,
+                          servico.imagens,
+                        )}
+                        tituloFallback={servico.nome}
+                        temaEscuro={paleta.temaEscuro}
+                        className="mb-4"
+                      />
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <span className="rounded-full bg-current/8 px-2.5 py-0.5 text-[11px] font-medium tracking-[0.12em] text-[var(--editorial-texto-secundario)] uppercase">
+                          {servico.categoria}
+                        </span>
+                        <span className="text-xs font-semibold text-[var(--editorial-destaque)]">
+                          {formatarApresentacaoPrecoItem({
+                            centavos: servico.precoBaseCentavos,
+                            rotuloOpcional: servico.rotuloPrecoOpcional,
+                          })}
+                        </span>
+                      </div>
 
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-current/10 pt-3">
-                      {servico.prazoOuDuracao ? (
-                        <p className="flex items-center gap-1.5 text-xs text-[var(--editorial-texto-secundario)]">
-                          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>{servico.prazoOuDuracao}</span>
-                        </p>
-                      ) : (
-                        <span />
-                      )}
-                    </div>
-                  </article>
-                ))}
+                      <h3
+                        className={combinarClasses(
+                          "mt-2.5 text-xl font-medium sm:text-lg",
+                          tipografia.classeTitulo,
+                        )}
+                      >
+                        {servico.nome}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--editorial-texto-secundario)]">
+                        {servico.resumo}
+                      </p>
+
+                      {servico.prazoOuDuracao || possuiCtaServico ? (
+                        <div className="mt-4 flex flex-col gap-3 border-t border-current/10 pt-3">
+                          {servico.prazoOuDuracao ? (
+                            <p className="flex items-center gap-1.5 text-xs text-[var(--editorial-texto-secundario)]">
+                              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                              <span>{servico.prazoOuDuracao}</span>
+                            </p>
+                          ) : null}
+
+                          {possuiCtaServico ? (
+                            <BotaoCtaItemAcervo
+                              pagina={pagina}
+                              tipo="servicos"
+                              itemId={servico.id}
+                              itemNome={servico.nome}
+                              configuracaoCta={configuracaoCta}
+                              whatsappFallbackOpcional={whatsappFallbackOpcional}
+                              aoIniciarMicrofluxo={iniciarMicrofluxoDoItem}
+                              tamanho="compacto"
+                              className="sm:w-full"
+                            />
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
               </section>
             ) : null}
           </div>

@@ -1,6 +1,10 @@
 import { ErroValidacaoDominio } from "../erros/errosDominio";
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 import {
+  ehFaixaInicioExperienciasValida,
+  type FaixaInicioExperiencias,
+} from "../editorial/faixaInicioExperiencias";
+import {
   LIMITE_MAXIMO_CHAMADAS_EDITORIAIS,
   hidratarChamadasEditoriaisAdicionais,
   type ConjuntoChamadasEditoriais,
@@ -41,6 +45,7 @@ export interface RascunhoConfiguracaoPagina extends ConjuntoChamadasEditoriais {
   readonly organizacaoId: string;
   readonly composicaoVisual: TipoComposicaoEditorial;
   readonly espacamentoAcoes?: EspacamentoAcoesHome;
+  readonly faixaInicioExperiencias?: FaixaInicioExperiencias;
   readonly paletaId: IdentificadorPaletaEditorial;
   readonly corPersonalizadaHex?: string;
   readonly customizacaoTokens?: CustomizacaoTokensEditorial;
@@ -208,10 +213,17 @@ export function hidratarRascunhoConfiguracaoPagina(
       ? dadosBrutos.espacamentoAcoes
       : padrao.espacamentoAcoes;
 
+  const faixaInicioExperiencias = ehFaixaInicioExperienciasValida(
+    dadosBrutos.faixaInicioExperiencias,
+  )
+    ? dadosBrutos.faixaInicioExperiencias
+    : padrao.faixaInicioExperiencias;
+
   return {
     organizacaoId: fallback.organizacaoId,
     composicaoVisual,
     ...(espacamentoAcoes ? { espacamentoAcoes } : {}),
+    ...(faixaInicioExperiencias ? { faixaInicioExperiencias } : {}),
     paletaId,
     ...(corPersonalizadaHex ? { corPersonalizadaHex } : {}),
     ...(customizacaoTokens ? { customizacaoTokens } : {}),
@@ -426,6 +438,9 @@ export function converterRascunhoParaConteudoPublicado(
     atualizadoEmIso: opcoes.publicadoEmIso ?? rascunho.atualizadoEmIso,
     composicaoVisual: rascunho.composicaoVisual,
     ...(rascunho.espacamentoAcoes ? { espacamentoAcoes: rascunho.espacamentoAcoes } : {}),
+    ...(rascunho.faixaInicioExperiencias
+      ? { faixaInicioExperiencias: rascunho.faixaInicioExperiencias }
+      : {}),
     paletaId: rascunho.paletaId,
     ...(rascunho.corPersonalizadaHex ? { corPersonalizadaHex: rascunho.corPersonalizadaHex } : {}),
     ...(rascunho.customizacaoTokens ? { customizacaoTokens: rascunho.customizacaoTokens } : {}),

@@ -280,7 +280,7 @@ export function GerenciadorCatalogoPainel({
               disabled={!podeEditarConteudo || publicacao.publicando || salvando}
               value={categoriaProduto}
               onChange={(e) => setCategoriaProduto(e.target.value)}
-              placeholder="Ex.: Esportivos Selecionados, Sedãs Premium"
+              placeholder="Ex.: Linha Clássica, Edição Limitada"
             />
 
             <div className="flex flex-col gap-1.5">
@@ -294,7 +294,7 @@ export function GerenciadorCatalogoPainel({
                 disabled={!podeEditarConteudo || publicacao.publicando || salvando}
                 value={resumoProduto}
                 onChange={(e) => setResumoProduto(e.target.value)}
-                placeholder="Destaques de procedência, opcionais, garantia e estado de conservação."
+                placeholder="Principais diferenciais, materiais, garantia e detalhes relevantes."
                 className="w-full rounded-lg border border-marfim-200 bg-white px-3.5 py-2.5 text-sm text-mineral-950 focus:border-indigo-400 focus:outline-none"
               />
             </div>
@@ -312,7 +312,7 @@ export function GerenciadorCatalogoPainel({
                 disabled={!podeEditarConteudo || publicacao.publicando || salvando}
                 value={precoProdutoTexto}
                 onChange={(e) => setPrecoProdutoTexto(e.target.value)}
-                placeholder="789.000,00"
+                placeholder="1.290,00"
               />
 
               <div className="flex flex-col gap-1.5">
@@ -362,7 +362,7 @@ export function GerenciadorCatalogoPainel({
                 value={especificacoesTexto}
                 onChange={(e) => setEspecificacoesTexto(e.target.value)}
                 placeholder={
-                  "Ano: 2024/2024\nQuilometragem: 4.800 km\nMotor: 3.0 Biturbo 480cv\nCâmbio: PDK 8 marchas"
+                  "Material: Titânio escovado\nDimensões: 42 mm\nGarantia: 2 anos\nOrigem: Nacional"
                 }
                 className="font-mono text-xs w-full rounded-lg border border-marfim-200 bg-white px-3.5 py-2.5 text-mineral-950 focus:border-indigo-400 focus:outline-none"
               />

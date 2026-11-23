@@ -56,12 +56,12 @@ export function CabecalhoMarcaDiscreta({
   return (
     <header
       className={combinarClasses(
-        "pt-10 flex flex-col gap-1.5",
+        "min-h-[8.5rem] py-10 flex flex-col justify-center gap-1.5",
         alinhamento
           ? "w-full"
           : alinharCentroNoMobile
-            ? "w-full items-center justify-center text-center @5xl:flex-row @5xl:items-baseline @5xl:justify-between @5xl:text-left"
-            : "items-start text-left @5xl:flex-row @5xl:items-baseline @5xl:justify-between",
+            ? "w-full items-center justify-center text-center @5xl:flex-row @5xl:items-center @5xl:justify-between @5xl:text-left"
+            : "items-start text-left @5xl:flex-row @5xl:items-center @5xl:justify-between",
         className,
       )}
     >

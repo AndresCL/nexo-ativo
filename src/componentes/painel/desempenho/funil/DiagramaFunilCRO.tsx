@@ -14,6 +14,7 @@ import {
   calcularEstagiosFunilRamificado,
   type EstagioFunilCalculado,
 } from "@/dominio/analytics/calculadorFunilRamificado";
+import { calcularOrigemPercurso } from "@/dominio/analytics/resumoQrCodeEOrigem";
 
 export interface PropriedadesDiagramaFunilCRO {
   readonly resumoMetricas: ResumoMetricasPeriodo;
@@ -157,13 +158,11 @@ export function DiagramaFunilCRO({
 
   // Cálculo de Atribuição de Origem do Percurso (Permalink vs Vitrine)
   const infoOrigemPercurso = useMemo(() => {
-    if (!microfluxoSelecionado || microfluxoSelecionado.aberturas === 0) return null;
-    const total = microfluxoSelecionado.aberturas;
-    const permalink = microfluxoSelecionado.aberturasPermalink ?? 0;
-    const vitrine = Math.max(0, total - permalink);
-    const pctPermalink = Math.round((permalink / total) * 1000) / 10;
-    const pctVitrine = Math.round((vitrine / total) * 1000) / 10;
-    return { total, permalink, vitrine, pctPermalink, pctVitrine };
+    if (!microfluxoSelecionado) return null;
+    return calcularOrigemPercurso(
+      microfluxoSelecionado.aberturas,
+      microfluxoSelecionado.aberturasPermalink,
+    );
   }, [microfluxoSelecionado]);
 
   return (
