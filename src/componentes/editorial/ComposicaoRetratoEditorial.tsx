@@ -105,7 +105,7 @@ export function ComposicaoRetratoEditorial({
               />
             </TransicaoEditorial>
 
-            <TransicaoEditorial atrasoSegundos={0.12} className="mt-7 @5xl:col-span-5 @5xl:mt-0">
+            <TransicaoEditorial atrasoSegundos={0.12} className="mt-7 min-w-0 @5xl:col-span-5 @5xl:mt-0">
               <ListaBlocosVitrine
                 pagina={pagina}
                 complementoChamada={complementoChamada}

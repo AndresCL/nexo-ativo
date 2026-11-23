@@ -179,7 +179,7 @@ export function ComposicaoGaleriaEditorial({
 
           <TransicaoEditorial
             atrasoSegundos={0.1}
-            className="flex flex-col justify-between gap-7 @5xl:col-span-5"
+            className="flex min-w-0 flex-col justify-between gap-7 @5xl:col-span-5"
           >
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}

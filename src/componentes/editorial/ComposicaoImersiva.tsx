@@ -122,7 +122,7 @@ export function ComposicaoImersiva({
               />
             </TransicaoEditorial>
 
-            <TransicaoEditorial atrasoSegundos={0.12} className="@5xl:col-span-5 @5xl:col-start-8">
+            <TransicaoEditorial atrasoSegundos={0.12} className="min-w-0 @5xl:col-span-5 @5xl:col-start-8">
               <ListaBlocosVitrine
                 pagina={pagina}
                 complementoChamada={complementoChamada}

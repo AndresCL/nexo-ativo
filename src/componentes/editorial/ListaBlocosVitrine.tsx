@@ -100,7 +100,7 @@ export function ListaBlocosVitrine({
   return (
     <div
       data-testid="lista-blocos-vitrine"
-      className={combinarClasses("flex w-full flex-col items-center @5xl:items-end", classeGap, className)}
+      className={combinarClasses("flex w-full min-w-0 flex-col items-center @5xl:items-end", classeGap, className)}
     >
       {previaEquipe
         ? acoesVisiveis

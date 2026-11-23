@@ -49,7 +49,7 @@ export function BlocoAvaliacoesGoogle({
 
   return (
     <div
-      className={combinarClasses("w-full max-w-xl text-left", className)}
+      className={combinarClasses("w-full min-w-0 max-w-xl text-left", className)}
       aria-busy={carregando}
     >
       {carregando ? (
