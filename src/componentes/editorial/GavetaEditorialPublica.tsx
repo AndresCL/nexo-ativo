@@ -11,8 +11,8 @@ import {
   type ProfissionalEquipe,
 } from "@/dominio/entidades/catalogoConteudo";
 import {
-  obterDescritorPaletaEditorial,
   obterDescritorTipografiaEditorial,
+  resolverTemaEscuroBottomSheetEditorial,
   type ConfiguracaoCtaAcervo,
   type ConteudoPaginaPublicada,
 } from "@/dominio/entidades/paginaPublicada";
@@ -62,7 +62,11 @@ export function GavetaEditorialPublica({
   aoAbrirCartao,
 }: PropriedadesGavetaEditorialPublica) {
   const { registrarEventoTelemetria } = useAmbienteVitrine();
-  const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
+  const temaEscuroBottomSheet = resolverTemaEscuroBottomSheetEditorial(
+    pagina.paletaId,
+    pagina.corPersonalizadaHex,
+    pagina.customizacaoTokens,
+  );
   const tipografia = obterDescritorTipografiaEditorial(pagina.tipografiaId);
 
   function iniciarMicrofluxoDoItem(
@@ -124,12 +128,7 @@ export function GavetaEditorialPublica({
                   return (
                     <article
                       key={produto.id}
-                      className={combinarClasses(
-                        "group rounded-2xl border p-5 transition-all duration-300 hover:border-current/35 sm:p-4",
-                        paleta.temaEscuro
-                          ? "border-white/12 bg-[var(--editorial-superficie)]/70 backdrop-blur-md hover:bg-[var(--editorial-superficie)]"
-                          : "border-black/10 bg-[var(--editorial-superficie)]/80 backdrop-blur-md hover:bg-[var(--editorial-superficie)]",
-                      )}
+                      className="group rounded-2xl border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)]/80 p-5 backdrop-blur-md transition-all duration-300 hover:border-current/35 hover:bg-[var(--editorial-superficie)] sm:p-4"
                     >
                       <GaleriaImagensComThumbs
                         imagens={obterListaImagensMidia(
@@ -143,7 +142,7 @@ export function GavetaEditorialPublica({
                           produto.imagens,
                         )}
                         tituloFallback={produto.nome}
-                        temaEscuro={paleta.temaEscuro}
+                        temaEscuro={temaEscuroBottomSheet}
                         className="mb-4"
                       />
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -212,12 +211,7 @@ export function GavetaEditorialPublica({
                   return (
                     <article
                       key={servico.id}
-                      className={combinarClasses(
-                        "group rounded-2xl border p-5 transition-all duration-300 hover:border-current/35 sm:p-4",
-                        paleta.temaEscuro
-                          ? "border-white/12 bg-[var(--editorial-superficie)]/70 backdrop-blur-md hover:bg-[var(--editorial-superficie)]"
-                          : "border-black/10 bg-[var(--editorial-superficie)]/80 backdrop-blur-md hover:bg-[var(--editorial-superficie)]",
-                      )}
+                      className="group rounded-2xl border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)]/80 p-5 backdrop-blur-md transition-all duration-300 hover:border-current/35 hover:bg-[var(--editorial-superficie)] sm:p-4"
                     >
                       <GaleriaImagensComThumbs
                         imagens={obterListaImagensMidia(
@@ -231,7 +225,7 @@ export function GavetaEditorialPublica({
                           servico.imagens,
                         )}
                         tituloFallback={servico.nome}
-                        temaEscuro={paleta.temaEscuro}
+                        temaEscuro={temaEscuroBottomSheet}
                         className="mb-4"
                       />
                       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -301,12 +295,7 @@ export function GavetaEditorialPublica({
                 return (
                   <article
                     key={projeto.id}
-                    className={combinarClasses(
-                      "overflow-hidden rounded-md border",
-                      paleta.temaEscuro
-                        ? "border-white/12 bg-[var(--editorial-superficie)]"
-                        : "border-black/10 bg-[var(--editorial-superficie)]",
-                    )}
+                    className="overflow-hidden rounded-md border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)]"
                   >
                     <GaleriaImagensComThumbs
                       imagens={obterListaImagensMidia(
@@ -319,7 +308,7 @@ export function GavetaEditorialPublica({
                       )}
                       tituloFallback={projeto.titulo}
                       proporcaoClassName="aspect-[16/10]"
-                      temaEscuro={paleta.temaEscuro}
+                      temaEscuro={temaEscuroBottomSheet}
                       className="p-2 pb-0"
                     />
 
@@ -358,12 +347,7 @@ export function GavetaEditorialPublica({
                 return (
                   <article
                     key={prof.id}
-                    className={combinarClasses(
-                      "flex flex-row items-start gap-3.5 rounded-xl border p-4 sm:gap-3 sm:p-3.5",
-                      paleta.temaEscuro
-                        ? "border-white/12 bg-[var(--editorial-superficie)]"
-                        : "border-black/10 bg-[var(--editorial-superficie)]",
-                    )}
+                    className="flex flex-row items-start gap-3.5 rounded-xl border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)] p-4 sm:gap-3 sm:p-3.5"
                   >
                     <AvatarProfissional
                       urlFoto={prof.urlFotoPerfil}

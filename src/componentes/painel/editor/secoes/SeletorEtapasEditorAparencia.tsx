@@ -157,7 +157,7 @@ export function SeletorEtapasEditorAparencia() {
                     ? (indice + 1) % ETAPAS_EDITOR_APARENCIA.length
                     : evento.key === "ArrowLeft" || evento.key === "ArrowUp"
                       ? (indice - 1 + ETAPAS_EDITOR_APARENCIA.length) %
-                        ETAPAS_EDITOR_APARENCIA.length
+                      ETAPAS_EDITOR_APARENCIA.length
                       : evento.key === "Home"
                         ? 0
                         : evento.key === "End"

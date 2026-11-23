@@ -7,6 +7,7 @@ import {
   type EspacamentoAcoesHome,
   type IdentificadorPaletaEditorial,
   type ItemAcaoHome,
+  type ModoFundoEquipeEditorial,
   type TipoIconeAcaoHome,
 } from "@/dominio/entidades/paginaPublicada";
 import { MAPA_ICONES_POR_ID } from "@/dominio/entidades/catalogoIconesEditorial";
@@ -29,6 +30,7 @@ export interface PropriedadesNavegacaoAcoesHome {
   readonly aoAcionarItem?: ManipuladorAcaoHome;
   readonly aoSelecionarItemAcervo?: (tipo: "produtos" | "servicos", itemId: string) => void;
   readonly previaEquipe?: PreviaEquipeVitrine;
+  readonly modoFundoEquipe?: ModoFundoEquipeEditorial;
   readonly videosYoutube?: readonly VideoYoutubeItem[];
   readonly modoExibicaoVideos?: ModoExibicaoVideos;
   readonly autoplayVideos?: boolean;
@@ -99,6 +101,12 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
       "aria-hidden": true,
     });
   }
+  if (acao.tipoDestino === "agenda") {
+    return MAPA_ICONES_POR_ID["agendamento"]?.componente({
+      className: "h-4 w-4 shrink-0",
+      "aria-hidden": true,
+    });
+  }
   if (acao.tipoDestino === "microfluxo") {
     if (/conectar|falar|consultor/i.test(acao.destino + acao.rotulo)) {
       return MAPA_ICONES_POR_ID["conectar"]?.componente({
@@ -138,6 +146,7 @@ export function NavegacaoAcoesHome({
   aoSelecionarItemAcervo,
   className,
   previaEquipe,
+  modoFundoEquipe,
   videosYoutube = [],
   modoExibicaoVideos = "carrossel",
   autoplayVideos = false,
@@ -190,6 +199,7 @@ export function NavegacaoAcoesHome({
               acao={acao}
               previa={previaEquipe}
               destaque={acao.destaquePrincipal}
+              modoFundo={modoFundoEquipe}
               aoAcionarItem={aoAcionarItem}
               className="@5xl:hidden"
             />
@@ -206,6 +216,7 @@ export function NavegacaoAcoesHome({
               acao={acao}
               previa={previaEquipe}
               destaque={ehDestaque}
+              modoFundo={modoFundoEquipe}
               aoAcionarItem={aoAcionarItem}
               className={
                 visibilidade.mobile

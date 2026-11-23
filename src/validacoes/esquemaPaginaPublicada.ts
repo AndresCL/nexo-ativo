@@ -6,12 +6,14 @@ import {
 } from "../dominio/editorial/faixaInicioExperiencias";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
+import { esquemaConfiguracaoAgendaVitrine } from "./esquemasAgenda";
 import { esquemaConfiguracaoPostVitrine } from "./esquemasMicrofluxo";
 import {
   esquemaChamadaEditorial,
   esquemaChamadasEditoriaisAdicionais,
 } from "./esquemasChamadasEditoriais";
 import { esquemaConfiguracaoAvaliacoesGoogle } from "./esquemasAvaliacoesGoogle";
+import { esquemaCustomizacaoTokensEditorial } from "./esquemaCustomizacaoTokens";
 import type { ConteudoPaginaPublicada } from "@/dominio/entidades/paginaPublicada";
 
 const esquemaCoordenadasPontoFocal = z.object({
@@ -90,6 +92,7 @@ const esquemaItemAcaoHome = z.object({
     })
     .optional(),
   configuracaoPost: esquemaConfiguracaoPostVitrine.optional(),
+  configuracaoAgenda: esquemaConfiguracaoAgendaVitrine.optional(),
   id: z.string().min(1),
   rotulo: z.string().min(1).max(60),
   subtituloDiscreto: z.string().max(90).optional(),
@@ -98,6 +101,7 @@ const esquemaItemAcaoHome = z.object({
   subtituloCartaoOpcional: z.string().max(90).optional(),
   tipoDestino: z.enum([
     "microfluxo",
+    "agenda",
     "publicacao_post",
     "secao_produtos",
     "secao_servicos",
@@ -180,21 +184,7 @@ export const esquemaConteudoPaginaPublicada: z.ZodType<ConteudoPaginaPublicada> 
       "Cor personalizada deve estar no formato HEX (#RGB ou #RRGGBB).",
     )
     .optional(),
-  customizacaoTokens: z
-    .object({
-      corFundoPrincipal: z.string().optional(),
-      corSuperficie: z.string().optional(),
-      corTextoPrincipal: z.string().optional(),
-      corTextoSecundario: z.string().optional(),
-      corDestaque: z.string().optional(),
-      corBorda: z.string().optional(),
-      corCtaFundo: z.string().optional(),
-      corCtaTexto: z.string().optional(),
-      corSecundarioFundo: z.string().optional(),
-      corSecundarioTexto: z.string().optional(),
-      corBrilhoBorda: z.string().optional(),
-    })
-    .optional(),
+  customizacaoTokens: esquemaCustomizacaoTokensEditorial.optional(),
   tipografiaId: z.enum([
     "classico_editorial",
     "contemporaneo_minimalista",

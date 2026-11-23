@@ -30,7 +30,7 @@ export default async function PaginaExperienciaPublica({
     (m) =>
       obterIdentificadorPublicoExperiencia(m.id) === identificadorExperiencia &&
       m.ativo &&
-      (!m.tipoAcao || m.tipoAcao === "microfluxo") &&
+      (!m.tipoAcao || m.tipoAcao === "microfluxo" || m.tipoAcao === "agenda") &&
       m.organizacaoId === pacote.pagina.organizacaoId,
   );
   if (!pacote || !fluxo) notFound();
@@ -39,6 +39,9 @@ export default async function PaginaExperienciaPublica({
     for (const item of Array.isArray(valor) ? valor : valor === undefined ? [] : [valor]) {
       consulta.append(chave, item);
     }
+  }
+  if (fluxo.tipoAcao === "agenda") {
+    redirect(`/${identificadorOrganizacao}${consulta.size ? `?${consulta}` : ""}#agenda-${fluxo.id}`);
   }
   const [caminho, hash] = construirCaminhoExperiencia(identificadorOrganizacao, fluxo.id).split(
     "#",

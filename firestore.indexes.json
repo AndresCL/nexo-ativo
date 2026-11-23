@@ -32,6 +32,14 @@
         { "fieldPath": "situacao", "order": "ASCENDING" },
         { "fieldPath": "atualizadoEm", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "agendamentos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "dataIso", "order": "ASCENDING" },
+        { "fieldPath": "horarioInicio", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

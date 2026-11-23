@@ -5,7 +5,7 @@ import { ArrowUpRight, Calendar, Phone, Sparkles } from "lucide-react";
 import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
 import { obterListaImagensMidia } from "@/dominio/entidades/catalogoConteudo";
 import {
-  obterDescritorPaletaEditorial,
+  resolverTemaEscuroBottomSheetEditorial,
   type ConteudoPaginaPublicada,
   type ItemAcaoHome,
 } from "@/dominio/entidades/paginaPublicada";
@@ -39,7 +39,11 @@ export function BottomSheetPostVitrine({
 
   if (!acaoPost) return null;
 
-  const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
+  const temaEscuroBottomSheet = resolverTemaEscuroBottomSheetEditorial(
+    pagina.paletaId,
+    pagina.corPersonalizadaHex,
+    pagina.customizacaoTokens,
+  );
   const post = acaoPost.configuracaoPost;
   const tituloExibicao = post?.tituloPost?.trim() || acaoPost.rotulo;
   const dataTexto = post?.dataTexto?.trim();
@@ -170,7 +174,7 @@ export function BottomSheetPostVitrine({
           <GaleriaImagensComThumbs
             imagens={imagensGaleria}
             tituloFallback={tituloExibicao}
-            temaEscuro={paleta.temaEscuro}
+            temaEscuro={temaEscuroBottomSheet}
             proporcaoClassName="aspect-4/3 w-full !rounded-none"
             className="space-y-0 [&_div.flex]:p-3 [&_div.flex]:bg-[var(--editorial-superficie)]/50"
           />

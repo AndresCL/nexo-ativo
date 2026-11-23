@@ -119,6 +119,7 @@ export function ComposicaoImersiva({
               <BlocoEquipeAposHero
                 acoes={pagina.acoesPrincipais}
                 previaEquipe={previaEquipe}
+                modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
                 aoAcionarItem={aoAcionarItem}
               />
             </TransicaoEditorial>
@@ -135,6 +136,7 @@ export function ComposicaoImersiva({
                 acoes={pagina.acoesPrincipais}
                 espacamentoAcoes={pagina.espacamentoAcoes}
                 previaEquipe={previaEquipe}
+                modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
                 videosYoutube={videosYoutube}
                 modoExibicaoVideos={modoExibicaoVideos}
                 autoplayVideos={autoplayVideos}

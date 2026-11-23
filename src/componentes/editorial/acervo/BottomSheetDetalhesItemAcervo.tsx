@@ -9,7 +9,7 @@ import {
   type ServicoOrganizacao,
 } from "@/dominio/entidades/catalogoConteudo";
 import {
-  obterDescritorPaletaEditorial,
+  resolverTemaEscuroBottomSheetEditorial,
   type ConteudoPaginaPublicada,
   type ConfiguracaoCtaAcervo,
 } from "@/dominio/entidades/paginaPublicada";
@@ -41,7 +41,11 @@ export function BottomSheetDetalhesItemAcervo({
 }: PropriedadesBottomSheetDetalhesItemAcervo) {
   if (!item) return null;
 
-  const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
+  const temaEscuroBottomSheet = resolverTemaEscuroBottomSheetEditorial(
+    pagina.paletaId,
+    pagina.corPersonalizadaHex,
+    pagina.customizacaoTokens,
+  );
   const ehProduto = tipo === "produtos";
   const produto = ehProduto ? (item as ProdutoCatalogo) : null;
   const servico = !ehProduto ? (item as ServicoOrganizacao) : null;
@@ -90,7 +94,7 @@ export function BottomSheetDetalhesItemAcervo({
           <GaleriaImagensComThumbs
             imagens={imagensGaleria}
             tituloFallback={item.nome}
-            temaEscuro={paleta.temaEscuro}
+            temaEscuro={temaEscuroBottomSheet}
             proporcaoClassName="aspect-4/3 w-full !rounded-none"
             className="space-y-0 [&_div.flex]:p-3 [&_div.flex]:bg-[var(--editorial-superficie)]/50"
           />

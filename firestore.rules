@@ -151,6 +151,22 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      match /configuracoes/agenda {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
+          && mantemOrganizacaoCorreta(organizacaoId);
+        allow delete: if false;
+      }
+
+      match /agendamentos/{agendamentoId} {
+        allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
+        allow write: if false;
+      }
+
+      match /controleAgendaDiaria/{dataIso} {
+        allow read, write: if false;
+      }
+
       match /metricasDiarias/{dataIso} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
         allow write: if false;

@@ -11,6 +11,7 @@ import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import {
   ContextoAmbienteVitrine,
+  criarServicoAgendamentoDemonstracao,
   criarServicoSubmissaoDemonstracao,
   type ValorContextoAmbienteVitrine,
 } from "./contextoAmbienteVitrine";
@@ -53,6 +54,7 @@ export function AlternadorPreviaDispositivo({
   );
 
   const servicoSubmissaoDemo = useMemo(() => criarServicoSubmissaoDemonstracao(), []);
+  const servicoAgendamentoDemo = useMemo(() => criarServicoAgendamentoDemonstracao(), []);
 
   const valorAmbientePrevia = useMemo<ValorContextoAmbienteVitrine>(
     () => ({
@@ -61,6 +63,7 @@ export function AlternadorPreviaDispositivo({
       sincronizarHistoricoNavegador: false,
       registrarEventoTelemetria: async () => {},
       servicoSubmissao: servicoSubmissaoDemo,
+      servicoAgendamento: servicoAgendamentoDemo,
       aoNavegarEmPrevia: (destino, tipo) => {
         if (tipo === "telefone") {
           notificar.informacao(`Prévia de ligação: o visitante discará para ${destino}.`);
@@ -69,7 +72,7 @@ export function AlternadorPreviaDispositivo({
         }
       },
     }),
-    [containerMoldura, servicoSubmissaoDemo],
+    [containerMoldura, servicoSubmissaoDemo, servicoAgendamentoDemo],
   );
 
   const paginaPrevia: ConteudoPaginaPublicada = permitirTrocarComposicao

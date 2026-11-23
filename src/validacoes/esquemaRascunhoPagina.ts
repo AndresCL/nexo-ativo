@@ -8,6 +8,7 @@ import {
   esquemaChamadasEditoriaisAdicionais,
 } from "./esquemasChamadasEditoriais";
 import { esquemaConfiguracaoAvaliacoesGoogle } from "./esquemasAvaliacoesGoogle";
+import { esquemaCustomizacaoTokensEditorial } from "./esquemaCustomizacaoTokens";
 import type { RascunhoConfiguracaoPagina } from "@/dominio/entidades/rascunhoConfiguracaoPagina";
 
 const esquemaPontoFocal = z.object({
@@ -39,21 +40,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
       "Cor personalizada deve estar no formato HEX (#RGB ou #RRGGBB).",
     )
     .optional(),
-  customizacaoTokens: z
-    .object({
-      corFundoPrincipal: z.string().optional(),
-      corSuperficie: z.string().optional(),
-      corTextoPrincipal: z.string().optional(),
-      corTextoSecundario: z.string().optional(),
-      corDestaque: z.string().optional(),
-      corBorda: z.string().optional(),
-      corCtaFundo: z.string().optional(),
-      corCtaTexto: z.string().optional(),
-      corSecundarioFundo: z.string().optional(),
-      corSecundarioTexto: z.string().optional(),
-      corBrilhoBorda: z.string().optional(),
-    })
-    .optional(),
+  customizacaoTokens: esquemaCustomizacaoTokensEditorial.optional(),
   tipografiaId: z.enum([
     "classico_editorial",
     "contemporaneo_minimalista",
@@ -126,6 +113,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
       tituloSecao: z.string().trim().max(100).optional(),
       tipoDestino: z.enum([
         "microfluxo",
+        "agenda",
         "publicacao_post",
         "secao_produtos",
         "secao_servicos",

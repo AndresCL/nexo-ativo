@@ -2,7 +2,10 @@
 
 import { useId, type CSSProperties } from "react";
 import { ChevronRight } from "lucide-react";
-import type { ItemAcaoHome } from "@/dominio/entidades/paginaPublicada";
+import type {
+  ItemAcaoHome,
+  ModoFundoEquipeEditorial,
+} from "@/dominio/entidades/paginaPublicada";
 import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { GrupoAvataresEquipe } from "./GrupoAvataresEquipe";
@@ -16,6 +19,7 @@ export interface PropriedadesAcaoEquipeVitrine {
   readonly previa: PreviaEquipeVitrine;
   readonly aoAcionarItem?: ManipuladorAcaoHome;
   readonly destaque?: boolean;
+  readonly modoFundo?: ModoFundoEquipeEditorial;
   readonly className?: string;
 }
 
@@ -24,13 +28,17 @@ export function AcaoEquipeVitrine({
   previa,
   aoAcionarItem,
   destaque,
+  modoFundo = "transparente",
   className,
 }: PropriedadesAcaoEquipeVitrine) {
   const id = useId();
   if (previa.total === 0) return null;
 
+  const usarFundoFixo = modoFundo === "fixo";
+
   const propriedades = {
     "data-acao-home-id": acao.id,
+    "data-modo-fundo-equipe": modoFundo,
     style: {
       "--equipe-tempo-interacao": `${DURACOES_MS.microinteracao}ms`,
       "--equipe-tempo-entrada": `${DURACOES_MS.entradaEditorial}ms`,
@@ -41,7 +49,10 @@ export function AcaoEquipeVitrine({
       ? `${id}-subtitulo ${id}-descricao`
       : `${id}-descricao`,
     className: combinarClasses(
-      "group flex min-h-12 w-full flex-row items-center justify-between gap-3 rounded-xl px-2 py-3 text-left text-[var(--editorial-texto)] hover:bg-[var(--editorial-superficie)]/45 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--editorial-texto)] @5xl:flex-col @5xl:items-start @5xl:gap-2.5",
+      "group flex min-h-12 w-full flex-row items-center justify-between gap-3 rounded-xl py-3 text-left text-[var(--editorial-equipe-texto)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--editorial-equipe-texto)] @5xl:flex-col @5xl:items-start @5xl:gap-2.5",
+      usarFundoFixo
+        ? "bg-[var(--editorial-equipe-fundo)] px-4 shadow-md backdrop-blur-md hover:opacity-95"
+        : "bg-transparent px-2 hover:bg-[var(--editorial-superficie)]/45",
       estilos.acao,
       className,
     ),
@@ -61,7 +72,7 @@ export function AcaoEquipeVitrine({
         {acao.subtituloDiscreto ? (
           <span
             id={`${id}-subtitulo`}
-            className="max-w-full text-xs leading-snug wrap-anywhere text-[var(--editorial-texto-secundario)]"
+            className="max-w-full text-xs leading-snug wrap-anywhere text-[var(--editorial-equipe-subtitulo)]"
           >
             {acao.subtituloDiscreto}
           </span>

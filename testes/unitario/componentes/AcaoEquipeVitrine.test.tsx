@@ -92,4 +92,28 @@ describe("Convite da equipe", () => {
     rerender(<NavegacaoAcoesHome acoes={[ACAO_EQUIPE_TESTE]} paletaId="noite_mineral" />);
     expect(screen.getByRole("link", { name: ACAO_EQUIPE_TESTE.rotulo })).toBeInTheDocument();
   });
+
+  it("alterna entre fundo transparente e fundo fixo preservando os tokens da equipe", () => {
+    const { rerender } = render(
+      <AcaoEquipeVitrine
+        acao={ACAO_EQUIPE_TESTE}
+        previa={criarPreviaEquipeVitrine(criarEquipeTeste(2), "org-equipe")}
+        modoFundo="transparente"
+      />,
+    );
+    const linkTransparente = screen.getByRole("link", { name: ACAO_EQUIPE_TESTE.rotulo });
+    expect(linkTransparente).toHaveAttribute("data-modo-fundo-equipe", "transparente");
+    expect(linkTransparente.className).toContain("bg-transparent");
+
+    rerender(
+      <AcaoEquipeVitrine
+        acao={ACAO_EQUIPE_TESTE}
+        previa={criarPreviaEquipeVitrine(criarEquipeTeste(2), "org-equipe")}
+        modoFundo="fixo"
+      />,
+    );
+    const linkFixo = screen.getByRole("link", { name: ACAO_EQUIPE_TESTE.rotulo });
+    expect(linkFixo).toHaveAttribute("data-modo-fundo-equipe", "fixo");
+    expect(linkFixo.className).toContain("bg-[var(--editorial-equipe-fundo)]");
+  });
 });

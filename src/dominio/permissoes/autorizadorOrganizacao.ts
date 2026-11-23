@@ -11,6 +11,7 @@ export type OperacaoOrganizacao =
   | "editar_aparencia_e_conteudo"
   | "publicar_pagina"
   | "gerenciar_solicitacoes"
+  | "gerenciar_agenda"
   | "gerenciar_equipe"
   | "gerenciar_membros_administrativos"
   | "gerenciar_assinatura";
@@ -22,6 +23,7 @@ const PAPEIS_PERMITIDOS_POR_OPERACAO: Readonly<
   editar_aparencia_e_conteudo: ["proprietario", "administrador"],
   publicar_pagina: ["proprietario", "administrador"],
   gerenciar_solicitacoes: ["proprietario", "administrador", "membro"],
+  gerenciar_agenda: ["proprietario", "administrador", "membro"],
   gerenciar_equipe: ["proprietario", "administrador"],
   gerenciar_membros_administrativos: ["proprietario"],
   gerenciar_assinatura: ["proprietario"],

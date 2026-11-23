@@ -1,3 +1,4 @@
+import type { ConfiguracaoAgendaVitrine } from "../agenda/tiposAgenda";
 import type { RegraCalculoComercialMicrofluxo } from "../comercial/tiposCalculoComercial";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
 import type { MidiaItemCatalogo } from "../entidades/catalogoConteudo";
@@ -142,6 +143,7 @@ export interface EtapaMicrofluxo {
 
 export type TipoAcaoVitrine =
   | "microfluxo"
+  | "agenda"
   | "publicacao_post"
   | "link_externo"
   | "secao_produtos"
@@ -216,6 +218,7 @@ export interface DefinicaoMicrofluxo {
     readonly microfluxoId?: string;
   };
   readonly configuracaoPost?: ConfiguracaoPostVitrine;
+  readonly configuracaoAgenda?: ConfiguracaoAgendaVitrine;
   readonly id: string;
   readonly organizacaoId: string;
   readonly tipoAcao?: TipoAcaoVitrine;

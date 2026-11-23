@@ -1,6 +1,7 @@
 import {
   obterAcoesPrincipaisVisiveis,
   type ItemAcaoHome,
+  type ModoFundoEquipeEditorial,
 } from "@/dominio/entidades/paginaPublicada";
 import {
   ehAcaoEquipe,
@@ -13,10 +14,12 @@ export function BlocoEquipeAposHero({
   acoes,
   previaEquipe,
   aoAcionarItem,
+  modoFundoEquipe,
 }: {
   readonly acoes: readonly ItemAcaoHome[];
   readonly previaEquipe?: PreviaEquipeVitrine;
   readonly aoAcionarItem?: ManipuladorAcaoHome;
+  readonly modoFundoEquipe?: ModoFundoEquipeEditorial;
 }) {
   if (!previaEquipe?.total) return null;
   const acoesHero = obterAcoesPrincipaisVisiveis(acoes).filter(
@@ -34,6 +37,7 @@ export function BlocoEquipeAposHero({
           acao={acao}
           previa={previaEquipe}
           destaque={acao.destaquePrincipal}
+          modoFundo={modoFundoEquipe}
           aoAcionarItem={aoAcionarItem}
         />
       ))}

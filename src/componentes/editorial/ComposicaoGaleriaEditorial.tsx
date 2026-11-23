@@ -176,6 +176,7 @@ export function ComposicaoGaleriaEditorial({
             <BlocoEquipeAposHero
               acoes={pagina.acoesPrincipais}
               previaEquipe={previaEquipe}
+              modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
               aoAcionarItem={aoAcionarItem}
             />
 
@@ -189,6 +190,7 @@ export function ComposicaoGaleriaEditorial({
               acoes={pagina.acoesPrincipais}
               espacamentoAcoes={pagina.espacamentoAcoes}
               previaEquipe={previaEquipe}
+              modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
               videosYoutube={videosYoutube}
               modoExibicaoVideos={modoExibicaoVideos}
               autoplayVideos={autoplayVideos}

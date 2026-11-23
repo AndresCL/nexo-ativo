@@ -196,7 +196,9 @@ export function ConfiguracaoPostExperiencia({
               <option value="">Selecione a experiência a ser iniciada...</option>
               {microfluxosDisponiveis
                 .filter(
-                  (m) => m.id !== fluxoAtual.id && (!m.tipoAcao || m.tipoAcao === "microfluxo"),
+                  (m) =>
+                    m.id !== fluxoAtual.id &&
+                    (!m.tipoAcao || m.tipoAcao === "microfluxo" || m.tipoAcao === "agenda"),
                 )
                 .map((m) => (
                   <option key={m.id} value={m.id}>

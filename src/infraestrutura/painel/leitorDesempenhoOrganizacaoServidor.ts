@@ -360,6 +360,7 @@ export async function carregarContextoDesempenhoOrganizacaoServidor(
         validacao.data.organizacaoId !== organizacaoId ||
         (validacao.data.tipoAcao &&
           validacao.data.tipoAcao !== "microfluxo" &&
+          validacao.data.tipoAcao !== "agenda" &&
           validacao.data.tipoAcao !== "publicacao_post")
       )
         return [];

@@ -51,12 +51,17 @@ import { SeletorIconeAcaoPopover } from "../editor/SeletorIconeAcaoPopover";
 import { TituloExperienciaEditavel } from "./TituloExperienciaEditavel";
 import { ConfiguracaoEquipeVitrine } from "./ConfiguracaoEquipeVitrine";
 import { ConfiguracaoPostExperiencia } from "./ConfiguracaoPostExperiencia";
+import { ConfiguracaoAgendaExperiencia } from "./ConfiguracaoAgendaExperiencia";
 import { OpcaoOcultarTituloVideosExperiencia } from "./OpcaoOcultarTituloVideosExperiencia";
 
 const DESCRITORES_TIPO_ACAO: Record<TipoAcaoVitrine, { rotulo: string; iconeBadge: string }> = {
   microfluxo: {
     rotulo: "Percurso guiado",
     iconeBadge: "Jornada",
+  },
+  agenda: {
+    rotulo: "Agenda / Agendamento",
+    iconeBadge: "Agenda",
   },
   publicacao_post: {
     rotulo: "Publicação / Post",
@@ -776,6 +781,14 @@ export function GerenciadorExperienciasPainel({
                       ...(novoTipo === "secao_equipe" ? { urlDestinoOpcional: "#equipe" } : {}),
                       ...(novoTipo === "secao_servicos" ? { urlDestinoOpcional: "#servicos" } : {}),
                       ...(novoTipo === "secao_produtos" ? { urlDestinoOpcional: "#produtos" } : {}),
+                      ...(novoTipo === "agenda" && !atual.configuracaoAgenda
+                        ? {
+                            configuracaoAgenda: {
+                              exigirTelefone: true,
+                              exibirCampoObservacoes: true,
+                            },
+                          }
+                        : {}),
                       ...(novoTipo === "publicacao_post" && !atual.configuracaoPost
                         ? {
                             configuracaoPost: {
@@ -946,7 +959,11 @@ export function GerenciadorExperienciasPainel({
                       >
                         <option value="">Selecione a experiência a ser iniciada...</option>
                         {microfluxos
-                          .filter((m) => m.id !== fluxoAtual.id && m.tipoAcao === "microfluxo")
+                          .filter(
+                            (m) =>
+                              m.id !== fluxoAtual.id &&
+                              (m.tipoAcao === "microfluxo" || m.tipoAcao === "agenda"),
+                          )
                           .map((m) => (
                             <option key={m.id} value={m.id}>
                               {m.titulo}
@@ -1026,6 +1043,16 @@ export function GerenciadorExperienciasPainel({
                 quantidadeProfissionais={quantidadeProfissionaisAtivos}
                 aoAlterar={(posicionamentoEquipe) =>
                   atualizarFluxoSelecionado((atual) => ({ ...atual, posicionamentoEquipe }))
+                }
+              />
+            ) : null}
+
+            {fluxoAtual.tipoAcao === "agenda" ? (
+              <ConfiguracaoAgendaExperiencia
+                fluxoAtual={fluxoAtual}
+                desabilitado={!podeAlterar}
+                aoAlterarAgenda={(configuracaoAgenda) =>
+                  atualizarFluxoSelecionado((atual) => ({ ...atual, configuracaoAgenda }))
                 }
               />
             ) : null}

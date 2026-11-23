@@ -12,9 +12,9 @@ import * as DialogoPrimitivo from "@radix-ui/react-dialog";
 import { motion, useDragControls, useMotionValue, useTransform, animate } from "motion/react";
 import { X } from "lucide-react";
 import {
-  gerarVariaveisCssPaletaEditorial,
-  obterDescritorPaletaEditorial,
+  gerarVariaveisCssBottomSheetEditorial,
   obterDescritorTipografiaEditorial,
+  resolverTemaEscuroBottomSheetEditorial,
   type ConteudoPaginaPublicada,
 } from "@/dominio/entidades/paginaPublicada";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
@@ -103,9 +103,13 @@ export function BottomSheetEditorialBase({
   const { containerPortal } = useAmbienteVitrine();
   const estaContido = containerPortal !== null;
 
-  const paleta = obterDescritorPaletaEditorial(pagina.paletaId);
   const tipografia = obterDescritorTipografiaEditorial(pagina.tipografiaId);
-  const variaveisPaleta = gerarVariaveisCssPaletaEditorial(
+  const temaEscuroBottomSheet = resolverTemaEscuroBottomSheetEditorial(
+    pagina.paletaId,
+    pagina.corPersonalizadaHex,
+    pagina.customizacaoTokens,
+  );
+  const variaveisPaleta = gerarVariaveisCssBottomSheetEditorial(
     pagina.paletaId,
     pagina.corPersonalizadaHex,
     pagina.customizacaoTokens,
@@ -178,9 +182,7 @@ export function BottomSheetEditorialBase({
               estaContido
                 ? "absolute inset-x-0 bottom-0 z-50 flex max-h-[92%] w-full flex-col overflow-hidden rounded-t-3xl border-t shadow-2xl"
                 : "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t shadow-2xl sm:animacao-painel-responsivo sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-full sm:w-[28rem] sm:rounded-none sm:border-l sm:border-t-0",
-              paleta.temaEscuro
-                ? "border-white/15 bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]"
-                : "border-black/10 bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]",
+              "border-[var(--editorial-borda)] bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]",
               tipografia.classeCorpo,
             )}
           >
@@ -194,7 +196,12 @@ export function BottomSheetEditorialBase({
               )}
             >
               <div
-                className="h-1.5 w-12 rounded-full bg-white/80 shadow-md backdrop-blur-md ring-1 ring-black/10"
+                className={combinarClasses(
+                  "h-1.5 w-12 rounded-full shadow-md backdrop-blur-md",
+                  midiaTopoSangrada || temaEscuroBottomSheet
+                    ? "bg-white/80 ring-1 ring-black/10"
+                    : "bg-black/25 ring-1 ring-white/40",
+                )}
                 aria-hidden="true"
               />
             </motion.div>

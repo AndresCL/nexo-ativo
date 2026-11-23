@@ -14,6 +14,9 @@ import { executarCriacaoOrganizacaoInicial } from "./casos-de-uso/criarOrganizac
 import { executarPublicacaoPaginaEditorial } from "./casos-de-uso/publicarPaginaTransacional";
 import { atribuirPrivilegioFundadorAuditado } from "./casos-de-uso/provisionarFundadorPlataforma";
 import { executarRegistroSolicitacaoVisitante } from "./casos-de-uso/registrarSolicitacaoVisitanteTransacional";
+import { executarConsultaDisponibilidadeAgenda } from "./casos-de-uso/consultarDisponibilidadeAgenda";
+import { executarRegistroAgendamentoVisitante } from "./casos-de-uso/registrarAgendamentoVisitanteTransacional";
+import { executarAtualizacaoSituacaoAgendamento } from "./casos-de-uso/atualizarSituacaoAgendamentoTransacional";
 import { executarSolicitacaoRecuperacaoSenha } from "./casos-de-uso/solicitarRecuperacaoSenhaTransacional";
 import { criarProvedorEmailPadrao } from "./email/adaptadorResendEmail";
 import { executarCriacaoAssinaturaAsaas } from "./casos-de-uso/criarAssinaturaOrganizacaoAsaas";
@@ -83,6 +86,37 @@ export const registrarSolicitacaoVisitante = onCall(
     }
   }
 );
+
+export const consultarDisponibilidadeAgendaPublica = onCall(async (requisicao) => {
+  try {
+    const { bancoDados } = obterAdminFuncoes();
+    return await executarConsultaDisponibilidadeAgenda(bancoDados, requisicao.data);
+  } catch (erro) {
+    throw converterErroParaHttpsError(erro);
+  }
+});
+
+export const registrarAgendamentoVisitante = onCall(
+  { secrets: [chaveResend] },
+  async (requisicao) => {
+    try {
+      const { bancoDados } = obterAdminFuncoes();
+      return await executarRegistroAgendamentoVisitante(bancoDados, requisicao.data);
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
+    }
+  },
+);
+
+export const atualizarSituacaoAgendamento = onCall(async (requisicao) => {
+  try {
+    const { bancoDados } = obterAdminFuncoes();
+    const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+    return await executarAtualizacaoSituacaoAgendamento(bancoDados, usuario, requisicao.data);
+  } catch (erro) {
+    throw converterErroParaHttpsError(erro);
+  }
+});
 
 export const solicitarRecuperacaoSenha = onCall(
   { secrets: [chaveResend] },

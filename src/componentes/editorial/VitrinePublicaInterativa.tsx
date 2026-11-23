@@ -34,6 +34,7 @@ import { restaurarFocoAcaoVitrine } from "./restaurarFocoAcaoVitrine";
 import { ContextoApresentacaoEquipe } from "@/ganchos/contextoApresentacaoEquipe";
 import { BottomSheetDetalhesItemAcervo } from "./acervo/BottomSheetDetalhesItemAcervo";
 import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
+import { GavetaAgendamentoPublico } from "./agenda/GavetaAgendamentoPublico";
 import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
@@ -80,6 +81,7 @@ export function VitrinePublicaInterativa({
     configuracaoCta?: ConfiguracaoCtaAcervo;
   } | null>(null);
   const [acaoPostAberta, setAcaoPostAberta] = useState<ItemAcaoHome | null>(null);
+  const [acaoAgendaAberta, setAcaoAgendaAberta] = useState<ItemAcaoHome | null>(null);
   const [cartaoProfissionalAtivo, setCartaoProfissionalAtivo] = useState<ProfissionalEquipe | null>(
     null,
   );
@@ -171,9 +173,33 @@ export function VitrinePublicaInterativa({
       if (secao) {
         ultimaEntradaDireta.current = null;
         setMicrofluxoAtivo(null);
+        setAcaoAgendaAberta(null);
         setConfiguracaoCtaSecaoAberta(undefined);
         setSecaoAberta(secao);
         return;
+      }
+
+      if (hashAtual.startsWith("#agenda-")) {
+        const idExperienciaAgenda = hashAtual.slice("#agenda-".length).split("?")[0] ?? "";
+        const fluxoAgenda = microfluxosDisponiveis.find(
+          (m) => m.id === idExperienciaAgenda && m.ativo && m.tipoAcao === "agenda",
+        );
+        if (fluxoAgenda) {
+          setSecaoAberta(null);
+          setMicrofluxoAtivo(null);
+          setAcaoPostAberta(null);
+          setAcaoAgendaAberta({
+            id: `acao-fluxo-${fluxoAgenda.id}`,
+            rotulo: fluxoAgenda.rotuloBotaoHome?.trim() || fluxoAgenda.titulo,
+            subtituloDiscreto: fluxoAgenda.subtituloBotaoHome?.trim() || undefined,
+            tipoDestino: "agenda",
+            destino: `#agenda-${fluxoAgenda.id}`,
+            ...(fluxoAgenda.configuracaoAgenda
+              ? { configuracaoAgenda: fluxoAgenda.configuracaoAgenda }
+              : {}),
+          });
+          return;
+        }
       }
 
       const resolucaoFluxo = resolverMicrofluxoPorDestino(hashAtual, microfluxosDisponiveis);
@@ -369,6 +395,31 @@ export function VitrinePublicaInterativa({
       setTituloSecaoAberta(acao.tituloSecao);
       setConfiguracaoCtaSecaoAberta(undefined);
       setSecaoAberta("equipe");
+      return;
+    }
+
+    if (acao.tipoDestino === "agenda" || acao.destino.startsWith("#agenda-")) {
+      setMicrofluxoAtivo(null);
+      setSecaoAberta(null);
+      setAcaoPostAberta(null);
+      setAcaoAgendaAberta(acao);
+
+      const idExperienciaAgenda = acao.destino.startsWith("#agenda-")
+        ? acao.destino.slice("#agenda-".length)
+        : acao.id.replace(/^acao-fluxo-/, "");
+      const fluxoAgenda = microfluxosDisponiveis.find((m) => m.id === idExperienciaAgenda);
+
+      void registrarEventoTelemetria({
+        organizacaoId: pagina.organizacaoId,
+        tipoEvento: "abertura_microfluxo",
+        canalOrigem: origem.canalOrigem,
+        ...(origem.qrCodeOrigem ? { qrCodeOrigem: origem.qrCodeOrigem } : {}),
+        ...(origem.cartaoProfissionalId
+          ? { cartaoProfissionalId: origem.cartaoProfissionalId }
+          : {}),
+        microfluxoId: fluxoAgenda?.id ?? idExperienciaAgenda,
+        microfluxoTitulo: fluxoAgenda?.titulo ?? acao.rotulo,
+      });
       return;
     }
 
@@ -584,6 +635,19 @@ export function VitrinePublicaInterativa({
         configuracaoCta={itemDetalhado?.configuracaoCta}
         aoIniciarMicrofluxo={(microfluxoId, contextoItem) => {
           const fluxo = microfluxosDisponiveis.find((m) => m.id === microfluxoId);
+          if (fluxo?.tipoAcao === "agenda") {
+            setSecaoAberta(null);
+            setAcaoPostAberta(null);
+            setAcaoAgendaAberta({
+              id: `acao-fluxo-${fluxo.id}`,
+              rotulo: fluxo.rotuloBotaoHome?.trim() || fluxo.titulo,
+              subtituloDiscreto: fluxo.subtituloBotaoHome?.trim() || undefined,
+              tipoDestino: "agenda",
+              destino: `#agenda-${fluxo.id}`,
+              ...(fluxo.configuracaoAgenda ? { configuracaoAgenda: fluxo.configuracaoAgenda } : {}),
+            });
+            return;
+          }
           if (fluxo) {
             setSecaoAberta(null);
             setContextoMicrofluxo({
@@ -603,12 +667,33 @@ export function VitrinePublicaInterativa({
         acaoPost={acaoPostAberta}
         aoIniciarMicrofluxo={(microfluxoId) => {
           const fluxo = microfluxosDisponiveis.find((m) => m.id === microfluxoId);
+          if (fluxo?.tipoAcao === "agenda") {
+            setSecaoAberta(null);
+            setAcaoAgendaAberta({
+              id: `acao-fluxo-${fluxo.id}`,
+              rotulo: fluxo.rotuloBotaoHome?.trim() || fluxo.titulo,
+              subtituloDiscreto: fluxo.subtituloBotaoHome?.trim() || undefined,
+              tipoDestino: "agenda",
+              destino: `#agenda-${fluxo.id}`,
+              ...(fluxo.configuracaoAgenda ? { configuracaoAgenda: fluxo.configuracaoAgenda } : {}),
+            });
+            return;
+          }
           if (fluxo) {
             setSecaoAberta(null);
             setContextoMicrofluxo(undefined);
             setMicrofluxoAtivo(fluxo);
           }
         }}
+      />
+
+      {/* Bottom Sheet de Agenda / Agendamento */}
+      <GavetaAgendamentoPublico
+        aberto={acaoAgendaAberta !== null}
+        aoFechar={() => setAcaoAgendaAberta(null)}
+        aoRetornarFoco={() => restaurarFocoAcaoVitrine(acionadorGaveta.current)}
+        pagina={pagina}
+        acaoAgenda={acaoAgendaAberta}
       />
 
       <AnimatePresence>

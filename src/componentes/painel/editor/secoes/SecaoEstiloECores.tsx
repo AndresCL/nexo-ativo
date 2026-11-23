@@ -1,13 +1,14 @@
 "use client";
 
 import type { RascunhoConfiguracaoPagina } from "@/dominio/entidades/rascunhoConfiguracaoPagina";
+import type { EstadoEditorAparencia } from "@/estados/estadoEditorAparencia";
 import { SeletorEspacamentoVitrine } from "./SeletorEspacamentoVitrine";
 import { SeletorFaixaInicioVitrine } from "./SeletorFaixaInicioVitrine";
 import { SeletorPaletaCromatica } from "./SeletorPaletaCromatica";
 
 export interface PropriedadesSecaoEstiloECores {
   readonly rascunho: RascunhoConfiguracaoPagina;
-  readonly alterarEstiloVisual: (atualizacao: Partial<RascunhoConfiguracaoPagina>) => void;
+  readonly alterarEstiloVisual: EstadoEditorAparencia["alterarEstiloVisual"];
   readonly somenteLeitura?: boolean;
 }
 

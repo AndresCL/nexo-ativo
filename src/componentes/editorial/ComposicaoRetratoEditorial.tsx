@@ -102,6 +102,7 @@ export function ComposicaoRetratoEditorial({
               <BlocoEquipeAposHero
                 acoes={pagina.acoesPrincipais}
                 previaEquipe={previaEquipe}
+                modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
                 aoAcionarItem={aoAcionarItem}
               />
               <BarraRedesSociaisDiscreta redes={pagina.redesSociais} className="mt-4" />
@@ -119,6 +120,7 @@ export function ComposicaoRetratoEditorial({
                 acoes={pagina.acoesPrincipais}
                 espacamentoAcoes={pagina.espacamentoAcoes}
                 previaEquipe={previaEquipe}
+                modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
                 videosYoutube={videosYoutube}
                 modoExibicaoVideos={modoExibicaoVideos}
                 autoplayVideos={autoplayVideos}

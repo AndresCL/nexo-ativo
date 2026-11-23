@@ -112,7 +112,7 @@ export function CabecalhoMarcaDiscreta({
         {identidade.urlLogotipoOpcional && (exibirNome || exibirSubtitulo) ? (
           <div
             aria-hidden="true"
-            className="h-6 w-px bg-current/25 shrink-0 sm:h-7"
+            className="h-6 w-px bg-[var(--editorial-logo-titulo)]/25 shrink-0 sm:h-7"
           />
         ) : null}
 
@@ -121,7 +121,7 @@ export function CabecalhoMarcaDiscreta({
             {exibirNome ? (
               <p
                 className={combinarClasses(
-                  "text-base leading-tight font-medium text-[var(--editorial-texto)] sm:text-lg @5xl:text-xl",
+                  "text-base leading-tight font-medium text-[var(--editorial-logo-titulo)] sm:text-lg @5xl:text-xl",
                   tipografia.classeTitulo,
                 )}
               >
@@ -129,7 +129,7 @@ export function CabecalhoMarcaDiscreta({
               </p>
             ) : null}
             {exibirSubtitulo ? (
-              <p className="mt-0.5 text-[10px] font-medium tracking-[0.14em] text-[var(--editorial-texto)]/80 uppercase sm:text-[11px]">
+              <p className="mt-0.5 text-[10px] font-medium tracking-[0.14em] text-[var(--editorial-logo-subtitulo)] uppercase sm:text-[11px]">
                 {identidade.subtituloCurto}
               </p>
             ) : null}

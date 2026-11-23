@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { esquemaConfiguracaoAgendaVitrine } from "./esquemasAgenda";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaMidiaItemCatalogo } from "./esquemasCatalogoConteudo";
@@ -258,6 +259,7 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
     tipoAcao: z
       .enum([
         "microfluxo",
+        "agenda",
         "publicacao_post",
         "link_externo",
         "secao_produtos",
@@ -302,4 +304,5 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
     })
     .optional(),
   configuracaoPost: esquemaConfiguracaoPostVitrine.optional(),
+  configuracaoAgenda: esquemaConfiguracaoAgendaVitrine.optional(),
   });

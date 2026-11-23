@@ -78,6 +78,26 @@ function gerarIdentificadorCurto(prefixo: string): string {
   return `${prefixo}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
+function mesclarCustomizacaoTokens(
+  atual: CustomizacaoTokensEditorial | undefined,
+  parcial: CustomizacaoTokensEditorial | null,
+): CustomizacaoTokensEditorial | undefined {
+  if (parcial === null) {
+    return undefined;
+  }
+
+  const combinado: Record<string, string | undefined> = {
+    ...(atual ?? {}),
+    ...parcial,
+  };
+
+  const limpo = Object.fromEntries(
+    Object.entries(combinado).filter(([, valor]) => typeof valor === "string" && valor.length > 0),
+  ) as CustomizacaoTokensEditorial;
+
+  return Object.keys(limpo).length > 0 ? limpo : undefined;
+}
+
 function limitarPercentual(valor: number): number {
   if (!Number.isFinite(valor)) {
     return 50;
@@ -125,14 +145,11 @@ function criarStoreEditorAparencia(dadosIniciais?: DadosIniciaisEditorAparencia)
             : {}),
           ...(parcial.customizacaoTokens !== undefined
             ? {
-              customizacaoTokens:
-                parcial.customizacaoTokens === null
-                  ? undefined
-                  : {
-                    ...(estado.rascunho.customizacaoTokens ?? {}),
-                    ...parcial.customizacaoTokens,
-                  },
-            }
+                customizacaoTokens: mesclarCustomizacaoTokens(
+                  estado.rascunho.customizacaoTokens,
+                  parcial.customizacaoTokens,
+                ),
+              }
             : {}),
           ...(parcial.tipografiaId ? { tipografiaId: parcial.tipografiaId } : {}),
         },
@@ -158,12 +175,12 @@ function criarStoreEditorAparencia(dadosIniciais?: DadosIniciaisEditorAparencia)
           ...(indice === 0
             ? { chamadaEditorial: { ...estado.rascunho.chamadaEditorial, ...parcial } }
             : {
-                chamadasEditoriaisAdicionais: (
-                  estado.rascunho.chamadasEditoriaisAdicionais ?? []
-                ).map((chamada, posicao) =>
-                  posicao === indice - 1 ? { ...chamada, ...parcial } : chamada,
-                ),
-              }),
+              chamadasEditoriaisAdicionais: (
+                estado.rascunho.chamadasEditoriaisAdicionais ?? []
+              ).map((chamada, posicao) =>
+                posicao === indice - 1 ? { ...chamada, ...parcial } : chamada,
+              ),
+            }),
         },
       })),
 

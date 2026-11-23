@@ -1,3 +1,4 @@
+import type { ConfiguracaoAgendaVitrine } from "../agenda/tiposAgenda";
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 import type { ConfiguracaoAvaliacoesGoogle } from "./avaliacoesGoogle";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
@@ -19,10 +20,14 @@ import {
   type DescritorTipografiaEditorial,
   type IdentificadorPaletaEditorial,
   type IdentificadorTipografiaEditorial,
+  type ModoFundoEquipeEditorial,
   type TipoComposicaoEditorial,
 } from "./composicaoEditorial";
 import { PontoFocalMidia } from "../objetos-valor/pontoFocalMidia";
-import { gerarPaletaEditorialAPartirDeCorPrimaria } from "../servicos/geradorPaletaEditorial";
+import {
+  ehCorEscura,
+  gerarPaletaEditorialAPartirDeCorPrimaria,
+} from "../servicos/geradorPaletaEditorial";
 import type {
   ConfiguracaoPostVitrine,
   DefinicaoMicrofluxo,
@@ -33,6 +38,7 @@ export type {
   CustomizacaoTokensEditorial,
   IdentificadorPaletaEditorial,
   IdentificadorTipografiaEditorial,
+  ModoFundoEquipeEditorial,
   TipoComposicaoEditorial,
 } from "./composicaoEditorial";
 
@@ -55,6 +61,7 @@ export type TipoRedeSocial =
 
 export type TipoDestinoAcaoHome =
   | "microfluxo"
+  | "agenda"
   | "publicacao_post"
   | "secao_produtos"
   | "secao_servicos"
@@ -126,6 +133,7 @@ export interface ItemAcaoHome {
   readonly modoExibicaoColecao?: "modal_gaveta" | "carrossel" | "grade_2_colunas";
   readonly configuracaoCtaAcervo?: ConfiguracaoCtaAcervo;
   readonly configuracaoPost?: ConfiguracaoPostVitrine;
+  readonly configuracaoAgenda?: ConfiguracaoAgendaVitrine;
   readonly id: string;
   readonly rotulo: string;
   readonly subtituloDiscreto?: string;
@@ -298,6 +306,25 @@ export function obterDescritorTipografiaEditorial(
   return CATALOGO_TIPOGRAFIAS_EDITORIAIS[tipografiaId];
 }
 
+export function resolverPaletaEditorialEfetiva(
+  paletaId: IdentificadorPaletaEditorial,
+  corPersonalizadaHex?: string,
+): DescritorPaletaEditorial {
+  const paletaBase = obterDescritorPaletaEditorial(paletaId);
+
+  if (
+    corPersonalizadaHex &&
+    /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(corPersonalizadaHex.trim())
+  ) {
+    return gerarPaletaEditorialAPartirDeCorPrimaria(
+      corPersonalizadaHex,
+      paletaBase.temaEscuro ? "escuro" : "claro",
+    );
+  }
+
+  return paletaBase;
+}
+
 /**
  * Gera propriedades CSS customizadas para que qualquer composição editorial
  * se adapte à paleta selecionada e respeite eventuais overrides de tokens.
@@ -307,17 +334,7 @@ export function gerarVariaveisCssPaletaEditorial(
   corPersonalizadaHex?: string,
   customizacaoTokens?: CustomizacaoTokensEditorial,
 ): Readonly<Record<string, string>> {
-  let paleta = obterDescritorPaletaEditorial(paletaId);
-
-  if (
-    corPersonalizadaHex &&
-    /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(corPersonalizadaHex.trim())
-  ) {
-    paleta = gerarPaletaEditorialAPartirDeCorPrimaria(
-      corPersonalizadaHex,
-      paleta.temaEscuro ? "escuro" : "claro",
-    );
-  }
+  const paleta = resolverPaletaEditorialEfetiva(paletaId, corPersonalizadaHex);
 
   const fundo = customizacaoTokens?.corFundoPrincipal || paleta.corFundoPrincipal;
   const superficie = customizacaoTokens?.corSuperficie || paleta.corSuperficie;
@@ -327,6 +344,99 @@ export function gerarVariaveisCssPaletaEditorial(
   const borda = customizacaoTokens?.corBorda || paleta.corBorda;
   const ctaFundo = customizacaoTokens?.corCtaFundo || paleta.corCtaFundo;
   const ctaTexto = customizacaoTokens?.corCtaTexto || paleta.corCtaTexto;
+  const secundarioFundo = customizacaoTokens?.corSecundarioFundo || paleta.corSecundarioFundo;
+  const secundarioTexto = customizacaoTokens?.corSecundarioTexto || paleta.corSecundarioTexto;
+  const logoTitulo =
+    customizacaoTokens?.corLogoTitulo ||
+    customizacaoTokens?.corTextoPrincipal ||
+    paleta.corLogoTitulo;
+  const logoSubtitulo =
+    customizacaoTokens?.corLogoSubtitulo ||
+    customizacaoTokens?.corTextoSecundario ||
+    paleta.corLogoSubtitulo;
+  const modoFundoEquipe: ModoFundoEquipeEditorial =
+    customizacaoTokens?.modoFundoEquipe ?? "transparente";
+  const equipeFundo = modoFundoEquipe === "fixo" ? secundarioFundo : "transparent";
+  const equipeTexto =
+    customizacaoTokens?.corEquipeTextoPrincipal ||
+    (modoFundoEquipe === "fixo"
+      ? secundarioTexto
+      : customizacaoTokens?.corTextoPrincipal || paleta.corEquipeTextoPrincipal);
+  const equipeSubtitulo =
+    customizacaoTokens?.corEquipeTextoSecundario ||
+    (modoFundoEquipe === "fixo"
+      ? `color-mix(in srgb, ${secundarioTexto} 78%, transparent)`
+      : customizacaoTokens?.corTextoSecundario || paleta.corEquipeTextoSecundario);
+  const brilhoBorda =
+    customizacaoTokens?.corBrilhoBorda || paleta.corBrilhoBorda || destaque;
+
+  return {
+    "--editorial-fundo": fundo,
+    "--editorial-superficie": superficie,
+    "--editorial-texto": texto,
+    "--editorial-titulo": texto,
+    "--editorial-texto-secundario": subtitulo,
+    "--editorial-subtitulo": subtitulo,
+    "--editorial-destaque": destaque,
+    "--editorial-vinheta": destaque,
+    "--editorial-borda": borda,
+    "--editorial-cta-fundo": ctaFundo,
+    "--editorial-cta-texto": ctaTexto,
+    "--editorial-secundario-fundo": secundarioFundo,
+    "--editorial-secundario-texto": secundarioTexto,
+    "--editorial-logo-titulo": logoTitulo,
+    "--editorial-logo-subtitulo": logoSubtitulo,
+    "--editorial-equipe-fundo": equipeFundo,
+    "--editorial-equipe-texto": equipeTexto,
+    "--editorial-equipe-subtitulo": equipeSubtitulo,
+    "--editorial-brilho-borda": brilhoBorda,
+  };
+}
+
+/**
+ * Gera propriedades CSS customizadas isoladas para o escopo de Bottom Sheets,
+ * permitindo personalizar fundo, superfícies, bordas, textos e CTA independentemente
+ * da vitrine principal, mantendo fallback seguro para a paleta/tokens gerais.
+ */
+export function gerarVariaveisCssBottomSheetEditorial(
+  paletaId: IdentificadorPaletaEditorial,
+  corPersonalizadaHex?: string,
+  customizacaoTokens?: CustomizacaoTokensEditorial,
+): Readonly<Record<string, string>> {
+  const paleta = resolverPaletaEditorialEfetiva(paletaId, corPersonalizadaHex);
+
+  const fundo =
+    customizacaoTokens?.corBottomSheetFundo ||
+    customizacaoTokens?.corFundoPrincipal ||
+    paleta.corBottomSheetFundo;
+  const superficie =
+    customizacaoTokens?.corBottomSheetSuperficie ||
+    customizacaoTokens?.corSuperficie ||
+    paleta.corBottomSheetSuperficie;
+  const borda =
+    customizacaoTokens?.corBottomSheetBorda ||
+    customizacaoTokens?.corBorda ||
+    paleta.corBottomSheetBorda;
+  const texto =
+    customizacaoTokens?.corBottomSheetTextoPrincipal ||
+    customizacaoTokens?.corTextoPrincipal ||
+    paleta.corBottomSheetTextoPrincipal;
+  const subtitulo =
+    customizacaoTokens?.corBottomSheetTextoSecundario ||
+    customizacaoTokens?.corTextoSecundario ||
+    paleta.corBottomSheetTextoSecundario;
+  const destaque =
+    customizacaoTokens?.corBottomSheetDestaque ||
+    customizacaoTokens?.corDestaque ||
+    paleta.corBottomSheetDestaque;
+  const ctaFundo =
+    customizacaoTokens?.corBottomSheetCtaFundo ||
+    customizacaoTokens?.corCtaFundo ||
+    paleta.corBottomSheetCtaFundo;
+  const ctaTexto =
+    customizacaoTokens?.corBottomSheetCtaTexto ||
+    customizacaoTokens?.corCtaTexto ||
+    paleta.corBottomSheetCtaTexto;
   const secundarioFundo = customizacaoTokens?.corSecundarioFundo || paleta.corSecundarioFundo;
   const secundarioTexto = customizacaoTokens?.corSecundarioTexto || paleta.corSecundarioTexto;
   const brilhoBorda =
@@ -348,6 +458,23 @@ export function gerarVariaveisCssPaletaEditorial(
     "--editorial-secundario-texto": secundarioTexto,
     "--editorial-brilho-borda": brilhoBorda,
   };
+}
+
+/**
+ * Determina se o fundo efetivo do Bottom Sheet é escuro para adaptar
+ * elementos sensíveis a contraste (como galerias e indicadores).
+ */
+export function resolverTemaEscuroBottomSheetEditorial(
+  paletaId: IdentificadorPaletaEditorial,
+  corPersonalizadaHex?: string,
+  customizacaoTokens?: CustomizacaoTokensEditorial,
+): boolean {
+  const paleta = resolverPaletaEditorialEfetiva(paletaId, corPersonalizadaHex);
+  const fundoEfetivo =
+    customizacaoTokens?.corBottomSheetFundo ||
+    customizacaoTokens?.corFundoPrincipal ||
+    paleta.corBottomSheetFundo;
+  return ehCorEscura(fundoEfetivo, paleta.temaEscuro);
 }
 
 /**
@@ -400,6 +527,9 @@ export function resolverAcoesVitrineComMicrofluxos(
     if (m.tipoAcao === "link_externo") {
       tipoDestino = "link_externo";
       destino = m.urlDestinoOpcional?.trim() || "https://";
+    } else if (m.tipoAcao === "agenda") {
+      tipoDestino = "agenda";
+      destino = `#agenda-${m.id}`;
     } else if (m.tipoAcao === "publicacao_post") {
       tipoDestino = "publicacao_post";
       destino = `#post-${m.id}`;
@@ -458,6 +588,9 @@ export function resolverAcoesVitrineComMicrofluxos(
         : {}),
       ...(tipoDestino === "publicacao_post" && m.configuracaoPost
         ? { configuracaoPost: m.configuracaoPost }
+        : {}),
+      ...(tipoDestino === "agenda" && m.configuracaoAgenda
+        ? { configuracaoAgenda: m.configuracaoAgenda }
         : {}),
     };
   });

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import * as DialogoPrimitivo from "@radix-ui/react-dialog";
 import {
   BarChart3,
+  CalendarDays,
   Compass,
   FolderKanban,
   Inbox,
@@ -81,6 +82,11 @@ const ITENS_MENU_PAINEL: readonly ItemNavegacaoPainel[] = [
     rotulo: "Experiências interativas",
     caminho: "/painel/experiencias",
     icone: <Compass className="h-4 w-4" aria-hidden="true" />,
+  },
+  {
+    rotulo: "Agenda",
+    caminho: "/painel/agenda",
+    icone: <CalendarDays className="h-4 w-4" aria-hidden="true" />,
   },
   {
     rotulo: "Solicitações",

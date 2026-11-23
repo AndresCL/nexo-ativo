@@ -122,6 +122,39 @@ export function hslParaRgb(hsl: Hsl): Rgb {
 }
 
 /**
+ * Estima se uma cor CSS (HEX ou rgb/rgba) é perceptualmente escura
+ * para adaptar bordas, indicadores e galerias com contraste seguro.
+ */
+export function ehCorEscura(corCss: string, fallbackEscuro: boolean): boolean {
+  const limpa = corCss.trim();
+  let r: number | null = null;
+  let g: number | null = null;
+  let b: number | null = null;
+
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(limpa)) {
+    const rgb = hexParaRgb(limpa);
+    r = rgb.r;
+    g = rgb.g;
+    b = rgb.b;
+  } else {
+    const matchRgb = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/.exec(limpa);
+    if (matchRgb) {
+      r = Number(matchRgb[1]);
+      g = Number(matchRgb[2]);
+      b = Number(matchRgb[3]);
+    }
+  }
+
+  if (r === null || g === null || b === null) {
+    return fallbackEscuro;
+  }
+
+  // Luminância relativa aproximada (Rec. 709)
+  const luminancia = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return luminancia < 0.5;
+}
+
+/**
  * Gera uma paleta cromática editorial completa garantindo contraste legível
  * a partir de uma única cor primária (Single Responsibility - SOLID).
  */
@@ -141,6 +174,7 @@ export function gerarPaletaEditorialAPartirDeCorPrimaria(
     const fundoRgb = hslParaRgb({ h: hslBase.h, s: satFundo, l: 6 });
     const superficieRgb = hslParaRgb({ h: hslBase.h, s: Math.min(hslBase.s, 22), l: 12 });
     const textoSecundarioRgb = hslParaRgb({ h: hslBase.h, s: Math.min(hslBase.s, 15), l: 72 });
+    const logoSubtituloRgb = hslParaRgb({ h: hslBase.h, s: Math.min(hslBase.s, 12), l: 84 });
 
     // O destaque em tema escuro deve ser vibrante e perceptível
     const destaqueLuminosidade = Math.max(55, Math.min(75, hslBase.l));
@@ -151,19 +185,36 @@ export function gerarPaletaEditorialAPartirDeCorPrimaria(
       l: destaqueLuminosidade,
     });
 
+    const fundoHex = rgbParaHex(fundoRgb);
+    const superficieHex = rgbParaHex(superficieRgb);
+    const textoSecundarioHex = rgbParaHex(textoSecundarioRgb);
+    const destaqueHex = rgbParaHex(destaqueRgb);
+
     return {
       codigo: "noite_mineral", // Identificador compatível
       nome: `Personalizada (${rgbParaHex(rgbBase)})`,
-      corFundoPrincipal: rgbParaHex(fundoRgb),
-      corSuperficie: rgbParaHex(superficieRgb),
+      corFundoPrincipal: fundoHex,
+      corSuperficie: superficieHex,
       corTextoPrincipal: "#f8fafc",
-      corTextoSecundario: rgbParaHex(textoSecundarioRgb),
-      corDestaque: rgbParaHex(destaqueRgb),
+      corTextoSecundario: textoSecundarioHex,
+      corDestaque: destaqueHex,
       corBorda: "rgba(255, 255, 255, 0.15)",
-      corCtaFundo: rgbParaHex(destaqueRgb),
-      corCtaTexto: rgbParaHex(fundoRgb),
+      corCtaFundo: destaqueHex,
+      corCtaTexto: fundoHex,
       corSecundarioFundo: "rgba(0, 0, 0, 0.4)",
       corSecundarioTexto: "#f8fafc",
+      corLogoTitulo: "#f8fafc",
+      corLogoSubtitulo: rgbParaHex(logoSubtituloRgb),
+      corEquipeTextoPrincipal: "#f8fafc",
+      corEquipeTextoSecundario: textoSecundarioHex,
+      corBottomSheetFundo: fundoHex,
+      corBottomSheetSuperficie: superficieHex,
+      corBottomSheetBorda: "rgba(255, 255, 255, 0.15)",
+      corBottomSheetTextoPrincipal: "#f8fafc",
+      corBottomSheetTextoSecundario: textoSecundarioHex,
+      corBottomSheetDestaque: destaqueHex,
+      corBottomSheetCtaFundo: destaqueHex,
+      corBottomSheetCtaTexto: fundoHex,
       temaEscuro: true,
     };
   }
@@ -183,19 +234,37 @@ export function gerarPaletaEditorialAPartirDeCorPrimaria(
     l: destaqueLuminosidadeClaro,
   });
 
+  const fundoHex = rgbParaHex(fundoRgb);
+  const superficieHex = rgbParaHex(superficieRgb);
+  const textoPrincipalHex = rgbParaHex(textoPrincipalRgb);
+  const textoSecundarioHex = rgbParaHex(textoSecundarioRgb);
+  const destaqueHex = rgbParaHex(destaqueRgb);
+
   return {
     codigo: "marfim_editorial", // Identificador compatível
     nome: `Personalizada (${rgbParaHex(rgbBase)})`,
-    corFundoPrincipal: rgbParaHex(fundoRgb),
-    corSuperficie: rgbParaHex(superficieRgb),
-    corTextoPrincipal: rgbParaHex(textoPrincipalRgb),
-    corTextoSecundario: rgbParaHex(textoSecundarioRgb),
-    corDestaque: rgbParaHex(destaqueRgb),
+    corFundoPrincipal: fundoHex,
+    corSuperficie: superficieHex,
+    corTextoPrincipal: textoPrincipalHex,
+    corTextoSecundario: textoSecundarioHex,
+    corDestaque: destaqueHex,
     corBorda: "rgba(0, 0, 0, 0.12)",
-    corCtaFundo: rgbParaHex(destaqueRgb),
+    corCtaFundo: destaqueHex,
     corCtaTexto: "#ffffff",
     corSecundarioFundo: "rgba(255, 255, 255, 0.7)",
-    corSecundarioTexto: rgbParaHex(textoPrincipalRgb),
+    corSecundarioTexto: textoPrincipalHex,
+    corLogoTitulo: textoPrincipalHex,
+    corLogoSubtitulo: textoSecundarioHex,
+    corEquipeTextoPrincipal: textoPrincipalHex,
+    corEquipeTextoSecundario: textoSecundarioHex,
+    corBottomSheetFundo: fundoHex,
+    corBottomSheetSuperficie: superficieHex,
+    corBottomSheetBorda: "rgba(0, 0, 0, 0.12)",
+    corBottomSheetTextoPrincipal: textoPrincipalHex,
+    corBottomSheetTextoSecundario: textoSecundarioHex,
+    corBottomSheetDestaque: destaqueHex,
+    corBottomSheetCtaFundo: destaqueHex,
+    corBottomSheetCtaTexto: "#ffffff",
     temaEscuro: false,
   };
 }
