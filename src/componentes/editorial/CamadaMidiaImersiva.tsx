@@ -122,6 +122,15 @@ export function CamadaMidiaImersiva({
     );
   }
 
+  const exibirVideo = Boolean(midiaResolvida.renderizarVideo && midiaResolvida.urlVideo);
+  const exibirImagem = Boolean(
+    !exibirVideo &&
+      midiaResolvida.urlImagemEstatica &&
+      midiaResolvida.urlImagemEstatica.trim() &&
+      !midiaResolvida.urlImagemEstatica.includes("imersivo-arquitetura-luz"),
+  );
+  const temMidiaVisual = exibirVideo || exibirImagem;
+
   return (
     <div
       className={combinarClasses(
@@ -130,49 +139,61 @@ export function CamadaMidiaImersiva({
       )}
       aria-hidden={false}
     >
-      {midiaResolvida.renderizarVideo && midiaResolvida.urlVideo ? (
-        <video
-          ref={videoRef}
-          data-testid="video-fundo-editorial"
-          poster={midiaResolvida.urlImagemEstatica}
-          aria-label={midiaResolvida.textoAlternativo}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          src={midiaResolvida.urlVideo}
-          className="h-full w-full object-cover transition-opacity duration-700 ease-out opacity-100"
-          style={{ objectPosition: midiaResolvida.posicaoObjetoCss }}
-        >
-          <source src={midiaResolvida.urlVideo} type="video/mp4" />
-        </video>
-      ) : midiaResolvida.urlImagemEstatica &&
-        midiaResolvida.urlImagemEstatica.trim() &&
-        !midiaResolvida.urlImagemEstatica.includes("imersivo-arquitetura-luz") ? (
-        <Image
-          src={midiaResolvida.urlImagemEstatica}
-          alt={midiaResolvida.textoAlternativo || "Fotografia de apresentação editorial"}
-          fill
-          priority
-          sizes="100vw"
-          unoptimized={deveIgnorarOtimizadorImagem(midiaResolvida.urlImagemEstatica)}
-          onLoad={() => setMidiaPronta(true)}
-          className={combinarClasses(
-            "object-cover transition-opacity duration-700 ease-out",
-            midiaPronta ? "opacity-100" : "opacity-0",
-          )}
-          style={{ objectPosition: midiaResolvida.posicaoObjetoCss }}
-        />
-      ) : null}
+      {temMidiaVisual ? (
+        <div className="relative w-full overflow-hidden">
+          {exibirVideo && midiaResolvida.urlVideo ? (
+            <video
+              ref={videoRef}
+              data-testid="video-fundo-editorial"
+              poster={midiaResolvida.urlImagemEstatica}
+              aria-label={midiaResolvida.textoAlternativo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              src={midiaResolvida.urlVideo}
+              className="block h-auto w-full transition-opacity duration-700 ease-out opacity-100"
+            >
+              <source src={midiaResolvida.urlVideo} type="video/mp4" />
+            </video>
+          ) : exibirImagem && midiaResolvida.urlImagemEstatica ? (
+            <Image
+              src={midiaResolvida.urlImagemEstatica}
+              alt={midiaResolvida.textoAlternativo || "Fotografia de apresentação editorial"}
+              width={1600}
+              height={900}
+              priority
+              sizes="100vw"
+              unoptimized={deveIgnorarOtimizadorImagem(midiaResolvida.urlImagemEstatica)}
+              onLoad={() => setMidiaPronta(true)}
+              className={combinarClasses(
+                "block h-auto w-full transition-opacity duration-700 ease-out",
+                midiaPronta ? "opacity-100" : "opacity-0",
+              )}
+            />
+          ) : null}
 
-      <div aria-hidden="true" className={combinarClasses("absolute inset-0", classeVelo)} />
-      {classeVeloRetratoSuperior ? (
-        <div
-          aria-hidden="true"
-          className={combinarClasses("absolute inset-0", classeVeloRetratoSuperior)}
-        />
-      ) : null}
+          <div aria-hidden="true" className={combinarClasses("absolute inset-0", classeVelo)} />
+          {classeVeloRetratoSuperior ? (
+            <div
+              aria-hidden="true"
+              className={combinarClasses("absolute inset-0", classeVeloRetratoSuperior)}
+            />
+          ) : null}
+          <div
+            aria-hidden="true"
+            data-testid="fade-inferior-midia-editorial"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%]"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--editorial-fundo) 55%, transparent) 55%, var(--editorial-fundo) 100%)",
+            }}
+          />
+        </div>
+      ) : (
+        <div aria-hidden="true" className={combinarClasses("absolute inset-0", classeVelo)} />
+      )}
 
       <EfeitoCantosEditorial
         tipo={midiaResolvida.efeitoCantos}

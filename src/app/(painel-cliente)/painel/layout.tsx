@@ -11,6 +11,7 @@ import { EstruturaNavegacaoPainel } from "@/componentes/painel/EstruturaNavegaca
 import { ProvedorPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { carregarPerfilPublicidadeOrganizacaoServidor } from "@/infraestrutura/painel/leitorPerfilPublicidadeServidor";
 import { contarSolicitacoesNovasOrganizacaoServidor } from "@/infraestrutura/painel/leitorSolicitacoesOrganizacaoServidor";
+import { contarAgendamentosConfirmadosOrganizacaoServidor } from "@/infraestrutura/painel/leitorAgendaOrganizacaoServidor";
 import { ChatCrisp } from "@/componentes/interface/ChatCrisp";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -38,13 +39,14 @@ export default async function LayoutPainelCliente({ children }: { readonly child
   const vinculos = await listarVinculosOrganizacaoServidor(sessao.uid);
   const organizacaoPrincipal = vinculos[0];
 
-  const totalSolicitacoesNovas = organizacaoPrincipal
-    ? await contarSolicitacoesNovasOrganizacaoServidor(organizacaoPrincipal.organizacaoId)
-    : 0;
-
-  const perfilPublicidade = organizacaoPrincipal
-    ? await carregarPerfilPublicidadeOrganizacaoServidor(organizacaoPrincipal.organizacaoId)
-    : "padrao";
+  const [totalSolicitacoesNovas, totalAgendamentosConfirmados, perfilPublicidade] =
+    organizacaoPrincipal
+      ? await Promise.all([
+          contarSolicitacoesNovasOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
+          contarAgendamentosConfirmadosOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
+          carregarPerfilPublicidadeOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
+        ])
+      : [0, 0, "padrao" as const];
 
   return (
     <ProvedorEstadoInterfacePainel>
@@ -53,6 +55,7 @@ export default async function LayoutPainelCliente({ children }: { readonly child
           nomeOrganizacaoAtiva={organizacaoPrincipal?.nomeOrganizacao}
           emailUsuario={sessao.email}
           totalSolicitacoesNovas={totalSolicitacoesNovas}
+          totalAgendamentosConfirmados={totalAgendamentosConfirmados}
           ehFundador={verificarPrivilegioFundador(sessao)}
         >
           {children}

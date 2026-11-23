@@ -22,17 +22,20 @@ describe("faixaInicioExperiencias", () => {
     expect(ehFaixaInicioExperienciasValida("alto")).toBe(true);
     expect(ehFaixaInicioExperienciasValida("centro")).toBe(true);
     expect(ehFaixaInicioExperienciasValida("baixo")).toBe(true);
+    expect(ehFaixaInicioExperienciasValida("extra_baixo")).toBe(true);
     expect(ehFaixaInicioExperienciasValida("invalida")).toBe(false);
 
     expect(resolverFaixaInicioExperiencias(undefined)).toBe(FAIXA_INICIO_EXPERIENCIAS_PADRAO);
     expect(resolverFaixaInicioExperiencias("alto")).toBe("alto");
     expect(resolverFaixaInicioExperiencias("centro")).toBe("centro");
+    expect(resolverFaixaInicioExperiencias("extra_baixo")).toBe("extra_baixo");
   });
 
   it("retorna classes com svh/clamp na viewport real e rem fixo na prévia contida", () => {
     expect(obterClasseRespiroAberturaExperiencias("alto")).toBe("pt-0");
     expect(obterClasseRespiroAberturaExperiencias("centro")).toContain("svh");
     expect(obterClasseRespiroAberturaExperiencias("baixo")).toContain("svh");
+    expect(obterClasseRespiroAberturaExperiencias("extra_baixo")).toContain("svh");
 
     expect(
       obterClasseRespiroAberturaExperiencias("centro", { alturaContidaPrevia: true }),
@@ -40,6 +43,9 @@ describe("faixaInicioExperiencias", () => {
     expect(
       obterClasseRespiroAberturaExperiencias("baixo", { alturaContidaPrevia: true }),
     ).not.toContain("svh");
+    expect(
+      obterClasseRespiroAberturaExperiencias("extra_baixo", { alturaContidaPrevia: true }),
+    ).toContain("pt-80");
 
     expect(obterDescritorFaixaInicioExperiencias("alto").classeAlinhamentoDesktop).toBe(
       "@5xl:content-start",
@@ -48,6 +54,9 @@ describe("faixaInicioExperiencias", () => {
       "@5xl:content-center",
     );
     expect(obterDescritorFaixaInicioExperiencias("baixo").classeAlinhamentoDesktop).toBe(
+      "@5xl:content-end",
+    );
+    expect(obterDescritorFaixaInicioExperiencias("extra_baixo").classeAlinhamentoDesktop).toBe(
       "@5xl:content-end",
     );
   });
@@ -94,5 +103,11 @@ describe("faixaInicioExperiencias", () => {
         alturaContidaPrevia: true,
       }),
     ).toContain("pt-72");
+    expect(
+      obterClasseRespiroAberturaExperiencias("extra_baixo", {
+        marcaNoTopo: false,
+        alturaContidaPrevia: true,
+      }),
+    ).toContain("pt-96");
   });
 });

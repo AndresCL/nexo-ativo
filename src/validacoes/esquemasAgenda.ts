@@ -49,6 +49,7 @@ export const esquemaConfiguracaoAgendaVitrine = z.object({
 export const esquemaConsultaDisponibilidadeAgenda = z.object({
   organizacaoId: z.string().trim().min(1, "Organização inválida.").max(120),
   anoMes: esquemaAnoMes,
+  avancarParaProximoMesDisponivel: z.boolean().optional(),
 });
 
 export const esquemaSubmissaoAgendamentoVisitante = z.object({

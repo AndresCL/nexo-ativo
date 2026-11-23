@@ -35,7 +35,7 @@ export async function executarConsultaDisponibilidadeAgenda(
     );
   }
 
-  const { organizacaoId, anoMes } = validacao.data;
+  const { organizacaoId, anoMes, avancarParaProximoMesDisponivel } = validacao.data;
 
   const refPaginaPublicada = bancoDados.collection("paginasPublicadas").doc(organizacaoId);
   const refConfigAgenda = bancoDados
@@ -116,9 +116,10 @@ export async function executarConsultaDisponibilidadeAgenda(
     }
   }
 
-  const diasDisponiveis = gerarDisponibilidadeMensal({
+  let anoMesEfetivo = anoMes;
+  let diasDisponiveis = gerarDisponibilidadeMensal({
     configuracao,
-    anoMes,
+    anoMes: anoMesEfetivo,
     ocupacaoPorData,
     agora,
   });
@@ -131,11 +132,26 @@ export async function executarConsultaDisponibilidadeAgenda(
       agora,
     });
 
+  if (
+    avancarParaProximoMesDisponivel &&
+    diasDisponiveis.length === 0 &&
+    proximoDiaDisponivelOpcional &&
+    !proximoDiaDisponivelOpcional.startsWith(`${anoMes}-`)
+  ) {
+    anoMesEfetivo = proximoDiaDisponivelOpcional.slice(0, 7);
+    diasDisponiveis = gerarDisponibilidadeMensal({
+      configuracao,
+      anoMes: anoMesEfetivo,
+      ocupacaoPorData,
+      agora,
+    });
+  }
+
   return {
     agendaAtiva: true,
     fusoHorario: configuracao.fusoHorario,
     duracaoSlotMinutos: configuracao.duracaoSlotMinutos,
-    anoMes,
+    anoMes: anoMesEfetivo,
     diasDisponiveis,
     ...(proximoDiaDisponivelOpcional ? { proximoDiaDisponivelOpcional } : {}),
   };

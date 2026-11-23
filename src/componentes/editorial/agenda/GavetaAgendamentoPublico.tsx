@@ -14,6 +14,7 @@ import {
 import {
   FUSO_HORARIO_PADRAO_AGENDA,
   type DisponibilidadeDiaPublico,
+  type RespostaDisponibilidadeAgendaPublica,
   type SlotHorarioDisponivel,
 } from "@/dominio/agenda/tiposAgenda";
 import {
@@ -45,6 +46,13 @@ export interface PropriedadesGavetaAgendamentoPublico {
 }
 
 type EtapaAgendamento = "selecao" | "dados" | "confirmacao";
+
+const TTL_CACHE_DISPONIBILIDADE_MS = 30_000;
+
+interface EntradaCacheDisponibilidade {
+  readonly resposta: RespostaDisponibilidadeAgendaPublica;
+  readonly expiraEmMs: number;
+}
 
 const FORMULARIO_INICIAL: DadosFormularioVisitanteAgenda = {
   nomeVisitante: "",
@@ -86,44 +94,116 @@ export function GavetaAgendamentoPublico({
     useState<ResultadoSubmissaoAgendamentoVisitante | null>(null);
 
   const jaAutoAvancouMesRef = useRef(false);
+  const cacheMesRef = useRef<Map<string, EntradaCacheDisponibilidade>>(new Map());
+  const promessasEmVooRef = useRef<Map<string, Promise<RespostaDisponibilidadeAgendaPublica>>>(
+    new Map(),
+  );
+
+  const possuiAcaoAgendaNaPagina = pagina.acoesPrincipais.some(
+    (acao) => acao.tipoDestino === "agenda" || acao.destino.startsWith("#agenda-"),
+  );
+
+  const buscarDisponibilidadeComCache = useCallback(
+    async (
+      mesAlvo: string,
+      avancarParaProximoMesDisponivel: boolean,
+      ignorarCache = false,
+    ): Promise<RespostaDisponibilidadeAgendaPublica> => {
+      const chaveCache = `${mesAlvo}:${avancarParaProximoMesDisponivel ? "auto" : "fixo"}`;
+      const agoraMs = Date.now();
+
+      if (!ignorarCache) {
+        const entrada = cacheMesRef.current.get(chaveCache);
+        if (entrada && entrada.expiraEmMs > agoraMs) {
+          return entrada.resposta;
+        }
+        const emVoo = promessasEmVooRef.current.get(chaveCache);
+        if (emVoo) {
+          return emVoo;
+        }
+      }
+
+      const promessa = adaptador
+        .consultarDisponibilidade({
+          organizacaoId: pagina.organizacaoId,
+          anoMes: mesAlvo,
+          ...(avancarParaProximoMesDisponivel ? { avancarParaProximoMesDisponivel: true } : {}),
+        })
+        .then((resposta) => {
+          const expiraEmMs = Date.now() + TTL_CACHE_DISPONIBILIDADE_MS;
+          cacheMesRef.current.set(chaveCache, { resposta, expiraEmMs });
+          cacheMesRef.current.set(`${resposta.anoMes}:fixo`, { resposta, expiraEmMs });
+          return resposta;
+        })
+        .finally(() => {
+          promessasEmVooRef.current.delete(chaveCache);
+        });
+
+      promessasEmVooRef.current.set(chaveCache, promessa);
+      return promessa;
+    },
+    [adaptador, pagina.organizacaoId],
+  );
+
+  const aplicarRespostaDisponibilidade = useCallback(
+    (resposta: RespostaDisponibilidadeAgendaPublica, mesSolicitado: string) => {
+      setAgendaAtiva(resposta.agendaAtiva);
+      setFusoHorario(resposta.fusoHorario);
+      setDuracaoSlotMinutos(resposta.duracaoSlotMinutos);
+      setDiasDisponiveis(resposta.diasDisponiveis);
+      setProximoDiaDisponivel(resposta.proximoDiaDisponivelOpcional);
+
+      if (resposta.anoMes !== mesSolicitado) {
+        jaAutoAvancouMesRef.current = true;
+        setAnoMes(resposta.anoMes);
+      }
+
+      if (resposta.diasDisponiveis.length > 0) {
+        setDataSelecionada((atual) => {
+          if (atual && resposta.diasDisponiveis.some((d) => d.dataIso === atual)) {
+            return atual;
+          }
+          return resposta.diasDisponiveis[0]?.dataIso ?? null;
+        });
+        setHorarioSelecionado(null);
+      } else if (
+        !jaAutoAvancouMesRef.current &&
+        resposta.proximoDiaDisponivelOpcional &&
+        !resposta.proximoDiaDisponivelOpcional.startsWith(`${resposta.anoMes}-`)
+      ) {
+        jaAutoAvancouMesRef.current = true;
+        const mesDestino = resposta.proximoDiaDisponivelOpcional.slice(0, 7);
+        setAnoMes(mesDestino);
+      } else {
+        setDataSelecionada(null);
+        setHorarioSelecionado(null);
+      }
+    },
+    [],
+  );
 
   const carregarMes = useCallback(
-    async (mesAlvo: string) => {
+    async (mesAlvo: string, ignorarCache = false) => {
+      const deveAutoAvancar = !jaAutoAvancouMesRef.current && mesAlvo === anoMesAtualMinimo;
+      const chaveCache = `${mesAlvo}:${deveAutoAvancar ? "auto" : "fixo"}`;
+      const entradaCache = !ignorarCache ? cacheMesRef.current.get(chaveCache) : undefined;
+
+      if (entradaCache && entradaCache.expiraEmMs > Date.now()) {
+        setErroCarregamento(null);
+        setCarregando(false);
+        aplicarRespostaDisponibilidade(entradaCache.resposta, mesAlvo);
+        return;
+      }
+
       setCarregando(true);
       setErroCarregamento(null);
       try {
-        const resposta = await adaptador.consultarDisponibilidade({
-          organizacaoId: pagina.organizacaoId,
-          anoMes: mesAlvo,
-        });
-
-        setAgendaAtiva(resposta.agendaAtiva);
-        setFusoHorario(resposta.fusoHorario);
-        setDuracaoSlotMinutos(resposta.duracaoSlotMinutos);
-        setDiasDisponiveis(resposta.diasDisponiveis);
-        setProximoDiaDisponivel(resposta.proximoDiaDisponivelOpcional);
-
-        if (resposta.diasDisponiveis.length > 0) {
-          setDataSelecionada((atual) => {
-            if (atual && resposta.diasDisponiveis.some((d) => d.dataIso === atual)) {
-              return atual;
-            }
-            return resposta.diasDisponiveis[0]?.dataIso ?? null;
-          });
-          setHorarioSelecionado(null);
-        } else if (
-          !jaAutoAvancouMesRef.current &&
-          resposta.proximoDiaDisponivelOpcional &&
-          !resposta.proximoDiaDisponivelOpcional.startsWith(`${mesAlvo}-`)
-        ) {
-          jaAutoAvancouMesRef.current = true;
-          const mesDestino = resposta.proximoDiaDisponivelOpcional.slice(0, 7);
-          setAnoMes(mesDestino);
-          return;
-        } else {
-          setDataSelecionada(null);
-          setHorarioSelecionado(null);
-        }
+        const resposta = await buscarDisponibilidadeComCache(
+          mesAlvo,
+          deveAutoAvancar,
+          ignorarCache,
+        );
+        aplicarRespostaDisponibilidade(resposta, mesAlvo);
       } catch (erro) {
         setErroCarregamento(
           erro instanceof Error
@@ -134,8 +214,16 @@ export function GavetaAgendamentoPublico({
         setCarregando(false);
       }
     },
-    [adaptador, pagina.organizacaoId],
+    [anoMesAtualMinimo, aplicarRespostaDisponibilidade, buscarDisponibilidadeComCache],
   );
+
+  // Prefetch silencioso assim que uma vitrine com agenda é carregada, evitando espera na 1ª abertura
+  useEffect(() => {
+    if (!possuiAcaoAgendaNaPagina) return;
+    void buscarDisponibilidadeComCache(anoMesAtualMinimo, true).catch(() => {
+      // Falha silenciosa: ao abrir a gaveta o usuário verá o tratamento de erro normal se persistir
+    });
+  }, [anoMesAtualMinimo, buscarDisponibilidadeComCache, possuiAcaoAgendaNaPagina]);
 
   useEffect(() => {
     if (!aberto) return;
@@ -212,6 +300,7 @@ export function GavetaAgendamentoPublico({
         ...(dadosForm.campoArmadilhaBot ? { campoArmadilhaBot: dadosForm.campoArmadilhaBot } : {}),
       });
 
+      cacheMesRef.current.clear();
       setResultadoConfirmacao(resultado);
       setEtapa("confirmacao");
 
@@ -235,10 +324,11 @@ export function GavetaAgendamentoPublico({
 
       // Se houve conflito de último segundo, volta à escolha de horário preservando os dados digitados
       if (/reservado|indisponível|disponível/i.test(mensagem)) {
+        cacheMesRef.current.clear();
         setErroEnvio(null);
         setHorarioSelecionado(null);
         setEtapa("selecao");
-        void carregarMes(anoMes);
+        void carregarMes(anoMes, true);
         setErroCarregamento(mensagem);
         return;
       }
@@ -321,25 +411,36 @@ export function GavetaAgendamentoPublico({
       pagina={pagina}
       rotuloBotaoFechar="Fechar agenda"
       cabecalhoFixo={
-        <div className="border-b border-current/12 pr-10 pb-3.5">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--editorial-texto-secundario)]">
-            {pagina.identidade.nomeExibicao}
-          </p>
-          <DialogoPrimitivo.Title
-            className={combinarClasses("mt-1 text-2xl sm:text-xl", tipografia.classeTitulo)}
-          >
-            {tituloExibicao}
-          </DialogoPrimitivo.Title>
-          {descricaoExibicao && etapa !== "confirmacao" ? (
-            <DialogoPrimitivo.Description className="mt-1 text-xs leading-relaxed text-[var(--editorial-texto-secundario)]">
-              {descricaoExibicao}
-            </DialogoPrimitivo.Description>
-          ) : (
+        etapa === "confirmacao" ? (
+          <>
+            <DialogoPrimitivo.Title className="sr-only">
+              {config?.mensagemConfirmacaoTitulo?.trim() || "Agendamento confirmado!"}
+            </DialogoPrimitivo.Title>
             <DialogoPrimitivo.Description className="sr-only">
-              Reserve um horário disponível na agenda de {pagina.identidade.nomeExibicao}.
+              {config?.mensagemConfirmacaoCorpo?.trim() || "Seu horário foi reservado com sucesso."}
             </DialogoPrimitivo.Description>
-          )}
-        </div>
+          </>
+        ) : (
+          <div className="border-b border-current/12 pr-10 pb-3.5">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--editorial-texto-secundario)]">
+              {pagina.identidade.nomeExibicao}
+            </p>
+            <DialogoPrimitivo.Title
+              className={combinarClasses("mt-1 text-2xl sm:text-xl", tipografia.classeTitulo)}
+            >
+              {tituloExibicao}
+            </DialogoPrimitivo.Title>
+            {descricaoExibicao ? (
+              <DialogoPrimitivo.Description className="mt-1 text-xs leading-relaxed text-[var(--editorial-texto-secundario)]">
+                {descricaoExibicao}
+              </DialogoPrimitivo.Description>
+            ) : (
+              <DialogoPrimitivo.Description className="sr-only">
+                Reserve um horário disponível na agenda de {pagina.identidade.nomeExibicao}.
+              </DialogoPrimitivo.Description>
+            )}
+          </div>
+        )
       }
       rodapeFixo={rodapeFixo}
       classNameConteudoInterno="pt-4 pb-2"
@@ -366,7 +467,7 @@ export function GavetaAgendamentoPublico({
               setHorarioSelecionado(null);
             }}
             aoSelecionarHorario={setHorarioSelecionado}
-            aoTentarNovamente={() => void carregarMes(anoMes)}
+            aoTentarNovamente={() => void carregarMes(anoMes, true)}
           />
         ) : etapa === "dados" && dataSelecionada && horarioSelecionado ? (
           <PassoDadosVisitanteAgenda

@@ -4,6 +4,7 @@ import Imagem from "next/image";
 
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 
+import { LIMITE_CARACTERES_RESUMO_CATALOGO } from "@/validacoes/esquemasCatalogoConteudo";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 
 import { useRef, useState, type FormEvent } from "react";
@@ -284,13 +285,19 @@ export function GerenciadorCatalogoPainel({
             />
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="resumo-produto" className="text-sm font-medium text-mineral-900">
-                Descrição editorial *
-              </label>
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor="resumo-produto" className="text-sm font-medium text-mineral-900">
+                  Descrição editorial *
+                </label>
+                <span className="text-[11px] tabular-nums text-mineral-500">
+                  {resumoProduto.length} / {LIMITE_CARACTERES_RESUMO_CATALOGO}
+                </span>
+              </div>
               <textarea
                 id="resumo-produto"
-                rows={3}
+                rows={4}
                 required
+                maxLength={LIMITE_CARACTERES_RESUMO_CATALOGO}
                 disabled={!podeEditarConteudo || publicacao.publicando || salvando}
                 value={resumoProduto}
                 onChange={(e) => setResumoProduto(e.target.value)}

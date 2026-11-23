@@ -39,6 +39,7 @@ export interface PropriedadesEstruturaNavegacaoPainel {
   readonly nomeOrganizacaoAtiva?: string;
   readonly emailUsuario?: string | null;
   readonly totalSolicitacoesNovas?: number;
+  readonly totalAgendamentosConfirmados?: number;
   readonly ehFundador?: boolean;
 }
 
@@ -113,9 +114,11 @@ const ITENS_MENU_PAINEL: readonly ItemNavegacaoPainel[] = [
 function ListaLinksNavegacao({
   aoSelecionar,
   totalSolicitacoesNovas = 0,
+  totalAgendamentosConfirmados = 0,
 }: {
   readonly aoSelecionar?: () => void;
   readonly totalSolicitacoesNovas?: number;
+  readonly totalAgendamentosConfirmados?: number;
 }) {
   const caminhoAtual = usePathname();
 
@@ -127,6 +130,7 @@ function ListaLinksNavegacao({
             ? caminhoAtual === "/painel"
             : item.caminho !== "/painel" && caminhoAtual.startsWith(item.caminho);
         const ehItemSolicitacoes = item.caminho === "/painel/solicitacoes";
+        const ehItemAgenda = item.caminho === "/painel/agenda";
 
         return (
           <Link
@@ -152,6 +156,14 @@ function ListaLinksNavegacao({
               >
                 {totalSolicitacoesNovas > 99 ? "99+" : totalSolicitacoesNovas}
               </span>
+            ) : ehItemAgenda && totalAgendamentosConfirmados > 0 ? (
+              <span
+                data-testid="badge-agenda-reservas"
+                aria-label={`${totalAgendamentosConfirmados} reservas confirmadas`}
+                className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[11px] font-semibold text-white shadow-xs"
+              >
+                {totalAgendamentosConfirmados > 99 ? "99+" : totalAgendamentosConfirmados}
+              </span>
             ) : null}
           </Link>
         );
@@ -165,11 +177,13 @@ export function EstruturaNavegacaoPainel({
   nomeOrganizacaoAtiva,
   emailUsuario,
   totalSolicitacoesNovas = 0,
+  totalAgendamentosConfirmados = 0,
   ehFundador = false,
 }: PropriedadesEstruturaNavegacaoPainel) {
   const menuAberto = useEstadoInterfacePainel((estado) => estado.menuLateralAbertoMobile);
   const alternarMenu = useEstadoInterfacePainel((estado) => estado.alternarMenuLateralMobile);
   const fecharMenu = useEstadoInterfacePainel((estado) => estado.fecharMenuLateralMobile);
+  const totalPendenciasMenu = totalSolicitacoesNovas + totalAgendamentosConfirmados;
 
   return (
     <div className="fundo-painel flex min-h-dvh flex-col lg:flex-row">
@@ -192,9 +206,9 @@ export function EstruturaNavegacaoPainel({
               className="relative"
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
-              {totalSolicitacoesNovas > 0 ? (
-                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white">
-                  {totalSolicitacoesNovas > 99 ? "99+" : totalSolicitacoesNovas}
+              {totalPendenciasMenu > 0 ? (
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white">
+                  {totalPendenciasMenu > 99 ? "99+" : totalPendenciasMenu}
                 </span>
               ) : null}
             </Botao>
@@ -222,6 +236,7 @@ export function EstruturaNavegacaoPainel({
                 <ListaLinksNavegacao
                   aoSelecionar={fecharMenu}
                   totalSolicitacoesNovas={totalSolicitacoesNovas}
+                  totalAgendamentosConfirmados={totalAgendamentosConfirmados}
                 />
               </div>
 
@@ -256,7 +271,10 @@ export function EstruturaNavegacaoPainel({
             ) : null}
           </div>
 
-          <ListaLinksNavegacao totalSolicitacoesNovas={totalSolicitacoesNovas} />
+          <ListaLinksNavegacao
+            totalSolicitacoesNovas={totalSolicitacoesNovas}
+            totalAgendamentosConfirmados={totalAgendamentosConfirmados}
+          />
         </div>
 
         <div className="border-t border-slate-200/60 pt-4">

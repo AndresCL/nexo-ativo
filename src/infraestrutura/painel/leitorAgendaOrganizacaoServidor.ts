@@ -1,5 +1,7 @@
+import { obterDataHoraAtualNoFuso } from "@/dominio/agenda/calendarioDatas";
 import {
   criarConfiguracaoAgendaPadrao,
+  FUSO_HORARIO_PADRAO_AGENDA,
   type AgendamentoAgenda,
   type ConfiguracaoAgendaOrganizacao,
 } from "@/dominio/agenda/tiposAgenda";
@@ -109,5 +111,36 @@ export async function carregarContextoAgendaOrganizacaoServidor(
     podeGerenciarAgenda,
     podeEditarDisponibilidade,
   };
+}
+
+/**
+ * Conta o número de reservas confirmadas futuras (de hoje em diante) para exibição
+ * do indicador visual (badge) no menu principal do painel.
+ */
+export async function contarAgendamentosConfirmadosOrganizacaoServidor(
+  organizacaoId: string,
+): Promise<number> {
+  try {
+    const { bancoDadosAdmin } = obterServicosAdminFirebase();
+    const hojeIso = obterDataHoraAtualNoFuso(new Date(), FUSO_HORARIO_PADRAO_AGENDA).dataIso;
+    const snap = await bancoDadosAdmin
+      .collection("organizacoes")
+      .doc(organizacaoId)
+      .collection("agendamentos")
+      .where("situacao", "==", "confirmado")
+      .select("dataIso")
+      .get();
+
+    let total = 0;
+    for (const doc of snap.docs) {
+      const dataIso = doc.data().dataIso;
+      if (typeof dataIso === "string" && dataIso >= hojeIso) {
+        total += 1;
+      }
+    }
+    return total;
+  } catch {
+    return 0;
+  }
 }
 

@@ -79,8 +79,9 @@ export function PassoSelecaoDataHorario({
     <div className="space-y-5">
       <div
         className={combinarClasses(
-          "rounded-2xl border p-3.5 sm:p-4",
+          "rounded-2xl border p-3.5 transition-opacity duration-200 sm:p-4",
           temaEscuro ? "border-white/12 bg-white/[0.04]" : "border-black/10 bg-black/[0.02]",
+          carregando && diasDisponiveis.length === 0 && "pointer-events-none opacity-60 animate-pulse",
         )}
       >
         <GradeCalendarioMensal

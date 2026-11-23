@@ -1,4 +1,4 @@
-export const FAIXAS_INICIO_EXPERIENCIAS = ["alto", "centro", "baixo"] as const;
+export const FAIXAS_INICIO_EXPERIENCIAS = ["alto", "centro", "baixo", "extra_baixo"] as const;
 
 export type FaixaInicioExperiencias = (typeof FAIXAS_INICIO_EXPERIENCIAS)[number];
 
@@ -80,7 +80,18 @@ export const CATALOGO_FAIXAS_INICIO_EXPERIENCIAS: Readonly<
     classeRespiroSemMarcaTopoViewport: "pt-[clamp(11rem,42svh,24rem)] @5xl:pt-0",
     classeRespiroSemMarcaTopoPrevia: "pt-72 @5xl:pt-0",
     classeAlinhamentoDesktop: "@5xl:content-end",
-    classePreviaAlinhamento: "justify-end",
+    classePreviaAlinhamento: "justify-end pb-1.5",
+  },
+  extra_baixo: {
+    codigo: "extra_baixo",
+    nome: "Extra baixo",
+    resumo: "Destaca ao máximo a foto ou vídeo na abertura e posiciona os blocos no rodapé da tela.",
+    classeRespiroViewport: "pt-[clamp(14rem,52svh,30rem)] @5xl:pt-0",
+    classeRespiroPrevia: "pt-80 @5xl:pt-0",
+    classeRespiroSemMarcaTopoViewport: "pt-[clamp(17rem,62svh,36rem)] @5xl:pt-0",
+    classeRespiroSemMarcaTopoPrevia: "pt-96 @5xl:pt-0",
+    classeAlinhamentoDesktop: "@5xl:content-end",
+    classePreviaAlinhamento: "justify-end pb-0",
   },
 };
 

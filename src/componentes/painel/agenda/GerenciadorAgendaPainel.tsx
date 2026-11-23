@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CalendarDays, Compass, SlidersHorizontal } from "lucide-react";
 import type { PortaAgendaPainel } from "@/aplicacao/portas/portasAgenda";
-import {
-  adicionarDiasDataIso,
-  obterDataHoraAtualNoFuso,
-} from "@/dominio/agenda/calendarioDatas";
+import { obterDataHoraAtualNoFuso } from "@/dominio/agenda/calendarioDatas";
 import type {
   AgendamentoAgenda,
   ConfiguracaoAgendaOrganizacao,
@@ -50,27 +47,24 @@ export function GerenciadorAgendaPainel({
   const [ocupandoId, setOcupandoId] = useState<string | null>(null);
 
   const hojeIso = obterDataHoraAtualNoFuso(new Date(), configuracao.fusoHorario).dataIso;
-  const daqui7DiasIso = adicionarDiasDataIso(hojeIso, 7);
-  const mesAtualPrefixo = `${hojeIso.slice(0, 7)}-`;
 
   const haAlteracoesPendentes =
     JSON.stringify(configuracao) !== JSON.stringify(configuracaoSalva);
 
   const metricas = useMemo(() => {
     let hoje = 0;
-    let proximos7Dias = 0;
+    let proximasConfirmadas = 0;
     for (const a of agendamentos) {
       if (a.situacao !== "confirmado") continue;
       if (a.dataIso === hojeIso) hoje += 1;
-      if (a.dataIso >= hojeIso && a.dataIso <= daqui7DiasIso) proximos7Dias += 1;
+      if (a.dataIso >= hojeIso) proximasConfirmadas += 1;
     }
-    const diasAbertosMes = Object.entries(configuracao.datasAbertas).filter(
-      ([dataIso, faixas]) =>
-        dataIso.startsWith(mesAtualPrefixo) && dataIso >= hojeIso && faixas.length > 0,
+    const diasAbertosFuturos = Object.entries(configuracao.datasAbertas).filter(
+      ([dataIso, faixas]) => dataIso >= hojeIso && faixas.length > 0,
     ).length;
 
-    return { hoje, proximos7Dias, diasAbertosMes };
-  }, [agendamentos, configuracao.datasAbertas, daqui7DiasIso, hojeIso, mesAtualPrefixo]);
+    return { hoje, proximasConfirmadas, diasAbertosFuturos };
+  }, [agendamentos, configuracao.datasAbertas, hojeIso]);
 
   async function salvarDisponibilidade() {
     setSalvandoConfig(true);
@@ -203,15 +197,15 @@ export function GerenciadorAgendaPainel({
           <p className="mt-1 text-2xl font-bold tracking-tight text-mineral-950">{metricas.hoje}</p>
         </CartaoSuperficie>
         <CartaoSuperficie className="p-4">
-          <p className="text-[11px] font-medium text-mineral-500">Próximos 7 dias</p>
+          <p className="text-[11px] font-medium text-mineral-500">Próximas reservas</p>
           <p className="mt-1 text-2xl font-bold tracking-tight text-mineral-950">
-            {metricas.proximos7Dias}
+            {metricas.proximasConfirmadas}
           </p>
         </CartaoSuperficie>
         <CartaoSuperficie className="p-4">
-          <p className="text-[11px] font-medium text-mineral-500">Dias abertos no mês</p>
+          <p className="text-[11px] font-medium text-mineral-500">Dias abertos</p>
           <p className="mt-1 text-2xl font-bold tracking-tight text-mineral-950">
-            {metricas.diasAbertosMes}
+            {metricas.diasAbertosFuturos}
           </p>
         </CartaoSuperficie>
       </div>
