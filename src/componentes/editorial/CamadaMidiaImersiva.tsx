@@ -27,21 +27,21 @@ export interface PropriedadesCamadaMidiaImersiva {
 const GRADIENTES_TEMA_ESCURO: Readonly<Record<IntensidadeVeloEscuro, string>> = {
   nenhum: "bg-transparent",
   suave:
-    "bg-gradient-to-t from-black/88 via-black/48 to-black/42 @5xl:bg-[linear-gradient(105deg,rgba(10,12,11,0.85)_0%,rgba(10,12,11,0.48)_48%,rgba(10,12,11,0.78)_100%)]",
+    "bg-gradient-to-t from-black/52 via-black/28 to-black/25 @5xl:bg-[linear-gradient(105deg,rgba(10,12,11,0.51)_0%,rgba(10,12,11,0.29)_48%,rgba(10,12,11,0.47)_100%)]",
   equilibrado:
-    "bg-gradient-to-t from-black/95 via-black/60 to-black/52 @5xl:bg-[linear-gradient(105deg,rgba(10,12,11,0.92)_0%,rgba(10,12,11,0.55)_46%,rgba(10,12,11,0.88)_100%)]",
+    "bg-gradient-to-t from-black/72 via-black/42 to-black/38 @5xl:bg-[linear-gradient(105deg,rgba(10,12,11,0.70)_0%,rgba(10,12,11,0.40)_46%,rgba(10,12,11,0.66)_100%)]",
   intenso:
-    "bg-gradient-to-t from-black/98 via-black/72 to-black/65 @5xl:bg-[linear-gradient(105deg,rgba(10,12,11,0.96)_0%,rgba(10,12,11,0.68)_50%,rgba(10,12,11,0.94)_100%)]",
+    "bg-gradient-to-t from-black/88 via-black/58 to-black/52 @5xl:bg-[linear-gradient(105deg,rgba(10,12,11,0.86)_0%,rgba(10,12,11,0.56)_50%,rgba(10,12,11,0.82)_100%)]",
 };
 
 const GRADIENTES_TEMA_CLARO: Readonly<Record<IntensidadeVeloEscuro, string>> = {
   nenhum: "bg-transparent",
   suave:
-    "bg-gradient-to-t from-[#f7f4ee]/88 via-[#f7f4ee]/35 to-[#f7f4ee]/20 @5xl:bg-[linear-gradient(105deg,rgba(247,244,238,0.86)_0%,rgba(247,244,238,0.28)_50%,rgba(247,244,238,0.82)_100%)]",
+    "bg-gradient-to-t from-[#f7f4ee]/52 via-[#f7f4ee]/20 to-[#f7f4ee]/12 @5xl:bg-[linear-gradient(105deg,rgba(247,244,238,0.52)_0%,rgba(247,244,238,0.17)_50%,rgba(247,244,238,0.49)_100%)]",
   equilibrado:
-    "bg-gradient-to-t from-[#f7f4ee]/94 via-[#f7f4ee]/50 to-[#f7f4ee]/28 @5xl:bg-[linear-gradient(105deg,rgba(247,244,238,0.92)_0%,rgba(247,244,238,0.42)_50%,rgba(247,244,238,0.88)_100%)]",
+    "bg-gradient-to-t from-[#f7f4ee]/72 via-[#f7f4ee]/34 to-[#f7f4ee]/20 @5xl:bg-[linear-gradient(105deg,rgba(247,244,238,0.70)_0%,rgba(247,244,238,0.28)_50%,rgba(247,244,238,0.66)_100%)]",
   intenso:
-    "bg-gradient-to-t from-[#f7f4ee]/97 via-[#f7f4ee]/66 to-[#f7f4ee]/40 @5xl:bg-[linear-gradient(105deg,rgba(247,244,238,0.96)_0%,rgba(247,244,238,0.58)_50%,rgba(247,244,238,0.94)_100%)]",
+    "bg-gradient-to-t from-[#f7f4ee]/88 via-[#f7f4ee]/50 to-[#f7f4ee]/32 @5xl:bg-[linear-gradient(105deg,rgba(247,244,238,0.86)_0%,rgba(247,244,238,0.44)_50%,rgba(247,244,238,0.82)_100%)]",
 };
 
 export function CamadaMidiaImersiva({
