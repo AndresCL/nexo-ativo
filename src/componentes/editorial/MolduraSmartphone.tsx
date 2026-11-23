@@ -23,7 +23,7 @@ export function MolduraSmartphone({
   return (
     <div
       className={combinarClasses(
-        "flex min-w-0 justify-center bg-white sm:bg-white sm:p-4",
+        "flex min-w-0 justify-center bg-mineral-950 sm:bg-white sm:p-4",
         classNameFundo,
       )}
     >

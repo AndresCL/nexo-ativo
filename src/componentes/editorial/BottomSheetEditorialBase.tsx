@@ -85,9 +85,13 @@ export function BottomSheetEditorialBase({
   }
 
   function iniciarArrastePeloTopo(evento: ReactPointerEvent<HTMLElement>) {
-    // Não inicia arraste se o clique foi em um botão, link ou input
+    // Não inicia arraste se o clique/toque foi em controles interativos ou áreas de swipe horizontal (ex.: galeria de fotos)
     const alvo = evento.target as HTMLElement | null;
-    if (alvo?.closest("button, a, input, textarea, select, [role='button']")) {
+    if (
+      alvo?.closest(
+        "button, a, input, textarea, select, [role='button'], [data-gesto-horizontal='true']",
+      )
+    ) {
       return;
     }
     dragControls.start(evento);

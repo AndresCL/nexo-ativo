@@ -8,6 +8,9 @@ export default function criarConfiguracaoNext(fase: string): NextConfig {
     distDir: emServidorDesenvolvimento ? ".next-dev" : ".next",
     reactStrictMode: true,
     poweredByHeader: false,
+    // Garante que <title> e tags og:* / twitter:* sejam sempre renderizados no <head>
+    // inicial (sem streaming para o <body>), essencial para crawlers como WhatsApp/Meta.
+    htmlLimitedBots: /.*/,
     images: {
       formats: ["image/avif", "image/webp"],
       remotePatterns: [

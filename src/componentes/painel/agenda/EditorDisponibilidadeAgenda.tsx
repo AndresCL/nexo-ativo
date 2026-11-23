@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import { AlertTriangle, CalendarCheck2, Info, Save, Sparkles, Trash2 } from "lucide-react";
 import {
+  adicionarDiasDataIso,
+  diferencaDiasEntreDatasIso,
+  formatarDataCurtaPtBr,
   formatarDataExtensoPtBr,
   listarDatasDoMes,
   obterDiaSemanaDataIso,
@@ -55,6 +58,24 @@ export function EditorDisponibilidadeAgenda({
   const faixasDiaSelecionado = configuracao.datasAbertas[dataSelecionada];
   const diaSelecionadoAberto = Boolean(faixasDiaSelecionado && faixasDiaSelecionado.length > 0);
   const reservasConfirmadasNoDia = contagemConfirmadosPorData.get(dataSelecionada) ?? 0;
+
+  const dataLimiteJanela = adicionarDiasDataIso(hojeIso, configuracao.janelaMaximaDias);
+  const diasAbertosForaDaJanela = useMemo(
+    () =>
+      Object.entries(configuracao.datasAbertas)
+        .filter(([dataIso, faixas]) => faixas.length > 0 && dataIso > dataLimiteJanela)
+        .map(([dataIso]) => dataIso)
+        .sort(),
+    [configuracao.datasAbertas, dataLimiteJanela],
+  );
+  const ultimaDataAbertaForaDaJanela = diasAbertosForaDaJanela[diasAbertosForaDaJanela.length - 1];
+  const diasNecessariosParaCobrir = ultimaDataAbertaForaDaJanela
+    ? diferencaDiasEntreDatasIso(hojeIso, ultimaDataAbertaForaDaJanela)
+    : 0;
+  const janelaSugerida = ([15, 30, 60, 90] as const).find(
+    (opcao) => opcao >= diasNecessariosParaCobrir,
+  ) ?? 90;
+  const diaSelecionadoForaDaJanela = diaSelecionadoAberto && dataSelecionada > dataLimiteJanela;
 
   function alternarAberturaDia(dataIso: string, abrir: boolean) {
     if (!podeEditar) return;
@@ -266,6 +287,47 @@ export function EditorDisponibilidadeAgenda({
         </div>
       </CartaoSuperficie>
 
+      {diasAbertosForaDaJanela.length > 0 ? (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-xs text-amber-950"
+        >
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
+            <p className="leading-relaxed">
+              Você tem{" "}
+              <strong>
+                {diasAbertosForaDaJanela.length}{" "}
+                {diasAbertosForaDaJanela.length === 1 ? "dia aberto" : "dias abertos"}
+              </strong>{" "}
+              após <strong>{formatarDataCurtaPtBr(dataLimiteJanela)}</strong>
+              {ultimaDataAbertaForaDaJanela
+                ? ` (até ${formatarDataCurtaPtBr(ultimaDataAbertaForaDaJanela)})`
+                : ""}
+              , mas eles estão ocultos na vitrine porque a <strong>Janela futura</strong> está em{" "}
+              <strong>Próximos {configuracao.janelaMaximaDias} dias</strong>.
+            </p>
+          </div>
+          {podeEditar && janelaSugerida > configuracao.janelaMaximaDias ? (
+            <Botao
+              type="button"
+              variante="operacional_secundario"
+              tamanho="compacto"
+              disabled={salvando}
+              onClick={() =>
+                aoAlterarConfiguracao({
+                  ...configuracao,
+                  janelaMaximaDias: janelaSugerida,
+                })
+              }
+              className="shrink-0 border-amber-300 bg-white text-amber-950 hover:bg-amber-100"
+            >
+              Ampliar para {janelaSugerida} dias
+            </Botao>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
         <CartaoSuperficie className="space-y-4 p-5">
           <div>
@@ -352,6 +414,17 @@ export function EditorDisponibilidadeAgenda({
                 {diaSelecionadoAberto ? "Aberto" : "Fechado"}
               </span>
             </div>
+
+            {diaSelecionadoForaDaJanela ? (
+              <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
+                <p>
+                  Este dia está aberto, mas <strong>ainda não aparece na vitrine</strong> porque
+                  ultrapassa a janela futura atual ({configuracao.janelaMaximaDias} dias, até{" "}
+                  {formatarDataCurtaPtBr(dataLimiteJanela)}).
+                </p>
+              </div>
+            ) : null}
 
             {reservasConfirmadasNoDia > 0 ? (
               <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950">

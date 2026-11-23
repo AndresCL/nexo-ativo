@@ -87,7 +87,7 @@ export function ComposicaoGaleriaEditorial({
         alturaContidaPrevia ? "min-h-[44rem]" : "min-h-dvh",
       )}
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-6 py-7 @3xl:px-10 @5xl:px-14 @5xl:py-10">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-between px-6 pt-7 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] @3xl:px-10 @5xl:px-14 @5xl:py-10">
         <TransicaoEditorial>
           <CabecalhoMarcaDiscreta
             identidade={pagina.identidade}

@@ -75,7 +75,7 @@ export function ComposicaoImersiva({
       style={variaveisPaleta}
       className={combinarClasses(
         "@container animacao-suave-entrada relative isolate flex w-full flex-col overflow-hidden bg-[var(--editorial-fundo)] text-[var(--editorial-texto)]",
-        alturaContidaPrevia ? "min-h-[44rem]" : "min-h-svh",
+        alturaContidaPrevia ? "min-h-[44rem]" : "min-h-dvh",
       )}
     >
       <CamadaMidiaImersiva
@@ -85,7 +85,7 @@ export function ComposicaoImersiva({
         estiloEnquadramento="tela_cheia"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 py-4 @3xl:px-10 @5xl:px-14 @5xl:py-6">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] @3xl:px-10 @5xl:px-14 @5xl:py-6">
         {marcaNoTopo ? (
           <TransicaoEditorial className="shrink-0">
             <CabecalhoMarcaDiscreta

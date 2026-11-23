@@ -56,20 +56,22 @@ export async function generateMetadata({ params }: PropriedadesPaginaVitrine): P
       siteName: pagina.identidade.nomeExibicao,
       title: seo.titulo,
       description: seo.descricao,
-      images: [
-        {
-          url: seo.urlImagemCompartilhamento,
-          width: 1200,
-          height: 630,
-          alt: pagina.identidade.nomeExibicao,
-        },
-      ],
+      ...(seo.urlImagemCompartilhamento
+        ? {
+            images: [
+              {
+                url: seo.urlImagemCompartilhamento,
+                alt: pagina.identidade.nomeExibicao,
+              },
+            ],
+          }
+        : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: seo.titulo,
       description: seo.descricao,
-      images: [seo.urlImagemCompartilhamento],
+      ...(seo.urlImagemCompartilhamento ? { images: [seo.urlImagemCompartilhamento] } : {}),
     },
   };
 }

@@ -93,11 +93,94 @@ export function GerenciadorServicosPainel({
   const [imagensServico, setImagensServico] = useState<readonly MidiaItemCatalogo[]>([]);
 
   const [salvando, setSalvando] = useState(false);
+
+  const servicoEmEdicao = idServicoEdicao
+    ? servicos.find((item) => item.id === idServicoEdicao) ?? null
+    : null;
+
+  const imagensIniciaisEdicao = servicoEmEdicao
+    ? obterListaImagensMidia(
+        servicoEmEdicao.urlImagemOpcional
+          ? {
+              url: servicoEmEdicao.urlImagemOpcional,
+              textoAlternativo: servicoEmEdicao.nome,
+              pontoFocal: servicoEmEdicao.pontoFocalImagem,
+            }
+          : null,
+        servicoEmEdicao.imagens,
+      )
+    : [];
+
+  const haAlteracoesNoFormulario = servicoEmEdicao
+    ? nomeServico.trim() !== servicoEmEdicao.nome.trim() ||
+      categoriaServico.trim() !== servicoEmEdicao.categoria.trim() ||
+      resumoServico.trim() !== servicoEmEdicao.resumo.trim() ||
+      precoServicoTexto.trim() !==
+        formatarCentavosParaCampoMoeda(servicoEmEdicao.precoBaseCentavos).trim() ||
+      rotuloPrecoServico.trim() !== (servicoEmEdicao.rotuloPrecoOpcional ?? "").trim() ||
+      prazoServico.trim() !== (servicoEmEdicao.prazoOuDuracao ?? "").trim() ||
+      JSON.stringify(imagensServico) !== JSON.stringify(imagensIniciaisEdicao)
+    : Boolean(
+        nomeServico.trim() ||
+          categoriaServico.trim() ||
+          resumoServico.trim() ||
+          precoServicoTexto.trim() ||
+          rotuloPrecoServico.trim() ||
+          prazoServico.trim() ||
+          imagensServico.length > 0,
+      );
+
+  async function persistirServicoAtual(): Promise<void> {
+    if (!nomeServico.trim() || !categoriaServico.trim() || !resumoServico.trim()) {
+      throw new Error(
+        "Preencha nome, categoria e resumo editorial do serviço antes de salvar o rascunho.",
+      );
+    }
+
+    const precoBaseCentavos = converterTextoMoedaParaCentavos(precoServicoTexto);
+    const existente = servicos.find((s) => s.id === idServicoEdicao);
+    const imagemPrincipal = imagensServico[0];
+    const novoOuAtualizado: ServicoOrganizacao = {
+      id: existente?.id ?? gerarIdServico(),
+      organizacaoId,
+      nome: nomeServico.trim(),
+      categoria: categoriaServico.trim(),
+      resumo: resumoServico.trim(),
+      ...(imagemPrincipal?.url ? { urlImagemOpcional: imagemPrincipal.url } : {}),
+      ...(imagemPrincipal?.pontoFocal
+        ? { pontoFocalImagem: imagemPrincipal.pontoFocal }
+        : existente?.pontoFocalImagem
+          ? { pontoFocalImagem: existente.pontoFocalImagem }
+          : {}),
+      ...(imagensServico.length > 0 ? { imagens: imagensServico } : {}),
+      ...(typeof precoBaseCentavos === "number" ? { precoBaseCentavos } : {}),
+      ...(rotuloPrecoServico.trim() ? { rotuloPrecoOpcional: rotuloPrecoServico.trim() } : {}),
+      ...(prazoServico.trim() ? { prazoOuDuracao: prazoServico.trim() } : {}),
+      ordemExibicao: existente?.ordemExibicao ?? servicos.length + 1,
+      ativo: existente?.ativo ?? true,
+      atualizadoEmIso: new Date().toISOString(),
+    };
+
+    await servicoCatalogo.salvarServico(novoOuAtualizado);
+
+    setServicos((atuais) => {
+      const existeNaLista = atuais.some((item) => item.id === novoOuAtualizado.id);
+      return existeNaLista
+        ? atuais.map((item) => (item.id === novoOuAtualizado.id ? novoOuAtualizado : item))
+        : [...atuais, novoOuAtualizado];
+    });
+
+    limparFormularioServico();
+  }
+
   const publicacao = usePublicacaoPagina({
     versaoPublicadaInicial,
+    podeSalvarRascunho: podeEditarConteudo,
     podePublicarPagina,
+    haAlteracoesNaoSalvas: haAlteracoesNoFormulario,
     bloqueado: salvando || alterandoVisibilidadeId !== null,
     revisaoConteudoSalvo: servicos,
+    salvarRascunho: persistirServicoAtual,
     publicarPagina: () => servicoCatalogo.publicarPagina(organizacaoId),
   });
 
@@ -145,42 +228,9 @@ export function GerenciadorServicosPainel({
     setSalvando(true);
 
     try {
-      const precoBaseCentavos = converterTextoMoedaParaCentavos(precoServicoTexto);
-      const existente = servicos.find((s) => s.id === idServicoEdicao);
-      const imagemPrincipal = imagensServico[0];
-      const novoOuAtualizado: ServicoOrganizacao = {
-        id: existente?.id ?? gerarIdServico(),
-        organizacaoId,
-        nome: nomeServico.trim(),
-        categoria: categoriaServico.trim(),
-        resumo: resumoServico.trim(),
-        ...(imagemPrincipal?.url ? { urlImagemOpcional: imagemPrincipal.url } : {}),
-        ...(imagemPrincipal?.pontoFocal
-          ? { pontoFocalImagem: imagemPrincipal.pontoFocal }
-          : existente?.pontoFocalImagem
-            ? { pontoFocalImagem: existente.pontoFocalImagem }
-            : {}),
-        ...(imagensServico.length > 0 ? { imagens: imagensServico } : {}),
-        ...(typeof precoBaseCentavos === "number" ? { precoBaseCentavos } : {}),
-        ...(rotuloPrecoServico.trim() ? { rotuloPrecoOpcional: rotuloPrecoServico.trim() } : {}),
-        ...(prazoServico.trim() ? { prazoOuDuracao: prazoServico.trim() } : {}),
-        ordemExibicao: existente?.ordemExibicao ?? servicos.length + 1,
-        ativo: existente?.ativo ?? true,
-        atualizadoEmIso: new Date().toISOString(),
-      };
-
-      await servicoCatalogo.salvarServico(novoOuAtualizado);
-
-      setServicos((atuais) => {
-        const existeNaLista = atuais.some((item) => item.id === novoOuAtualizado.id);
-        return existeNaLista
-          ? atuais.map((item) => (item.id === novoOuAtualizado.id ? novoOuAtualizado : item))
-          : [...atuais, novoOuAtualizado];
-      });
-
-      limparFormularioServico();
+      await persistirServicoAtual();
       notificar.sucesso(
-        "Serviço salvo com sucesso. Clique em 'Publicar página' para sincronizar com a vitrine e com os fluxos interativos.",
+        "Serviço salvo como rascunho. Clique em 'Publicar página' para sincronizar com a vitrine e com os fluxos interativos.",
       );
     } catch (erro) {
       notificar.erro(erro instanceof Error ? erro.message : "Não foi possível salvar o serviço.");
@@ -223,6 +273,7 @@ export function GerenciadorServicosPainel({
         subtitulo="Organize seus serviços, valores e prazos. Publique as atualizações para apresentar suas ofertas na vitrine."
         identificadorPublico={identificadorPublico}
         controle={publicacao}
+        exibirSalvarRascunho
       />
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">

@@ -11,6 +11,7 @@ export interface PropriedadesCabecalhoPublicacaoRapidaAcervo {
   readonly titulo: string;
   readonly subtitulo: string;
   readonly identificadorPublico: string;
+  readonly exibirSalvarRascunho?: boolean;
 }
 
 export function CabecalhoPublicacaoRapidaAcervo({
@@ -19,6 +20,7 @@ export function CabecalhoPublicacaoRapidaAcervo({
   titulo,
   subtitulo,
   identificadorPublico,
+  exibirSalvarRascunho = false,
 }: PropriedadesCabecalhoPublicacaoRapidaAcervo) {
   const versaoAtual = controle.versaoPublicada;
 
@@ -55,6 +57,7 @@ export function CabecalhoPublicacaoRapidaAcervo({
         <AcoesPublicacaoPagina
           controle={controle}
           identificadorPublico={identificadorPublico}
+          exibirSalvarRascunho={exibirSalvarRascunho}
         />
       </header>
     </div>

@@ -66,21 +66,80 @@ describe("Domínio da Página Publicada e SEO", () => {
     expect(visiveis[0]?.rotulo).toBe("Opção 1");
   });
 
-  it("deve construir metadados canônicos e escapar JSON-LD contra fechamento prematuro de script", () => {
+  it("deve construir metadados canônicos, priorizar imagem real do usuário e escapar JSON-LD", () => {
     const exemplarBase = CATALOGO_DEMONSTRACOES_EDITORIAIS["garage-88"]!;
-    const paginaComCaracterEspecial = {
+    const paginaComCapaUsuario = {
       ...exemplarBase,
       identidade: {
         ...exemplarBase.identidade,
         nomeExibicao: "Garage 88 </script><script>alert(1)</script>",
       },
+      midiaFundo: {
+        ...exemplarBase.midiaFundo,
+        tipo: "imagem" as const,
+        urlPrincipal: "https://firebasestorage.googleapis.com/v0/b/nexo/o/capa.jpg?alt=media",
+      },
+      seo: {
+        ...exemplarBase.seo,
+        urlImagemCompartilhamento: undefined,
+      },
     };
 
-    const seo = construirResumoMetadadosSeo(paginaComCaracterEspecial, "https://fluxo.com.br/");
-    expect(seo.urlCanonica).toBe("https://fluxo.com.br/garage-88");
-    expect(seo.urlImagemCompartilhamento).toBe("https://fluxo.com.br/garage-88/opengraph-image");
+    const seoComCapa = construirResumoMetadadosSeo(paginaComCapaUsuario, "https://fluxo.com.br/");
+    expect(seoComCapa.urlCanonica).toBe("https://fluxo.com.br/garage-88");
+    expect(seoComCapa.urlImagemCompartilhamento).toBe(
+      "https://firebasestorage.googleapis.com/v0/b/nexo/o/capa.jpg?alt=media",
+    );
 
-    const jsonLd = serializarJsonLdSeguro(paginaComCaracterEspecial, "https://fluxo.com.br");
+    const seoComImagemExplicita = construirResumoMetadadosSeo(
+      {
+        ...paginaComCapaUsuario,
+        seo: {
+          ...paginaComCapaUsuario.seo,
+          urlImagemCompartilhamento: "https://cdn.exemplo.com/og-custom.png",
+        },
+      },
+      "https://fluxo.com.br/",
+    );
+    expect(seoComImagemExplicita.urlImagemCompartilhamento).toBe(
+      "https://cdn.exemplo.com/og-custom.png",
+    );
+
+    const seoComDegradadoELogoRaster = construirResumoMetadadosSeo(
+      {
+        ...paginaComCapaUsuario,
+        midiaFundo: {
+          ...paginaComCapaUsuario.midiaFundo,
+          tipo: "degradado" as const,
+        },
+        identidade: {
+          ...paginaComCapaUsuario.identidade,
+          urlLogotipoOpcional: "/midias-demonstracao/logo-garage88.png",
+        },
+      },
+      "https://fluxo.com.br/",
+    );
+    expect(seoComDegradadoELogoRaster.urlImagemCompartilhamento).toBe(
+      "https://fluxo.com.br/midias-demonstracao/logo-garage88.png",
+    );
+
+    const seoSemImagemRaster = construirResumoMetadadosSeo(
+      {
+        ...paginaComCapaUsuario,
+        midiaFundo: {
+          ...paginaComCapaUsuario.midiaFundo,
+          tipo: "degradado" as const,
+        },
+        identidade: {
+          ...paginaComCapaUsuario.identidade,
+          urlLogotipoOpcional: "/midias-demonstracao/logo.svg",
+        },
+      },
+      "https://fluxo.com.br/",
+    );
+    expect(seoSemImagemRaster.urlImagemCompartilhamento).toBeUndefined();
+
+    const jsonLd = serializarJsonLdSeguro(paginaComCapaUsuario, "https://fluxo.com.br");
     expect(jsonLd).not.toContain("</script>");
     expect(jsonLd).toContain("\\u003c/script>");
   });
