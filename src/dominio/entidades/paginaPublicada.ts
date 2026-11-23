@@ -10,6 +10,8 @@ export type {
   FaixaInicioExperiencias,
   PosicaoCabecalhoMarca,
 } from "../editorial/faixaInicioExperiencias";
+import type { TamanhoCabecalhoMarca } from "../editorial/tamanhoCabecalhoMarca";
+export type { TamanhoCabecalhoMarca } from "../editorial/tamanhoCabecalhoMarca";
 import type { ConjuntoChamadasEditoriais } from "./chamadasEditoriais";
 export type { ChamadaPrincipalEditorial } from "./chamadasEditoriais";
 import {
@@ -108,6 +110,7 @@ export interface IdentidadeMarcaEditorial {
   readonly subtituloCurto?: string;
   readonly mostrarSubtituloCurto?: boolean;
   readonly alinhamentoCabecalho?: "esquerda" | "centro" | "direita";
+  readonly tamanhoCabecalho?: TamanhoCabecalhoMarca;
   readonly posicaoCabecalho?: PosicaoCabecalhoMarca;
   readonly urlLogotipoOpcional?: string;
   readonly formatoBordaLogotipo?: FormatoBordaLogotipo;

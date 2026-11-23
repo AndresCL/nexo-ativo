@@ -7,6 +7,7 @@ import {
   type IdentificadorTipografiaEditorial,
 } from "@/dominio/entidades/paginaPublicada";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
+import { obterEscalaVisualCabecalhoMarca } from "./escalaCabecalhoMarca";
 
 export interface PropriedadesCabecalhoMarcaDiscreta {
   readonly identidade: IdentidadeMarcaEditorial;
@@ -42,8 +43,10 @@ export function CabecalhoMarcaDiscreta({
   const exibirNome = (identidade.mostrarNomeExibicao ?? true) && Boolean(identidade.nomeExibicao);
   const exibirSubtitulo =
     (identidade.mostrarSubtituloCurto ?? true) && Boolean(identidade.subtituloCurto);
+  const exibirTexto = exibirNome || exibirSubtitulo;
   const alinhamento = identidade.alinhamentoCabecalho;
   const ehSlotExperiencias = varianteEspacamento === "slot_experiencias";
+  const escala = obterEscalaVisualCabecalhoMarca(identidade.tamanhoCabecalho);
 
   const classeAlinhamentoContainer =
     alinhamento === "centro"
@@ -55,12 +58,13 @@ export function CabecalhoMarcaDiscreta({
           : ehSlotExperiencias
             ? "w-full justify-center @5xl:justify-end"
             : alinharCentroNoMobile
-              ? "w-full justify-center @5xl:w-auto @5xl:justify-start @5xl:gap-3"
-              : "justify-start gap-3";
+              ? "w-full justify-center @5xl:w-auto @5xl:justify-start"
+              : "justify-start";
 
   return (
     <header
       data-variante-cabecalho={varianteEspacamento}
+      data-tamanho-cabecalho={escala.codigo}
       className={combinarClasses(
         ehSlotExperiencias
           ? "pt-1 pb-4 flex flex-col justify-center gap-1.5"
@@ -75,15 +79,26 @@ export function CabecalhoMarcaDiscreta({
         className,
       )}
     >
-      <div className={combinarClasses("flex items-center gap-3", classeAlinhamentoContainer)}>
+      <div
+        className={combinarClasses(
+          "flex max-w-full items-center",
+          escala.classeGapContainer,
+          classeAlinhamentoContainer,
+        )}
+      >
         {identidade.urlLogotipoOpcional ? (
           identidade.formatoBordaLogotipo === "circulo" ? (
-            <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full overflow-hidden shadow-sm">
+            <div
+              className={combinarClasses(
+                "relative shrink-0 overflow-hidden rounded-full shadow-sm",
+                escala.classeLogoCirculo,
+              )}
+            >
               <Image
                 src={identidade.urlLogotipoOpcional}
                 alt={`Marca de ${identidade.nomeExibicao}`}
                 fill
-                sizes="(max-width: 640px) 48px, 56px"
+                sizes={escala.sizesLogoCirculo}
                 unoptimized={deveIgnorarOtimizadorImagem(identidade.urlLogotipoOpcional)}
                 className="object-cover"
                 priority
@@ -99,29 +114,35 @@ export function CabecalhoMarcaDiscreta({
               <Image
                 src={identidade.urlLogotipoOpcional}
                 alt={`Marca de ${identidade.nomeExibicao}`}
-                width={255}
-                height={58}
+                width={escala.larguraImagemLivre}
+                height={escala.alturaImagemLivre}
                 unoptimized={deveIgnorarOtimizadorImagem(identidade.urlLogotipoOpcional)}
-                className="h-12 max-h-14 w-auto max-w-[140px] object-contain sm:h-12 sm:max-h-14 sm:max-w-[255px]"
+                className={
+                  exibirTexto ? escala.classeLogoLivreComTexto : escala.classeLogoLivreSemTexto
+                }
                 priority
               />
             </div>
           )
         ) : null}
 
-        {identidade.urlLogotipoOpcional && (exibirNome || exibirSubtitulo) ? (
+        {identidade.urlLogotipoOpcional && exibirTexto ? (
           <div
             aria-hidden="true"
-            className="h-6 w-px bg-[var(--editorial-logo-titulo)]/25 shrink-0 sm:h-7"
+            className={combinarClasses(
+              "w-px shrink-0 bg-[var(--editorial-logo-titulo)]/25",
+              escala.classeDivisor,
+            )}
           />
         ) : null}
 
-        {exibirNome || exibirSubtitulo ? (
-          <div className="flex flex-col justify-center text-left">
+        {exibirTexto ? (
+          <div className="flex min-w-0 flex-col justify-center text-left">
             {exibirNome ? (
               <p
                 className={combinarClasses(
-                  "text-base leading-tight font-medium text-[var(--editorial-logo-titulo)] sm:text-lg @5xl:text-xl",
+                  "leading-tight font-medium break-words text-[var(--editorial-logo-titulo)]",
+                  escala.classeTitulo,
                   tipografia.classeTitulo,
                 )}
               >
@@ -129,7 +150,12 @@ export function CabecalhoMarcaDiscreta({
               </p>
             ) : null}
             {exibirSubtitulo ? (
-              <p className="mt-0.5 text-[10px] font-medium tracking-[0.14em] text-[var(--editorial-logo-subtitulo)] uppercase sm:text-[11px]">
+              <p
+                className={combinarClasses(
+                  "mt-0.5 font-medium break-words tracking-[0.14em] text-[var(--editorial-logo-subtitulo)] uppercase",
+                  escala.classeSubtitulo,
+                )}
+              >
                 {identidade.subtituloCurto}
               </p>
             ) : null}

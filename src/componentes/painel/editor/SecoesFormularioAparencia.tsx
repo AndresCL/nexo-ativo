@@ -29,6 +29,7 @@ import {
 import { FormularioAvaliacoesGoogle } from "./FormularioAvaliacoesGoogle";
 import { SecaoEstiloECores } from "./secoes/SecaoEstiloECores";
 import { SeletorEtapasEditorAparencia } from "./secoes/SeletorEtapasEditorAparencia";
+import { SeletorTamanhoCabecalhoMarca } from "./secoes/SeletorTamanhoCabecalhoMarca";
 
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 
@@ -191,6 +192,14 @@ export function SecoesFormularioAparencia({
                       </div>
                     </div>
                   ) : null}
+
+                  <SeletorTamanhoCabecalhoMarca
+                    valorAtual={rascunho.identidade.tamanhoCabecalho}
+                    desabilitado={somenteLeitura}
+                    aoSelecionar={(tamanhoCabecalho) =>
+                      atualizarIdentidade({ tamanhoCabecalho })
+                    }
+                  />
 
                   <div className="space-y-1.5">
                     <label className="block text-xs font-medium text-mineral-800">

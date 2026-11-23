@@ -5,6 +5,7 @@ import {
   ehPosicaoCabecalhoMarcaValida,
   type FaixaInicioExperiencias,
 } from "../editorial/faixaInicioExperiencias";
+import { ehTamanhoCabecalhoMarcaValido } from "../editorial/tamanhoCabecalhoMarca";
 import {
   LIMITE_MAXIMO_CHAMADAS_EDITORIAIS,
   hidratarChamadasEditoriaisAdicionais,
@@ -244,6 +245,9 @@ export function hidratarRascunhoConfiguracaoPagina(
       identidadeBruta.alinhamentoCabecalho === "centro" ||
       identidadeBruta.alinhamentoCabecalho === "direita"
         ? { alinhamentoCabecalho: identidadeBruta.alinhamentoCabecalho }
+        : {}),
+      ...(ehTamanhoCabecalhoMarcaValido(identidadeBruta.tamanhoCabecalho)
+        ? { tamanhoCabecalho: identidadeBruta.tamanhoCabecalho }
         : {}),
       ...(ehPosicaoCabecalhoMarcaValida(identidadeBruta.posicaoCabecalho)
         ? { posicaoCabecalho: identidadeBruta.posicaoCabecalho }

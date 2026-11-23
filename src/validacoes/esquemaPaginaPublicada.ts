@@ -4,6 +4,7 @@ import {
   FAIXAS_INICIO_EXPERIENCIAS,
   POSICOES_CABECALHO_MARCA,
 } from "../dominio/editorial/faixaInicioExperiencias";
+import { TAMANHOS_CABECALHO_MARCA } from "../dominio/editorial/tamanhoCabecalhoMarca";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaConfiguracaoAgendaVitrine } from "./esquemasAgenda";
@@ -60,6 +61,7 @@ const esquemaIdentidadeMarcaEditorial = z.object({
   subtituloCurto: z.string().max(120).optional(),
   mostrarSubtituloCurto: z.boolean().optional(),
   alinhamentoCabecalho: z.enum(["esquerda", "centro", "direita"]).optional(),
+  tamanhoCabecalho: z.enum(TAMANHOS_CABECALHO_MARCA).optional(),
   posicaoCabecalho: z.enum(POSICOES_CABECALHO_MARCA).optional(),
   urlLogotipoOpcional: z.string().min(1).optional(),
   formatoBordaLogotipo: z.enum(["natural", "suave", "arredondado", "circulo"]).optional(),
