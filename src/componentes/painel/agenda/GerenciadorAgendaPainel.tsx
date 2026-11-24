@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CalendarDays, Compass, SlidersHorizontal } from "lucide-react";
 import type { PortaAgendaPainel } from "@/aplicacao/portas/portasAgenda";
+import type { PortaObservacaoDeltaColecao } from "@/aplicacao/portas/portasReatividade";
 import { obterDataHoraAtualNoFuso } from "@/dominio/agenda/calendarioDatas";
 import type {
   AgendamentoAgenda,
@@ -13,6 +14,9 @@ import type {
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { TransicaoAlternancia } from "@/componentes/interface/TransicaoAlternancia";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
+import { IndicadorTempoRealPainel } from "@/componentes/painel/IndicadorTempoRealPainel";
+import { useColecaoDeltaTempoReal } from "@/ganchos/useColecaoDeltaTempoReal";
+import { observadorAgendaPainelCliente } from "@/infraestrutura/painel/observadorAgendaPainelCliente";
 import { servicoAgendaPainelCliente } from "@/infraestrutura/painel/servicoAgendaPainelCliente";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { EditorDisponibilidadeAgenda } from "./EditorDisponibilidadeAgenda";
@@ -26,6 +30,16 @@ export interface PropriedadesGerenciadorAgendaPainel {
   readonly podeGerenciarAgenda: boolean;
   readonly podeEditarDisponibilidade: boolean;
   readonly servicoAgenda?: PortaAgendaPainel;
+  readonly observadorAgendamentos?: PortaObservacaoDeltaColecao<AgendamentoAgenda>;
+}
+
+function ordenarAgendamentosCronologicamente(
+  a: AgendamentoAgenda,
+  b: AgendamentoAgenda,
+): number {
+  const cmpData = a.dataIso.localeCompare(b.dataIso);
+  if (cmpData !== 0) return cmpData;
+  return a.horarioInicio.localeCompare(b.horarioInicio);
 }
 
 export function GerenciadorAgendaPainel({
@@ -36,13 +50,32 @@ export function GerenciadorAgendaPainel({
   podeGerenciarAgenda,
   podeEditarDisponibilidade,
   servicoAgenda = servicoAgendaPainelCliente,
+  observadorAgendamentos = observadorAgendaPainelCliente,
 }: PropriedadesGerenciadorAgendaPainel) {
   const [abaAtiva, setAbaAtiva] = useState<"reservas" | "disponibilidade">(
     Object.keys(configuracaoInicial.datasAbertas).length === 0 ? "disponibilidade" : "reservas",
   );
   const [configuracao, setConfiguracao] = useState(configuracaoInicial);
   const [configuracaoSalva, setConfiguracaoSalva] = useState(configuracaoInicial);
-  const [agendamentos, setAgendamentos] = useState(agendamentosIniciais);
+  const idEmEscritaLocalRef = useRef<string | null>(null);
+  const {
+    itens: agendamentos,
+    setItens: setAgendamentos,
+    estadoConexao,
+  } = useColecaoDeltaTempoReal({
+    organizacaoId,
+    itensIniciais: agendamentosIniciais,
+    observador: observadorAgendamentos,
+    ordenar: ordenarAgendamentosCronologicamente,
+    idEmEscritaLocalRef,
+    aoChegarNovosItens: (novos) => {
+      if (novos.length === 1 && novos[0]) {
+        notificar.informacao(`Novo agendamento recebido de ${novos[0].nomeVisitante}.`);
+      } else if (novos.length > 1) {
+        notificar.informacao(`${novos.length} novos agendamentos recebidos.`);
+      }
+    },
+  });
   const [salvandoConfig, setSalvandoConfig] = useState(false);
   const [ocupandoId, setOcupandoId] = useState<string | null>(null);
 
@@ -89,6 +122,7 @@ export function GerenciadorAgendaPainel({
     readonly situacao: SituacaoAgendamento;
     readonly observacoesInternas?: string;
   }) {
+    idEmEscritaLocalRef.current = parametros.agendamentoId;
     setOcupandoId(parametros.agendamentoId);
     try {
       const resultado = await servicoAgenda.atualizarSituacaoAgendamento({
@@ -116,6 +150,7 @@ export function GerenciadorAgendaPainel({
         erro instanceof Error ? erro.message : "Não foi possível atualizar o agendamento.",
       );
     } finally {
+      idEmEscritaLocalRef.current = null;
       setOcupandoId(null);
     }
   }
@@ -124,9 +159,15 @@ export function GerenciadorAgendaPainel({
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-4">
         <div className="space-y-1">
-          <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
-            Agenda
-          </h1>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
+              Agenda
+            </h1>
+            <IndicadorTempoRealPainel
+              estadoConexao={estadoConexao}
+              aoAtualizarManual={() => window.location.reload()}
+            />
+          </div>
           <p className="text-xs leading-relaxed text-mineral-500">
             Marque os dias abertos para atendimento e acompanhe as reservas feitas pela sua vitrine.
           </p>

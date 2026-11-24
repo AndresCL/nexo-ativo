@@ -19,6 +19,7 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
+import type { PortaObservacaoDeltaColecao } from "@/aplicacao/portas/portasReatividade";
 import type { PortaGerenciamentoSolicitacoesPainel } from "@/aplicacao/portas/portasSolicitacoesComerciais";
 import type {
   ConfiguracaoEmailOrganizacao,
@@ -36,12 +37,16 @@ import {
   type SolicitacaoComercial,
 } from "@/dominio/entidades/solicitacaoComercial";
 import { ValorMonetarioCentavos } from "@/dominio/objetos-valor/valorMonetarioCentavos";
+import { useColecaoDeltaTempoReal } from "@/ganchos/useColecaoDeltaTempoReal";
+import { observadorSolicitacoesPainelCliente } from "@/infraestrutura/painel/observadorSolicitacoesPainelCliente";
 import { servicoSolicitacoesPainelCliente } from "@/infraestrutura/painel/servicoSolicitacoesPainelCliente";
+import { IndicadorTempoRealPainel } from "@/componentes/painel/IndicadorTempoRealPainel";
 import { Botao } from "@/componentes/interface/Botao";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import * as Dialogo from "@radix-ui/react-dialog";
 import { QuadroSolicitacoes } from "./QuadroSolicitacoes";
 import { DialogoExportacaoSolicitacoes } from "./DialogoExportacaoSolicitacoes";
+import { BlocoRespostasMicrofluxoSolicitacao } from "./BlocoRespostasMicrofluxoSolicitacao";
 import { TransicaoColapsavel } from "@/componentes/interface/TransicaoColapsavel";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
@@ -56,6 +61,14 @@ export interface PropriedadesGerenciadorSolicitacoesPainel {
   readonly podeGerenciarSolicitacoes: boolean;
   readonly podeConfigurarEmail?: boolean;
   readonly servicoSolicitacoes?: PortaGerenciamentoSolicitacoesPainel;
+  readonly observadorSolicitacoes?: PortaObservacaoDeltaColecao<SolicitacaoComercial>;
+}
+
+function ordenarSolicitacoesMaisRecentesPrimeiro(
+  a: SolicitacaoComercial,
+  b: SolicitacaoComercial,
+): number {
+  return b.criadoEmIso.localeCompare(a.criadoEmIso);
 }
 
 export function GerenciadorSolicitacoesPainel({
@@ -69,9 +82,27 @@ export function GerenciadorSolicitacoesPainel({
   podeGerenciarSolicitacoes,
   podeConfigurarEmail = false,
   servicoSolicitacoes = servicoSolicitacoesPainelCliente,
+  observadorSolicitacoes = observadorSolicitacoesPainelCliente,
 }: PropriedadesGerenciadorSolicitacoesPainel) {
-  const [solicitacoes, setSolicitacoes] =
-    useState<readonly SolicitacaoComercial[]>(solicitacoesIniciais);
+  const idEmEscritaLocalRef = useRef<string | null>(null);
+  const {
+    itens: solicitacoes,
+    setItens: setSolicitacoes,
+    estadoConexao,
+  } = useColecaoDeltaTempoReal({
+    organizacaoId,
+    itensIniciais: solicitacoesIniciais,
+    observador: observadorSolicitacoes,
+    ordenar: ordenarSolicitacoesMaisRecentesPrimeiro,
+    idEmEscritaLocalRef,
+    aoChegarNovosItens: (novas) => {
+      if (novas.length === 1 && novas[0]) {
+        notificar.informacao(`Nova solicitação recebida de ${novas[0].nomeVisitante}.`);
+      } else if (novas.length > 1) {
+        notificar.informacao(`${novas.length} novas solicitações recebidas.`);
+      }
+    },
+  });
   const [termoBusca, setTermoBusca] = useState("");
   const [solicitacaoSelecionadaId, setSolicitacaoSelecionadaId] = useState<string | null>(null);
   const [exibirConfiguracaoEmail, setExibirConfiguracaoEmail] = useState(false);
@@ -183,6 +214,7 @@ export function GerenciadorSolicitacoesPainel({
     }
 
     salvamentoEmCurso.current = true;
+    idEmEscritaLocalRef.current = alvo.id;
     setSalvandoId(alvo.id);
     setSolicitacoes((atuais) =>
       atuais.map((item) => (item.id === alvo.id ? { ...item, situacao: novaSituacao } : item)),
@@ -238,6 +270,7 @@ export function GerenciadorSolicitacoesPainel({
       );
     } finally {
       salvamentoEmCurso.current = false;
+      idEmEscritaLocalRef.current = null;
       setSalvandoId(null);
     }
   }
@@ -285,9 +318,15 @@ export function GerenciadorSolicitacoesPainel({
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-3 sm:pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
-            Solicitações Recebidas
-          </h1>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
+              Solicitações Recebidas
+            </h1>
+            <IndicadorTempoRealPainel
+              estadoConexao={estadoConexao}
+              aoAtualizarManual={() => window.location.reload()}
+            />
+          </div>
           <p className="mt-1 text-xs text-mineral-600">
             Acompanhe os contatos gerados pelos seus microfluxos interativos com contexto e valores
             preservados historicamente.
@@ -801,29 +840,10 @@ function DetalheSolicitacaoSelecionada({
         ) : null}
       </div>
 
-      {solicitacao.respostasRegistradas.length > 0 || solicitacao.mensagemAdicional ? (
-        <div className="space-y-3 rounded-md border border-marfim-200 bg-marfim-50/70 p-4">
-          <h3 className="text-xs font-semibold tracking-wider text-mineral-700 uppercase">
-            Respostas do Visitante no Microfluxo
-          </h3>
-
-          <dl className="space-y-2.5 text-xs">
-            {solicitacao.respostasRegistradas.map((resp) => (
-              <div key={resp.etapaId}>
-                <dt className="font-medium text-mineral-600">{resp.pergunta}</dt>
-                <dd className="mt-0.5 text-mineral-950">{resp.respostaTexto}</dd>
-              </div>
-            ))}
-
-            {solicitacao.mensagemAdicional ? (
-              <div>
-                <dt className="font-medium text-mineral-600">Observação complementar</dt>
-                <dd className="mt-0.5 text-mineral-950">{solicitacao.mensagemAdicional}</dd>
-              </div>
-            ) : null}
-          </dl>
-        </div>
-      ) : null}
+      <BlocoRespostasMicrofluxoSolicitacao
+        respostas={solicitacao.respostasRegistradas}
+        mensagemAdicional={solicitacao.mensagemAdicional}
+      />
 
       <form
         onSubmit={(e) => {

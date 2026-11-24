@@ -19,6 +19,7 @@ import {
   type PortaAssinaturasPainelCliente,
 } from "@/infraestrutura/painel/servicoAssinaturasPainelCliente";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
+import { useRevalidarAoFocarAba } from "@/ganchos/useRevalidarAoFocarAba";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 import { BannerCicloAssinatura } from "./BannerCicloAssinatura";
@@ -53,6 +54,7 @@ export function GerenciadorAssinaturaPainel({
   servicoAssinaturas = servicoAssinaturasPainelCliente,
 }: PropriedadesGerenciadorAssinaturaPainel) {
   const router = useRouter();
+  useRevalidarAoFocarAba();
   const planoAtivoCodigo = organizacao.resumoDireitosPlano.planoCodigo;
   const situacaoAssinatura = organizacao.resumoDireitosPlano.situacaoAssinatura;
 
