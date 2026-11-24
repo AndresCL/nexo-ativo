@@ -7,6 +7,7 @@ import {
 import { TAMANHOS_CABECALHO_MARCA } from "../dominio/editorial/tamanhoCabecalhoMarca";
 import { TAMANHOS_REDES_SOCIAIS } from "../dominio/editorial/configuracaoRedesSociais";
 import { IDENTIFICADORES_BLOCOS_SISTEMA_VITRINE } from "../dominio/editorial/ordemBlocosVitrine";
+import { VALORES_ANIMACAO_DESTAQUE } from "../dominio/microfluxos/animacaoDestaque";
 import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquipeVitrine";
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaConfiguracaoAgendaVitrine } from "./esquemasAgenda";
@@ -119,6 +120,7 @@ const esquemaItemAcaoHome = z.object({
   destino: z.string().min(1).max(500),
   destaquePrincipal: z.boolean().optional(),
   animarBordaDestaque: z.boolean().optional(),
+  animacaoDestaque: z.enum(VALORES_ANIMACAO_DESTAQUE).optional(),
   corBrilhoBorda: z.string().optional(),
   icone: z.string().min(1).max(60).optional(),
 });

@@ -148,6 +148,16 @@ export function BottomSheetEditorialBase({
           style={variaveisPaleta}
           aria-describedby={ariaDescribedBy}
           data-testid={dataTestId}
+          onInteractOutside={estaContido ? (evento) => evento.preventDefault() : undefined}
+          onEscapeKeyDown={
+            estaContido
+              ? (evento) => {
+                  if (!containerPortal?.contains(document.activeElement)) {
+                    evento.preventDefault();
+                  }
+                }
+              : undefined
+          }
           onCloseAutoFocus={
             aoRetornarFoco || referenciaRetornoFoco
               ? (evento) => {

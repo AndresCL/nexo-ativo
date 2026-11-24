@@ -10,6 +10,10 @@ import type {
 import { MAPA_ICONES_POR_ID } from "@/dominio/entidades/catalogoIconesEditorial";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import {
+  obterClasseAnimacaoDestaque,
+  resolverAnimacaoDestaque,
+} from "@/dominio/microfluxos/animacaoDestaque";
+import {
   ehAcaoEquipe,
   obterVisibilidadeEquipe,
 } from "@/dominio/editorial/posicionamentoEquipeVitrine";
@@ -268,8 +272,10 @@ export function ItemAcaoVitrine({
     </div>
   );
 
-  const temBrilhoInterior = ehDestaque && acao.animarBordaDestaque === true;
-  const classesBrilhoInterior = temBrilhoInterior ? "efeito-brilho-interior" : undefined;
+  const animacaoDestaque = ehDestaque
+    ? resolverAnimacaoDestaque(acao.animacaoDestaque, acao.animarBordaDestaque)
+    : "nenhuma";
+  const classesAnimacaoDestaque = obterClasseAnimacaoDestaque(animacaoDestaque);
   const estiloBrilho = acao.corBrilhoBorda
     ? ({ "--editorial-brilho-borda": acao.corBrilhoBorda } as CSSProperties)
     : undefined;
@@ -280,7 +286,7 @@ export function ItemAcaoVitrine({
       data-acao-home-id={acao.id}
       style={estiloBrilho}
       onClick={(evento) => aoAcionarItem(acao, evento.currentTarget)}
-      className={combinarClasses(classesBaseItem, classesBrilhoInterior)}
+      className={combinarClasses(classesBaseItem, classesAnimacaoDestaque)}
     >
       {conteudoInterno}
     </button>
@@ -289,7 +295,7 @@ export function ItemAcaoVitrine({
       href={acao.destino}
       style={estiloBrilho}
       {...(externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={combinarClasses(classesBaseItem, classesBrilhoInterior)}
+      className={combinarClasses(classesBaseItem, classesAnimacaoDestaque)}
     >
       {conteudoInterno}
     </a>

@@ -1,4 +1,8 @@
 import type { ConfiguracaoAgendaVitrine } from "../agenda/tiposAgenda";
+import {
+  resolverAnimacaoDestaque,
+  type AnimacaoDestaque,
+} from "../microfluxos/animacaoDestaque";
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 import type { ConfiguracaoAvaliacoesGoogle } from "./avaliacoesGoogle";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
@@ -151,6 +155,7 @@ export interface ItemAcaoHome {
   readonly destino: string;
   readonly destaquePrincipal?: boolean;
   readonly animarBordaDestaque?: boolean;
+  readonly animacaoDestaque?: AnimacaoDestaque;
   readonly corBrilhoBorda?: string;
   readonly icone?: TipoIconeAcaoHome;
 }
@@ -583,6 +588,10 @@ export function resolverAcoesVitrineComMicrofluxos(
       icone: (m.iconeBotaoHome as TipoIconeAcaoHome) || acaoExistente?.icone || "automatico",
       destaquePrincipal: m.destaquePrimarioHome ?? acaoExistente?.destaquePrincipal ?? false,
       animarBordaDestaque: m.animarBordaDestaque ?? acaoExistente?.animarBordaDestaque ?? false,
+      animacaoDestaque: resolverAnimacaoDestaque(
+        m.animacaoDestaque ?? acaoExistente?.animacaoDestaque,
+        m.animarBordaDestaque ?? acaoExistente?.animarBordaDestaque,
+      ),
       corBrilhoBorda: m.corBrilhoBorda ?? acaoExistente?.corBrilhoBorda,
       ...(tipoDestino === "secao_equipe" && m.posicionamentoEquipe
         ? { posicionamentoEquipe: m.posicionamentoEquipe }

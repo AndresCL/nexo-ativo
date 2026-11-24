@@ -4,6 +4,7 @@ import { esquemaPosicionamentoEquipeVitrine } from "./esquemaPosicionamentoEquip
 import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaMidiaItemCatalogo } from "./esquemasCatalogoConteudo";
 import type { DefinicaoMicrofluxo, EtapaMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
+import { VALORES_ANIMACAO_DESTAQUE } from "@/dominio/microfluxos/animacaoDestaque";
 import { esquemaRegraCalculoComercialMicrofluxo } from "./esquemasCalculoComercial";
 
 export const esquemaConfiguracaoPostVitrine = z.object({
@@ -291,6 +292,7 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
     iconeBotaoHome: z.string().min(1).max(60).optional(),
     destaquePrimarioHome: z.boolean().optional(),
     animarBordaDestaque: z.boolean().optional(),
+    animacaoDestaque: z.enum(VALORES_ANIMACAO_DESTAQUE).optional(),
     corBrilhoBorda: z.string().optional(),
     ordemHome: z.number().int().min(0).max(50).optional(),
     posicionamentoEquipe: esquemaPosicionamentoEquipeVitrine.optional(),

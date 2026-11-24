@@ -7,7 +7,12 @@ import { AcoesPublicacaoPagina } from "@/componentes/painel/AcoesPublicacaoPagin
 import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 import type { ServicoCatalogoConteudoPorta } from "@/aplicacao/portas/portasCatalogoConteudo";
-import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
+import type {
+  ProdutoCatalogo,
+  ProfissionalEquipe,
+  ProjetoPortfolio,
+  ServicoOrganizacao,
+} from "@/dominio/entidades/catalogoConteudo";
 import type { RascunhoConfiguracaoPagina } from "@/dominio/entidades/rascunhoConfiguracaoPagina";
 import {
   resolverPosicaoCabecalhoMarca,
@@ -30,12 +35,16 @@ import { servicoCatalogoConteudoCliente } from "@/infraestrutura/painel/servicoC
 import type { ItemListaUnificadaVitrine } from "../experiencias/descritoresTipoAcao";
 import { DialogoExclusaoExperiencia } from "../experiencias/DialogoExclusaoExperiencia";
 import { EditorExperienciaSelecionada } from "../experiencias/EditorExperienciaSelecionada";
+import { LayoutListaComPreviaVitrine } from "../experiencias/LayoutListaComPreviaVitrine";
 import {
   ListaOrdenavelBlocosVitrine,
   type FiltroVisibilidadeLista,
 } from "../experiencias/ListaOrdenavelBlocosVitrine";
 
 export interface PropriedadesGerenciadorExperienciasPainel {
+  readonly servicos?: readonly ServicoOrganizacao[];
+  readonly produtos?: readonly ProdutoCatalogo[];
+  readonly projetosPortfolio?: readonly ProjetoPortfolio[];
   readonly profissionais?: readonly ProfissionalEquipe[];
   readonly quantidadeProfissionaisAtivos?: number;
   readonly organizacaoId: string;
@@ -111,6 +120,9 @@ function sincronizarOrdemHomeNosMicrofluxos(
 }
 
 export function GerenciadorExperienciasPainel({
+  servicos = [],
+  produtos = [],
+  projetosPortfolio = [],
   quantidadeProfissionaisAtivos,
   profissionais = [],
   organizacaoId,
@@ -477,24 +489,40 @@ export function GerenciadorExperienciasPainel({
           aoAtualizarEtapa={atualizarEtapaFluxo}
         />
       ) : (
-        <ListaOrdenavelBlocosVitrine
-          blocoMarcaFixaTopo={blocoMarcaFixaTopo}
-          itensFluxoOrdenados={itensFluxoOrdenados}
+        <LayoutListaComPreviaVitrine
+          rascunhoPagina={rascunhoPaginaInicial}
           identificadorPublico={identificadorPublico}
-          busca={busca}
-          filtroVisibilidade={filtroVisibilidade}
-          podeAlterar={podeAlterar}
-          referenciaBotaoNovaExperiencia={botaoNovaExperiencia}
-          aoAlterarBusca={setBusca}
-          aoAlterarFiltro={setFiltroVisibilidade}
-          aoCriarNovaExperiencia={criarNovoFluxo}
-          aoReordenarPorArraste={aplicarNovaOrdemBlocos}
-          aoMoverItem={moverItem}
-          aoAlternarVisibilidadeExperiencia={alternarVisibilidadeExperiencia}
-          aoAlternarVisibilidadeSistema={alternarVisibilidadeSistema}
-          aoAlternarFixarMarcaTopo={alternarFixarMarcaTopo}
-          aoAbrirEditorExperiencia={(id) => setFluxoEmEdicaoId(id)}
-        />
+          versaoPublicada={versaoPublicada}
+          microfluxos={microfluxos}
+          ordemBlocosVitrine={blocosSistema.ordemBlocosVitrine}
+          blocosSistemaOcultos={blocosSistema.blocosSistemaOcultos}
+          posicaoCabecalhoMarca={blocosSistema.posicaoCabecalhoMarca}
+          avaliacoesGoogleHabilitado={blocosSistema.avaliacoesGoogleHabilitado}
+          servicos={servicos}
+          produtos={produtos}
+          projetosPortfolio={projetosPortfolio}
+          profissionais={profissionais}
+          exibirAvaliacoesGoogle={podeEditarConteudo}
+        >
+          <ListaOrdenavelBlocosVitrine
+            blocoMarcaFixaTopo={blocoMarcaFixaTopo}
+            itensFluxoOrdenados={itensFluxoOrdenados}
+            identificadorPublico={identificadorPublico}
+            busca={busca}
+            filtroVisibilidade={filtroVisibilidade}
+            podeAlterar={podeAlterar}
+            referenciaBotaoNovaExperiencia={botaoNovaExperiencia}
+            aoAlterarBusca={setBusca}
+            aoAlterarFiltro={setFiltroVisibilidade}
+            aoCriarNovaExperiencia={criarNovoFluxo}
+            aoReordenarPorArraste={aplicarNovaOrdemBlocos}
+            aoMoverItem={moverItem}
+            aoAlternarVisibilidadeExperiencia={alternarVisibilidadeExperiencia}
+            aoAlternarVisibilidadeSistema={alternarVisibilidadeSistema}
+            aoAlternarFixarMarcaTopo={alternarFixarMarcaTopo}
+            aoAbrirEditorExperiencia={(id) => setFluxoEmEdicaoId(id)}
+          />
+        </LayoutListaComPreviaVitrine>
       )}
 
       <DialogoExclusaoExperiencia

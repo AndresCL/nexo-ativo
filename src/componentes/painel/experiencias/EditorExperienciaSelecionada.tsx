@@ -17,6 +17,11 @@ import type {
   EtapaMicrofluxo,
   TipoAcaoVitrine,
 } from "@/dominio/microfluxos/tiposMicrofluxo";
+import {
+  OPCOES_ANIMACAO_DESTAQUE,
+  resolverAnimacaoDestaque,
+  type AnimacaoDestaque,
+} from "@/dominio/microfluxos/animacaoDestaque";
 import { avaliarIntegridadeGrafoMicrofluxo } from "@/dominio/microfluxos/validadorGrafoMicrofluxo";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 import { CanvasEditorVisualFluxos } from "../microfluxos/CanvasEditorVisualFluxos";
@@ -165,21 +170,31 @@ export function EditorExperienciaSelecionada({
               </label>
 
               {fluxoAtual.destaquePrimarioHome ? (
-                <label className="flex cursor-pointer items-center gap-2 pb-2 text-xs font-medium text-mineral-800">
-                  <input
-                    type="checkbox"
+                <label className="space-y-1 text-xs font-medium text-mineral-700">
+                  <span className="block">Animação</span>
+                  <select
+                    aria-label="Animação do destaque"
                     disabled={!podeAlterar}
-                    checked={Boolean(fluxoAtual.animarBordaDestaque)}
-                    onChange={(e) => {
-                      const marcado = e.target.checked;
+                    value={resolverAnimacaoDestaque(
+                      fluxoAtual.animacaoDestaque,
+                      fluxoAtual.animarBordaDestaque,
+                    )}
+                    onChange={(evento) => {
+                      const novaAnimacao = evento.target.value as AnimacaoDestaque;
                       aoAtualizarFluxo((f) => ({
                         ...f,
-                        animarBordaDestaque: marcado,
+                        animacaoDestaque: novaAnimacao,
+                        animarBordaDestaque: novaAnimacao === "brilho_interior",
                       }));
                     }}
-                    className="h-4 w-4 rounded border-marfim-300 accent-mineral-900"
-                  />
-                  <span>Brilho interior</span>
+                    className="min-h-10 rounded-lg border border-marfim-200 bg-white px-3 text-sm text-mineral-950"
+                  >
+                    {OPCOES_ANIMACAO_DESTAQUE.map((opcao) => (
+                      <option key={opcao.valor} value={opcao.valor}>
+                        {opcao.rotulo}
+                      </option>
+                    ))}
+                  </select>
                 </label>
               ) : null}
 

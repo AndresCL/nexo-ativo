@@ -291,6 +291,25 @@
   animation: radialFundoFluido2 9.5s ease-in-out infinite;
 }
 
+@keyframes haloPulsanteDestaque {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--editorial-cta-fundo, var(--editorial-destaque, #111111)) 82%, transparent);
+  }
+
+  70% {
+    box-shadow: 0 0 0 17px color-mix(in srgb, var(--editorial-cta-fundo, var(--editorial-destaque, #111111)) 0%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--editorial-cta-fundo, var(--editorial-destaque, #111111)) 0%, transparent);
+  }
+}
+
+.efeito-halo-pulsante {
+  box-shadow: none;
+  animation: haloPulsanteDestaque 1.75s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   *,

@@ -4,6 +4,11 @@ import { loadEnvConfig } from "@next/env";
 import { cert, deleteApp, initializeApp } from "firebase-admin/app";
 import { getAuth, type Auth, type UserRecord } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
+import {
+  coletarUrlsEmuladorStorage,
+  migrarMidiasEmuladorParaStorageProducao,
+} from "./migradorMidiaStorageProducao";
 import { executarPublicacaoPaginaEditorial } from "../funcoes/src/casos-de-uso/publicarPaginaTransacional";
 import { CATALOGO_PLANOS_FLUXO } from "../src/dominio/assinaturas/tiposAssinaturaAsaas";
 import type {
@@ -319,7 +324,8 @@ async function promoverOrganizacaoProducao(): Promise<void> {
   const modoExecutar = process.argv.includes("--executar");
 
   console.info(`1. Extraindo e validando pacote de "${slug}" do emulador local...`);
-  const pacote = await extrairPacoteDoEmuladorLocal(slug, planoCodigo);
+  let pacote = await extrairPacoteDoEmuladorLocal(slug, planoCodigo);
+  const midiasLocaisDetectadas = coletarUrlsEmuladorStorage(pacote);
 
   console.info("Resumo do pacote extraído e validado:");
   console.info(`  - Organização: ${pacote.organizacao.nome} (${pacote.organizacao.id})`);
@@ -333,16 +339,23 @@ async function promoverOrganizacaoProducao(): Promise<void> {
   console.info(
     `  - Documentos de configuração: ${pacote.configuracoes.map((c) => c.id).join(", ") || "nenhum"}`,
   );
+  console.info(`  - Mídias locais no Storage a migrar: ${midiasLocaisDetectadas.length}`);
 
   const credencialJson = JSON.parse(readFileSync(caminhoCredencial, "utf-8")) as {
     project_id?: string;
   };
   const projectIdDestino = credencialJson.project_id ?? "nexo-ativo";
+  const bucketDestinoNome =
+    extrairArgumento("--bucket") ?? `${projectIdDestino}.firebasestorage.app`;
+
+  delete process.env.FIREBASE_STORAGE_EMULATOR_HOST;
+  delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
 
   const appDestino = initializeApp(
     {
       credential: cert(caminhoCredencial),
       projectId: projectIdDestino,
+      storageBucket: bucketDestinoNome,
     },
     "destino-producao",
   );
@@ -376,6 +389,21 @@ async function promoverOrganizacaoProducao(): Promise<void> {
     ) {
       throw new Error(
         `A organização "${slug}" (${organizacaoId}) já possui documentos em produção. Use --forcar se desejar atualizar.`,
+      );
+    }
+
+    if (midiasLocaisDetectadas.length > 0) {
+      console.info(
+        `\n2.5. Migrando ${midiasLocaisDetectadas.length} mídia(s) do Storage local para "${bucketDestinoNome}"...`,
+      );
+      const bucketProducao = getStorage(appDestino).bucket(bucketDestinoNome);
+      const resultadoMigracao = await migrarMidiasEmuladorParaStorageProducao(
+        pacote,
+        bucketProducao,
+      );
+      pacote = resultadoMigracao.dadosMigrados;
+      console.info(
+        `  - ${resultadoMigracao.arquivosMigrados} mídia(s) migrada(s) e URLs reescritas para produção.`,
       );
     }
 

@@ -2,6 +2,7 @@ import type { ConfiguracaoAgendaVitrine } from "../agenda/tiposAgenda";
 import type { RegraCalculoComercialMicrofluxo } from "../comercial/tiposCalculoComercial";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
 import type { MidiaItemCatalogo } from "../entidades/catalogoConteudo";
+import type { AnimacaoDestaque } from "./animacaoDestaque";
 
 export type AncoraPadraoMicrofluxo = string;
 
@@ -245,6 +246,7 @@ export interface DefinicaoMicrofluxo {
   readonly iconeBotaoHome?: string;
   readonly destaquePrimarioHome?: boolean;
   readonly animarBordaDestaque?: boolean;
+  readonly animacaoDestaque?: AnimacaoDestaque;
   readonly corBrilhoBorda?: string;
   readonly ordemHome?: number;
 }

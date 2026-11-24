@@ -30,6 +30,9 @@ export default async function PaginaExperienciasPainel() {
       identificadorPublico={contexto.organizacao.identificadorPublico}
       microfluxosIniciais={contexto.microfluxos}
       rascunhoPaginaInicial={contexto.rascunhoPagina}
+      servicos={contexto.servicos}
+      produtos={contexto.produtos}
+      projetosPortfolio={contexto.projetosPortfolio}
       profissionais={contexto.profissionais}
       quantidadeProfissionaisAtivos={contexto.profissionais.filter((p) => p.ativo).length}
       versaoPublicadaInicial={contexto.versaoPublicadaAtual}

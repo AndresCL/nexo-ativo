@@ -236,19 +236,19 @@ export function GerenciadorSolicitacoesPainel({
         atuais.map((item) =>
           item.id === alvo.id
             ? {
-                ...item,
-                situacao: novaSituacao,
-                ...(novasObservacoes !== undefined
-                  ? { observacoesInternas: novasObservacoes }
-                  : {}),
-                ...(novoProfissionalId
-                  ? {
-                      profissionalId: novoProfissionalId,
-                      profissionalNome: profEscolhido?.nomeCompleto ?? item.profissionalNome,
-                    }
-                  : {}),
-                atualizadoEmIso,
-              }
+              ...item,
+              situacao: novaSituacao,
+              ...(novasObservacoes !== undefined
+                ? { observacoesInternas: novasObservacoes }
+                : {}),
+              ...(novoProfissionalId
+                ? {
+                  profissionalId: novoProfissionalId,
+                  profissionalNome: profEscolhido?.nomeCompleto ?? item.profissionalNome,
+                }
+                : {}),
+              atualizadoEmIso,
+            }
             : item,
         ),
       );
