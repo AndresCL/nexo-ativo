@@ -53,6 +53,7 @@ import { GavetaAgendamentoPublico } from "./agenda/GavetaAgendamentoPublico";
 import { renderizarIconeAcao } from "./NavegacaoAcoesHome";
 import { RodapeEditorial } from "./RodapeEditorial";
 import { identificarSecaoPorHash, resolverMicrofluxoPorDestino } from "./roteadorAcoesPublicas";
+import { abrirLinkExternoSeguro } from "@/utilitarios/navegacaoLinkExterno";
 import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export interface PropriedadesCartaoDigitalProfissionalPublico {
@@ -504,7 +505,7 @@ export function CartaoDigitalProfissionalPublico({
     }
 
     if (/^https?:\/\//i.test(acao.destino)) {
-      window.open(acao.destino, "_blank", "noopener,noreferrer");
+      abrirLinkExternoSeguro(acao.destino);
       return;
     }
 

@@ -1,8 +1,12 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { Eye, List } from "lucide-react";
+import { List } from "lucide-react";
 import { AlternadorPreviaDispositivo } from "@/componentes/editorial/AlternadorPreviaDispositivo";
+import {
+  AlternadorMobileEditorPrevia,
+  type ModoMobileEditorPrevia,
+} from "@/componentes/painel/AlternadorMobileEditorPrevia";
 import type { PosicaoCabecalhoMarca } from "@/dominio/editorial/faixaInicioExperiencias";
 import type { IdentificadorBlocoSistemaVitrine } from "@/dominio/editorial/ordemBlocosVitrine";
 import type {
@@ -55,7 +59,7 @@ export function LayoutListaComPreviaVitrine({
   profissionais = [],
   exibirAvaliacoesGoogle = false,
 }: PropriedadesLayoutListaComPreviaVitrine) {
-  const [abaMobile, setAbaMobile] = useState<AbaMobileExperiencias>("lista");
+  const [abaMobile, setAbaMobile] = useState<ModoMobileEditorPrevia>("editor");
 
   const paginaComExperiencias = useMemo(() => {
     if (!rascunhoPagina) return null;
@@ -118,45 +122,16 @@ export function LayoutListaComPreviaVitrine({
 
   return (
     <div className="space-y-4">
-      <div
-        role="tablist"
-        aria-label="Alternar entre lista e prévia"
-        className="inline-flex w-full rounded-xl border border-marfim-200 bg-marfim-100/80 p-1 xl:hidden"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={abaMobile === "lista"}
-          onClick={() => setAbaMobile("lista")}
-          className={combinarClasses(
-            "flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors",
-            abaMobile === "lista"
-              ? "bg-white text-mineral-950 shadow-xs"
-              : "text-mineral-600 hover:text-mineral-900",
-          )}
-        >
-          <List className="h-3.5 w-3.5" aria-hidden="true" />
-          Lista
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={abaMobile === "previa"}
-          onClick={() => setAbaMobile("previa")}
-          className={combinarClasses(
-            "flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors",
-            abaMobile === "previa"
-              ? "bg-white text-mineral-950 shadow-xs"
-              : "text-mineral-600 hover:text-mineral-900",
-          )}
-        >
-          <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-          Prévia
-        </button>
-      </div>
+      <AlternadorMobileEditorPrevia
+        modoAtivo={abaMobile}
+        aoAlterarModo={setAbaMobile}
+        rotuloEditor="Lista"
+        iconeEditor={<List className="h-3.5 w-3.5" aria-hidden="true" />}
+        ariaLabel="Alternar entre lista e prévia"
+      />
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_410px]">
-        <div className={combinarClasses("min-w-0", abaMobile === "lista" ? "block" : "hidden xl:block")}>
+        <div className={combinarClasses("min-w-0", abaMobile === "editor" ? "block" : "hidden xl:block")}>
           {children}
         </div>
 

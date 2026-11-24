@@ -7,7 +7,8 @@ import { AvisosPublicidade } from "@/componentes/painel/AvisosPublicidade";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { combinarClasses } from "@/utilitarios/combinarClasses";
 import type { ServicoEditorAparenciaPorta } from "@/aplicacao/portas/portasEditorAparencia";
 import type { AcervoPublicoVitrine } from "@/dominio/entidades/catalogoConteudo";
 import {
@@ -17,6 +18,10 @@ import {
 import { useEstadoEditorAparencia } from "@/estados/estadoEditorAparencia";
 import { servicoEditorAparenciaCliente } from "@/infraestrutura/painel/servicoEditorAparenciaCliente";
 import { AlternadorPreviaDispositivo } from "@/componentes/editorial/AlternadorPreviaDispositivo";
+import {
+  AlternadorMobileEditorPrevia,
+  type ModoMobileEditorPrevia,
+} from "@/componentes/painel/AlternadorMobileEditorPrevia";
 import { Botao } from "@/componentes/interface/Botao";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { NavegacaoAparencia, SecoesFormularioAparencia } from "./SecoesFormularioAparencia";
@@ -133,6 +138,8 @@ export function EditorGuiadoAparencia({
       registrarNovaPublicacao(resultado.versaoPublicada, resultado.publicadoEmIso),
   });
 
+  const [modoMobile, setModoMobile] = useState<ModoMobileEditorPrevia>("editor");
+
   return (
     <div className="space-y-6">
       <header className="border-b border-marfim-200/80 pb-3 sm:pb-4">
@@ -198,8 +205,18 @@ export function EditorGuiadoAparencia({
         </CartaoSuperficie>
       ) : null}
 
+      <AlternadorMobileEditorPrevia
+        modoAtivo={modoMobile}
+        aoAlterarModo={setModoMobile}
+      />
+
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)]">
-        <div className="min-w-0 space-y-5">
+        <div
+          className={combinarClasses(
+            "min-w-0 space-y-5",
+            modoMobile === "editor" ? "block" : "hidden xl:block",
+          )}
+        >
           <NavegacaoAparencia />
 
           <SecoesFormularioAparencia
@@ -209,7 +226,12 @@ export function EditorGuiadoAparencia({
           />
         </div>
 
-        <div className="min-w-0 space-y-3 xl:sticky xl:top-6">
+        <div
+          className={combinarClasses(
+            "min-w-0 space-y-3 xl:sticky xl:top-6",
+            modoMobile === "previa" ? "block" : "hidden xl:block",
+          )}
+        >
           <AlternadorPreviaDispositivo
             aparencia="clara"
             paginaBase={paginaComExperiencias}

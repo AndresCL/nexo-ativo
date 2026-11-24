@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Trash2, Video } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Trash2, Video } from "lucide-react";
 import { Botao } from "@/componentes/interface/Botao";
 import {
   construirUrlEmbedYoutube,
@@ -9,12 +9,14 @@ import {
 
 interface PropriedadesListaVideosPainel {
   readonly videos: readonly VideoYoutubeItem[];
+  readonly aoEditar: (video: VideoYoutubeItem) => void;
   readonly aoMover: (indice: number, direcao: "cima" | "baixo") => void;
   readonly aoRemover: (id: string) => void;
 }
 
 export function ListaVideosPainel({
   videos,
+  aoEditar,
   aoMover,
   aoRemover,
 }: PropriedadesListaVideosPainel) {
@@ -24,7 +26,7 @@ export function ListaVideosPainel({
         <Video className="mb-3 h-8 w-8 text-mineral-400" aria-hidden="true" />
         <p className="text-sm font-semibold text-mineral-950">Nenhum vídeo adicionado ainda</p>
         <p className="mt-1 max-w-xs text-xs leading-relaxed text-mineral-500">
-          Adicione o link de um vídeo do YouTube no formulário ao lado para exibir na sua vitrine.
+          Clique em “Novo vídeo” para adicionar um link do YouTube na sua vitrine.
         </p>
       </div>
     );
@@ -62,6 +64,15 @@ export function ListaVideosPainel({
             </div>
 
             <div className="flex items-center gap-1 self-end sm:self-center">
+              <Botao
+                type="button"
+                variante="fantasma"
+                tamanho="compacto"
+                onClick={() => aoEditar(video)}
+                aria-label="Editar vídeo"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Botao>
               <Botao
                 type="button"
                 variante="fantasma"

@@ -31,6 +31,7 @@ import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvisosPublicidade } from "@/componentes/painel/AvisosPublicidade";
 import { CabecalhoPublicacaoRapidaAcervo } from "./CabecalhoPublicacaoRapidaAcervo";
+import { LayoutGerenciadorAcervo } from "@/componentes/painel/compartilhado/LayoutGerenciadorAcervo";
 
 export interface PropriedadesGerenciadorPortfolioPainel {
   readonly organizacaoId: string;
@@ -71,6 +72,7 @@ export function GerenciadorPortfolioPainel({
         .includes(termo)
     );
   });
+  const [formularioAberto, setFormularioAberto] = useState(false);
   const [idProjetoEdicao, setIdProjetoEdicao] = useState<string | null>(null);
   const [titulo, setTitulo] = useState("");
   const [categoriaOuSerie, setCategoriaOuSerie] = useState("");
@@ -96,6 +98,12 @@ export function GerenciadorPortfolioPainel({
     setResumoEditorial("");
     setImagensProjeto([]);
     setTextoAlternativoCapa("");
+    setFormularioAberto(false);
+  }
+
+  function abrirNovoProjeto() {
+    limparFormulario();
+    setFormularioAberto(true);
   }
 
   function editarProjeto(projeto: ProjetoPortfolio) {
@@ -104,6 +112,7 @@ export function GerenciadorPortfolioPainel({
     setCategoriaOuSerie(projeto.categoriaOuSerie);
     setAnoOuLocal(projeto.anoOuLocal ?? "");
     setResumoEditorial(projeto.resumoEditorial);
+    setFormularioAberto(true);
     setImagensProjeto(
       obterListaImagensMidia(
         {
@@ -192,172 +201,154 @@ export function GerenciadorPortfolioPainel({
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <CabecalhoPublicacaoRapidaAcervo
-        aparencia="clara"
-        titulo="Portfólio"
-        subtitulo="Apresente seus projetos, obras e entregas. Organize as imagens e publique seus trabalhos na vitrine."
-        identificadorPublico={identificadorPublico}
-        controle={publicacao}
+  const formularioProjeto = (
+    <form onSubmit={salvarProjeto} className="space-y-4">
+      <CampoFormulario
+        className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
+        ref={referenciaTitulo}
+        rotulo="Título do projeto ou obra"
+        required
+        disabled={!podeEditarConteudo || publicacao.publicando || salvando}
+        value={titulo}
+        onChange={(e) => setTitulo(e.target.value)}
+        placeholder="Ex.: Residência Vale das Pedras"
       />
 
-      <AvisosPublicidade areas={["portfolio"]} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <CampoFormulario
+          className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
+          rotulo="Categoria ou série"
+          required
+          disabled={!podeEditarConteudo || publicacao.publicando || salvando}
+          value={categoriaOuSerie}
+          onChange={(e) => setCategoriaOuSerie(e.target.value)}
+          placeholder="Ex.: Casa de Campo · 620 m²"
+        />
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <div className="min-w-0 space-y-4">
-          <div>
-            <h2 className="text-base font-semibold text-mineral-950">
-              {idProjetoEdicao ? "Editar projeto" : "Adicionar projeto ao portfólio"}
-            </h2>
-            <p className="mt-1 text-xs text-mineral-500">
-              Conte a história do projeto, escolha uma capa e salve. Depois, publique para atualizar a
-              vitrine.
-            </p>
-          </div>
-
-          <CartaoSuperficie className="min-w-0 rounded-2xl bg-white p-5 shadow-2xs sm:p-6">
-            <form onSubmit={salvarProjeto} className="space-y-4">
-            <CampoFormulario
-              className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
-              ref={referenciaTitulo}
-              rotulo="Título do projeto ou obra"
-              required
-              disabled={!podeEditarConteudo || publicacao.publicando || salvando}
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Ex.: Residência Vale das Pedras"
-            />
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <CampoFormulario
-                className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
-                rotulo="Categoria ou série"
-                required
-                disabled={!podeEditarConteudo || publicacao.publicando || salvando}
-                value={categoriaOuSerie}
-                onChange={(e) => setCategoriaOuSerie(e.target.value)}
-                placeholder="Ex.: Casa de Campo · 620 m²"
-              />
-
-              <CampoFormulario
-                className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
-                rotulo="Ano ou cidade (opcional)"
-                disabled={!podeEditarConteudo || publicacao.publicando || salvando}
-                value={anoOuLocal}
-                onChange={(e) => setAnoOuLocal(e.target.value)}
-                placeholder="Ex.: Itu · 2025"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between gap-2">
-                <label
-                  htmlFor="resumo-projeto-portfolio"
-                  className="text-sm font-medium text-mineral-900"
-                >
-                  Resumo editorial *
-                </label>
-                <span className="text-[11px] tabular-nums text-mineral-500">
-                  {resumoEditorial.length} / {LIMITE_CARACTERES_RESUMO_CATALOGO}
-                </span>
-              </div>
-              <textarea
-                id="resumo-projeto-portfolio"
-                rows={4}
-                required
-                maxLength={LIMITE_CARACTERES_RESUMO_CATALOGO}
-                disabled={!podeEditarConteudo || publicacao.publicando || salvando}
-                value={resumoEditorial}
-                onChange={(e) => setResumoEditorial(e.target.value)}
-                placeholder="Contexto, materiais ou resultados relevantes deste trabalho."
-                className="w-full rounded-lg border border-marfim-200 bg-white px-3.5 py-2.5 text-sm text-mineral-950 focus:border-indigo-400 focus:outline-none"
-              />
-            </div>
-
-            <EditorListaImagensCatalogo
-              organizacaoId={organizacaoId}
-              rotulo="Fotografias do projeto"
-              obrigatorio
-              imagens={imagensProjeto}
-              aoAlterarImagens={setImagensProjeto}
-              servicoUpload={servicoCatalogo}
-              desabilitado={!podeEditarConteudo || publicacao.publicando || salvando}
-              tituloFallback={titulo || "Projeto"}
-            />
-
-            <CampoFormulario
-              className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
-              rotulo="Texto alternativo da capa"
-              disabled={!podeEditarConteudo || publicacao.publicando || salvando}
-              value={textoAlternativoCapa}
-              onChange={(e) => setTextoAlternativoCapa(e.target.value)}
-              placeholder="Descrição breve da fotografia para acessibilidade"
-            />
-
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              <Botao
-                type="submit"
-                variante="operacional_primario"
-                tamanho="compacto"
-                disabled={
-                  !podeEditarConteudo || publicacao.publicando || alterandoVisibilidadeId !== null
-                }
-                className="rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                carregando={salvando}
-              >
-                {idProjetoEdicao ? (
-                  <Save className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Plus className="h-4 w-4" aria-hidden="true" />
-                )}
-                <span>{idProjetoEdicao ? "Salvar alterações" : "Adicionar ao portfólio"}</span>
-              </Botao>
-
-              {idProjetoEdicao ? (
-                <Botao
-                  variante="fantasma"
-                  tamanho="compacto"
-                  disabled={salvando || alterandoVisibilidadeId !== null}
-                  onClick={limparFormulario}
-                >
-                  Cancelar edição
-                </Botao>
-              ) : null}
-            </div>
-          </form>
-        </CartaoSuperficie>
+        <CampoFormulario
+          className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
+          rotulo="Ano ou cidade (opcional)"
+          disabled={!podeEditarConteudo || publicacao.publicando || salvando}
+          value={anoOuLocal}
+          onChange={(e) => setAnoOuLocal(e.target.value)}
+          placeholder="Ex.: Itu · 2025"
+        />
       </div>
 
-        <section aria-labelledby="titulo-lista-projetos" className="min-w-0 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 id="titulo-lista-projetos" className="text-base font-semibold text-mineral-950">
-                Seus projetos{" "}
-                <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-mineral-800">
-                  {projetos.length}
-                </span>
-              </h2>
-              <p className="mt-1 text-xs text-mineral-500">
-                Uma visão dos trabalhos que compõem seu portfólio.
-              </p>
-            </div>
-            {idProjetoEdicao && podeEditarConteudo ? (
-              <Botao
-                variante="operacional_secundario"
-                tamanho="compacto"
-                disabled={salvando || alterandoVisibilidadeId !== null}
-                className="rounded-lg border-neutral-300 bg-white text-mineral-900 hover:bg-neutral-50 shadow-2xs"
-                onClick={() => {
-                  limparFormulario();
-                  referenciaTitulo.current?.focus();
-                }}
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Novo projeto
-              </Botao>
-            ) : null}
-          </div>
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <label
+            htmlFor="resumo-projeto-portfolio"
+            className="text-sm font-medium text-mineral-900"
+          >
+            Resumo editorial *
+          </label>
+          <span className="text-[11px] tabular-nums text-mineral-500">
+            {resumoEditorial.length} / {LIMITE_CARACTERES_RESUMO_CATALOGO}
+          </span>
+        </div>
+        <textarea
+          id="resumo-projeto-portfolio"
+          rows={4}
+          required
+          maxLength={LIMITE_CARACTERES_RESUMO_CATALOGO}
+          disabled={!podeEditarConteudo || publicacao.publicando || salvando}
+          value={resumoEditorial}
+          onChange={(e) => setResumoEditorial(e.target.value)}
+          placeholder="Contexto, materiais ou resultados relevantes deste trabalho."
+          className="w-full rounded-lg border border-marfim-200 bg-white px-3.5 py-2.5 text-sm text-mineral-950 focus:border-indigo-400 focus:outline-none"
+        />
+      </div>
+
+      <EditorListaImagensCatalogo
+        organizacaoId={organizacaoId}
+        rotulo="Fotografias do projeto"
+        obrigatorio
+        imagens={imagensProjeto}
+        aoAlterarImagens={setImagensProjeto}
+        servicoUpload={servicoCatalogo}
+        desabilitado={!podeEditarConteudo || publicacao.publicando || salvando}
+        tituloFallback={titulo || "Projeto"}
+      />
+
+      <CampoFormulario
+        className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
+        rotulo="Texto alternativo da capa"
+        disabled={!podeEditarConteudo || publicacao.publicando || salvando}
+        value={textoAlternativoCapa}
+        onChange={(e) => setTextoAlternativoCapa(e.target.value)}
+        placeholder="Descrição breve da fotografia para acessibilidade"
+      />
+
+      <div className="flex flex-wrap items-center gap-2 pt-2">
+        <Botao
+          type="submit"
+          variante="operacional_primario"
+          tamanho="compacto"
+          disabled={
+            !podeEditarConteudo || publicacao.publicando || alterandoVisibilidadeId !== null
+          }
+          className="rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+          carregando={salvando}
+        >
+          {idProjetoEdicao ? (
+            <Save className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Plus className="h-4 w-4" aria-hidden="true" />
+          )}
+          <span>{idProjetoEdicao ? "Salvar alterações" : "Adicionar ao portfólio"}</span>
+        </Botao>
+
+        <Botao
+          type="button"
+          variante="fantasma"
+          tamanho="compacto"
+          disabled={salvando || alterandoVisibilidadeId !== null}
+          onClick={limparFormulario}
+        >
+          Cancelar
+        </Botao>
+      </div>
+    </form>
+  );
+
+  return (
+    <LayoutGerenciadorAcervo
+      rotuloBotaoNovo="Novo projeto"
+      podeCriar={podeEditarConteudo}
+      aoClicarNovo={abrirNovoProjeto}
+      formularioAberto={formularioAberto}
+      tituloFormulario={idProjetoEdicao ? "Editar projeto" : "Adicionar projeto ao portfólio"}
+      subtituloFormulario="Conte a história do projeto, escolha uma capa e salve. Depois, publique para atualizar a vitrine."
+      aoFecharFormulario={limparFormulario}
+      conteudoFormulario={formularioProjeto}
+      cabecalhoSuperior={
+        <>
+          <CabecalhoPublicacaoRapidaAcervo
+            aparencia="clara"
+            titulo="Portfólio"
+            subtitulo="Apresente seus projetos, obras e entregas. Organize as imagens e publique seus trabalhos na vitrine."
+            identificadorPublico={identificadorPublico}
+            controle={publicacao}
+          />
+          <AvisosPublicidade areas={["portfolio"]} />
+        </>
+      }
+      barraAcoesExtras={
+        <div>
+          <h2 id="titulo-lista-projetos" className="text-base font-semibold text-mineral-950">
+            Seus projetos{" "}
+            <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-mineral-800">
+              {projetos.length}
+            </span>
+          </h2>
+          <p className="mt-1 text-xs text-mineral-500">
+            Uma visão dos trabalhos que compõem seu portfólio.
+          </p>
+        </div>
+      }
+    >
+      <section aria-labelledby="titulo-lista-projetos" className="min-w-0 space-y-4">
           <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-2xs sm:flex-row">
             <div className="relative min-w-0 flex-1">
               <Search
@@ -527,7 +518,6 @@ export function GerenciadorPortfolioPainel({
             </ul>
           )}
         </section>
-      </div>
-    </div>
+    </LayoutGerenciadorAcervo>
   );
 }

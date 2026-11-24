@@ -30,6 +30,7 @@ import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { CampoUploadMidiaStorage } from "@/componentes/painel/editor/CampoUploadMidiaStorage";
 import { SeletorPontoFocalMidia } from "@/componentes/painel/editor/SeletorPontoFocalMidia";
 import { CabecalhoPublicacaoRapidaAcervo } from "./CabecalhoPublicacaoRapidaAcervo";
+import { LayoutGerenciadorAcervo } from "@/componentes/painel/compartilhado/LayoutGerenciadorAcervo";
 
 export interface PropriedadesGerenciadorEquipePainel {
   readonly organizacaoId: string;
@@ -109,6 +110,8 @@ export function GerenciadorEquipePainel({
 
   const ocupado = publicacao.ocupado;
 
+  const [formularioAberto, setFormularioAberto] = useState(false);
+
   function limparFormulario() {
     setIdProfissionalEdicao(null);
     setNomeCompleto("");
@@ -125,6 +128,12 @@ export function GerenciadorEquipePainel({
     setInstagram("");
     setAceitaSolicitacoesDiretas(true);
     setExibirAcoesVitrineNoCartao(true);
+    setFormularioAberto(false);
+  }
+
+  function abrirNovoProfissional() {
+    limparFormulario();
+    setFormularioAberto(true);
   }
 
   function editarProfissional(profissional: ProfissionalEquipe) {
@@ -143,6 +152,7 @@ export function GerenciadorEquipePainel({
     setInstagram(profissional.instagramOpcional ?? "");
     setAceitaSolicitacoesDiretas(profissional.aceitaSolicitacoesDiretas);
     setExibirAcoesVitrineNoCartao(profissional.exibirAcoesVitrineNoCartao ?? true);
+    setFormularioAberto(true);
     referenciaNome.current?.focus();
   }
 
@@ -286,35 +296,8 @@ export function GerenciadorEquipePainel({
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <CabecalhoPublicacaoRapidaAcervo
-        aparencia="clara"
-        titulo="Equipe e Cartões"
-        subtitulo="Organize sua equipe, personalize os cartões digitais e compartilhe os perfis por link ou QR Code."
-        identificadorPublico={identificadorPublico}
-        controle={publicacao}
-      />
-
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <section aria-labelledby="titulo-formulario-especialista" className="min-w-0 space-y-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 text-mineral-800">
-                <Users className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <h2 id="titulo-formulario-especialista" className="text-base font-semibold text-mineral-950">
-                {idProfissionalEdicao ? "Editar perfil e cartão digital" : "Cadastrar especialista"}
-              </h2>
-            </div>
-            <p className="mt-1 text-xs leading-relaxed text-mineral-500">
-              Preencha o perfil e os contatos. Depois de salvar, publique para atualizar o cartão
-              digital.
-            </p>
-          </div>
-
-          <CartaoSuperficie className="min-w-0 rounded-2xl bg-white p-5 shadow-2xs sm:p-6">
-            <form onSubmit={salvarProfissional} className="space-y-4">
+  const formularioProfissional = (
+    <form onSubmit={salvarProfissional} className="space-y-4">
               <CampoFormulario
                 className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
                 ref={referenciaNome}
@@ -503,50 +486,55 @@ export function GerenciadorEquipePainel({
                   </span>
                 </Botao>
 
-                {idProfissionalEdicao ? (
-                  <Botao
-                    variante="fantasma"
-                    tamanho="compacto"
-                    disabled={ocupado}
-                    onClick={limparFormulario}
-                  >
-                    Cancelar edição
-                  </Botao>
-                ) : null}
+                <Botao
+                  type="button"
+                  variante="fantasma"
+                  tamanho="compacto"
+                  disabled={ocupado}
+                  onClick={limparFormulario}
+                >
+                  Cancelar
+                </Botao>
               </div>
             </form>
-          </CartaoSuperficie>
-        </section>
+  );
 
-        <section aria-labelledby="titulo-lista-equipe" className="min-w-0 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 id="titulo-lista-equipe" className="text-base font-semibold text-mineral-950">
-                Sua equipe{" "}
-                <span className="ml-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
-                  {profissionais.length}
-                </span>
-              </h2>
-              <p className="mt-1 text-xs text-mineral-500">
-                Perfis, cartões digitais e contatos em um só lugar.
-              </p>
-            </div>
-            {idProfissionalEdicao && podeEditarConteudo ? (
-              <Botao
-                variante="operacional_secundario"
-                tamanho="compacto"
-                disabled={ocupado}
-                className="rounded-lg border-indigo-200 bg-indigo-50 text-indigo-900 hover:bg-indigo-100"
-                onClick={() => {
-                  limparFormulario();
-                  referenciaNome.current?.focus();
-                }}
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Novo profissional
-              </Botao>
-            ) : null}
-          </div>
+  return (
+    <LayoutGerenciadorAcervo
+      rotuloBotaoNovo="Novo profissional"
+      podeCriar={podeEditarConteudo}
+      aoClicarNovo={abrirNovoProfissional}
+      formularioAberto={formularioAberto}
+      tituloFormulario={
+        idProfissionalEdicao ? "Editar perfil e cartão digital" : "Cadastrar especialista"
+      }
+      subtituloFormulario="Preencha o perfil e os contatos. Depois de salvar, publique para atualizar o cartão digital."
+      aoFecharFormulario={limparFormulario}
+      conteudoFormulario={formularioProfissional}
+      cabecalhoSuperior={
+        <CabecalhoPublicacaoRapidaAcervo
+          aparencia="clara"
+          titulo="Equipe e Cartões"
+          subtitulo="Organize sua equipe, personalize os cartões digitais e compartilhe os perfis por link ou QR Code."
+          identificadorPublico={identificadorPublico}
+          controle={publicacao}
+        />
+      }
+      barraAcoesExtras={
+        <div>
+          <h2 id="titulo-lista-equipe" className="text-base font-semibold text-mineral-950">
+            Sua equipe{" "}
+            <span className="ml-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+              {profissionais.length}
+            </span>
+          </h2>
+          <p className="mt-1 text-xs text-mineral-500">
+            Perfis, cartões digitais e contatos em um só lugar.
+          </p>
+        </div>
+      }
+    >
+      <section aria-labelledby="titulo-lista-equipe" className="min-w-0 space-y-4">
           <div className="flex flex-col gap-2 rounded-xl border border-marfim-200 bg-white p-3 sm:flex-row">
             <div className="relative min-w-0 flex-1">
               <Search
@@ -637,7 +625,6 @@ export function GerenciadorEquipePainel({
             </ul>
           )}
         </section>
-      </div>
-    </div>
+    </LayoutGerenciadorAcervo>
   );
 }

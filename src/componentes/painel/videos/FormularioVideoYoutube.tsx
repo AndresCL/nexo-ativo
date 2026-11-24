@@ -1,23 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Save } from "lucide-react";
 import { Botao } from "@/componentes/interface/Botao";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 import type { VideoYoutubeItem } from "@/dominio/objetos-valor/videoYoutube";
 import { extrairIdVideoYoutube } from "@/dominio/objetos-valor/videoYoutube";
 
 interface PropriedadesFormularioVideoYoutube {
-  readonly aoAdicionar: (video: VideoYoutubeItem) => void;
+  readonly videoEdicao?: VideoYoutubeItem | null;
+  readonly aoSalvar: (video: VideoYoutubeItem) => void;
+  readonly aoCancelar?: () => void;
   readonly salvando?: boolean;
 }
 
 export function FormularioVideoYoutube({
-  aoAdicionar,
+  videoEdicao = null,
+  aoSalvar,
+  aoCancelar,
   salvando = false,
 }: PropriedadesFormularioVideoYoutube) {
-  const [url, setUrl] = useState("");
-  const [titulo, setTitulo] = useState("");
+  const [url, setUrl] = useState(videoEdicao?.url ?? "");
+  const [titulo, setTitulo] = useState(videoEdicao?.titulo ?? "");
   const [erro, setErro] = useState<string | null>(null);
 
   function lidarComEnvio(evento: React.FormEvent) {
@@ -29,8 +33,8 @@ export function FormularioVideoYoutube({
       return;
     }
 
-    aoAdicionar({
-      id: `${idExtraido}-${Date.now()}`,
+    aoSalvar({
+      id: videoEdicao?.id ?? `${idExtraido}-${Date.now()}`,
       url: url.trim(),
       titulo: titulo.trim() || undefined,
     });
@@ -63,16 +67,33 @@ export function FormularioVideoYoutube({
         onChange={(e) => setTitulo(e.target.value)}
       />
 
-      <div className="pt-2">
+      <div className="flex flex-wrap items-center gap-2 pt-2">
         <Botao
           type="submit"
           variante="operacional_primario"
+          tamanho="compacto"
           disabled={salvando}
-          className="w-full gap-2 rounded-lg shadow-2xs"
+          className="gap-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-2xs"
         >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          Adicionar vídeo
+          {videoEdicao ? (
+            <Save className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Plus className="h-4 w-4" aria-hidden="true" />
+          )}
+          <span>{videoEdicao ? "Salvar alterações" : "Adicionar vídeo"}</span>
         </Botao>
+
+        {aoCancelar ? (
+          <Botao
+            type="button"
+            variante="fantasma"
+            tamanho="compacto"
+            disabled={salvando}
+            onClick={aoCancelar}
+          >
+            Cancelar
+          </Botao>
+        ) : null}
       </div>
     </form>
   );

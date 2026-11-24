@@ -35,6 +35,7 @@ import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvisoRecursoRestrito } from "@/componentes/painel/AvisosPublicidade";
 import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { CabecalhoPublicacaoRapidaAcervo } from "./CabecalhoPublicacaoRapidaAcervo";
+import { LayoutGerenciadorAcervo } from "@/componentes/painel/compartilhado/LayoutGerenciadorAcervo";
 
 function gerarIdServico(): string {
   return `srv-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -184,6 +185,8 @@ export function GerenciadorServicosPainel({
     publicarPagina: () => servicoCatalogo.publicarPagina(organizacaoId),
   });
 
+  const [formularioAberto, setFormularioAberto] = useState(false);
+
   function limparFormularioServico() {
     setIdServicoEdicao(null);
     setNomeServico("");
@@ -193,6 +196,12 @@ export function GerenciadorServicosPainel({
     setRotuloPrecoServico("");
     setPrazoServico("");
     setImagensServico([]);
+    setFormularioAberto(false);
+  }
+
+  function abrirNovoServico() {
+    limparFormularioServico();
+    setFormularioAberto(true);
   }
 
   function carregarServicoParaEdicao(servico: ServicoOrganizacao) {
@@ -203,6 +212,7 @@ export function GerenciadorServicosPainel({
     setPrecoServicoTexto(formatarCentavosParaCampoMoeda(servico.precoBaseCentavos));
     setRotuloPrecoServico(servico.rotuloPrecoOpcional ?? "");
     setPrazoServico(servico.prazoOuDuracao ?? "");
+    setFormularioAberto(true);
     setImagensServico(
       obterListaImagensMidia(
         servico.urlImagemOpcional
@@ -265,30 +275,8 @@ export function GerenciadorServicosPainel({
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <CabecalhoPublicacaoRapidaAcervo
-        aparencia="clara"
-        titulo="Serviços"
-        subtitulo="Organize seus serviços, valores e prazos. Publique as atualizações para apresentar suas ofertas na vitrine."
-        identificadorPublico={identificadorPublico}
-        controle={publicacao}
-        exibirSalvarRascunho
-      />
-
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <div className="min-w-0 space-y-4">
-          <div>
-            <h2 className="text-base font-semibold text-mineral-950">
-              {idServicoEdicao ? "Editar serviço" : "Novo serviço"}
-            </h2>
-            <p className="mt-1 text-xs text-mineral-500">
-              Defina o que você oferece e salve. Depois, publique para atualizar sua vitrine.
-            </p>
-          </div>
-
-          <CartaoSuperficie className="min-w-0 rounded-2xl bg-white p-5 shadow-2xs sm:p-6">
-            <form onSubmit={salvarFormularioServico} className="space-y-4">
+  const formularioServico = (
+    <form onSubmit={salvarFormularioServico} className="space-y-4">
             <CampoFormulario
               className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
               ref={referenciaNome}
@@ -396,50 +384,54 @@ export function GerenciadorServicosPainel({
                 <span>{idServicoEdicao ? "Salvar alterações" : "Adicionar serviço"}</span>
               </Botao>
 
-              {idServicoEdicao ? (
-                <Botao
-                  variante="fantasma"
-                  tamanho="compacto"
-                  disabled={salvando || alterandoVisibilidadeId !== null}
-                  onClick={limparFormularioServico}
-                >
-                  Cancelar edição
-                </Botao>
-              ) : null}
-            </div>
-          </form>
-        </CartaoSuperficie>
-      </div>
-
-        <section aria-labelledby="titulo-lista-servicos" className="min-w-0 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 id="titulo-lista-servicos" className="text-base font-semibold text-mineral-950">
-                Seus serviços{" "}
-                <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-mineral-800">
-                  {servicos.length}
-                </span>
-              </h2>
-              <p className="mt-1 text-xs text-mineral-500">
-                Gerencie suas ofertas e a visibilidade na vitrine.
-              </p>
-            </div>
-            {idServicoEdicao && podeEditarConteudo ? (
               <Botao
-                variante="operacional_secundario"
+                type="button"
+                variante="fantasma"
                 tamanho="compacto"
                 disabled={salvando || alterandoVisibilidadeId !== null}
-                className="rounded-lg border-neutral-300 bg-white text-mineral-900 hover:bg-neutral-50 shadow-2xs"
-                onClick={() => {
-                  limparFormularioServico();
-                  referenciaNome.current?.focus();
-                }}
+                onClick={limparFormularioServico}
               >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Novo serviço
+                Cancelar
               </Botao>
-            ) : null}
-          </div>
+            </div>
+          </form>
+  );
+
+  return (
+    <LayoutGerenciadorAcervo
+      rotuloBotaoNovo="Novo serviço"
+      podeCriar={podeEditarConteudo}
+      aoClicarNovo={abrirNovoServico}
+      formularioAberto={formularioAberto}
+      tituloFormulario={idServicoEdicao ? "Editar serviço" : "Novo serviço"}
+      subtituloFormulario="Defina o que você oferece e salve. Depois, publique para atualizar sua vitrine."
+      aoFecharFormulario={limparFormularioServico}
+      conteudoFormulario={formularioServico}
+      cabecalhoSuperior={
+        <CabecalhoPublicacaoRapidaAcervo
+          aparencia="clara"
+          titulo="Serviços"
+          subtitulo="Organize seus serviços, valores e prazos. Publique as atualizações para apresentar suas ofertas na vitrine."
+          identificadorPublico={identificadorPublico}
+          controle={publicacao}
+          exibirSalvarRascunho
+        />
+      }
+      barraAcoesExtras={
+        <div>
+          <h2 id="titulo-lista-servicos" className="text-base font-semibold text-mineral-950">
+            Seus serviços{" "}
+            <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-mineral-800">
+              {servicos.length}
+            </span>
+          </h2>
+          <p className="mt-1 text-xs text-mineral-500">
+            Gerencie suas ofertas e a visibilidade na vitrine.
+          </p>
+        </div>
+      }
+    >
+      <section aria-labelledby="titulo-lista-servicos" className="min-w-0 space-y-4">
           <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-2xs sm:flex-row">
             <div className="relative min-w-0 flex-1">
               <Search
@@ -632,7 +624,6 @@ export function GerenciadorServicosPainel({
             </ul>
           )}
         </section>
-      </div>
-    </div>
+    </LayoutGerenciadorAcervo>
   );
 }

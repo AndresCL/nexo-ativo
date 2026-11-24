@@ -203,9 +203,15 @@ export function VisaoGeralPainel({
           <div className="my-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-marfim-200 bg-marfim-50/50 p-3.5">
             <div className="min-w-0">
               <p className="text-[11px] text-mineral-500">Endereço público oficial</p>
-              <p className="truncate font-mono text-xs font-semibold text-mineral-900">
-                /{identificadorPublico}
-              </p>
+              <a
+                href={`/${identificadorPublico}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex max-w-full items-center gap-1 truncate font-mono text-xs font-semibold text-mineral-900 underline-offset-2 hover:underline"
+              >
+                <span className="truncate">/{identificadorPublico}</span>
+                <ArrowUpRight className="h-3 w-3 shrink-0 text-mineral-500" aria-hidden="true" />
+              </a>
             </div>
 
             <div className="flex items-center gap-2">

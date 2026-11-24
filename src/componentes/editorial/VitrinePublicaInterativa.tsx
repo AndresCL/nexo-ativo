@@ -36,6 +36,7 @@ import { BottomSheetDetalhesItemAcervo } from "./acervo/BottomSheetDetalhesItemA
 import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
 import { GavetaAgendamentoPublico } from "./agenda/GavetaAgendamentoPublico";
 import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
+import { abrirLinkExternoSeguro } from "@/utilitarios/navegacaoLinkExterno";
 import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
 
 export interface PropriedadesVitrinePublicaInterativa {
@@ -495,7 +496,7 @@ export function VitrinePublicaInterativa({
     }
 
     if (/^https?:\/\//i.test(acao.destino)) {
-      window.open(acao.destino, "_blank", "noopener,noreferrer");
+      abrirLinkExternoSeguro(acao.destino);
       return;
     }
 

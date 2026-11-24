@@ -9,6 +9,7 @@ import type { ModoExibicaoVideos, VideoYoutubeItem } from "@/dominio/objetos-val
 import { salvarConfiguracaoVideos } from "@/infraestrutura/painel/servicoVideosYoutubeCliente";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
+import { LayoutGerenciadorAcervo } from "@/componentes/painel/compartilhado/LayoutGerenciadorAcervo";
 import { FormularioVideoYoutube } from "./FormularioVideoYoutube";
 import { ListaVideosPainel } from "./ListaVideosPainel";
 
@@ -38,6 +39,8 @@ export function GerenciadorVideosPainel({
   const [autoplay, setAutoplay] = useState(autoplayInicial);
   const [ocultarTitulo] = useState(ocultarTituloInicial);
   const [salvando, setSalvando] = useState(false);
+  const [formularioAberto, setFormularioAberto] = useState(false);
+  const [videoEdicao, setVideoEdicao] = useState<VideoYoutubeItem | null>(null);
 
   const controlePublicacao = usePublicacaoPagina({
     versaoPublicadaInicial,
@@ -69,9 +72,28 @@ export function GerenciadorVideosPainel({
     }
   }
 
-  function lidarComAdicionar(video: VideoYoutubeItem) {
-    const atualizados = [...videos, video];
+  function fecharFormulario() {
+    setVideoEdicao(null);
+    setFormularioAberto(false);
+  }
+
+  function abrirNovoVideo() {
+    setVideoEdicao(null);
+    setFormularioAberto(true);
+  }
+
+  function abrirEdicaoVideo(video: VideoYoutubeItem) {
+    setVideoEdicao(video);
+    setFormularioAberto(true);
+  }
+
+  function lidarComSalvar(video: VideoYoutubeItem) {
+    const existe = videos.some((v) => v.id === video.id);
+    const atualizados = existe
+      ? videos.map((v) => (v.id === video.id ? video : v))
+      : [...videos, video];
     setVideos(atualizados);
+    fecharFormulario();
     void persistir(atualizados, modoExibicao);
   }
 
@@ -99,46 +121,47 @@ export function GerenciadorVideosPainel({
   }
 
   return (
-    <div className="space-y-6">
-      <CabecalhoPublicacaoRapidaAcervo
-        aparencia="clara"
-        controle={controlePublicacao}
-        titulo="Vídeos do YouTube"
-        subtitulo="Adicione 1 ou mais vídeos do YouTube e escolha como eles serão exibidos na vitrine."
-        identificadorPublico={identificadorPublico}
-      />
-
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <div className="min-w-0 space-y-4">
-          <div>
-            <h2 className="text-base font-semibold text-mineral-950">
-              Novo vídeo
-            </h2>
-            <p className="mt-1 text-xs text-mineral-500">
-              Informe o link do YouTube e título para exibir na sua vitrine.
-            </p>
-          </div>
-
-          <CartaoSuperficie className="min-w-0 rounded-2xl bg-white p-5 shadow-2xs sm:p-6">
-            <FormularioVideoYoutube
-              aoAdicionar={lidarComAdicionar}
-              salvando={salvando}
-            />
-          </CartaoSuperficie>
+    <LayoutGerenciadorAcervo
+      rotuloBotaoNovo="Novo vídeo"
+      podeCriar
+      aoClicarNovo={abrirNovoVideo}
+      formularioAberto={formularioAberto}
+      tituloFormulario={videoEdicao ? "Editar vídeo" : "Novo vídeo"}
+      subtituloFormulario="Informe o link do YouTube e o título para exibir na sua vitrine."
+      aoFecharFormulario={fecharFormulario}
+      conteudoFormulario={
+        <FormularioVideoYoutube
+          key={videoEdicao?.id ?? "novo"}
+          videoEdicao={videoEdicao}
+          aoSalvar={lidarComSalvar}
+          aoCancelar={fecharFormulario}
+          salvando={salvando}
+        />
+      }
+      cabecalhoSuperior={
+        <CabecalhoPublicacaoRapidaAcervo
+          aparencia="clara"
+          controle={controlePublicacao}
+          titulo="Vídeos do YouTube"
+          subtitulo="Adicione 1 ou mais vídeos do YouTube e escolha como eles serão exibidos na vitrine."
+          identificadorPublico={identificadorPublico}
+        />
+      }
+      barraAcoesExtras={
+        <div>
+          <h2 id="titulo-lista-videos" className="text-base font-semibold text-mineral-950">
+            Seus vídeos{" "}
+            <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-mineral-800">
+              {videos.length}
+            </span>
+          </h2>
+          <p className="mt-1 text-xs text-mineral-500">
+            Organize a ordem dos vídeos exibidos na sua vitrine.
+          </p>
         </div>
-
-        <section aria-labelledby="titulo-lista-videos" className="min-w-0 space-y-4">
-          <div>
-            <h2 id="titulo-lista-videos" className="text-base font-semibold text-mineral-950">
-              Seus vídeos{" "}
-              <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-mineral-800">
-                {videos.length}
-              </span>
-            </h2>
-            <p className="mt-1 text-xs text-mineral-500">
-              Organize a ordem dos vídeos exibidos na sua vitrine.
-            </p>
-          </div>
+      }
+    >
+      <section aria-labelledby="titulo-lista-videos" className="min-w-0 space-y-4">
 
           {/* Configuração Geral de Exibição na Vitrine */}
           <CartaoSuperficie className="space-y-3 rounded-2xl bg-white p-4 shadow-2xs">
@@ -212,11 +235,11 @@ export function GerenciadorVideosPainel({
 
           <ListaVideosPainel
             videos={videos}
+            aoEditar={abrirEdicaoVideo}
             aoMover={lidarComMover}
             aoRemover={lidarComRemover}
           />
         </section>
-      </div>
-    </div>
+    </LayoutGerenciadorAcervo>
   );
 }
