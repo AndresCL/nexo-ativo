@@ -8,7 +8,8 @@ import {
   formatarRotuloQrCode,
 } from "@/dominio/analytics/resumoQrCodeEOrigem";
 import { TooltipInformativo } from "@/componentes/interface/TooltipInformativo";
-import { combinarClasses } from "@/utilitarios/combinarClasses";
+import { ItemMetricaLinhaResponsiva } from "@/componentes/painel/desempenho/compartilhado/ItemMetricaLinhaResponsiva";
+import { TabelaDestinosQrCode } from "./TabelaDestinosQrCode";
 
 export interface PropriedadesFunilDesempenhoQrCodes {
   readonly qrCodes: readonly MetricaQrCode[];
@@ -77,8 +78,8 @@ export function FunilDesempenhoQrCodes({ qrCodes }: PropriedadesFunilDesempenhoQ
           id: "leituras",
           nome: "1. Leituras Físicas do QR Code",
           volume: topo,
-          percentualSobreTopo: 100,
-          percentualSobreEtapaAnterior: 100,
+          percentualSobreTopo: topo > 0 ? 100 : 0,
+          percentualSobreEtapaAnterior: topo > 0 ? 100 : 0,
           detalhe: "Usuários que escanearam e abriram a experiência no local",
           cor: "#D97706", // Amber 600
         },
@@ -109,8 +110,8 @@ export function FunilDesempenhoQrCodes({ qrCodes }: PropriedadesFunilDesempenhoQ
         id: "leituras",
         nome: "1. Leituras Físicas do QR Code",
         volume: topo,
-        percentualSobreTopo: 100,
-        percentualSobreEtapaAnterior: 100,
+        percentualSobreTopo: topo > 0 ? 100 : 0,
+        percentualSobreEtapaAnterior: topo > 0 ? 100 : 0,
         detalhe: "Acessos originados de materiais impressos, placas ou balcão",
         cor: "#D97706", // Amber 600
       },
@@ -186,154 +187,52 @@ export function FunilDesempenhoQrCodes({ qrCodes }: PropriedadesFunilDesempenhoQ
           </div>
         </div>
 
-        {/* Sub-cabeçalho Tabular Flat Padronizado */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2 px-3 text-[11px] font-medium text-mineral-400">
-          <span className="min-w-0 flex-1">Etapa de Conversão</span>
-          <div className="flex items-center gap-4 text-right shrink-0">
-            <span className="w-14 sm:w-16 text-right">Volume</span>
-            <span className="w-14 sm:w-16 text-right">% Topo</span>
-            <span className="w-14 sm:w-16 text-right">vs. Anterior</span>
-          </div>
-        </div>
-
-        {/* Estágios do Funil de QR Code Alinhados */}
-        <div className="space-y-1">
-          {etapas.map((etapa, indice) => {
-            const larguraBarra = `${Math.max(etapa.percentualSobreTopo, 3)}%`;
-
-            return (
-              <div
-                key={etapa.id}
-                className="rounded-xl px-3 py-2 transition-colors hover:bg-slate-50/70"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span
-                      className="h-3.5 w-1 shrink-0 rounded-full"
-                      style={{ backgroundColor: etapa.cor }}
-                      aria-hidden="true"
+        {/* Estágios do Funil de QR Code Responsivos */}
+        <div className="divide-y divide-slate-100">
+          {etapas.map((etapa, indice) => (
+            <ItemMetricaLinhaResponsiva
+              key={etapa.id}
+              corIndicador={etapa.cor}
+              percentualBarra={etapa.percentualSobreTopo}
+              titulo={
+                <span className="inline-flex items-center gap-1.5 font-bold">
+                  <span>{etapa.nome}</span>
+                  {etapa.detalhe ? (
+                    <TooltipInformativo
+                      texto={etapa.detalhe}
+                      tamanhoIcone={12}
+                      alinhamento="centro"
                     />
-                    <span className="text-xs font-bold text-mineral-950 truncate">
-                      {etapa.nome}
-                    </span>
-                    {etapa.detalhe ? (
-                      <TooltipInformativo
-                        texto={etapa.detalhe}
-                        tamanhoIcone={12}
-                        alinhamento="centro"
-                      />
-                    ) : null}
-                  </div>
-
-                  <div className="flex items-center gap-4 text-right shrink-0">
-                    <span className="w-14 sm:w-16 text-right font-bold tabular-nums text-xs text-mineral-950">
-                      {etapa.volume.toLocaleString("pt-BR")}
-                    </span>
-                    <span className="w-14 sm:w-16 text-right font-semibold tabular-nums text-xs text-mineral-800">
-                      {etapa.percentualSobreTopo}%
-                    </span>
-                    <span className="w-14 sm:w-16 text-right font-medium tabular-nums text-xs text-mineral-400">
-                      {indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Barra de Progresso Fina Flat com Cor */}
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: larguraBarra,
-                      backgroundColor: etapa.cor,
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+                  ) : null}
+                </span>
+              }
+              metricas={[
+                {
+                  rotulo: "Volume",
+                  valor: etapa.volume.toLocaleString("pt-BR"),
+                  destaque: "forte",
+                },
+                {
+                  rotulo: "% Topo",
+                  valor: `${etapa.percentualSobreTopo}%`,
+                  destaque: "medio",
+                },
+                {
+                  rotulo: "vs. Anterior",
+                  valor: indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—",
+                  destaque: "suave",
+                },
+              ]}
+            />
+          ))}
         </div>
 
-        {/* Tabela de Destinos de QR Code */}
-        {qrCodes.length > 0 ? (
-          <div className="pt-2">
-            <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white">
-              <table className="w-full text-left text-xs">
-                <caption className="sr-only">Desempenho detalhado por destino de QR Code</caption>
-                <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-medium text-mineral-500">
-                  <tr>
-                    <th scope="col" className="px-4 py-2.5">
-                      Destino do QR Code
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right">
-                      Leituras Físicas
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right">
-                      Fluxos Iniciados
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 text-right">
-                      Conclusões + WhatsApp
-                    </th>
-                    <th scope="col" className="px-4 py-2.5 text-right">
-                      Taxa de Conversão
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {qrCodes.map((qr) => {
-                    const conversoes = qr.conclusoesFluxo + qr.contatosWhatsapp;
-                    const taxa =
-                      qr.visualizacoes > 0
-                        ? `${Math.round((conversoes / qr.visualizacoes) * 1000) / 10}%`
-                        : "—";
-                    const selecionado = destinoSelecionado === qr.codigo;
-
-                    return (
-                      <tr
-                        key={qr.codigo}
-                        onClick={() =>
-                          setDestinoSelecionado(selecionado ? "todos" : qr.codigo)
-                        }
-                        className={combinarClasses(
-                          "cursor-pointer transition-colors",
-                          selecionado
-                            ? "bg-slate-50/90 font-medium"
-                            : "hover:bg-slate-50/50 text-mineral-700",
-                        )}
-                      >
-                        <td className="px-4 py-2.5 font-medium text-mineral-950">
-                          <div className="flex items-center gap-2">
-                            <span>{formatarRotuloQrCode(qr.codigo)}</span>
-                            {selecionado ? (
-                              <span className="rounded-full bg-mineral-950 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
-                                Ativo
-                              </span>
-                            ) : null}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2.5 text-right tabular-nums font-bold text-mineral-950">
-                          {qr.visualizacoes.toLocaleString("pt-BR")}
-                        </td>
-                        <td className="px-3 py-2.5 text-right tabular-nums font-medium text-mineral-700">
-                          {qr.aberturasFluxo.toLocaleString("pt-BR")}
-                        </td>
-                        <td className="px-3 py-2.5 text-right tabular-nums font-bold text-mineral-900">
-                          {conversoes.toLocaleString("pt-BR")}
-                        </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-mineral-900">
-                          {taxa}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <p className="py-4 text-center text-xs text-mineral-500">
-            Nenhum acesso via QR Code rastreado neste período ainda.
-          </p>
-        )}
+        {/* Lista Responsiva de Destinos de QR Code */}
+        <TabelaDestinosQrCode
+          qrCodes={qrCodes}
+          destinoSelecionado={destinoSelecionado}
+          aoSelecionarDestino={setDestinoSelecionado}
+        />
       </div>
     </section>
   );

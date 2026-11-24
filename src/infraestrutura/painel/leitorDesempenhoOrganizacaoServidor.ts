@@ -195,6 +195,12 @@ function reconstruirMetricasDiariasDeDocFirestore(
     dataIso: dados.dataIso as string,
     visualizacoesVitrine: Number(dados.visualizacoesVitrine || 0),
     visualizacoesCartao: Number(dados.visualizacoesCartao || 0),
+    ...(dados.sessoesUnicas !== undefined
+      ? { sessoesUnicas: Number(dados.sessoesUnicas || 0) }
+      : {}),
+    ...(dados.sessoesComCliqueAcao !== undefined
+      ? { sessoesComCliqueAcao: Number(dados.sessoesComCliqueAcao || 0) }
+      : {}),
     cliquesAcoesHome: Number(dados.cliquesAcoesHome || 0),
     aberturasMicrofluxo: Number(dados.aberturasMicrofluxo || 0),
     conclusoesMicrofluxo: Number(dados.conclusoesMicrofluxo || 0),

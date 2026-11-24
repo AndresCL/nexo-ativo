@@ -33,17 +33,22 @@ describe("FunilDesempenhoQrCodes", () => {
     expect(screen.queryByText("Materiais Impressos & Balcão")).not.toBeInTheDocument();
   });
 
-  it("renderiza as etapas do funil com colunas tabulares e valores corretos", () => {
+  it("renderiza as etapas do funil com métricas responsivas e valores corretos", () => {
     render(<FunilDesempenhoQrCodes qrCodes={qrCodesMock} />);
 
-    expect(screen.getByText("Etapa de Conversão")).toBeInTheDocument();
-    expect(screen.getByText("Volume")).toBeInTheDocument();
-    expect(screen.getByText("% Topo")).toBeInTheDocument();
-    expect(screen.getByText("vs. Anterior")).toBeInTheDocument();
+    expect(screen.getAllByText("Volume").length).toBe(3);
+    expect(screen.getAllByText("% Topo").length).toBe(3);
+    expect(screen.getAllByText("vs. Anterior").length).toBe(3);
 
     expect(screen.getByText("1. Leituras Físicas do QR Code")).toBeInTheDocument();
     expect(screen.getByText("2. Engajamento em Microfluxos")).toBeInTheDocument();
     expect(screen.getByText("3. Conversões Comerciais")).toBeInTheDocument();
+  });
+
+  it("exibe 0% no topo quando não há leituras de QR Code", () => {
+    render(<FunilDesempenhoQrCodes qrCodes={[]} />);
+
+    expect(screen.queryByText("100%")).not.toBeInTheDocument();
   });
 
   it("permite filtrar por destino específico e atualizar a visualização", () => {

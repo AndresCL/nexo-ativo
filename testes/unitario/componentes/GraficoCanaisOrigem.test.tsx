@@ -47,15 +47,14 @@ describe("GraficoCanaisOrigem", () => {
     expect(screen.getByText("cliques no WhatsApp")).toBeInTheDocument();
   });
 
-  it("renderiza a tabela de canais com colunas tabulares e valores corretos", () => {
+  it("renderiza as linhas responsivas de canais com rótulos e métricas corretas", () => {
     render(<GraficoCanaisOrigem canais={canaisMock} identificadorOrganizacao="minha-loja" />);
 
-    // Cabeçalho da tabela
-    expect(screen.getByText("Canal de Origem")).toBeInTheDocument();
-    expect(screen.getByText("Visitas")).toBeInTheDocument();
-    expect(screen.getByText("Fluxos")).toBeInTheDocument();
-    expect(screen.getAllByText("WhatsApp").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("% Share")).toBeInTheDocument();
+    // Rótulos de métricas em cada linha responsiva
+    expect(screen.getAllByText("Visitas").length).toBe(3);
+    expect(screen.getAllByText("Fluxos").length).toBe(3);
+    expect(screen.getAllByText("WhatsApp").length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByText("% Share").length).toBe(3);
 
     // Rótulos dos canais
     expect(screen.getByText("Cartões VIP da Equipe")).toBeInTheDocument();

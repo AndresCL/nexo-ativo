@@ -132,9 +132,20 @@ export class CalculadorMetricasCRO {
    * Consolida o conjunto completo das 4 métricas CRO a partir dos dados de entrada.
    */
   public static consolidarResumo(dados: EntradaDadosMetricasCRO): ResumoMetricasCRO {
+    const ctr =
+      dados.sessoesComCliqueAcao !== undefined
+        ? calcularTaxaExplicada(
+            dados.sessoesComCliqueAcao,
+            dados.visitantesOuSessoes,
+            dados.sessoesComCliqueAcao === 1 ? "sessão com clique" : "sessões com clique",
+            dados.visitantesOuSessoes === 1 ? "sessão" : "sessões",
+            "Mede a proporção de sessões únicas que interagiram com botões e chamadas de ação da vitrine.",
+          )
+        : this.calcularCTR(dados.cliquesAcaoTotais, dados.visitantesOuSessoes);
+
     return {
       entradas: dados,
-      ctr: this.calcularCTR(dados.cliquesAcaoTotais, dados.visitantesOuSessoes),
+      ctr,
       cvrContato: this.calcularCVRContato(dados.contatosUnicos, dados.visitantesOuSessoes),
       taxaLeadsQualificados: this.calcularTaxaLeadsQualificados(
         dados.leadsQualificados,
@@ -157,11 +168,21 @@ export class CalculadorMetricasCRO {
    */
   public static construirEtapasFunil(dados: EntradaDadosMetricasCRO): readonly EtapaFunilCRO[] {
     const topo = Math.max(0, dados.visitantesOuSessoes);
+    const usandoSessoesUnicas = dados.sessoesComCliqueAcao !== undefined;
+    const volumeInteracoes = usandoSessoesUnicas
+      ? Math.max(0, dados.sessoesComCliqueAcao!)
+      : Math.max(0, dados.cliquesAcaoTotais);
 
     function calcPct(parte: number, base: number): number {
       if (base <= 0 || parte <= 0) return 0;
       return arredondarTaxaPercentual((parte / base) * 100);
     }
+
+    const detalheInteracoes = usandoSessoesUnicas
+      ? `Sessões únicas que clicaram (${dados.cliquesAcaoTotais.toLocaleString("pt-BR")} cliques totais)`
+      : dados.usandoContagemLegada
+        ? "Contagem legada de cliques totais (pode incluir múltiplos cliques por visita)"
+        : "Interações em botões, WhatsApp e aberturas de fluxo";
 
     return [
       {
@@ -170,16 +191,18 @@ export class CalculadorMetricasCRO {
         volume: topo,
         percentualSobreTopo: topo > 0 ? 100 : 0,
         percentualSobreEtapaAnterior: topo > 0 ? 100 : 0,
-        detalhe: "Pessoas que acessaram a vitrine ou cartões VIP",
+        detalhe: usandoSessoesUnicas
+          ? "Sessões únicas na vitrine ou cartões VIP"
+          : "Pessoas que acessaram a vitrine ou cartões VIP",
         cor: "#4F46E5", // Indigo
       },
       {
         id: "interacoes",
         nome: "2. Cliques de Ação (CTR)",
-        volume: dados.cliquesAcaoTotais,
-        percentualSobreTopo: calcPct(dados.cliquesAcaoTotais, topo),
-        percentualSobreEtapaAnterior: calcPct(dados.cliquesAcaoTotais, topo),
-        detalhe: "Interações em botões, WhatsApp e aberturas de fluxo",
+        volume: volumeInteracoes,
+        percentualSobreTopo: calcPct(volumeInteracoes, topo),
+        percentualSobreEtapaAnterior: calcPct(volumeInteracoes, topo),
+        detalhe: detalheInteracoes,
         cor: "#0284C7", // Sky
       },
       {
@@ -187,7 +210,7 @@ export class CalculadorMetricasCRO {
         nome: "3. Contatos Gerados (CVR)",
         volume: dados.contatosUnicos,
         percentualSobreTopo: calcPct(dados.contatosUnicos, topo),
-        percentualSobreEtapaAnterior: calcPct(dados.contatosUnicos, dados.cliquesAcaoTotais),
+        percentualSobreEtapaAnterior: calcPct(dados.contatosUnicos, volumeInteracoes),
         detalhe: "Formulários submetidos e conversas iniciadas",
         cor: "#8B5CF6", // Violet
       },

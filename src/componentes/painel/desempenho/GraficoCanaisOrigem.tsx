@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { copiarTextoComAviso } from "@/componentes/interface/notificacoes/copiarTextoComAviso";
+import { ItemMetricaLinhaResponsiva } from "@/componentes/painel/desempenho/compartilhado/ItemMetricaLinhaResponsiva";
 import type {
   CanalOrigemTrafego,
   MetricaCanalOrigem,
@@ -143,84 +144,63 @@ export function GraficoCanaisOrigem({
           </div>
         </div>
 
-        {/* Tabela Flat de Canais com Alinhamento Tabular */}
-        <div className="pt-2">
-          {/* Subcabeçalho da Tabela */}
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 px-2.5 text-[11px] font-medium text-mineral-400">
-            <span className="min-w-0 flex-1">Canal de Origem</span>
-            <div className="flex items-center gap-2 sm:gap-4 text-right shrink-0">
-              <span className="w-12 sm:w-16 text-right">Visitas</span>
-              <span className="w-10 sm:w-14 text-right">Fluxos</span>
-              <span className="w-12 sm:w-16 text-right">WhatsApp</span>
-              <span className="w-10 sm:w-14 text-right">% Share</span>
-              <span className="w-7 text-center">Link</span>
-            </div>
-          </div>
+        {/* Lista Responsiva de Canais (Título em linha própria + métricas compactas) */}
+        <div className="divide-y divide-slate-100 pt-1">
+          {canais.map((canal) => {
+            const config = CONFIG_CANAIS[canal.canal] ?? CONFIG_CANAIS.direto;
+            const Icone = config.icone;
+            const pctVisitas =
+              totalVisitas > 0 ? Math.round((canal.visualizacoes / totalVisitas) * 100) : 0;
 
-          {/* Linhas da Tabela */}
-          <div className="space-y-0.5 divide-y divide-slate-50 pt-1">
-            {canais.map((canal) => {
-              const config = CONFIG_CANAIS[canal.canal] ?? CONFIG_CANAIS.direto;
-              const Icone = config.icone;
-              const pctVisitas =
-                totalVisitas > 0 ? Math.round((canal.visualizacoes / totalVisitas) * 100) : 0;
-
-              return (
-                <div
-                  key={canal.canal}
-                  className="flex items-center justify-between gap-2 sm:gap-4 rounded-xl px-2.5 py-2 transition-colors hover:bg-slate-50/70"
-                >
-                  {/* Indicador de Cor + Ícone + Nome do Canal */}
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <span
-                      className="h-4 w-1 shrink-0 rounded-full"
-                      style={{ backgroundColor: config.corBarra }}
-                      aria-hidden="true"
-                    />
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200/60 bg-slate-100 text-mineral-700">
-                      <Icone className="h-3.5 w-3.5" aria-hidden="true" />
-                    </span>
-                    <span className="truncate text-xs font-semibold text-mineral-950">
-                      {canal.rotulo}
-                    </span>
-                  </div>
-
-                  {/* Colunas Tabulares */}
-                  <div className="flex items-center gap-2 sm:gap-4 text-right shrink-0">
-                    <span className="w-12 sm:w-16 text-right text-xs font-bold tabular-nums text-mineral-950">
-                      {canal.visualizacoes.toLocaleString("pt-BR")}
-                    </span>
-                    <span className="w-10 sm:w-14 text-right text-xs font-medium tabular-nums text-mineral-600">
-                      {canal.aberturasFluxo.toLocaleString("pt-BR")}
-                    </span>
-                    <span className="w-12 sm:w-16 text-right text-xs font-medium tabular-nums text-mineral-600">
-                      {canal.contatosWhatsapp.toLocaleString("pt-BR")}
-                    </span>
-                    <span className="w-10 sm:w-14 text-right text-xs font-semibold tabular-nums text-mineral-800">
-                      {pctVisitas}%
-                    </span>
-
-                    {/* Botão de Cópia Discreto */}
-                    <div className="w-7 flex items-center justify-center">
-                      {config.parametroUrl ? (
-                        <button
-                          type="button"
-                          onClick={() => copiarParametro(config.parametroUrl)}
-                          aria-label={`Copiar link rastreado para ${canal.rotulo}`}
-                          title={`Copiar link rastreado para ${canal.rotulo}`}
-                          className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-white text-mineral-400 transition-colors hover:border-slate-300 hover:text-mineral-950 cursor-pointer shadow-2xs"
-                        >
-                          <Copy className="h-3 w-3" aria-hidden="true" />
-                        </button>
-                      ) : (
-                        <span className="h-6 w-6 block" aria-hidden="true" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+            return (
+              <ItemMetricaLinhaResponsiva
+                key={canal.canal}
+                titulo={canal.rotulo}
+                corIndicador={config.corBarra}
+                atenuado={canal.visualizacoes === 0 && canal.aberturasFluxo === 0 && canal.contatosWhatsapp === 0}
+                icone={
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-slate-200/60 bg-slate-100 text-mineral-700">
+                    <Icone className="h-3.5 w-3.5" aria-hidden="true" />
+                  </span>
+                }
+                acaoDireita={
+                  config.parametroUrl ? (
+                    <button
+                      type="button"
+                      onClick={() => copiarParametro(config.parametroUrl)}
+                      aria-label={`Copiar link rastreado para ${canal.rotulo}`}
+                      title={`Copiar link rastreado para ${canal.rotulo}`}
+                      className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-white text-mineral-400 transition-colors hover:border-slate-300 hover:text-mineral-950 cursor-pointer shadow-2xs"
+                    >
+                      <Copy className="h-3 w-3" aria-hidden="true" />
+                    </button>
+                  ) : null
+                }
+                metricas={[
+                  {
+                    rotulo: "Visitas",
+                    valor: canal.visualizacoes.toLocaleString("pt-BR"),
+                    destaque: "forte",
+                  },
+                  {
+                    rotulo: "Fluxos",
+                    valor: canal.aberturasFluxo.toLocaleString("pt-BR"),
+                    destaque: "suave",
+                  },
+                  {
+                    rotulo: "WhatsApp",
+                    valor: canal.contatosWhatsapp.toLocaleString("pt-BR"),
+                    destaque: "suave",
+                  },
+                  {
+                    rotulo: "% Share",
+                    valor: `${pctVisitas}%`,
+                    destaque: "medio",
+                  },
+                ]}
+              />
+            );
+          })}
         </div>
 
         {/* Nota Informativa Flat */}

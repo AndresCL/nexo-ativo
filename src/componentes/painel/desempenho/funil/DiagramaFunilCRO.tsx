@@ -8,6 +8,7 @@ import type {
 } from "@/dominio/analytics/tiposMetricasAgregadas";
 import type { ItemExperienciaPainel } from "@/infraestrutura/painel/leitorDesempenhoOrganizacaoServidor";
 import { ConectorAbandonoFunil } from "./ConectorAbandonoFunil";
+import { ItemMetricaLinhaResponsiva } from "@/componentes/painel/desempenho/compartilhado/ItemMetricaLinhaResponsiva";
 import { TooltipInformativo } from "@/componentes/interface/TooltipInformativo";
 import { analisarTopologiaFunil } from "@/dominio/microfluxos/analisadorTopologiaFunil";
 import {
@@ -204,28 +205,19 @@ export function DiagramaFunilCRO({
 
       {/* Card com os Estágios Detalhados do Funil CRO */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs sm:p-6 space-y-3">
-        {/* Sub-cabeçalho Tabular Flat Padronizado */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 text-xs">
-          <div className="flex items-center gap-2 min-w-0">
-            <Layers className="h-4 w-4 text-mineral-700 shrink-0" />
-            <span className="font-semibold text-mineral-900 truncate">
-              {experienciaIdSelecionada === "todas"
-                ? "Estágios Globais do Negócio"
-                : `Funil Individual: ${microfluxoSelecionado?.titulo}`}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-right text-[11px] font-medium text-mineral-400 shrink-0">
-            <span className="w-14 sm:w-16 text-right">Volume</span>
-            <span className="w-14 sm:w-16 text-right">% Topo</span>
-            <span className="w-14 sm:w-16 text-right">vs. Anterior</span>
-          </div>
+        {/* Sub-cabeçalho com Título do Funil Ativo */}
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5 text-xs">
+          <Layers className="h-4 w-4 text-mineral-700 shrink-0" />
+          <span className="font-semibold text-mineral-900 break-words">
+            {experienciaIdSelecionada === "todas"
+              ? "Estágios Globais do Negócio"
+              : `Funil Individual: ${microfluxoSelecionado?.titulo}`}
+          </span>
         </div>
 
-        {/* Estágios Visuais Alinhados Tabularmente */}
+        {/* Estágios Visuais Responsivos (Título em linha própria + métricas compactas) */}
         <div className="space-y-0.5">
           {estagios.map((etapa, indice) => {
-            const larguraBarra = `${Math.max(etapa.percentualSobreTopo, 3)}%`;
             const proximaEtapa = estagios[indice + 1];
 
             if (etapa.tipo === "ramificado") {
@@ -233,12 +225,12 @@ export function DiagramaFunilCRO({
 
               return (
                 <div key={etapa.id}>
-                  <div className="rounded-xl px-3 py-2 transition-colors hover:bg-slate-50/70">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <span className="text-xs font-bold text-mineral-950 truncate">
-                          {etapa.nome}
-                        </span>
+                  <ItemMetricaLinhaResponsiva
+                    corIndicador={etapa.cor || "#4F46E5"}
+                    percentualBarra={etapa.percentualSobreTopo}
+                    titulo={
+                      <span className="inline-flex flex-wrap items-center gap-1.5 font-bold">
+                        <span>{etapa.nome}</span>
                         {etapa.detalhe ? (
                           <TooltipInformativo
                             texto={etapa.detalhe}
@@ -249,81 +241,78 @@ export function DiagramaFunilCRO({
                         <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[9px] font-semibold text-slate-700 shrink-0">
                           Decisão de Rota
                         </span>
+                      </span>
+                    }
+                    metricas={[
+                      {
+                        rotulo: "Volume",
+                        valor: etapa.volume.toLocaleString("pt-BR"),
+                        destaque: "forte",
+                      },
+                      {
+                        rotulo: "% Topo",
+                        valor: `${etapa.percentualSobreTopo}%`,
+                        destaque: "medio",
+                      },
+                      {
+                        rotulo: "vs. Anterior",
+                        valor: indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—",
+                        destaque: "suave",
+                      },
+                    ]}
+                  />
+
+                  {/* Sub-rotas alternativas dentro do nó de decisão */}
+                  {etapa.rotas.length > 0 ? (
+                    <div className="mx-3 mt-1 mb-2 pt-2 border-t border-slate-100 space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-mineral-600">
+                        <GitFork className="h-3 w-3 text-mineral-500" />
+                        <span>Distribuição das Rotas:</span>
                       </div>
 
-                      <div className="flex items-center gap-4 text-right shrink-0">
-                        <span className="w-14 sm:w-16 text-right font-bold tabular-nums text-xs text-mineral-950">
-                          {etapa.volume.toLocaleString("pt-BR")}
-                        </span>
-                        <span className="w-14 sm:w-16 text-right font-semibold tabular-nums text-xs text-mineral-800">
-                          {etapa.percentualSobreTopo}%
-                        </span>
-                        <span className="w-14 sm:w-16 text-right font-medium tabular-nums text-xs text-mineral-400">
-                          {indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Barra de Progresso Fina Flat com Cor do Estágio */}
-                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: larguraBarra, backgroundColor: etapa.cor || "#4F46E5" }}
-                      />
-                    </div>
-
-                    {/* Sub-rotas alternativas dentro do nó de decisão */}
-                    {etapa.rotas.length > 0 ? (
-                      <div className="mt-2.5 pt-2 border-t border-slate-100 space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-mineral-600">
-                          <GitFork className="h-3 w-3 text-mineral-500" />
-                          <span>Distribuição das Rotas:</span>
-                        </div>
-
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          {etapa.rotas.map((rota) => {
-                            const larguraRota = `${Math.max(rota.percentualSobreDecisao, 2)}%`;
-                            return (
-                              <div
-                                key={rota.opcaoId}
-                                className="rounded-lg border border-slate-200/70 bg-slate-50/50 p-2.5 space-y-1"
-                              >
-                                <div className="flex items-start justify-between gap-1.5">
-                                  <span className="text-[11px] font-semibold text-mineral-900 leading-tight">
-                                    {rota.rotuloOpcao}
-                                  </span>
-                                  <span className="text-[11px] font-bold tabular-nums text-mineral-950 shrink-0">
-                                    {rota.volume.toLocaleString("pt-BR")}
-                                  </span>
-                                </div>
-
-                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
-                                  <div
-                                    className="h-full rounded-full bg-slate-700 transition-all duration-500"
-                                    style={{ width: larguraRota }}
-                                  />
-                                </div>
-
-                                <div className="flex items-center justify-between text-[10px] text-mineral-500">
-                                  <span>{rota.percentualSobreTopo}% do topo</span>
-                                  <span className="font-medium text-mineral-600">
-                                    ({rota.percentualSobreDecisao}% desta decisão)
-                                  </span>
-                                </div>
-
-                                {rota.etapasInternas.length > 0 ? (
-                                  <div className="pt-1 border-t border-slate-200/60 text-[10px] text-mineral-600">
-                                    <span className="text-mineral-400">Passo da rota: </span>
-                                    {rota.etapasInternas.map((e) => e.titulo).join(" → ")}
-                                  </div>
-                                ) : null}
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {etapa.rotas.map((rota) => {
+                          const larguraRota = `${Math.max(rota.percentualSobreDecisao, 2)}%`;
+                          return (
+                            <div
+                              key={rota.opcaoId}
+                              className="rounded-lg border border-slate-200/70 bg-slate-50/50 p-2.5 space-y-1"
+                            >
+                              <div className="flex items-start justify-between gap-1.5">
+                                <span className="text-[11px] font-semibold text-mineral-900 leading-tight">
+                                  {rota.rotuloOpcao}
+                                </span>
+                                <span className="text-[11px] font-bold tabular-nums text-mineral-950 shrink-0">
+                                  {rota.volume.toLocaleString("pt-BR")}
+                                </span>
                               </div>
-                            );
-                          })}
-                        </div>
+
+                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                                <div
+                                  className="h-full rounded-full bg-slate-700 transition-all duration-500"
+                                  style={{ width: larguraRota }}
+                                />
+                              </div>
+
+                              <div className="flex items-center justify-between text-[10px] text-mineral-500">
+                                <span>{rota.percentualSobreTopo}% do topo</span>
+                                <span className="font-medium text-mineral-600">
+                                  ({rota.percentualSobreDecisao}% desta decisão)
+                                </span>
+                              </div>
+
+                              {rota.etapasInternas.length > 0 ? (
+                                <div className="pt-1 border-t border-slate-200/60 text-[10px] text-mineral-600">
+                                  <span className="text-mineral-400">Passo da rota: </span>
+                                  {rota.etapasInternas.map((e) => e.titulo).join(" → ")}
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        })}
                       </div>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
 
                   {/* Conector de Abandono da Decisão Compacto */}
                   {proximaEtapa ? (
@@ -337,18 +326,18 @@ export function DiagramaFunilCRO({
               );
             }
 
-            // Estágio Linear Simples Alinhado Tabularmente
+            // Estágio Linear Simples Responsivo
             const perda = proximaEtapa ? Math.max(etapa.volume - proximaEtapa.volume, 0) : 0;
             const ehMaiorGargalo = perda === maiorPerda && maiorPerda > 0;
 
             return (
               <div key={etapa.id}>
-                <div className="rounded-xl px-3 py-2 transition-colors hover:bg-slate-50/70">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <span className="text-xs font-bold text-mineral-950 truncate">
-                        {etapa.nome}
-                      </span>
+                <ItemMetricaLinhaResponsiva
+                  corIndicador={etapa.cor || "#4F46E5"}
+                  percentualBarra={etapa.percentualSobreTopo}
+                  titulo={
+                    <span className="inline-flex flex-wrap items-center gap-1.5 font-bold">
+                      <span>{etapa.nome}</span>
                       {etapa.detalhe ? (
                         <TooltipInformativo
                           texto={etapa.detalhe}
@@ -356,29 +345,26 @@ export function DiagramaFunilCRO({
                           alinhamento="centro"
                         />
                       ) : null}
-                    </div>
-
-                    <div className="flex items-center gap-4 text-right shrink-0">
-                      <span className="w-14 sm:w-16 text-right font-bold tabular-nums text-xs text-mineral-950">
-                        {etapa.volume.toLocaleString("pt-BR")}
-                      </span>
-                      <span className="w-14 sm:w-16 text-right font-semibold tabular-nums text-xs text-mineral-800">
-                        {etapa.percentualSobreTopo}%
-                      </span>
-                      <span className="w-14 sm:w-16 text-right font-medium tabular-nums text-xs text-mineral-400">
-                        {indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Barra de Progresso Fina Flat com Cor do Estágio */}
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{ width: larguraBarra, backgroundColor: etapa.cor || "#4F46E5" }}
-                    />
-                  </div>
-                </div>
+                    </span>
+                  }
+                  metricas={[
+                    {
+                      rotulo: "Volume",
+                      valor: etapa.volume.toLocaleString("pt-BR"),
+                      destaque: "forte",
+                    },
+                    {
+                      rotulo: "% Topo",
+                      valor: `${etapa.percentualSobreTopo}%`,
+                      destaque: "medio",
+                    },
+                    {
+                      rotulo: "vs. Anterior",
+                      valor: indice > 0 ? `${etapa.percentualSobreEtapaAnterior}%` : "—",
+                      destaque: "suave",
+                    },
+                  ]}
+                />
 
                 {/* Conector de Abandono Compacto */}
                 {proximaEtapa ? (

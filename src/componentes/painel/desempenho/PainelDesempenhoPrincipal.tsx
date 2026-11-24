@@ -21,6 +21,10 @@ import { GraficoCanaisOrigem } from "./GraficoCanaisOrigem";
 import { EstatisticasExperiencias } from "./EstatisticasExperiencias";
 import { FunilDesempenhoQrCodes } from "./qrcodes/FunilDesempenhoQrCodes";
 import { TabelaPerformanceEquipe } from "./equipe/TabelaPerformanceEquipe";
+import {
+  NavegacaoAbasDesempenho,
+  type IdAbaDesempenho,
+} from "./compartilhado/NavegacaoAbasDesempenho";
 
 export type { ItemExperienciaPainel };
 
@@ -39,6 +43,7 @@ export function PainelDesempenhoPrincipal({
 }: PropriedadesPainelDesempenhoPrincipal) {
   const [mesSelecionado, setMesSelecionado] = useState<string>("todos");
   const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
+  const [abaAtiva, setAbaAtiva] = useState<IdAbaDesempenho>("visao_geral");
 
   // Extrai lista única de Ano-Mês ordenados decrescentes
   const mesesDisponiveis = useMemo(() => {
@@ -87,20 +92,20 @@ export function PainelDesempenhoPrincipal({
   }, [historicoDoMes]);
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-clip">
       {/* Cabeçalho Editorial com Seletor de Período e Cópia para IA */}
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-marfim-200/80 pb-6">
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold tracking-tight text-mineral-950 sm:text-2xl">
             Desempenho & Conversão
           </h1>
-          <p className="mt-1 text-xs text-mineral-600">
+          <p className="mt-1 text-xs leading-relaxed text-mineral-600">
             Acompanhe a interação (CTR), captação (CVR), qualificação de leads e fechamento comercial.
           </p>
         </div>
 
         {/* Controles do Período e Exportação para IA */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex max-w-full flex-wrap items-center gap-2.5">
           <BotaoCopiarRelatorioIA
             descricaoEscopo={obterRotuloPeriodoRelatorio(mesSelecionado, diaSelecionado)}
             gerarTexto={() =>
@@ -119,8 +124,8 @@ export function PainelDesempenhoPrincipal({
             }
           />
 
-          <div className="flex items-center gap-2.5 rounded-xl border border-marfim-300 bg-white px-3.5 py-2 shadow-xs transition-all hover:border-marfim-400">
-            <Calendar className="h-4 w-4 text-mineral-600" aria-hidden="true" />
+          <div className="flex max-w-full items-center gap-2.5 rounded-xl border border-marfim-300 bg-white px-3.5 py-2 shadow-xs transition-all hover:border-marfim-400">
+            <Calendar className="h-4 w-4 shrink-0 text-mineral-600" aria-hidden="true" />
             <label htmlFor="seletor-periodo-metricas" className="sr-only">
               Filtrar período
             </label>
@@ -131,7 +136,7 @@ export function PainelDesempenhoPrincipal({
                 setMesSelecionado(e.target.value);
                 setDiaSelecionado(null);
               }}
-              className="cursor-pointer border-none bg-transparent text-xs font-semibold text-mineral-900 focus:outline-none"
+              className="max-w-full cursor-pointer border-none bg-transparent text-xs font-semibold text-mineral-900 focus:outline-none"
             >
               <option value="todos">Últimos 30 dias (visão recente)</option>
               {mesesDisponiveis.map((mes) => {
@@ -151,54 +156,70 @@ export function PainelDesempenhoPrincipal({
         </div>
       </header>
 
-      {/* Indicadores de Conversão CRO com Fórmulas e Sparklines */}
-      <GradeIndicadoresCRO
-        resumoMetricas={metricasAtivas}
-        historicoCronologico={historicoCronologico}
-        diaSelecionado={diaSelecionado}
-        mesSelecionado={mesSelecionado}
-      />
+      {/* Navegação por Abas: do Geral ao Particular */}
+      <NavegacaoAbasDesempenho abaAtiva={abaAtiva} aoSelecionarAba={setAbaAtiva} />
 
-      {/* Histórico Diário & Interatividade por Dia */}
-      <section aria-labelledby="titulo-grafico-temporal">
-        <GraficoTemporalInterativo
-          historicoDiario={historicoDoMes}
-          diaSelecionado={diaSelecionado}
-          aoSelecionarDia={setDiaSelecionado}
-        />
-      </section>
+      {abaAtiva === "visao_geral" ? (
+        <div className="min-w-0 space-y-8">
+          {/* 1. Indicadores de Conversão CRO */}
+          <GradeIndicadoresCRO
+            resumoMetricas={metricasAtivas}
+            historicoCronologico={historicoCronologico}
+            diaSelecionado={diaSelecionado}
+            mesSelecionado={mesSelecionado}
+          />
 
-      {/* Grid: Funil CRO Completo (Global vs Por Experiência) & Canais de Origem */}
-      <section className="grid gap-6 lg:grid-cols-2">
-        <DiagramaFunilCRO resumoMetricas={metricasAtivas} experiencias={experiencias} />
-        <GraficoCanaisOrigem
-          canais={metricasAtivas.metricasPorCanal}
-          qrCodes={metricasAtivas.metricasPorQrCode}
-          identificadorOrganizacao={organizacao.identificadorPublico}
-        />
-      </section>
+          {/* 2. Histórico Diário & Interatividade por Dia */}
+          <section aria-labelledby="titulo-grafico-temporal" className="min-w-0">
+            <GraficoTemporalInterativo
+              historicoDiario={historicoDoMes}
+              diaSelecionado={diaSelecionado}
+              aoSelecionarDia={setDiaSelecionado}
+            />
+          </section>
 
-      {/* Métricas Individuais por Percurso / Microfluxo */}
-      <EstatisticasExperiencias
-        experiencias={experiencias}
-        metricas={metricasAtivas.metricasPorMicrofluxo}
-        historico={
-          diaSelecionado
-            ? historicoDoMes.filter((d) => d.dataIso === diaSelecionado)
-            : historicoDoMes
-        }
-      />
+          {/* 3. Funil de Conversão & Retenção em largura total */}
+          <div className="min-w-0">
+            <DiagramaFunilCRO resumoMetricas={metricasAtivas} experiencias={experiencias} />
+          </div>
+        </div>
+      ) : null}
 
-      {/* Desempenho por QR Code com Funil Físico Dedicado e Filtro por Destino */}
-      <FunilDesempenhoQrCodes qrCodes={metricasAtivas.metricasPorQrCode} />
+      {abaAtiva === "aquisicao" ? (
+        <div className="min-w-0 space-y-8">
+          <GraficoCanaisOrigem
+            canais={metricasAtivas.metricasPorCanal}
+            qrCodes={metricasAtivas.metricasPorQrCode}
+            identificadorOrganizacao={organizacao.identificadorPublico}
+          />
+          <FunilDesempenhoQrCodes qrCodes={metricasAtivas.metricasPorQrCode} />
+        </div>
+      ) : null}
 
-      {/* Performance dos Membros da Equipe & Cartões VIP */}
-      <TabelaPerformanceEquipe
-        profissionais={profissionais}
-        metricasPorCartao={metricasAtivas.metricasPorCartao}
-        metricasPorProfissional={metricasAtivas.metricasPorProfissional}
-        identificadorOrganizacao={organizacao.identificadorPublico}
-      />
+      {abaAtiva === "experiencias" ? (
+        <div className="min-w-0">
+          <EstatisticasExperiencias
+            experiencias={experiencias}
+            metricas={metricasAtivas.metricasPorMicrofluxo}
+            historico={
+              diaSelecionado
+                ? historicoDoMes.filter((d) => d.dataIso === diaSelecionado)
+                : historicoDoMes
+            }
+          />
+        </div>
+      ) : null}
+
+      {abaAtiva === "equipe" ? (
+        <div className="min-w-0">
+          <TabelaPerformanceEquipe
+            profissionais={profissionais}
+            metricasPorCartao={metricasAtivas.metricasPorCartao}
+            metricasPorProfissional={metricasAtivas.metricasPorProfissional}
+            identificadorOrganizacao={organizacao.identificadorPublico}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

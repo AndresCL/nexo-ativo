@@ -54,6 +54,8 @@ export interface MetricasDiariasOrganizacao {
   readonly dataIso: string; // formato AAAA-MM-DD
   readonly visualizacoesVitrine: number;
   readonly visualizacoesCartao?: number;
+  readonly sessoesUnicas?: number;
+  readonly sessoesComCliqueAcao?: number;
   readonly cliquesAcoesHome?: number;
   readonly aberturasMicrofluxo: number;
   readonly conclusoesMicrofluxo: number;
@@ -130,6 +132,9 @@ export interface ResumoMetricasPeriodo {
   readonly diasConsiderados: number;
   readonly totalVisualizacoes: number;
   readonly totalVisualizacoesCartoes: number;
+  readonly totalSessoesUnicas?: number;
+  readonly totalSessoesComCliqueAcao?: number;
+  readonly possuiTelemetriaSessao?: boolean;
   readonly totalCliquesAcoesHome: number;
   readonly totalAberturasMicrofluxo: number;
   readonly totalConclusoesMicrofluxo: number;
@@ -174,6 +179,9 @@ export function consolidarResumoMetricas(
 
   let totalVisualizacoes = 0;
   let totalVisualizacoesCartoes = 0;
+  let totalSessoesUnicas = 0;
+  let totalSessoesComCliqueAcao = 0;
+  let possuiTelemetriaSessao = false;
   let totalCliquesAcoesHome = 0;
   let totalAberturasMicrofluxo = 0;
   let totalConclusoesMicrofluxo = 0;
@@ -236,6 +244,11 @@ export function consolidarResumoMetricas(
   for (const m of selecionadas) {
     totalVisualizacoes += m.visualizacoesVitrine || 0;
     totalVisualizacoesCartoes += m.visualizacoesCartao || 0;
+    if (m.sessoesUnicas !== undefined || m.sessoesComCliqueAcao !== undefined) {
+      possuiTelemetriaSessao = true;
+      totalSessoesUnicas += m.sessoesUnicas || 0;
+      totalSessoesComCliqueAcao += m.sessoesComCliqueAcao || 0;
+    }
     totalCliquesAcoesHome += m.cliquesAcoesHome || 0;
     totalAberturasMicrofluxo += m.aberturasMicrofluxo || 0;
     totalConclusoesMicrofluxo += m.conclusoesMicrofluxo || 0;
@@ -460,9 +473,16 @@ export function consolidarResumoMetricas(
       ? dadosComerciaisComplementares.contatosTotais
       : totalConclusoesMicrofluxo + totalCliquesWhatsapp;
 
+  const visitantesOuSessoes = possuiTelemetriaSessao
+    ? totalSessoesUnicas
+    : totalVisualizacoes + totalVisualizacoesCartoes;
+
   const entradasCRO: EntradaDadosMetricasCRO = {
-    visitantesOuSessoes: totalVisualizacoes,
+    visitantesOuSessoes,
     cliquesAcaoTotais,
+    ...(possuiTelemetriaSessao
+      ? { sessoesComCliqueAcao: totalSessoesComCliqueAcao }
+      : { usandoContagemLegada: true }),
     contatosUnicos,
     leadsQualificados: dadosComerciaisComplementares?.leadsQualificados ?? 0,
     vendasConcluidas: dadosComerciaisComplementares?.vendasConcluidas ?? 0,
@@ -473,6 +493,9 @@ export function consolidarResumoMetricas(
     diasConsiderados: selecionadas.length || diasDesejados,
     totalVisualizacoes,
     totalVisualizacoesCartoes,
+    totalSessoesUnicas,
+    totalSessoesComCliqueAcao,
+    possuiTelemetriaSessao,
     totalCliquesAcoesHome,
     totalAberturasMicrofluxo,
     totalConclusoesMicrofluxo,

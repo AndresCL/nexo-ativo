@@ -21,6 +21,10 @@ export interface EntradaDadosMetricasCRO {
   readonly visitantesOuSessoes: number;
   /** Total de cliques nas chamadas de ação (WhatsApp, botões de ação e aberturas de fluxo) */
   readonly cliquesAcaoTotais: number;
+  /** Sessões únicas que realizaram ao menos um clique de ação (quando telemetria de sessão está ativa) */
+  readonly sessoesComCliqueAcao?: number;
+  /** Indica se o período usa apenas contagem legada (sem deduplicação de sessão) */
+  readonly usandoContagemLegada?: boolean;
   /** Total de contatos comerciais únicos gerados (formulários enviados ou conversas iniciadas) */
   readonly contatosUnicos: number;
   /** Contatos que atenderam aos critérios comerciais (em atendimento, proposta enviada ou concluída) */

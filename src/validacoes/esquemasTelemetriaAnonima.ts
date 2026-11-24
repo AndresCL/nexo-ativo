@@ -35,6 +35,8 @@ export const esquemaRegistroEventoAnonimo = z.object({
   itemCatalogoId: z.string().max(80).optional(),
   itemCatalogoNome: z.string().max(120).optional(),
   etapaId: z.string().max(80).optional(),
+  primeiraVisualizacaoSessao: z.boolean().optional(),
+  primeiroCliqueSessao: z.boolean().optional(),
 });
 
 export type DadosRegistroEventoAnonimo = z.infer<typeof esquemaRegistroEventoAnonimo>;

@@ -62,6 +62,10 @@ function renderizarPainel() {
       ]}
     />,
   );
+}
+
+function abrirAbaEquipe() {
+  fireEvent.click(screen.getByRole("tab", { name: "Equipe" }));
   const ranking = screen.getByRole("region", { name: "Performance da Equipe & Cartões VIP" });
   const linhaCarlos = within(ranking).getByRole("row", { name: /Carlos Eduardo/ });
   return { ranking, celulas: within(linhaCarlos).getAllByRole("cell") };
@@ -70,6 +74,7 @@ function renderizarPainel() {
 describe("Ranking da equipe no painel de desempenho", () => {
   it("mostra estatísticas individuais e zera os fluxos ao filtrar um dia sem aberturas", () => {
     renderizarPainel();
+    fireEvent.click(screen.getByRole("tab", { name: "Experiências" }));
     const secao = screen.getByRole("region", { name: "Desempenho por experiência" });
     expect(
       within(secao).getByRole("img", {
@@ -82,12 +87,19 @@ describe("Ranking da equipe no painel de desempenho", () => {
         name: "Comparação de Aberturas entre experiências",
       }),
     ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Visão Geral" }));
     fireEvent.click(screen.getByRole("button", { name: "2026-11-11" }));
-    expect(within(secao).queryByText("50%")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Experiências" }));
+    const secaoFiltrada = screen.getByRole("region", { name: "Desempenho por experiência" });
+    expect(within(secaoFiltrada).queryByText("50%")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Aquisição" }));
     expect(screen.getAllByText("Permalink", { exact: true }).length).toBeGreaterThan(0);
   });
   it("exibe os cliques uma vez, usa ações por visita e não inclui uma linha para o identificador interno", () => {
-    const { ranking, celulas } = renderizarPainel();
+    renderizarPainel();
+    const { ranking, celulas } = abrirAbaEquipe();
     expect(celulas[1]).toHaveTextContent(/^2$/);
     expect(celulas[4]).toHaveTextContent(/^6$/);
     expect(celulas[5]).toHaveTextContent(/^3,0$/);
@@ -98,16 +110,17 @@ describe("Ranking da equipe no painel de desempenho", () => {
   });
 
   it("recalcula o ranking para o dia e o mês selecionados sem reutilizar contatos de outro período", () => {
-    const { ranking } = renderizarPainel();
-    const consultarCelulas = () =>
-      within(within(ranking).getByRole("row", { name: /Carlos Eduardo/ })).getAllByRole("cell");
+    renderizarPainel();
     fireEvent.click(screen.getByRole("button", { name: "2026-11-11" }));
-    expect(consultarCelulas()[4]).toHaveTextContent(/^0$/);
-    expect(consultarCelulas()[5]).toHaveTextContent(/^—$/);
+    expect(abrirAbaEquipe().celulas[4]).toHaveTextContent(/^0$/);
+    expect(abrirAbaEquipe().celulas[5]).toHaveTextContent(/^—$/);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Visão Geral" }));
     fireEvent.click(screen.getByRole("button", { name: "Ver período completo" }));
-    expect(consultarCelulas()[4]).toHaveTextContent(/^6$/);
+    expect(abrirAbaEquipe().celulas[4]).toHaveTextContent(/^6$/);
+
     fireEvent.change(screen.getByLabelText("Filtrar período"), { target: { value: "2026-11" } });
-    expect(consultarCelulas()[4]).toHaveTextContent(/^6$/);
-    expect(consultarCelulas()[5]).toHaveTextContent(/^3,0$/);
+    expect(abrirAbaEquipe().celulas[4]).toHaveTextContent(/^6$/);
+    expect(abrirAbaEquipe().celulas[5]).toHaveTextContent(/^3,0$/);
   });
 });

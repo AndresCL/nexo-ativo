@@ -40,6 +40,8 @@ export async function executarRegistroEventoAgregadoAnonimo(
     microfluxoTitulo,
     profissionalId,
     profissionalNome,
+    primeiraVisualizacaoSessao,
+    primeiroCliqueSessao,
   } = validacao.data;
   const hojeDataIso = new Date().toISOString().split("T")[0]!;
   const agoraIso = new Date().toISOString();
@@ -50,10 +52,24 @@ export async function executarRegistroEventoAgregadoAnonimo(
     .collection("metricasDiarias")
     .doc(hojeDataIso);
 
+  const ehVisualizacao =
+    tipoEvento === "visualizacao_vitrine" || tipoEvento === "visualizacao_cartao";
+  const ehCliqueAcao =
+    tipoEvento === "clique_acao_home" ||
+    tipoEvento === "abertura_microfluxo" ||
+    tipoEvento === "clique_whatsapp" ||
+    tipoEvento === "clique_ligacao";
+
   const campoIncrementar = CAMPO_POR_EVENTO[tipoEvento];
   const payloadAtualizacao: Record<string, unknown> = {
     dataIso: hojeDataIso,
     ...(campoIncrementar ? { [campoIncrementar]: FieldValue.increment(1) } : {}),
+    ...(primeiraVisualizacaoSessao && ehVisualizacao
+      ? { sessoesUnicas: FieldValue.increment(1) }
+      : {}),
+    ...(primeiroCliqueSessao && ehCliqueAcao
+      ? { sessoesComCliqueAcao: FieldValue.increment(1) }
+      : {}),
     atualizadoEmIso: agoraIso,
   };
 

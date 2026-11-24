@@ -59,18 +59,18 @@ function ConteudoLinhaBloco({
     const acoesMobileSistema: AcaoMenuMobileBloco[] = [
       ...(ehMarca && aoAlternarFixarMarcaTopo
         ? [
-            {
-              id: "fixar-topo",
-              rotulo: item.fixaNoTopo ? "Mover para lista ordenável" : "Fixar marca no topo",
-              icone: item.fixaNoTopo ? (
-                <PinOff className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                <Pin className="h-4 w-4" aria-hidden="true" />
-              ),
-              desabilitado: !podeAlterar,
-              aoExecutar: aoAlternarFixarMarcaTopo,
-            },
-          ]
+          {
+            id: "fixar-topo",
+            rotulo: item.fixaNoTopo ? "Mover para lista ordenável" : "Fixar marca no topo",
+            icone: item.fixaNoTopo ? (
+              <PinOff className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Pin className="h-4 w-4" aria-hidden="true" />
+            ),
+            desabilitado: !podeAlterar,
+            aoExecutar: aoAlternarFixarMarcaTopo,
+          },
+        ]
         : []),
       {
         id: "visibilidade",
@@ -85,21 +85,21 @@ function ConteudoLinhaBloco({
       },
       ...(!item.fixaNoTopo && aoMover
         ? [
-            {
-              id: "mover-cima",
-              rotulo: "Mover para cima",
-              icone: <ArrowUp className="h-4 w-4" aria-hidden="true" />,
-              desabilitado: !podeSubir,
-              aoExecutar: () => aoMover(-1),
-            },
-            {
-              id: "mover-baixo",
-              rotulo: "Mover para baixo",
-              icone: <ArrowDown className="h-4 w-4" aria-hidden="true" />,
-              desabilitado: !podeDescer,
-              aoExecutar: () => aoMover(1),
-            },
-          ]
+          {
+            id: "mover-cima",
+            rotulo: "Mover para cima",
+            icone: <ArrowUp className="h-4 w-4" aria-hidden="true" />,
+            desabilitado: !podeSubir,
+            aoExecutar: () => aoMover(-1),
+          },
+          {
+            id: "mover-baixo",
+            rotulo: "Mover para baixo",
+            icone: <ArrowDown className="h-4 w-4" aria-hidden="true" />,
+            desabilitado: !podeDescer,
+            aoExecutar: () => aoMover(1),
+          },
+        ]
         : []),
       {
         id: "aparencia",
@@ -261,14 +261,14 @@ function ConteudoLinhaBloco({
   const acoesMobileExperiencia: AcaoMenuMobileBloco[] = [
     ...(aoAbrirEditor
       ? [
-          {
-            id: "editar",
-            rotulo: "Editar experiência",
-            icone: <ChevronRight className="h-4 w-4" aria-hidden="true" />,
-            destaque: true,
-            aoExecutar: aoAbrirEditor,
-          },
-        ]
+        {
+          id: "editar",
+          rotulo: "Editar experiência",
+          icone: <ChevronRight className="h-4 w-4" aria-hidden="true" />,
+          destaque: true,
+          aoExecutar: aoAbrirEditor,
+        },
+      ]
       : []),
     {
       id: "visibilidade",
@@ -283,38 +283,38 @@ function ConteudoLinhaBloco({
     },
     ...(aoMover
       ? [
-          {
-            id: "mover-cima",
-            rotulo: "Mover para cima",
-            icone: <ArrowUp className="h-4 w-4" aria-hidden="true" />,
-            desabilitado: !podeSubir,
-            aoExecutar: () => aoMover(-1),
-          },
-          {
-            id: "mover-baixo",
-            rotulo: "Mover para baixo",
-            icone: <ArrowDown className="h-4 w-4" aria-hidden="true" />,
-            desabilitado: !podeDescer,
-            aoExecutar: () => aoMover(1),
-          },
-        ]
+        {
+          id: "mover-cima",
+          rotulo: "Mover para cima",
+          icone: <ArrowUp className="h-4 w-4" aria-hidden="true" />,
+          desabilitado: !podeSubir,
+          aoExecutar: () => aoMover(-1),
+        },
+        {
+          id: "mover-baixo",
+          rotulo: "Mover para baixo",
+          icone: <ArrowDown className="h-4 w-4" aria-hidden="true" />,
+          desabilitado: !podeDescer,
+          aoExecutar: () => aoMover(1),
+        },
+      ]
       : []),
     ...(ehMicrofluxo
       ? [
-          {
-            id: "copiar-link",
-            rotulo: "Copiar link da experiência",
-            icone: <Link2 className="h-4 w-4" aria-hidden="true" />,
-            aoExecutar: () =>
-              void copiarTextoComAviso(
-                new URL(
-                  construirCaminhoExperiencia(identificadorPublico, fluxo.id),
-                  window.location.origin,
-                ).href,
-                "Permalink da experiência copiado.",
-              ),
-          },
-        ]
+        {
+          id: "copiar-link",
+          rotulo: "Copiar link da experiência",
+          icone: <Link2 className="h-4 w-4" aria-hidden="true" />,
+          aoExecutar: () =>
+            void copiarTextoComAviso(
+              new URL(
+                construirCaminhoExperiencia(identificadorPublico, fluxo.id),
+                window.location.origin,
+              ).href,
+              "Permalink da experiência copiado.",
+            ),
+        },
+      ]
       : []),
   ];
 
