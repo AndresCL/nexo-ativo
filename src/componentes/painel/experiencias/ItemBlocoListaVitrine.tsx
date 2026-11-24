@@ -6,20 +6,13 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronRight,
-  Compass,
   ExternalLink,
   Eye,
   EyeOff,
-  Globe,
   GripVertical,
   Link2,
-  MessageCircle,
-  Phone,
   Pin,
   PinOff,
-  Share2,
-  Sparkles,
-  Star,
 } from "lucide-react";
 import { copiarTextoComAviso } from "@/componentes/interface/notificacoes/copiarTextoComAviso";
 import { construirCaminhoExperiencia } from "@/dominio/microfluxos/conclusaoMicrofluxo";
@@ -28,6 +21,7 @@ import {
   DESCRITORES_TIPO_ACAO,
   type ItemListaUnificadaVitrine,
 } from "./descritoresTipoAcao";
+import { MenuAcoesMobileBloco, type AcaoMenuMobileBloco } from "./MenuAcoesMobileBloco";
 
 export interface PropriedadesItemBlocoListaVitrine {
   readonly item: ItemListaUnificadaVitrine;
@@ -61,18 +55,65 @@ function ConteudoLinhaBloco({
 }) {
   if (item.tipo === "sistema") {
     const ehMarca = item.idBloco === "bloco:marca";
-    const IconeSistema =
-      item.idBloco === "bloco:marca"
-        ? Sparkles
-        : item.idBloco === "bloco:avaliacoes_google"
-          ? Star
-          : Share2;
+
+    const acoesMobileSistema: AcaoMenuMobileBloco[] = [
+      ...(ehMarca && aoAlternarFixarMarcaTopo
+        ? [
+            {
+              id: "fixar-topo",
+              rotulo: item.fixaNoTopo ? "Mover para lista ordenável" : "Fixar marca no topo",
+              icone: item.fixaNoTopo ? (
+                <PinOff className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Pin className="h-4 w-4" aria-hidden="true" />
+              ),
+              desabilitado: !podeAlterar,
+              aoExecutar: aoAlternarFixarMarcaTopo,
+            },
+          ]
+        : []),
+      {
+        id: "visibilidade",
+        rotulo: item.visivel ? "Ocultar na vitrine" : "Mostrar na vitrine",
+        icone: item.visivel ? (
+          <EyeOff className="h-4 w-4" aria-hidden="true" />
+        ) : (
+          <Eye className="h-4 w-4" aria-hidden="true" />
+        ),
+        desabilitado: !podeAlterar,
+        aoExecutar: aoAlternarVisibilidade,
+      },
+      ...(!item.fixaNoTopo && aoMover
+        ? [
+            {
+              id: "mover-cima",
+              rotulo: "Mover para cima",
+              icone: <ArrowUp className="h-4 w-4" aria-hidden="true" />,
+              desabilitado: !podeSubir,
+              aoExecutar: () => aoMover(-1),
+            },
+            {
+              id: "mover-baixo",
+              rotulo: "Mover para baixo",
+              icone: <ArrowDown className="h-4 w-4" aria-hidden="true" />,
+              desabilitado: !podeDescer,
+              aoExecutar: () => aoMover(1),
+            },
+          ]
+        : []),
+      {
+        id: "aparencia",
+        rotulo: "Configurar em Aparência",
+        icone: <ExternalLink className="h-4 w-4" aria-hidden="true" />,
+        href: `/painel/aparencia?aba=${item.abaAparencia}`,
+      },
+    ];
 
     return (
       <div
         data-testid={`item-bloco-${item.idBloco}`}
         className={combinarClasses(
-          "flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white px-3.5 py-3 shadow-2xs transition-colors sm:flex-nowrap",
+          "flex flex-nowrap items-center justify-between gap-2.5 rounded-xl border bg-white px-3 py-3 shadow-2xs transition-colors sm:gap-3 sm:px-3.5",
           item.fixaNoTopo
             ? "border-indigo-200 bg-indigo-50/35"
             : item.visivel
@@ -80,7 +121,7 @@ function ConteudoLinhaBloco({
               : "border-dashed border-marfim-300 bg-marfim-50/70 opacity-80",
         )}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
           {!item.fixaNoTopo ? (
             <button
               type="button"
@@ -92,7 +133,7 @@ function ConteudoLinhaBloco({
                   ? "Arraste para reordenar"
                   : "Limpe a busca ou filtro para arrastar"
               }
-              className="flex h-8 w-7 shrink-0 cursor-grab items-center justify-center rounded-md text-mineral-400 hover:bg-marfim-100 hover:text-mineral-700 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
+              className="flex h-8 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-mineral-400 hover:bg-marfim-100 hover:text-mineral-700 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
             >
               <GripVertical className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -105,48 +146,33 @@ function ConteudoLinhaBloco({
             </span>
           )}
 
-          {posicaoExibicao !== undefined ? (
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-marfim-100 text-[11px] font-bold tabular-nums text-mineral-700">
-              {posicaoExibicao}º
-            </span>
-          ) : null}
-
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mineral-900/5 text-mineral-800">
-            <IconeSistema className="h-4 w-4" aria-hidden="true" />
-          </span>
-
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="truncate text-sm font-semibold text-mineral-950">{item.titulo}</span>
-              <span className="rounded-full border border-mineral-200 bg-marfim-50 px-2 py-0.5 text-[10px] font-medium text-mineral-600">
-                {item.badgeTipo}
-              </span>
-              {item.fixaNoTopo ? (
-                <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-800">
-                  Fixa no topo
+            <div className="flex min-w-0 items-center gap-1.5">
+              {posicaoExibicao !== undefined ? (
+                <span className="shrink-0 text-sm font-semibold tabular-nums text-mineral-950">
+                  {posicaoExibicao}º
                 </span>
               ) : null}
-              <span
-                className={combinarClasses(
-                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-                  item.visivel
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-marfim-200 bg-marfim-100 text-mineral-500",
-                )}
-              >
-                {item.visivel ? (
-                  <Eye className="h-2.5 w-2.5" aria-hidden="true" />
-                ) : (
-                  <EyeOff className="h-2.5 w-2.5" aria-hidden="true" />
-                )}
-                {item.visivel ? "Visível" : "Oculto"}
-              </span>
+              <span className="truncate text-sm font-semibold text-mineral-950">{item.titulo}</span>
             </div>
-            <p className="mt-0.5 truncate text-[11px] text-mineral-500">{item.subtitulo}</p>
+            <p className="mt-0.5 truncate text-xs text-mineral-500">
+              {[
+                item.badgeTipo,
+                item.fixaNoTopo ? "Fixa no topo" : null,
+                item.visivel ? "Visível" : "Oculto",
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+            {item.subtitulo ? (
+              <p className="mt-0.5 truncate text-[11px] text-mineral-400">{item.subtitulo}</p>
+            ) : null}
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1">
+        <MenuAcoesMobileBloco tituloBloco={item.titulo} acoes={acoesMobileSistema} />
+
+        <div className="hidden shrink-0 items-center gap-1 sm:flex">
           {ehMarca && aoAlternarFixarMarcaTopo ? (
             <button
               type="button"
@@ -229,21 +255,80 @@ function ConteudoLinhaBloco({
   const { fluxo } = item;
   const nomeExibicao = fluxo.rotuloBotaoHome?.trim() || fluxo.titulo;
   const ehDestaque = fluxo.destaquePrimarioHome === true;
-  const IconeStatus = ehDestaque ? Star : fluxo.ativo ? Eye : EyeOff;
   const tipoAcao = fluxo.tipoAcao ?? "microfluxo";
   const ehMicrofluxo = tipoAcao === "microfluxo";
+
+  const acoesMobileExperiencia: AcaoMenuMobileBloco[] = [
+    ...(aoAbrirEditor
+      ? [
+          {
+            id: "editar",
+            rotulo: "Editar experiência",
+            icone: <ChevronRight className="h-4 w-4" aria-hidden="true" />,
+            destaque: true,
+            aoExecutar: aoAbrirEditor,
+          },
+        ]
+      : []),
+    {
+      id: "visibilidade",
+      rotulo: fluxo.ativo ? "Ocultar na vitrine" : "Mostrar na vitrine",
+      icone: fluxo.ativo ? (
+        <EyeOff className="h-4 w-4" aria-hidden="true" />
+      ) : (
+        <Eye className="h-4 w-4" aria-hidden="true" />
+      ),
+      desabilitado: !podeAlterar,
+      aoExecutar: aoAlternarVisibilidade,
+    },
+    ...(aoMover
+      ? [
+          {
+            id: "mover-cima",
+            rotulo: "Mover para cima",
+            icone: <ArrowUp className="h-4 w-4" aria-hidden="true" />,
+            desabilitado: !podeSubir,
+            aoExecutar: () => aoMover(-1),
+          },
+          {
+            id: "mover-baixo",
+            rotulo: "Mover para baixo",
+            icone: <ArrowDown className="h-4 w-4" aria-hidden="true" />,
+            desabilitado: !podeDescer,
+            aoExecutar: () => aoMover(1),
+          },
+        ]
+      : []),
+    ...(ehMicrofluxo
+      ? [
+          {
+            id: "copiar-link",
+            rotulo: "Copiar link da experiência",
+            icone: <Link2 className="h-4 w-4" aria-hidden="true" />,
+            aoExecutar: () =>
+              void copiarTextoComAviso(
+                new URL(
+                  construirCaminhoExperiencia(identificadorPublico, fluxo.id),
+                  window.location.origin,
+                ).href,
+                "Permalink da experiência copiado.",
+              ),
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div
       data-testid={`item-bloco-${item.idBloco}`}
       className={combinarClasses(
-        "group flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white px-3.5 py-3 shadow-2xs transition-colors sm:flex-nowrap",
+        "group flex flex-nowrap items-center justify-between gap-2.5 rounded-xl border bg-white px-3 py-3 shadow-2xs transition-colors sm:gap-3 sm:px-3.5",
         fluxo.ativo
           ? "border-marfim-200 hover:border-indigo-300"
           : "border-dashed border-marfim-300 bg-marfim-50/70 opacity-85",
       )}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
         <button
           type="button"
           disabled={!arrasteHabilitado}
@@ -252,67 +337,45 @@ function ConteudoLinhaBloco({
           title={
             arrasteHabilitado ? "Arraste para reordenar" : "Limpe a busca ou filtro para arrastar"
           }
-          className="flex h-8 w-7 shrink-0 cursor-grab items-center justify-center rounded-md text-mineral-400 hover:bg-marfim-100 hover:text-mineral-700 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex h-8 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-mineral-400 hover:bg-marfim-100 hover:text-mineral-700 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
         >
           <GripVertical className="h-4 w-4" aria-hidden="true" />
         </button>
-
-        {posicaoExibicao !== undefined ? (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-[11px] font-bold tabular-nums text-indigo-700">
-            {posicaoExibicao}º
-          </span>
-        ) : null}
 
         <button
           type="button"
           onClick={aoAbrirEditor}
           className="min-w-0 flex-1 cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-indigo-500"
         >
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex min-w-0 items-center gap-1.5">
+            {posicaoExibicao !== undefined ? (
+              <span className="shrink-0 text-sm font-semibold tabular-nums text-mineral-950">
+                {posicaoExibicao}º
+              </span>
+            ) : null}
             <span className="truncate text-sm font-semibold text-mineral-950 group-hover:text-indigo-800">
               {nomeExibicao}
             </span>
-            <span
-              className={combinarClasses(
-                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-                ehDestaque
-                  ? "border-violet-200 bg-violet-50 text-violet-800"
-                  : fluxo.ativo
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-marfim-200 bg-marfim-100 text-mineral-500",
-              )}
-            >
-              <IconeStatus className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
-              {ehDestaque ? "Em destaque" : fluxo.ativo ? "Visível" : "Oculta"}
-            </span>
-            <span className="inline-flex items-center gap-1 text-[11px] text-mineral-500">
-              {ehMicrofluxo ? (
-                `${fluxo.etapas.length} etapas`
-              ) : (
-                <>
-                  {tipoAcao === "link_externo" ? (
-                    <Globe className="h-3 w-3" aria-hidden="true" />
-                  ) : tipoAcao === "whatsapp" ? (
-                    <MessageCircle className="h-3 w-3" aria-hidden="true" />
-                  ) : tipoAcao === "telefone" ? (
-                    <Phone className="h-3 w-3" aria-hidden="true" />
-                  ) : (
-                    <Compass className="h-3 w-3" aria-hidden="true" />
-                  )}
-                  {DESCRITORES_TIPO_ACAO[tipoAcao]?.iconeBadge ?? "Ação"}
-                </>
-              )}
-            </span>
           </div>
+          <p className="mt-0.5 truncate text-xs text-mineral-500">
+            {[
+              ehDestaque ? "Em destaque" : fluxo.ativo ? "Visível" : "Oculta",
+              ehMicrofluxo
+                ? `${fluxo.etapas.length} etapas`
+                : (DESCRITORES_TIPO_ACAO[tipoAcao]?.iconeBadge ?? "Ação"),
+            ].join(" · ")}
+          </p>
           {fluxo.subtituloBotaoHome ? (
-            <p className="mt-0.5 truncate text-[11px] text-mineral-500">
+            <p className="mt-0.5 truncate text-[11px] text-mineral-400">
               {fluxo.subtituloBotaoHome}
             </p>
           ) : null}
         </button>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
+      <MenuAcoesMobileBloco tituloBloco={nomeExibicao} acoes={acoesMobileExperiencia} />
+
+      <div className="hidden shrink-0 items-center gap-1 sm:flex">
         {ehMicrofluxo ? (
           <button
             type="button"
