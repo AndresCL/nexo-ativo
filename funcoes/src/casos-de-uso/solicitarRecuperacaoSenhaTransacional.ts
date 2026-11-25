@@ -100,7 +100,7 @@ export async function executarSolicitacaoRecuperacaoSenha(
         atualizadoEmIso: agoraIso,
       });
     }
-  } catch (erro: unknown) {
+  } catch {
     // Se o usuário não existir no Firebase Auth (auth/user-not-found) ou houver falha controlada,
     // garantimos segurança contra enumeração de contas retornando a mesma mensagem neutra.
   }

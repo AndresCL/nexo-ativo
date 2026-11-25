@@ -46,34 +46,46 @@ export interface PortaProvedorAsaas {
   removerCobranca(cobrancaAsaasId: string): Promise<void>;
 }
 
-export interface OpcoesAdaptadorAsaas {
+export interface OpcoesAdaptadorAsaasHttp {
+  readonly chaveApi: string;
+  readonly urlBase: string;
+  readonly funcaoFetch?: typeof fetch;
+}
+
+export interface OpcoesFabricaProvedorAsaas {
   readonly chaveApi?: string;
   readonly urlBase?: string;
+  readonly permitirSimulacao?: boolean;
   readonly funcaoFetch?: typeof fetch;
 }
 
 /**
  * Adaptador HTTP para comunicação com a API oficial v3 do Asaas.
- * Suporta modo simulado quando `ASAAS_API_KEY` não está presente em desenvolvimento/emulador.
+ * Exige credenciais e URL base explícitas (fail-fast).
  */
 export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
-  private readonly chaveApi: string | undefined;
+  private readonly chaveApi: string;
   private readonly urlBase: string;
   private readonly funcaoFetch: typeof fetch;
 
-  public constructor(opcoes: OpcoesAdaptadorAsaas = {}) {
-    this.chaveApi = opcoes.chaveApi ?? process.env.ASAAS_API_KEY?.trim();
-    const urlConfigurada = opcoes.urlBase ?? (process.env.ASAAS_URL_BASE || "https://api-sandbox.asaas.com/v3");
+  public constructor(opcoes: OpcoesAdaptadorAsaasHttp) {
+    const chaveLimpa = opcoes.chaveApi.trim();
+    const urlLimpa = opcoes.urlBase.trim().replace(/\/+$/, "");
+
+    if (!chaveLimpa) {
+      throw new Error("ASAAS_API_KEY não configurada para o adaptador HTTP do Asaas.");
+    }
+    if (!urlLimpa) {
+      throw new Error("ASAAS_URL_BASE não configurada para o adaptador HTTP do Asaas.");
+    }
+
+    this.chaveApi = chaveLimpa;
     // Normaliza caso a URL tenha sido informada como sandbox.asaas.com em vez de api-sandbox.asaas.com
-    this.urlBase = urlConfigurada.replace("://sandbox.asaas.com", "://api-sandbox.asaas.com");
+    this.urlBase = urlLimpa.replace("://sandbox.asaas.com", "://api-sandbox.asaas.com");
     this.funcaoFetch = opcoes.funcaoFetch ?? fetch;
   }
 
   public async obterOuCriarCliente(parametros: ParametrosCriarClienteAsaas): Promise<string> {
-    if (!this.chaveApi) {
-      return `cus_simulado_${parametros.organizacaoId}`;
-    }
-
     // Consulta prévia para reaproveitar cliente existente com o mesmo CPF/CNPJ
     try {
       const respostaBusca = await this.funcaoFetch(
@@ -147,15 +159,6 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
   public async criarAssinatura(
     parametros: ParametrosCriarAssinaturaAsaas,
   ): Promise<RespostaCriacaoAssinaturaAsaas> {
-    if (!this.chaveApi) {
-      return {
-        assinaturaAsaasId: `sub_simulada_${parametros.organizacaoId}`,
-        urlFaturaOuCheckout: `https://sandbox.asaas.com/i/simulada-${parametros.organizacaoId}`,
-        proximoVencimento: new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0],
-        situacao: "ACTIVE",
-      };
-    }
-
     const amanha = new Date(Date.now() + 86400000).toISOString().split("T")[0];
     const dataPrimeiroVencimento = parametros.dataPrimeiroVencimentoIso || amanha;
 
@@ -247,14 +250,6 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
   public async criarCobrancaAvulsaImplantacao(
     parametros: ParametrosCriarCobrancaImplantacaoAsaas,
   ): Promise<RespostaCriacaoCobrancaAvulsaAsaas> {
-    if (!this.chaveApi) {
-      return {
-        cobrancaAsaasId: `pay_implantacao_simulada_${parametros.organizacaoId}`,
-        urlFaturaOuCheckout: `https://sandbox.asaas.com/i/implantacao-${parametros.organizacaoId}`,
-        situacao: "PENDING",
-      };
-    }
-
     const amanha = new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
     const payload = {
@@ -290,10 +285,6 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
   }
 
   public async cancelarAssinatura(assinaturaAsaasId: string): Promise<void> {
-    if (!this.chaveApi) {
-      return;
-    }
-
     const resposta = await this.funcaoFetch(`${this.urlBase}/subscriptions/${assinaturaAsaasId}`, {
       method: "DELETE",
       headers: {
@@ -308,10 +299,6 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
   }
 
   public async removerCobranca(cobrancaAsaasId: string): Promise<void> {
-    if (!this.chaveApi) {
-      return;
-    }
-
     try {
       const resposta = await this.funcaoFetch(`${this.urlBase}/payments/${cobrancaAsaasId}`, {
         method: "DELETE",
@@ -330,6 +317,67 @@ export class AdaptadorAsaasHttp implements PortaProvedorAsaas {
   }
 }
 
-export function criarProvedorAsaasPadrao(): PortaProvedorAsaas {
-  return new AdaptadorAsaasHttp();
+/**
+ * Adaptador simulado restrito ao emulador local quando não há chave de API configurada.
+ */
+export class AdaptadorAsaasSimulado implements PortaProvedorAsaas {
+  public async obterOuCriarCliente(parametros: ParametrosCriarClienteAsaas): Promise<string> {
+    return `cus_simulado_${parametros.organizacaoId}`;
+  }
+
+  public async criarAssinatura(
+    parametros: ParametrosCriarAssinaturaAsaas,
+  ): Promise<RespostaCriacaoAssinaturaAsaas> {
+    return {
+      assinaturaAsaasId: `sub_simulada_${parametros.organizacaoId}`,
+      urlFaturaOuCheckout: `https://sandbox.asaas.com/i/simulada-${parametros.organizacaoId}`,
+      proximoVencimento: new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0],
+      situacao: "ACTIVE",
+    };
+  }
+
+  public async criarCobrancaAvulsaImplantacao(
+    parametros: ParametrosCriarCobrancaImplantacaoAsaas,
+  ): Promise<RespostaCriacaoCobrancaAvulsaAsaas> {
+    return {
+      cobrancaAsaasId: `pay_implantacao_simulada_${parametros.organizacaoId}`,
+      urlFaturaOuCheckout: `https://sandbox.asaas.com/i/implantacao-${parametros.organizacaoId}`,
+      situacao: "PENDING",
+    };
+  }
+
+  public async cancelarAssinatura(_assinaturaAsaasId: string): Promise<void> {
+    // Sem efeito colateral externo no modo simulado
+  }
+
+  public async removerCobranca(_cobrancaAsaasId: string): Promise<void> {
+    // Sem efeito colateral externo no modo simulado
+  }
+}
+
+export function criarProvedorAsaasPadrao(
+  opcoes: OpcoesFabricaProvedorAsaas = {},
+): PortaProvedorAsaas {
+  const chaveApi = (opcoes.chaveApi ?? process.env.ASAAS_API_KEY)?.trim();
+  const urlBase = (opcoes.urlBase ?? process.env.ASAAS_URL_BASE)?.trim();
+  const permitirSimulacao =
+    opcoes.permitirSimulacao ?? process.env.FUNCTIONS_EMULATOR === "true";
+
+  if (!chaveApi) {
+    if (permitirSimulacao) {
+      return new AdaptadorAsaasSimulado();
+    }
+    throw new Error("ASAAS_API_KEY não configurada no ambiente de execução.");
+  }
+
+  const urlResolvida = urlBase || (permitirSimulacao ? "https://api-sandbox.asaas.com/v3" : "");
+  if (!urlResolvida) {
+    throw new Error("ASAAS_URL_BASE não configurada no ambiente de execução.");
+  }
+
+  return new AdaptadorAsaasHttp({
+    chaveApi,
+    urlBase: urlResolvida,
+    funcaoFetch: opcoes.funcaoFetch,
+  });
 }

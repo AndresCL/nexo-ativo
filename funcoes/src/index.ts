@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { setGlobalOptions } from "firebase-functions/v2";
-import { defineSecret } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { exigirPrivilegioFundador } from "../../src/dominio/permissoes/autorizadorOrganizacao";
 import { ValorMonetarioCentavos } from "../../src/dominio/objetos-valor/valorMonetarioCentavos";
@@ -20,6 +20,7 @@ import { executarAtualizacaoSituacaoAgendamento } from "./casos-de-uso/atualizar
 import { executarSolicitacaoRecuperacaoSenha } from "./casos-de-uso/solicitarRecuperacaoSenhaTransacional";
 import { executarEnvioVerificacaoEmail } from "./casos-de-uso/enviarVerificacaoEmailTransacional";
 import { criarProvedorEmailPadrao } from "./email/adaptadorResendEmail";
+import { criarProvedorAsaasPadrao } from "./asaas/adaptadorAsaasCliente";
 import { executarCriacaoAssinaturaAsaas } from "./casos-de-uso/criarAssinaturaOrganizacaoAsaas";
 import { executarCancelamentoAssinaturaAsaas } from "./casos-de-uso/cancelarAssinaturaOrganizacaoAsaas";
 import { executarRestabelecimentoAssinaturaAsaas } from "./casos-de-uso/restabelecerAssinaturaOrganizacaoAsaas";
@@ -156,112 +157,154 @@ export const enviarVerificacaoEmail = onCall(
   }
 );
 
-export const criarAssinaturaAsaas = onCall(async (requisicao) => {
-  try {
-    const { bancoDados } = obterAdminFuncoes();
-    const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
-    if (!usuario) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Você precisa estar autenticado para contratar um plano.",
-      );
-    }
-    return await executarCriacaoAssinaturaAsaas(bancoDados, usuario, requisicao.data);
-  } catch (erro) {
-    throw converterErroParaHttpsError(erro);
-  }
+const chaveAsaas = defineSecret("ASAAS_API_KEY");
+const tokenWebhookAsaas = defineSecret("ASAAS_WEBHOOK_ACCESS_TOKEN");
+const urlBaseAsaas = defineString("ASAAS_URL_BASE", {
+  default: "https://api.asaas.com/v3",
 });
 
-export const cancelarAssinaturaAsaas = onCall(async (requisicao) => {
-  try {
-    const { bancoDados } = obterAdminFuncoes();
-    const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
-    if (!usuario) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Você precisa estar autenticado para cancelar a assinatura.",
+function criarProvedorAsaasConfigurado() {
+  return criarProvedorAsaasPadrao({
+    chaveApi: chaveAsaas.value(),
+    urlBase: urlBaseAsaas.value(),
+  });
+}
+
+export const criarAssinaturaAsaas = onCall(
+  { secrets: [chaveAsaas] },
+  async (requisicao) => {
+    try {
+      const { bancoDados } = obterAdminFuncoes();
+      const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+      if (!usuario) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Você precisa estar autenticado para contratar um plano.",
+        );
+      }
+      return await executarCriacaoAssinaturaAsaas(
+        bancoDados,
+        usuario,
+        requisicao.data,
+        criarProvedorAsaasConfigurado(),
       );
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
     }
-    return await executarCancelamentoAssinaturaAsaas(bancoDados, usuario, requisicao.data);
-  } catch (erro) {
-    throw converterErroParaHttpsError(erro);
-  }
-});
+  },
+);
 
-export const restabelecerAssinaturaAsaas = onCall(async (requisicao) => {
-  try {
-    const { bancoDados } = obterAdminFuncoes();
-    const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
-    if (!usuario) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Você precisa estar autenticado para restabelecer a assinatura.",
+export const cancelarAssinaturaAsaas = onCall(
+  { secrets: [chaveAsaas] },
+  async (requisicao) => {
+    try {
+      const { bancoDados } = obterAdminFuncoes();
+      const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+      if (!usuario) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Você precisa estar autenticado para cancelar a assinatura.",
+        );
+      }
+      return await executarCancelamentoAssinaturaAsaas(
+        bancoDados,
+        usuario,
+        requisicao.data,
+        criarProvedorAsaasConfigurado(),
       );
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
     }
-    return await executarRestabelecimentoAssinaturaAsaas(bancoDados, usuario, requisicao.data);
-  } catch (erro) {
-    throw converterErroParaHttpsError(erro);
-  }
-});
+  },
+);
 
-export const contratarImplantacaoAssistidaAsaas = onCall(async (requisicao) => {
-  try {
-    const { bancoDados } = obterAdminFuncoes();
-    const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
-    if (!usuario) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Você precisa estar autenticado para contratar a implantação assistida.",
+export const restabelecerAssinaturaAsaas = onCall(
+  { secrets: [chaveAsaas] },
+  async (requisicao) => {
+    try {
+      const { bancoDados } = obterAdminFuncoes();
+      const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+      if (!usuario) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Você precisa estar autenticado para restabelecer a assinatura.",
+        );
+      }
+      return await executarRestabelecimentoAssinaturaAsaas(
+        bancoDados,
+        usuario,
+        requisicao.data,
+        criarProvedorAsaasConfigurado(),
       );
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
     }
-    return await executarContratacaoImplantacaoAssistidaAsaas(bancoDados, usuario, requisicao.data);
-  } catch (erro) {
-    throw converterErroParaHttpsError(erro);
-  }
-});
+  },
+);
 
-export const webhookAsaas = onRequest({ cors: false }, async (requisicao, resposta) => {
-  try {
-    const tokenEsperado = process.env.ASAAS_WEBHOOK_ACCESS_TOKEN?.trim();
-    const tokensValidos = new Set(
-      [
-        tokenEsperado,
-        "whsec_DnuEBYPZEg5LjvowsNK-mDTh-HZ6Ei98k_uTtr7TVKw",
-        "whsec_DnuEBYPZEg5LjvowsNK",
-        "token_segredo_para_testes_123",
-      ].filter(Boolean) as string[],
-    );
+export const contratarImplantacaoAssistidaAsaas = onCall(
+  { secrets: [chaveAsaas] },
+  async (requisicao) => {
+    try {
+      const { bancoDados } = obterAdminFuncoes();
+      const usuario = extrairUsuarioDeRequisicaoCallable(requisicao);
+      if (!usuario) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Você precisa estar autenticado para contratar a implantação assistida.",
+        );
+      }
+      return await executarContratacaoImplantacaoAssistidaAsaas(
+        bancoDados,
+        usuario,
+        requisicao.data,
+        criarProvedorAsaasConfigurado(),
+      );
+    } catch (erro) {
+      throw converterErroParaHttpsError(erro);
+    }
+  },
+);
 
-    const tokenRecebido = requisicao.headers["asaas-access-token"] as string | undefined;
-    if (tokensValidos.size > 0 && (!tokenRecebido || !tokensValidos.has(tokenRecebido.trim()))) {
-      console.warn("[WEBHOOK_ASAAS_NAO_AUTORIZADO]", {
-        tokenRecebido,
-        tokensValidos: Array.from(tokensValidos),
+export const webhookAsaas = onRequest(
+  { cors: false, secrets: [tokenWebhookAsaas] },
+  async (requisicao, resposta) => {
+    try {
+      const tokenEsperado = tokenWebhookAsaas.value().trim();
+      if (!tokenEsperado) {
+        console.error("[WEBHOOK_ASAAS_NAO_CONFIGURADO]");
+        resposta.status(500).json({ erro: "Token de webhook Asaas não configurado." });
+        return;
+      }
+
+      const tokenRecebido = requisicao.headers["asaas-access-token"] as string | undefined;
+      if (!tokenRecebido || tokenRecebido.trim() !== tokenEsperado) {
+        console.warn("[WEBHOOK_ASAAS_NAO_AUTORIZADO]");
+        resposta.status(401).json({ erro: "Token de webhook Asaas não autorizado." });
+        return;
+      }
+
+      console.log("[WEBHOOK_ASAAS_RECEBIDO]", {
+        evento: requisicao.body?.event,
+        paymentId: requisicao.body?.payment?.id,
+        status: requisicao.body?.payment?.status,
       });
-      resposta.status(401).json({ erro: "Token de webhook Asaas não autorizado." });
-      return;
+
+      const { bancoDados } = obterAdminFuncoes();
+      const resultado = await executarProcessamentoWebhookAsaasTransacional(
+        bancoDados,
+        requisicao.body,
+      );
+
+      console.log("[WEBHOOK_ASAAS_SUCESSO]", resultado);
+      resposta.status(200).json(resultado);
+    } catch (erro) {
+      console.error("[WEBHOOK_ASAAS_ERRO]", erro);
+      const mensagem = erro instanceof Error ? erro.message : "Erro interno no webhook Asaas.";
+      resposta.status(400).json({ erro: mensagem });
     }
-
-    console.log("[WEBHOOK_ASAAS_RECEBIDO]", {
-      evento: requisicao.body?.event,
-      paymentId: requisicao.body?.payment?.id,
-      status: requisicao.body?.payment?.status,
-    });
-
-    const { bancoDados } = obterAdminFuncoes();
-    const resultado = await executarProcessamentoWebhookAsaasTransacional(
-      bancoDados,
-      requisicao.body,
-    );
-
-    console.log("[WEBHOOK_ASAAS_SUCESSO]", resultado);
-    resposta.status(200).json(resultado);
-  } catch (erro) {
-    console.error("[WEBHOOK_ASAAS_ERRO]", erro);
-    const mensagem = erro instanceof Error ? erro.message : "Erro interno no webhook Asaas.";
-    resposta.status(400).json({ erro: mensagem });
-  }
-});
+  },
+);
 
 export const alterarSituacaoOrganizacaoFundador = onCall(async (requisicao) => {
   try {

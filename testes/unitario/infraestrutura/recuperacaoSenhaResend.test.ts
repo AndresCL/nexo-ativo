@@ -2,11 +2,15 @@ import { describe, expect, it, vi } from "vitest";
 import { executarSolicitacaoRecuperacaoSenha } from "../../../funcoes/src/casos-de-uso/solicitarRecuperacaoSenhaTransacional";
 import type { PortaProvedorEmailTransacional } from "../../../funcoes/src/email/adaptadorResendEmail";
 
+type BancoRecuperacao = Parameters<typeof executarSolicitacaoRecuperacaoSenha>[0];
+type AutenticacaoRecuperacao = Parameters<typeof executarSolicitacaoRecuperacaoSenha>[1];
+type MensagemEmailEnviada = Parameters<PortaProvedorEmailTransacional["enviarEmailIdempotente"]>[0];
+
 describe("Caso de Uso: Solicitação de Recuperação de Senha com Rate-Limit e Resend", () => {
   it("deve gerar link seguro e enviar e-mail minimalista quando usuário existe", async () => {
     const mapaFirestore = new Map<string, Record<string, unknown>>();
 
-    const bancoFalso: any = {
+    const bancoFalso = {
       collection: (nome: string) => ({
         doc: (id: string) => ({
           get: async () => ({
@@ -18,14 +22,14 @@ describe("Caso de Uso: Solicitação de Recuperação de Senha com Rate-Limit e 
           },
         }),
       }),
-    };
+    } as unknown as BancoRecuperacao;
 
-    const autenticacaoAdminFalsa: any = {
+    const autenticacaoAdminFalsa = {
       getUserByEmail: vi.fn().mockResolvedValue({ uid: "user-123", email: "fundador@nexoativo.com.br" }),
       generatePasswordResetLink: vi.fn().mockResolvedValue("https://demo-fluxo.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=codigoTesteSeguro"),
-    };
+    } as unknown as AutenticacaoRecuperacao;
 
-    const envios: any[] = [];
+    const envios: MensagemEmailEnviada[] = [];
     const provedorEmailFalso: PortaProvedorEmailTransacional = {
       enviarEmailIdempotente: async (msg) => {
         envios.push(msg);
@@ -56,7 +60,7 @@ describe("Caso de Uso: Solicitação de Recuperação de Senha com Rate-Limit e 
   it("deve barrar segundo envio imediato pelo rate limit para blindar cota do Resend", async () => {
     const mapaFirestore = new Map<string, Record<string, unknown>>();
 
-    const bancoFalso: any = {
+    const bancoFalso = {
       collection: (nome: string) => ({
         doc: (id: string) => ({
           get: async () => ({
@@ -68,14 +72,14 @@ describe("Caso de Uso: Solicitação de Recuperação de Senha com Rate-Limit e 
           },
         }),
       }),
-    };
+    } as unknown as BancoRecuperacao;
 
-    const autenticacaoAdminFalsa: any = {
+    const autenticacaoAdminFalsa = {
       getUserByEmail: vi.fn().mockResolvedValue({ uid: "user-123", email: "fundador@nexoativo.com.br" }),
       generatePasswordResetLink: vi.fn().mockResolvedValue("https://demo-fluxo.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=codigo"),
-    };
+    } as unknown as AutenticacaoRecuperacao;
 
-    const envios: any[] = [];
+    const envios: MensagemEmailEnviada[] = [];
     const provedorEmailFalso: PortaProvedorEmailTransacional = {
       enviarEmailIdempotente: async (msg) => {
         envios.push(msg);
