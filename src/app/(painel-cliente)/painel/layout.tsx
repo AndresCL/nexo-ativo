@@ -10,6 +10,7 @@ import { verificarPrivilegioFundador } from "@/dominio/permissoes/autorizadorOrg
 import { EstruturaNavegacaoPainel } from "@/componentes/painel/EstruturaNavegacaoPainel";
 import { ProvedorPoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { carregarPerfilPublicidadeOrganizacaoServidor } from "@/infraestrutura/painel/leitorPerfilPublicidadeServidor";
+import { carregarLogotipoOrganizacaoServidor } from "@/infraestrutura/painel/leitorLogotipoOrganizacaoServidor";
 import { contarSolicitacoesNovasOrganizacaoServidor } from "@/infraestrutura/painel/leitorSolicitacoesOrganizacaoServidor";
 import { contarAgendamentosConfirmadosOrganizacaoServidor } from "@/infraestrutura/painel/leitorAgendaOrganizacaoServidor";
 import { ChatCrisp } from "@/componentes/interface/ChatCrisp";
@@ -39,21 +40,28 @@ export default async function LayoutPainelCliente({ children }: { readonly child
   const vinculos = await listarVinculosOrganizacaoServidor(sessao.uid);
   const organizacaoPrincipal = vinculos[0];
 
-  const [totalSolicitacoesNovas, totalAgendamentosConfirmados, perfilPublicidade] =
-    organizacaoPrincipal
-      ? await Promise.all([
-          contarSolicitacoesNovasOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
-          contarAgendamentosConfirmadosOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
-          carregarPerfilPublicidadeOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
-        ])
-      : [0, 0, "padrao" as const];
+  const [
+    totalSolicitacoesNovas,
+    totalAgendamentosConfirmados,
+    perfilPublicidade,
+    urlLogotipoOrganizacao,
+  ] = organizacaoPrincipal
+    ? await Promise.all([
+        contarSolicitacoesNovasOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
+        contarAgendamentosConfirmadosOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
+        carregarPerfilPublicidadeOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
+        carregarLogotipoOrganizacaoServidor(organizacaoPrincipal.organizacaoId),
+      ])
+    : [0, 0, "padrao" as const, null];
 
   return (
     <ProvedorEstadoInterfacePainel>
       <ProvedorPoliticaPublicidade codigoPerfil={perfilPublicidade}>
         <EstruturaNavegacaoPainel
           nomeOrganizacaoAtiva={organizacaoPrincipal?.nomeOrganizacao}
+          nomeUsuario={sessao.nomeExibicao}
           emailUsuario={sessao.email}
+          urlLogotipoOrganizacao={urlLogotipoOrganizacao}
           totalSolicitacoesNovas={totalSolicitacoesNovas}
           totalAgendamentosConfirmados={totalAgendamentosConfirmados}
           ehFundador={verificarPrivilegioFundador(sessao)}

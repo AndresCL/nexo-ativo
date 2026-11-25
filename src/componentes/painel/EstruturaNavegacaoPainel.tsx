@@ -21,7 +21,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useEstadoInterfacePainel } from "@/estados/estadoInterfacePainel";
 import { MenuRodapeUsuario } from "@/componentes/painel/MenuRodapeUsuario";
 import { LogoNexoAtivo } from "@/componentes/interface/LogoNexoAtivo";
@@ -37,7 +37,9 @@ interface ItemNavegacaoPainel {
 export interface PropriedadesEstruturaNavegacaoPainel {
   readonly children: ReactNode;
   readonly nomeOrganizacaoAtiva?: string;
+  readonly nomeUsuario?: string | null;
   readonly emailUsuario?: string | null;
+  readonly urlLogotipoOrganizacao?: string | null;
   readonly totalSolicitacoesNovas?: number;
   readonly totalAgendamentosConfirmados?: number;
   readonly ehFundador?: boolean;
@@ -115,10 +117,12 @@ function ListaLinksNavegacao({
   aoSelecionar,
   totalSolicitacoesNovas = 0,
   totalAgendamentosConfirmados = 0,
+  contraido = false,
 }: {
   readonly aoSelecionar?: () => void;
   readonly totalSolicitacoesNovas?: number;
   readonly totalAgendamentosConfirmados?: number;
+  readonly contraido?: boolean;
 }) {
   const caminhoAtual = usePathname();
 
@@ -131,24 +135,43 @@ function ListaLinksNavegacao({
             : item.caminho !== "/painel" && caminhoAtual.startsWith(item.caminho);
         const ehItemSolicitacoes = item.caminho === "/painel/solicitacoes";
         const ehItemAgenda = item.caminho === "/painel/agenda";
+        const temBadge =
+          (ehItemSolicitacoes && totalSolicitacoesNovas > 0) ||
+          (ehItemAgenda && totalAgendamentosConfirmados > 0);
 
         return (
           <Link
             key={item.rotulo}
             href={item.caminho}
             onClick={aoSelecionar}
+            title={contraido ? item.rotulo : undefined}
+            aria-label={contraido ? item.rotulo : undefined}
             aria-current={ativo ? "page" : undefined}
-            className={`flex min-h-10 items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-mineral-950 ${ativo
+            className={`relative flex min-h-10 items-center justify-between overflow-hidden rounded-lg px-3 py-2 text-sm transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-mineral-950 ${
+              ativo
                 ? "bg-mineral-950 font-medium text-white shadow-2xs"
                 : "text-mineral-600 hover:bg-mineral-100/80 hover:text-mineral-950"
-              }`}
+            }`}
           >
-            <div className="flex items-center gap-3">
-              {item.icone}
-              <span>{item.rotulo}</span>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex w-5 shrink-0 items-center justify-center">{item.icone}</span>
+              <span
+                className={`whitespace-nowrap transition-opacity duration-150 ${
+                  contraido ? "opacity-0" : "opacity-100"
+                }`}
+              >
+                {item.rotulo}
+              </span>
             </div>
 
-            {ehItemSolicitacoes && totalSolicitacoesNovas > 0 ? (
+            {contraido ? (
+              temBadge ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-600"
+                />
+              ) : null
+            ) : ehItemSolicitacoes && totalSolicitacoesNovas > 0 ? (
               <span
                 data-testid="badge-solicitacoes-novas"
                 aria-label={`${totalSolicitacoesNovas} novas solicitações`}
@@ -175,7 +198,9 @@ function ListaLinksNavegacao({
 export function EstruturaNavegacaoPainel({
   children,
   nomeOrganizacaoAtiva,
+  nomeUsuario,
   emailUsuario,
+  urlLogotipoOrganizacao,
   totalSolicitacoesNovas = 0,
   totalAgendamentosConfirmados = 0,
   ehFundador = false,
@@ -183,6 +208,8 @@ export function EstruturaNavegacaoPainel({
   const menuAberto = useEstadoInterfacePainel((estado) => estado.menuLateralAbertoMobile);
   const alternarMenu = useEstadoInterfacePainel((estado) => estado.alternarMenuLateralMobile);
   const fecharMenu = useEstadoInterfacePainel((estado) => estado.fecharMenuLateralMobile);
+  const [menuDesktopExpandido, setMenuDesktopExpandido] = useState(false);
+  const menuContraido = !menuDesktopExpandido;
   const totalPendenciasMenu = totalSolicitacoesNovas + totalAgendamentosConfirmados;
 
   return (
@@ -242,7 +269,9 @@ export function EstruturaNavegacaoPainel({
 
               <div className="border-t border-slate-200/60 pt-4">
                 <MenuRodapeUsuario
+                  nomeUsuario={nomeUsuario}
                   emailUsuario={emailUsuario}
+                  urlLogotipoOrganizacao={urlLogotipoOrganizacao}
                   aoClicarLink={fecharMenu}
                 />
               </div>
@@ -251,34 +280,68 @@ export function EstruturaNavegacaoPainel({
         </DialogoPrimitivo.Root>
       </header>
 
-      <aside className="fundo-menu-painel hidden w-64 shrink-0 flex-col gap-4 border-r border-slate-200/60 p-6 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:overflow-y-auto lg:overscroll-contain">
-        <div className="flex flex-col gap-8">
-          <div>
-            <Link href="/painel" className="inline-block text-mineral-950">
-              <LogoNexoAtivo tamanho="padrao" />
-            </Link>
-            <p className="mt-0.5 truncate text-xs font-medium text-mineral-700">
-              {nomeOrganizacaoAtiva ?? "Configuração inicial"}
-            </p>
-            {ehFundador ? (
+      {/* Espaçador fixo no fluxo para o conteúdo principal nunca pular no hover */}
+      <div className="hidden w-[72px] shrink-0 lg:block" aria-hidden="true" />
+
+      <aside
+        onMouseEnter={() => setMenuDesktopExpandido(true)}
+        onMouseLeave={() => setMenuDesktopExpandido(false)}
+        onFocus={() => setMenuDesktopExpandido(true)}
+        onBlur={(evento) => {
+          if (!evento.currentTarget.contains(evento.relatedTarget as Node | null)) {
+            setMenuDesktopExpandido(false);
+          }
+        }}
+        className={`fundo-menu-painel fixed inset-y-0 left-0 z-30 hidden border-r border-slate-200/60 transition-[width,box-shadow] duration-200 ease-out lg:flex ${
+          menuContraido ? "w-[72px] shadow-none" : "w-64 shadow-xl"
+        }`}
+      >
+        <div className="flex h-full w-full flex-col justify-between gap-4 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-5">
+          <div className="flex flex-col gap-5">
+            <div className="min-h-12 overflow-hidden px-2">
               <Link
-                href="/fundador"
-                className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-mineral-300 bg-mineral-100/90 px-2.5 py-1 text-[11px] font-semibold text-mineral-900 transition-colors hover:bg-mineral-200"
+                href="/painel"
+                title="Nexo Ativo"
+                className="inline-flex items-center whitespace-nowrap text-mineral-950"
               >
-                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Painel Fundador</span>
+                <LogoNexoAtivo tamanho="padrao" exibirTexto={!menuContraido} />
               </Link>
-            ) : null}
+              <div
+                className={`transition-opacity duration-150 ${
+                  menuContraido ? "pointer-events-none opacity-0" : "opacity-100"
+                }`}
+                aria-hidden={menuContraido}
+              >
+                <p className="mt-0.5 truncate text-xs font-medium text-mineral-700">
+                  {nomeOrganizacaoAtiva ?? "Configuração inicial"}
+                </p>
+                {ehFundador ? (
+                  <Link
+                    href="/fundador"
+                    className="mt-2 inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-mineral-300 bg-mineral-100/90 px-2.5 py-1 text-[11px] font-semibold text-mineral-900 transition-colors hover:bg-mineral-200"
+                  >
+                    <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span>Painel Fundador</span>
+                  </Link>
+                ) : null}
+              </div>
+            </div>
+
+            <ListaLinksNavegacao
+              totalSolicitacoesNovas={totalSolicitacoesNovas}
+              totalAgendamentosConfirmados={totalAgendamentosConfirmados}
+              contraido={menuContraido}
+            />
           </div>
 
-          <ListaLinksNavegacao
-            totalSolicitacoesNovas={totalSolicitacoesNovas}
-            totalAgendamentosConfirmados={totalAgendamentosConfirmados}
-          />
-        </div>
-
-        <div className="border-t border-slate-200/60 pt-4">
-          <MenuRodapeUsuario emailUsuario={emailUsuario} />
+          <div className="border-t border-slate-200/60 pt-4">
+            <MenuRodapeUsuario
+              nomeUsuario={nomeUsuario}
+              emailUsuario={emailUsuario}
+              urlLogotipoOrganizacao={urlLogotipoOrganizacao}
+              contraido={menuContraido}
+            />
+          </div>
         </div>
       </aside>
 

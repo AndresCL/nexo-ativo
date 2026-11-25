@@ -13,21 +13,10 @@ export function criarEtapaDadosRetorno(id: string): EtapaMicrofluxo {
     id,
     tipoEtapa: "etapa_livre",
     modeloOrigem: "coleta_contato",
-    titulo: "Como prefere receber o retorno?",
-    subtituloOpcional: "Informe seu nome e número para receber o contato da equipe.",
+    titulo: "Seus dados de contato",
+    subtituloOpcional: "Deixe seu nome e WhatsApp para nossa equipe retornar.",
     obrigatoria: true,
     blocos: [
-      {
-        id: "preferencia-contato",
-        tipo: "escolha",
-        rotulo: "Como prefere receber o retorno?",
-        multipla: false,
-        obrigatorio: true,
-        opcoes: [
-          { id: "whatsapp", rotulo: "WhatsApp" },
-          { id: "ligacao", rotulo: "Ligação" },
-        ],
-      },
       {
         id: "nomeCompleto",
         tipo: "campo",
@@ -40,7 +29,7 @@ export function criarEtapaDadosRetorno(id: string): EtapaMicrofluxo {
         finalidade: "telefoneOuWhatsapp",
         campo: {
           id: "telefoneOuWhatsapp",
-          rotulo: "Seu número",
+          rotulo: "Seu WhatsApp",
           tipo: "telefone",
           obrigatorio: true,
         },

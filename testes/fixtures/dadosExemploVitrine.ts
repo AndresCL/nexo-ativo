@@ -21,6 +21,10 @@ import {
   ACERVO_POUSADA_VELAS_DO_FORTE,
   VITRINE_POUSADA_VELAS_DO_FORTE,
 } from "./dadosPousadaVelasDoForte";
+import {
+  ACERVO_CARDIM_CASTRO,
+  VITRINE_CARDIM_CASTRO,
+} from "./dadosCardimECastroAdvocacia";
 
 /**
  * Exemplares editoriais completos para demonstração e conferência local em desenvolvimento
@@ -323,6 +327,7 @@ export const CATALOGO_DEMONSTRACOES_EDITORIAIS: Readonly<Record<string, Conteudo
     "suppera-seguros": VITRINE_SUPPERA_SEGUROS,
     nexoativo: VITRINE_NEXOATIVO,
     "pousada-velas-do-forte": VITRINE_POUSADA_VELAS_DO_FORTE,
+    cardimecastroadvocacia: VITRINE_CARDIM_CASTRO,
   };
 
 export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublicoVitrine>> = {
@@ -1060,6 +1065,7 @@ export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublic
   "suppera-seguros": ACERVO_SUPPERA_SEGUROS,
   nexoativo: ACERVO_NEXOATIVO,
   "pousada-velas-do-forte": ACERVO_POUSADA_VELAS_DO_FORTE,
+  cardimecastroadvocacia: ACERVO_CARDIM_CASTRO,
 };
 
 export function buscarDemonstracaoEditorialPorSlug(

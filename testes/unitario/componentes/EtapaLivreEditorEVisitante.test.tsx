@@ -20,62 +20,54 @@ function Composicao({ inicial = [] }: { readonly inicial?: readonly BlocoEtapaLi
   return <EditorComposicaoEtapa blocos={blocos} etapas={[]} podeEditar aoAlterar={setBlocos} />;
 }
 describe("Etapa livre editável", () => {
-  it.each(["WhatsApp", "Ligação"])(
-    "registra a preferência %s com apenas nome e número antes da conclusão",
-    async (canal) => {
-      const etapa = criarEtapaDadosRetorno("retorno");
-      const fluxo = {
-        ...criarMicrofluxoPadraoParaTestes({
-          organizacaoId: pagina.organizacaoId,
-          nomeOrganizacao: "Lumina",
-          modelo: "catalogo",
-        }),
-        etapaInicialId: etapa.id,
-        etapas: [etapa],
-        textoBotaoConclusao: "Enviar solicitação",
-        regraCalculoComercial: { modalidade: "sem_calculo" as const },
-        conclusao: {
-          acoes: [],
-          camposWhatsapp: [],
-          resumo: { ativo: false, campos: [], incluirDemonstrativo: false },
-        },
-      };
-      const enviarSolicitacaoVisitante = vi
-        .fn()
-        .mockResolvedValue({ solicitacaoId: "retorno-registrado", duplicadaIdempotente: false });
-      render(
-        <ExecutorMicrofluxoVisitante
-          aberto
-          microfluxo={fluxo}
-          pagina={pagina}
-          acervo={acervo}
-          aoAlterarAbertura={vi.fn()}
-          servicoSubmissao={{ enviarSolicitacaoVisitante }}
-        />,
-      );
-      expect(screen.queryByLabelText(/E-mail|Mensagem adicional/)).not.toBeInTheDocument();
-      fireEvent.change(screen.getByLabelText(/Seu nome/), { target: { value: "Ana Souza" } });
-      fireEvent.change(screen.getByLabelText(/Seu número/), { target: { value: "11999999999" } });
-      fireEvent.click(screen.getByRole("button", { name: "Enviar solicitação" }));
-      expect(enviarSolicitacaoVisitante).not.toHaveBeenCalled();
-      fireEvent.click(screen.getByRole("button", { name: canal }));
-      expect(enviarSolicitacaoVisitante).not.toHaveBeenCalled();
-      fireEvent.click(screen.getByRole("button", { name: "Enviar solicitação" }));
-      expect(await screen.findByTestId("confirmacao-microfluxo-concluido")).toHaveTextContent(
-        "retorno-registrado",
-      );
-      expect(enviarSolicitacaoVisitante).toHaveBeenCalledTimes(1);
-      expect(enviarSolicitacaoVisitante).toHaveBeenCalledWith(
-        expect.objectContaining({
-          nomeVisitante: "Ana Souza",
-          telefoneOuWhatsapp: "11999999999",
-          respostasRegistradas: expect.arrayContaining([
-            expect.objectContaining({ respostaTexto: canal }),
-          ]),
-        }),
-      );
-    },
-  );
+  it("registra o retorno com apenas nome e WhatsApp antes da conclusão", async () => {
+    const etapa = criarEtapaDadosRetorno("retorno");
+    const fluxo = {
+      ...criarMicrofluxoPadraoParaTestes({
+        organizacaoId: pagina.organizacaoId,
+        nomeOrganizacao: "Lumina",
+        modelo: "catalogo",
+      }),
+      etapaInicialId: etapa.id,
+      etapas: [etapa],
+      textoBotaoConclusao: "Enviar solicitação",
+      regraCalculoComercial: { modalidade: "sem_calculo" as const },
+      conclusao: {
+        acoes: [],
+        camposWhatsapp: [],
+        resumo: { ativo: false, campos: [], incluirDemonstrativo: false },
+      },
+    };
+    const enviarSolicitacaoVisitante = vi
+      .fn()
+      .mockResolvedValue({ solicitacaoId: "retorno-registrado", duplicadaIdempotente: false });
+    render(
+      <ExecutorMicrofluxoVisitante
+        aberto
+        microfluxo={fluxo}
+        pagina={pagina}
+        acervo={acervo}
+        aoAlterarAbertura={vi.fn()}
+        servicoSubmissao={{ enviarSolicitacaoVisitante }}
+      />,
+    );
+    expect(screen.queryByLabelText(/E-mail|Mensagem adicional/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Enviar solicitação" }));
+    expect(enviarSolicitacaoVisitante).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText(/Seu nome/), { target: { value: "Ana Souza" } });
+    fireEvent.change(screen.getByLabelText(/Seu WhatsApp/), { target: { value: "11999999999" } });
+    fireEvent.click(screen.getByRole("button", { name: "Enviar solicitação" }));
+    expect(await screen.findByTestId("confirmacao-microfluxo-concluido")).toHaveTextContent(
+      "retorno-registrado",
+    );
+    expect(enviarSolicitacaoVisitante).toHaveBeenCalledTimes(1);
+    expect(enviarSolicitacaoVisitante).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nomeVisitante: "Ana Souza",
+        telefoneOuWhatsapp: "11999999999",
+      }),
+    );
+  });
   it("combina e ordena texto, imagem, campo, escolha, catálogo e equipe", () => {
     render(<Composicao />);
     for (const tipo of ["texto", "imagem", "campo", "escolha", "catálogo", "equipe"])

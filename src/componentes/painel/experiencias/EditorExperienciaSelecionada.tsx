@@ -91,7 +91,7 @@ export function EditorExperienciaSelecionada({
         <p className="text-xs text-mineral-500">
           Editando experiência ·{" "}
           <span className="font-semibold text-mineral-900">
-            {fluxoAtual.rotuloBotaoHome?.trim() || fluxoAtual.titulo}
+            {fluxoAtual.titulo}
           </span>
         </p>
       </div>

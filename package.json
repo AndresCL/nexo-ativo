@@ -13,6 +13,7 @@
     "recuperar:garage88": "vite-node --config vitest.config.ts scripts/recuperarGarage88.ts",
     "criar:suppera": "vite-node --config vitest.config.ts scripts/criarSupperaSeguros.ts",
     "criar:pousada": "vite-node --config vitest.config.ts scripts/criarPousadaVelasDoForte.ts",
+    "criar:cardim-castro": "vite-node --config vitest.config.ts scripts/criarCardimECastroAdvocacia.ts",
     "criar:nexoativo": "vite-node --config vitest.config.ts scripts/criarNexoAtivo.ts",
     "provisionar:fundador": "vite-node --config vitest.config.ts scripts/provisionarFundador.ts",
     "promover:organizacao": "vite-node --config vitest.config.ts scripts/promoverOrganizacaoProducao.ts",
