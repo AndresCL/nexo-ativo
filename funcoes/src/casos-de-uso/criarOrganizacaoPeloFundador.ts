@@ -13,6 +13,7 @@ import {
   criarRascunhoConfiguracaoPaginaPadrao,
   removerCamposIndefinidosParaFirestore,
 } from "../../../src/dominio/entidades/rascunhoConfiguracaoPagina";
+import { criarConteudoInicialOrganizacao } from "../../../src/dominio/entidades/conteudoInicialOrganizacao";
 import {
   ErroConflitoDominio,
   ErroValidacaoDominio,
@@ -218,6 +219,34 @@ export async function executarCriacaoOrganizacaoPeloFundador(
         }),
       ),
     );
+
+    const conteudoInicial = criarConteudoInicialOrganizacao({
+      organizacaoId,
+      nomeOrganizacao: dados.nome,
+      nomeProprietarioOpcional: proprietario.nomeExibicao,
+      perfilPublicidade,
+      limiteProfissionaisAtivos: resumoDireitosPlano.limiteProfissionaisAtivos,
+      agoraIso,
+    });
+
+    for (const fluxo of conteudoInicial.microfluxos) {
+      transacao.set(
+        referenciaOrganizacao.collection("microfluxos").doc(fluxo.id),
+        removerCamposIndefinidosParaFirestore(fluxo),
+      );
+    }
+    for (const profissional of conteudoInicial.profissionais) {
+      transacao.set(
+        referenciaOrganizacao.collection("profissionais").doc(profissional.id),
+        removerCamposIndefinidosParaFirestore(profissional),
+      );
+    }
+    for (const produto of conteudoInicial.produtos) {
+      transacao.set(
+        referenciaOrganizacao.collection("produtos").doc(produto.id),
+        removerCamposIndefinidosParaFirestore(produto),
+      );
+    }
 
     const registroAuditoria: RegistroAuditoria = {
       id: referenciaAuditoria.id,

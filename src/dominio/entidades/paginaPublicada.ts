@@ -139,6 +139,7 @@ export interface ConfiguracaoCtaAcervo {
 }
 
 export interface ItemAcaoHome {
+  readonly larguraCard?: "inteiro" | "metade";
   readonly posicionamentoEquipe?: PosicionamentoEquipeVitrine;
   readonly limiteAvataresEquipe?: number | null;
   readonly modoExibicaoColecao?: "modal_gaveta" | "carrossel" | "grade_2_colunas";
@@ -593,6 +594,9 @@ export function resolverAcoesVitrineComMicrofluxos(
         m.animarBordaDestaque ?? acaoExistente?.animarBordaDestaque,
       ),
       corBrilhoBorda: m.corBrilhoBorda ?? acaoExistente?.corBrilhoBorda,
+      ...(m.larguraCardHome ?? acaoExistente?.larguraCard
+        ? { larguraCard: m.larguraCardHome ?? acaoExistente?.larguraCard }
+        : {}),
       ...(tipoDestino === "secao_equipe" && m.posicionamentoEquipe
         ? { posicionamentoEquipe: m.posicionamentoEquipe }
         : {}),

@@ -294,6 +294,7 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
     animarBordaDestaque: z.boolean().optional(),
     animacaoDestaque: z.enum(VALORES_ANIMACAO_DESTAQUE).optional(),
     corBrilhoBorda: z.string().optional(),
+    larguraCardHome: z.enum(["inteiro", "metade"]).optional(),
     ordemHome: z.number().int().min(0).max(50).optional(),
     posicionamentoEquipe: esquemaPosicionamentoEquipeVitrine.optional(),
     limiteAvataresEquipe: esquemaLimiteAvataresEquipe,

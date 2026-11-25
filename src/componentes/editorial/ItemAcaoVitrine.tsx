@@ -21,6 +21,7 @@ import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrin
 import type { ModoExibicaoVideos, VideoYoutubeItem } from "@/dominio/objetos-valor/videoYoutube";
 import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 import { AcaoEquipeVitrine, type ManipuladorAcaoHome } from "./AcaoEquipeVitrine";
+import { CardAcaoVitrineCompacto } from "./CardAcaoVitrineCompacto";
 import { SecaoVideosYoutube } from "./SecaoVideosYoutube";
 import { SecaoColecaoAcervoHome } from "./acervo/SecaoColecaoAcervoHome";
 
@@ -118,6 +119,7 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
 export interface PropriedadesItemAcaoVitrine {
   readonly acao: ItemAcaoHome;
   readonly ehDestaque: boolean;
+  readonly formatoCompacto?: boolean;
   readonly aoAcionarItem?: ManipuladorAcaoHome;
   readonly aoSelecionarItemAcervo?: (tipo: "produtos" | "servicos", itemId: string) => void;
   readonly previaEquipe?: PreviaEquipeVitrine;
@@ -133,6 +135,7 @@ export interface PropriedadesItemAcaoVitrine {
 export function ItemAcaoVitrine({
   acao,
   ehDestaque,
+  formatoCompacto = false,
   aoAcionarItem,
   aoSelecionarItemAcervo,
   previaEquipe,
@@ -215,6 +218,16 @@ export function ItemAcaoVitrine({
         modoExibicao={modoExibicaoVideos}
         autoplay={autoplayVideos}
         tituloSecao={ocultarTituloVideos ? undefined : acao.tituloSecao || acao.rotulo}
+      />
+    );
+  }
+
+  if (formatoCompacto && !ehDestaque) {
+    return (
+      <CardAcaoVitrineCompacto
+        acao={acao}
+        icone={renderizarIconeAcao(acao)}
+        aoAcionarItem={aoAcionarItem}
       />
     );
   }

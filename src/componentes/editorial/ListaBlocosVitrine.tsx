@@ -13,6 +13,10 @@ import {
   resolverOrdemBlocosVitrine,
 } from "@/dominio/editorial/ordemBlocosVitrine";
 import {
+  agruparBlocosEmLinhasVitrine,
+  podeUsarLarguraMetade,
+} from "@/dominio/editorial/agrupamentoGridVitrine";
+import {
   ehAcaoEquipe,
   obterVisibilidadeEquipe,
 } from "@/dominio/editorial/posicionamentoEquipeVitrine";
@@ -95,7 +99,23 @@ export function ListaBlocosVitrine({
         : "gap-2.5";
 
   const temDestaqueExplicito = acoesVisiveis.some((a) => a.destaquePrincipal === true);
+  const mapaDestaquePorBloco = new Map<string, boolean>();
   let primeiroIndiceAcao = 0;
+  for (const idBloco of ordemResolvida) {
+    const acao = mapaAcoesPorBloco.get(idBloco);
+    if (!acao) continue;
+    const indiceAtual = primeiroIndiceAcao++;
+    mapaDestaquePorBloco.set(
+      idBloco,
+      acao.destaquePrincipal ?? (!temDestaqueExplicito && indiceAtual === 0),
+    );
+  }
+
+  const linhasVitrine = agruparBlocosEmLinhasVitrine(ordemResolvida, (idBloco) => {
+    const acao = mapaAcoesPorBloco.get(idBloco);
+    if (!acao) return false;
+    return podeUsarLarguraMetade(acao, mapaDestaquePorBloco.get(idBloco) === true);
+  });
 
   return (
     <div
@@ -125,7 +145,43 @@ export function ListaBlocosVitrine({
             ))
         : null}
 
-      {ordemResolvida.map((idBloco) => {
+      {linhasVitrine.map((linha) => {
+        if (linha.tipo === "par") {
+          return (
+            <div
+              key={linha.idsBlocos.join("__")}
+              data-linha-vitrine="par"
+              className="mx-auto grid w-full max-w-sm grid-cols-2 gap-2.5 @5xl:mx-0 @5xl:ml-auto @5xl:max-w-xs"
+            >
+              {linha.idsBlocos.map((idBloco) => {
+                const acao = mapaAcoesPorBloco.get(idBloco);
+                if (!acao) return null;
+                return (
+                  <div key={idBloco} data-bloco-vitrine={idBloco} className="min-w-0">
+                    <ItemAcaoVitrine
+                      acao={acao}
+                      ehDestaque={false}
+                      formatoCompacto
+                      aoAcionarItem={aoAcionarItem}
+                      aoSelecionarItemAcervo={aoSelecionarItemAcervo}
+                      previaEquipe={previaEquipe}
+                      modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
+                      videosYoutube={videosYoutube}
+                      modoExibicaoVideos={modoExibicaoVideos}
+                      autoplayVideos={autoplayVideos}
+                      ocultarTituloVideos={ocultarTituloVideos}
+                      produtos={produtos}
+                      servicos={servicos}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        const { idBloco } = linha;
+
         if (idBloco === "bloco:marca") {
           return (
             <div key={idBloco} className="w-full" data-bloco-vitrine="bloco:marca">
@@ -165,9 +221,7 @@ export function ListaBlocosVitrine({
 
         const acao = mapaAcoesPorBloco.get(idBloco);
         if (!acao) return null;
-        const indiceAtual = primeiroIndiceAcao++;
-        const ehDestaque =
-          acao.destaquePrincipal ?? (!temDestaqueExplicito && indiceAtual === 0);
+        const ehDestaque = mapaDestaquePorBloco.get(idBloco) === true;
 
         return (
           <div

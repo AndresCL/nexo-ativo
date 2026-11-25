@@ -9,6 +9,8 @@ import { AlertTriangle } from "lucide-react";
 
 import type { PortaProvisionamentoOrganizacaoCliente } from "@/aplicacao/portas/portasAutenticacao";
 import { normalizarSugestaoIdentificador } from "@/dominio/objetos-valor/identificadorPublico";
+import { POLITICAS_PUBLICIDADE_DISPONIVEIS } from "@/dominio/publicidade/registroPoliticasPublicidade";
+import { CODIGO_PERFIL_PUBLICIDADE_PADRAO } from "@/dominio/publicidade/tiposPerfilPublicidade";
 import { servicoAutenticacaoCliente } from "@/infraestrutura/firebase/servicoAutenticacaoCliente";
 import {
   esquemaCriarOrganizacaoInicial,
@@ -41,6 +43,7 @@ export function FormularioCriarPrimeiraOrganizacao({
       nome: "",
       identificadorPublico: "",
       segmentoAtividade: "",
+      perfilPublicidade: CODIGO_PERFIL_PUBLICIDADE_PADRAO,
     },
   });
 
@@ -135,6 +138,30 @@ export function FormularioCriarPrimeiraOrganizacao({
         mensagemErro={errors.segmentoAtividade?.message}
         {...register("segmentoAtividade")}
       />
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="perfilPublicidade"
+          className="block text-xs font-medium text-mineral-800"
+        >
+          Perfil regulatório de publicidade
+        </label>
+        <select
+          id="perfilPublicidade"
+          disabled={!cadastroHabilitado}
+          className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-mineral-950 outline-none transition focus:border-mineral-950 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-mineral-500"
+          {...register("perfilPublicidade")}
+        >
+          {POLITICAS_PUBLICIDADE_DISPONIVEIS.map((politica) => (
+            <option key={politica.codigo} value={politica.codigo}>
+              {politica.rotulo}
+            </option>
+          ))}
+        </select>
+        <p className="text-[11px] leading-relaxed text-mineral-500">
+          Ajusta automaticamente avisos e recursos para profissões reguladas (OAB, CFM ou CFO).
+        </p>
+      </div>
 
       <CampoFormulario
         rotulo="Endereço público da sua página"

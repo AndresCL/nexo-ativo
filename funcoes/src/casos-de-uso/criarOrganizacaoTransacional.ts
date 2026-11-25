@@ -17,6 +17,8 @@ import {
   criarRascunhoConfiguracaoPaginaPadrao,
   removerCamposIndefinidosParaFirestore,
 } from "../../../src/dominio/entidades/rascunhoConfiguracaoPagina";
+import { criarConteudoInicialOrganizacao } from "../../../src/dominio/entidades/conteudoInicialOrganizacao";
+import { CODIGO_PERFIL_PUBLICIDADE_PADRAO } from "../../../src/dominio/publicidade/tiposPerfilPublicidade";
 import { esquemaCriarOrganizacaoInicial } from "../../../src/validacoes/esquemasAutenticacao";
 
 export interface ResultadoCriacaoOrganizacaoTransacional {
@@ -67,13 +69,17 @@ export async function executarCriacaoOrganizacaoInicial(
       );
     }
 
+    const perfilPublicidade = dados.perfilPublicidade ?? CODIGO_PERFIL_PUBLICIDADE_PADRAO;
+    const resumoDireitosPlano = criarResumoDireitosPlanoInicial();
+
     const novaOrganizacao: Organizacao = {
       id: organizacaoId,
       nome: dados.nome,
       identificadorPublico: slug,
       segmentoAtividade: dados.segmentoAtividade,
+      ...(perfilPublicidade !== CODIGO_PERFIL_PUBLICIDADE_PADRAO ? { perfilPublicidade } : {}),
       situacao: "ativa",
-      resumoDireitosPlano: criarResumoDireitosPlanoInicial(),
+      resumoDireitosPlano,
       criadoEmIso: agoraIso,
       atualizadoEmIso: agoraIso,
     };
@@ -134,6 +140,35 @@ export async function executarCriacaoOrganizacaoInicial(
         }),
       ),
     );
+
+    const conteudoInicial = criarConteudoInicialOrganizacao({
+      organizacaoId,
+      nomeOrganizacao: dados.nome,
+      nomeProprietarioOpcional: usuario.nomeExibicao ?? undefined,
+      perfilPublicidade,
+      limiteProfissionaisAtivos: resumoDireitosPlano.limiteProfissionaisAtivos,
+      agoraIso,
+    });
+
+    for (const fluxo of conteudoInicial.microfluxos) {
+      transacao.set(
+        referenciaOrganizacao.collection("microfluxos").doc(fluxo.id),
+        removerCamposIndefinidosParaFirestore(fluxo),
+      );
+    }
+    for (const profissional of conteudoInicial.profissionais) {
+      transacao.set(
+        referenciaOrganizacao.collection("profissionais").doc(profissional.id),
+        removerCamposIndefinidosParaFirestore(profissional),
+      );
+    }
+    for (const produto of conteudoInicial.produtos) {
+      transacao.set(
+        referenciaOrganizacao.collection("produtos").doc(produto.id),
+        removerCamposIndefinidosParaFirestore(produto),
+      );
+    }
+
     transacao.set(referenciaAuditoria, auditoria);
   });
 

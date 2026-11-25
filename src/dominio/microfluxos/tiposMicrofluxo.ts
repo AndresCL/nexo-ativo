@@ -248,6 +248,7 @@ export interface DefinicaoMicrofluxo {
   readonly animarBordaDestaque?: boolean;
   readonly animacaoDestaque?: AnimacaoDestaque;
   readonly corBrilhoBorda?: string;
+  readonly larguraCardHome?: "inteiro" | "metade";
   readonly ordemHome?: number;
 }
 

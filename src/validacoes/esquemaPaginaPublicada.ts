@@ -122,6 +122,7 @@ const esquemaItemAcaoHome = z.object({
   animarBordaDestaque: z.boolean().optional(),
   animacaoDestaque: z.enum(VALORES_ANIMACAO_DESTAQUE).optional(),
   corBrilhoBorda: z.string().optional(),
+  larguraCard: z.enum(["inteiro", "metade"]).optional(),
   icone: z.string().min(1).max(60).optional(),
 });
 

@@ -360,10 +360,13 @@ function ConteudoLinhaBloco({
           <p className="mt-0.5 truncate text-xs text-mineral-500">
             {[
               ehDestaque ? "Em destaque" : fluxo.ativo ? "Visível" : "Oculta",
+              !ehDestaque && fluxo.larguraCardHome === "metade" ? "Card 1/2" : null,
               ehMicrofluxo
                 ? `${fluxo.etapas.length} etapas`
                 : (DESCRITORES_TIPO_ACAO[tipoAcao]?.iconeBadge ?? "Ação"),
-            ].join(" · ")}
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
           {fluxo.subtituloBotaoHome ? (
             <p className="mt-0.5 truncate text-[11px] text-mineral-400">

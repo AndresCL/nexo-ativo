@@ -34,6 +34,7 @@ import { OpcaoOcultarTituloVideosExperiencia } from "../catalogo/OpcaoOcultarTit
 import { DESCRITORES_TIPO_ACAO } from "./descritoresTipoAcao";
 import { SecaoColecaoAcervoExperiencia } from "./SecaoColecaoAcervoExperiencia";
 import { SecaoConfiguracaoPixExperiencia } from "./SecaoConfiguracaoPixExperiencia";
+import { SeletorLarguraCardVitrine } from "./SeletorLarguraCardVitrine";
 
 export interface PropriedadesEditorExperienciaSelecionada {
   readonly organizacaoId: string;
@@ -168,6 +169,17 @@ export function EditorExperienciaSelecionada({
                   <option value="destaque">Em destaque</option>
                 </select>
               </label>
+
+              <SeletorLarguraCardVitrine
+                tipoAcao={fluxoAtual.tipoAcao}
+                modoExibicaoColecao={fluxoAtual.modoExibicaoColecao}
+                destaquePrimario={fluxoAtual.destaquePrimarioHome === true}
+                valor={fluxoAtual.larguraCardHome}
+                disabled={!podeAlterar}
+                aoAlterar={(larguraCardHome) =>
+                  aoAtualizarFluxo((atual) => ({ ...atual, larguraCardHome }))
+                }
+              />
 
               {fluxoAtual.destaquePrimarioHome ? (
                 <label className="space-y-1 text-xs font-medium text-mineral-700">

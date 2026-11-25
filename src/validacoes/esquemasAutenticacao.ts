@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  CODIGO_PERFIL_PUBLICIDADE_PADRAO,
+  CODIGOS_PERFIL_PUBLICIDADE,
+} from "@/dominio/publicidade/tiposPerfilPublicidade";
 import { esquemaIdentificadorPublico } from "./esquemasComuns";
 
 export const esquemaEntrarComEmail = z.object({
@@ -82,6 +86,10 @@ export const esquemaCriarOrganizacaoInicial = z.object({
     .trim()
     .min(2, "Informe seu segmento de atuação.")
     .max(60, "Use no máximo 60 caracteres."),
+  perfilPublicidade: z
+    .enum(CODIGOS_PERFIL_PUBLICIDADE)
+    .default(CODIGO_PERFIL_PUBLICIDADE_PADRAO)
+    .optional(),
 });
 
 export type DadosCriarOrganizacaoInicial = z.infer<typeof esquemaCriarOrganizacaoInicial>;
