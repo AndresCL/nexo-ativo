@@ -24,8 +24,6 @@ import {
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
-type AbaMobileExperiencias = "lista" | "previa";
-
 export interface PropriedadesLayoutListaComPreviaVitrine {
   readonly children: ReactNode;
   readonly rascunhoPagina?: RascunhoConfiguracaoPagina;
