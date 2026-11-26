@@ -4,7 +4,7 @@ import type {
   ResultadoSubmissaoSolicitacaoVisitante,
 } from "@/aplicacao/portas/portasSolicitacoesComerciais";
 import { gerarChaveIdempotenciaSolicitacao } from "@/dominio/entidades/solicitacaoComercial";
-import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteFirebase";
+import { obterFuncoesClienteFirebase } from "@/infraestrutura/firebase/clienteFuncoesFirebase";
 import type { DadosSubmissaoPublicaSolicitacao } from "@/validacoes/esquemaSolicitacaoComercial";
 
 export class ServicoSubmissaoSolicitacaoVisitanteFirebase implements PortaSubmissaoSolicitacaoVisitante {
@@ -21,7 +21,7 @@ export class ServicoSubmissaoSolicitacaoVisitanteFirebase implements PortaSubmis
         ...(dados.produtoId ? { produtoId: dados.produtoId } : {}),
       });
 
-    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const funcoesRemotas = obterFuncoesClienteFirebase();
     const chamarRegistro = httpsCallable<
       DadosSubmissaoPublicaSolicitacao,
       ResultadoSubmissaoSolicitacaoVisitante

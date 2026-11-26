@@ -1,6 +1,6 @@
 import { httpsCallable } from "firebase/functions";
 import type { DadosRegistroEventoAnonimo } from "@/validacoes/esquemasTelemetriaAnonima";
-import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteFirebase";
+import { obterFuncoesClienteFirebase } from "@/infraestrutura/firebase/clienteFuncoesFirebase";
 import {
   rastreadorSessaoTelemetriaPadrao,
   type RastreadorSessaoTelemetria,
@@ -20,7 +20,7 @@ export class ServicoTelemetriaAnonimaFirebase implements PortaTelemetriaAnonima 
   public async registrarEvento(dados: DadosRegistroEventoAnonimo): Promise<void> {
     try {
       const dadosComSessao = this.rastreadorSessao.enriquecerComSinaisSessao(dados);
-      const { funcoesRemotas } = obterServicosClienteFirebase();
+      const funcoesRemotas = obterFuncoesClienteFirebase();
       const chamarRegistro = httpsCallable<DadosRegistroEventoAnonimo, { registrado: boolean }>(
         funcoesRemotas,
         "registrarEventoAnonimo",

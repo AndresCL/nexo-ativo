@@ -3,7 +3,7 @@
 import { construirCssDegradadoEditorial } from "@/dominio/objetos-valor/degradadoEditorial";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   deveIgnorarOtimizadorImagem,
   obterDescritorPaletaEditorial,
@@ -53,16 +53,7 @@ export function CamadaMidiaImersiva({
 }: PropriedadesCamadaMidiaImersiva) {
   const movimentoReduzido = usePreferenciaMovimentoReduzido();
   const paleta = obterDescritorPaletaEditorial(paletaId);
-  const [midiaPronta, setMidiaPronta] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  useEffect(() => {
-    // Garante visibilidade suave mesmo se o evento de load não disparar por cache
-    const temporizadorSeguranca = setTimeout(() => {
-      setMidiaPronta(true);
-    }, 450);
-    return () => clearTimeout(temporizadorSeguranca);
-  }, [midia]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -164,13 +155,10 @@ export function CamadaMidiaImersiva({
               width={1600}
               height={900}
               priority
+              fetchPriority="high"
               sizes="100vw"
               unoptimized={deveIgnorarOtimizadorImagem(midiaResolvida.urlImagemEstatica)}
-              onLoad={() => setMidiaPronta(true)}
-              className={combinarClasses(
-                "block h-auto w-full transition-opacity duration-700 ease-out",
-                midiaPronta ? "opacity-100" : "opacity-0",
-              )}
+              className="block h-auto w-full opacity-100"
             />
           ) : null}
 

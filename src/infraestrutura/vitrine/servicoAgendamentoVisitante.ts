@@ -5,7 +5,7 @@ import type {
 } from "@/aplicacao/portas/portasAgenda";
 import type { RespostaDisponibilidadeAgendaPublica } from "@/dominio/agenda/tiposAgenda";
 import { gerarChaveIdempotenciaAgendamento } from "@/dominio/agenda/validadorReservaAgenda";
-import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteFirebase";
+import { obterFuncoesClienteFirebase } from "@/infraestrutura/firebase/clienteFuncoesFirebase";
 import type {
   DadosConsultaDisponibilidadeAgenda,
   DadosSubmissaoAgendamentoVisitante,
@@ -15,7 +15,7 @@ export class ServicoAgendamentoVisitanteFirebase implements PortaAgendamentoVisi
   public async consultarDisponibilidade(
     dados: DadosConsultaDisponibilidadeAgenda,
   ): Promise<RespostaDisponibilidadeAgendaPublica> {
-    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const funcoesRemotas = obterFuncoesClienteFirebase();
     const chamar = httpsCallable<
       DadosConsultaDisponibilidadeAgenda,
       RespostaDisponibilidadeAgendaPublica
@@ -37,7 +37,7 @@ export class ServicoAgendamentoVisitanteFirebase implements PortaAgendamentoVisi
         emailVisitante: dados.emailVisitante,
       });
 
-    const { funcoesRemotas } = obterServicosClienteFirebase();
+    const funcoesRemotas = obterFuncoesClienteFirebase();
     const chamar = httpsCallable<
       DadosSubmissaoAgendamentoVisitante,
       ResultadoSubmissaoAgendamentoVisitante

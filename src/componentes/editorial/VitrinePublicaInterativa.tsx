@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -20,24 +21,50 @@ import type {
 } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { usePreferenciaMovimentoReduzido } from "@/ganchos/usarPreferenciaMovimentoReduzido";
 import { CURVA_EDITORIAL, DURACOES_SEGUNDOS } from "@/componentes/interface/constantesAnimacao";
-import { CartaoDigitalProfissionalPublico } from "./CartaoDigitalProfissionalPublico";
 import { TelaCarregamentoEditorial } from "./TelaCarregamentoEditorial";
 import type { PortaSubmissaoSolicitacaoVisitante } from "@/aplicacao/portas/portasSolicitacoesComerciais";
 import { obterOuDetectarOrigemSessao } from "@/infraestrutura/analytics/rastreadorSessaoOrigem";
-import { ExecutorMicrofluxoVisitante } from "./ExecutorMicrofluxoVisitante";
-import { GavetaEditorialPublica, type SecaoAcervoAberta } from "./GavetaEditorialPublica";
+import type { SecaoAcervoAberta } from "./GavetaEditorialPublica";
 import { RenderizadorComposicaoEditorial } from "./RenderizadorComposicaoEditorial";
 import { BlocoAvaliacoesGoogle } from "./avaliacoes/BlocoAvaliacoesGoogle";
 import { identificarSecaoPorHash, resolverMicrofluxoPorDestino } from "./roteadorAcoesPublicas";
 import { criarPreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 import { restaurarFocoAcaoVitrine } from "./restaurarFocoAcaoVitrine";
 import { ContextoApresentacaoEquipe } from "@/ganchos/contextoApresentacaoEquipe";
-import { BottomSheetDetalhesItemAcervo } from "./acervo/BottomSheetDetalhesItemAcervo";
-import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
-import { GavetaAgendamentoPublico } from "./agenda/GavetaAgendamentoPublico";
 import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 import { abrirLinkExternoSeguro } from "@/utilitarios/navegacaoLinkExterno";
 import { useAmbienteVitrine } from "./contextoAmbienteVitrine";
+
+const CartaoDigitalProfissionalPublico = dynamic(
+  () =>
+    import("./CartaoDigitalProfissionalPublico").then(
+      (mod) => mod.CartaoDigitalProfissionalPublico,
+    ),
+  { ssr: false },
+);
+const ExecutorMicrofluxoVisitante = dynamic(
+  () => import("./ExecutorMicrofluxoVisitante").then((mod) => mod.ExecutorMicrofluxoVisitante),
+  { ssr: false },
+);
+const GavetaEditorialPublica = dynamic(
+  () => import("./GavetaEditorialPublica").then((mod) => mod.GavetaEditorialPublica),
+  { ssr: false },
+);
+const BottomSheetDetalhesItemAcervo = dynamic(
+  () =>
+    import("./acervo/BottomSheetDetalhesItemAcervo").then(
+      (mod) => mod.BottomSheetDetalhesItemAcervo,
+    ),
+  { ssr: false },
+);
+const BottomSheetPostVitrine = dynamic(
+  () => import("./acervo/BottomSheetPostVitrine").then((mod) => mod.BottomSheetPostVitrine),
+  { ssr: false },
+);
+const GavetaAgendamentoPublico = dynamic(
+  () => import("./agenda/GavetaAgendamentoPublico").then((mod) => mod.GavetaAgendamentoPublico),
+  { ssr: false },
+);
 
 export interface PropriedadesVitrinePublicaInterativa {
   readonly pagina: ConteudoPaginaPublicada;
@@ -52,7 +79,7 @@ export function VitrinePublicaInterativa({
   pagina,
   acervo,
   servicoSubmissao,
-  duracaoMinimaLoaderMs = process.env.NODE_ENV === "test" ? 0 : 3000,
+  duracaoMinimaLoaderMs = 0,
   alturaContidaPrevia = false,
   exibirAvaliacoesGoogle = true,
 }: PropriedadesVitrinePublicaInterativa) {

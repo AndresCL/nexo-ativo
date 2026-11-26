@@ -103,7 +103,6 @@ export default async function PaginaVitrineOrganizacao({ params }: PropriedadesP
           rel="preload"
           as="image"
           href={pagina.identidade.urlLogotipoOpcional}
-          fetchPriority="high"
         />
       ) : null}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro }} />

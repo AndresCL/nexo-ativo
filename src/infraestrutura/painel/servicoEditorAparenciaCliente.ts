@@ -17,6 +17,7 @@ import {
 import { ErroValidacaoDominio } from "@/dominio/erros/errosDominio";
 import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteFirebase";
 import { traduzirErroAutenticacaoFirebase } from "@/infraestrutura/firebase/tradutorErrosFirebaseAuth";
+import { otimizarImagemParaUpload } from "@/utilitarios/otimizarImagemUpload";
 import {
   esquemaRascunhoConfiguracaoPagina,
   type DadosRequisicaoPublicarPagina,
@@ -83,16 +84,22 @@ export class ServicoEditorAparenciaFirebaseCliente implements ServicoEditorApare
       opcoes.categoria,
     );
 
+    const arquivoParaEnvio =
+      opcoes.categoria === "imagem"
+        ? await otimizarImagemParaUpload(opcoes.arquivo)
+        : opcoes.arquivo;
+
     const pastaCategoria = opcoes.categoria === "video" ? "videos" : "imagens";
-    const nomeSeguro = gerarNomeArquivoSeguroStorage(opcoes.arquivo.name);
+    const nomeSeguro = gerarNomeArquivoSeguroStorage(arquivoParaEnvio.name);
     const caminhoArmazenamento = `organizacoes/${opcoes.organizacaoId}/${pastaCategoria}/${nomeSeguro}`;
 
     const { armazenamento } = obterServicosClienteFirebase();
     const referenciaArquivo = ref(armazenamento, caminhoArmazenamento);
 
     return new Promise<ResultadoUploadMidiaEditorial>((resolver, rejeitar) => {
-      const tarefa = uploadBytesResumable(referenciaArquivo, opcoes.arquivo, {
-        contentType: opcoes.arquivo.type,
+      const tarefa = uploadBytesResumable(referenciaArquivo, arquivoParaEnvio, {
+        contentType: arquivoParaEnvio.type,
+        cacheControl: "public, max-age=31536000, immutable",
       });
 
       tarefa.on(

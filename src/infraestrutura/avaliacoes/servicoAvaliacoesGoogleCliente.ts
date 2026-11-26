@@ -6,10 +6,10 @@ import type {
   EstabelecimentoGoogle,
   ResumoAvaliacoesGoogle,
 } from "@/dominio/entidades/avaliacoesGoogle";
-import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteFirebase";
+import { obterFuncoesClienteFirebase } from "@/infraestrutura/firebase/clienteFuncoesFirebase";
 
 async function chamarFuncao<Resposta>(nome: string, dados: object): Promise<Resposta> {
-  const { funcoesRemotas } = obterServicosClienteFirebase();
+  const funcoesRemotas = obterFuncoesClienteFirebase();
   const consultar = httpsCallable<object, Resposta>(funcoesRemotas, nome, { timeout: 20000 });
   const resposta = await consultar(dados);
   return resposta.data;
