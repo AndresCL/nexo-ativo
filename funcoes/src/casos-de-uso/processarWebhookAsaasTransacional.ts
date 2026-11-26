@@ -1,4 +1,4 @@
-import type { Firestore } from "firebase-admin/firestore";
+import { FieldValue, type Firestore } from "firebase-admin/firestore";
 import {
   CATALOGO_PLANOS_FLUXO,
   converterReaisParaCentavosInteiros,
@@ -276,12 +276,19 @@ export async function executarProcessamentoWebhookAsaasTransacional(
       transacao.set(refAssinaturaGlobal, registroAssinaturaParaSalvar, { merge: true });
     } else if (assinatura?.id) {
       const valorCentavos = converterReaisParaCentavosInteiros(assinatura.value);
+      const valorAnteriorCentavos =
+        typeof dadosAssinatura?.valorMensalCentavos === "number"
+          ? dadosAssinatura.valorMensalCentavos
+          : 0;
+      const valorAlterado = valorCentavos > 0 && valorCentavos !== valorAnteriorCentavos;
+
       const registroAssinaturaParaSalvar = {
         id: organizacaoId,
         organizacaoId,
         assinaturaAsaasId: assinatura.id,
         planoCodigo,
-        valorMensalCentavos: valorCentavos > 0 ? valorCentavos : (dadosAssinatura?.valorMensalCentavos ?? 0),
+        valorMensalCentavos: valorCentavos > 0 ? valorCentavos : valorAnteriorCentavos,
+        ...(valorAlterado ? { valorLiquidoMensalCentavos: FieldValue.delete() } : {}),
         situacaoAsaas: assinatura.status,
         situacaoInterna: novaSituacaoAssinatura,
         contratouImplantacaoAssistida: dadosAssinatura?.contratouImplantacaoAssistida ?? false,

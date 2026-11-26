@@ -250,6 +250,10 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /despesasFundador/{despesaId} {
+      allow read, write: if false;
+    }
+
     // Negação explícita para qualquer outro caminho não mapeado
     match /{document=**} {
       allow read, write: if false;
