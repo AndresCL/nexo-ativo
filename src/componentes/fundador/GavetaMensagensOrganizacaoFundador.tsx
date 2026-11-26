@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import * as Dialogo from "@radix-ui/react-dialog";
-import { Clock, ExternalLink, MessageSquarePlus, Send, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Clock, ExternalLink, FileText, MessageSquarePlus, Send, X } from "lucide-react";
 import { formatarRotuloSituacaoAssinatura } from "@/dominio/fundador/calculadoraMetricasFundador";
 import {
   DESCRITORES_ETAPA_KANBAN_FUNDADOR,
@@ -12,6 +13,10 @@ import {
 } from "@/dominio/fundador/tiposPainelFundador";
 import { Botao } from "@/componentes/interface/Botao";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
+import {
+  CURVA_EDITORIAL,
+  DURACOES_SEGUNDOS,
+} from "@/componentes/interface/constantesAnimacao";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
@@ -38,6 +43,7 @@ export interface PropriedadesGavetaMensagensOrganizacaoFundador {
     texto: string,
   ) => Promise<void>;
   readonly aoAcessarPainel: (organizacao: ItemVisaoGeralOrganizacaoFundador) => Promise<void>;
+  readonly aoAbrirBriefing: (organizacao: ItemVisaoGeralOrganizacaoFundador) => void;
   readonly aoAbrirAjustePlano: (organizacao: ItemVisaoGeralOrganizacaoFundador) => void;
   readonly aoAbrirAlterarSituacao: (organizacao: ItemVisaoGeralOrganizacaoFundador) => void;
   readonly aoAbrirPerfilPublicidade: (organizacao: ItemVisaoGeralOrganizacaoFundador) => void;
@@ -51,10 +57,12 @@ export function GavetaMensagensOrganizacaoFundador({
   aoMoverEtapa,
   aoAdicionarMensagem,
   aoAcessarPainel,
+  aoAbrirBriefing,
   aoAbrirAjustePlano,
   aoAbrirAlterarSituacao,
   aoAbrirPerfilPublicidade,
 }: PropriedadesGavetaMensagensOrganizacaoFundador) {
+  const prefereMovimentoReduzido = useReducedMotion();
   const [textoNovaMensagem, setTextoNovaMensagem] = useState("");
   const [enviandoMensagem, setEnviandoMensagem] = useState(false);
 
@@ -92,61 +100,88 @@ export function GavetaMensagensOrganizacaoFundador({
         }
       }}
     >
-      <Dialogo.Portal>
-        <Dialogo.Overlay className="fixed inset-0 z-50 bg-mineral-950/35 backdrop-blur-xs" />
-        <Dialogo.Content
-          aria-describedby={undefined}
-          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-white shadow-2xl focus:outline-none"
-        >
-          <div className="flex items-center justify-between gap-3 border-b border-marfim-200 px-6 py-4">
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold tracking-[0.16em] text-indigo-600 uppercase">
-                Acompanhamento do Fundador
-              </p>
-              <Dialogo.Title className="truncate text-base font-bold text-mineral-950">
-                {organizacao?.nome ?? "Organização"}
-              </Dialogo.Title>
-            </div>
-            <Dialogo.Close
-              disabled={enviandoMensagem}
-              aria-label="Fechar mensagens"
-              className="rounded-lg p-2 text-mineral-600 hover:bg-marfim-100"
-            >
-              <X className="h-5 w-5" aria-hidden="true" />
-            </Dialogo.Close>
-          </div>
-
-          {organizacao ? (
-            <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-6">
-              <CartaoSuperficie className="space-y-4 rounded-xl border border-marfim-200 bg-marfim-50/60 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-mono text-xs font-medium text-mineral-700">
-                      /{organizacao.identificadorPublico}
+      <AnimatePresence>
+        {organizacao ? (
+          <Dialogo.Portal forceMount>
+            <Dialogo.Overlay asChild forceMount>
+              <motion.div
+                initial={prefereMovimentoReduzido ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={prefereMovimentoReduzido ? undefined : { opacity: 0 }}
+                transition={{ duration: DURACOES_SEGUNDOS.microinteracao }}
+                className="fixed inset-0 z-50 bg-mineral-950/35 backdrop-blur-xs"
+              />
+            </Dialogo.Overlay>
+            <Dialogo.Content aria-describedby={undefined} asChild forceMount>
+              <motion.div
+                initial={prefereMovimentoReduzido ? false : { x: "100%" }}
+                animate={{ x: 0 }}
+                exit={prefereMovimentoReduzido ? undefined : { x: "100%" }}
+                transition={{
+                  duration: DURACOES_SEGUNDOS.painel,
+                  ease: CURVA_EDITORIAL,
+                }}
+                className="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-white shadow-2xl focus:outline-none"
+              >
+                <div className="flex items-center justify-between gap-3 border-b border-marfim-200 px-6 py-4">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold tracking-[0.16em] text-indigo-600 uppercase">
+                      Acompanhamento do Fundador
                     </p>
-                    <p className="text-[11px] text-mineral-500">
-                      {organizacao.segmentoAtividade} · Plano{" "}
-                      <strong className="uppercase">{organizacao.planoCodigo}</strong> (
-                      {formatarRotuloSituacaoAssinatura(
-                        organizacao.situacaoAssinatura,
-                        organizacao.origemAssinatura,
-                      )}
-                      )
-                    </p>
+                    <Dialogo.Title className="truncate text-base font-bold text-mineral-950">
+                      {organizacao.nome}
+                    </Dialogo.Title>
                   </div>
-
-                  <button
-                    type="button"
-                    disabled={acessandoOrgId === organizacao.id}
-                    onClick={() => void aoAcessarPainel(organizacao)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 transition-colors hover:bg-emerald-100 disabled:opacity-50"
+                  <Dialogo.Close
+                    disabled={enviandoMensagem}
+                    aria-label="Fechar mensagens"
+                    className="rounded-lg p-2 text-mineral-600 hover:bg-marfim-100"
                   >
-                    <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>
-                      {acessandoOrgId === organizacao.id ? "Abrindo..." : "Acessar Painel"}
-                    </span>
-                  </button>
+                    <X className="h-5 w-5" aria-hidden="true" />
+                  </Dialogo.Close>
                 </div>
+
+                <div className="flex flex-1 flex-col gap-5 overflow-y-auto p-6">
+                  <CartaoSuperficie className="space-y-4 rounded-xl border border-marfim-200 bg-marfim-50/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-xs font-medium text-mineral-700">
+                          /{organizacao.identificadorPublico}
+                        </p>
+                        <p className="text-[11px] text-mineral-500">
+                          {organizacao.segmentoAtividade} · Plano{" "}
+                          <strong className="uppercase">{organizacao.planoCodigo}</strong> (
+                          {formatarRotuloSituacaoAssinatura(
+                            organizacao.situacaoAssinatura,
+                            organizacao.origemAssinatura,
+                          )}
+                          )
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => aoAbrirBriefing(organizacao)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-900 transition-colors hover:bg-indigo-100"
+                        >
+                          <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>Briefing de Implantação</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={acessandoOrgId === organizacao.id}
+                          onClick={() => void aoAcessarPainel(organizacao)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 transition-colors hover:bg-emerald-100 disabled:opacity-50"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>
+                            {acessandoOrgId === organizacao.id ? "Abrindo..." : "Acessar Painel"}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
 
                 <div className="border-t border-marfim-200 pt-3">
                   <label
@@ -280,10 +315,12 @@ export function GavetaMensagensOrganizacaoFundador({
                   </ul>
                 )}
               </div>
-            </div>
-          ) : null}
-        </Dialogo.Content>
-      </Dialogo.Portal>
+                </div>
+              </motion.div>
+            </Dialogo.Content>
+          </Dialogo.Portal>
+        ) : null}
+      </AnimatePresence>
     </Dialogo.Root>
   );
 }

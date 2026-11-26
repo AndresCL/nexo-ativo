@@ -1,5 +1,9 @@
 import { httpsCallable } from "firebase/functions";
 import type {
+  BriefingImplantacaoFundador,
+  ParametrosSalvarBriefingImplantacaoFundador,
+} from "@/dominio/fundador/briefingImplantacao";
+import type {
   EtapaKanbanOrganizacaoFundador,
   MensagemKanbanFundador,
   ParametrosAdicionarMensagemKanbanFundador,
@@ -15,8 +19,19 @@ import {
   esquemaAdicionarMensagemKanbanFundador,
   esquemaAlterarEtapaKanbanFundador,
   esquemaAtualizarEmailProprietarioFundador,
+  esquemaSalvarBriefingImplantacaoFundador,
   type ParametrosAtualizarEmailProprietarioFundador,
 } from "@/validacoes/esquemasPainelFundador";
+
+export interface PortaBriefingFundadorCliente {
+  obterBriefingImplantacao(
+    organizacaoId: string,
+    sinal?: AbortSignal,
+  ): Promise<BriefingImplantacaoFundador | null>;
+  salvarBriefingImplantacao(
+    parametros: ParametrosSalvarBriefingImplantacaoFundador,
+  ): Promise<BriefingImplantacaoFundador | null>;
+}
 
 export interface PortaKanbanFundadorCliente {
   alterarEtapaKanbanOrganizacao(
@@ -27,7 +42,9 @@ export interface PortaKanbanFundadorCliente {
   ): Promise<MensagemKanbanFundador>;
 }
 
-export interface PortaOperacoesFundadorCliente extends Partial<PortaKanbanFundadorCliente> {
+export interface PortaOperacoesFundadorCliente
+  extends Partial<PortaKanbanFundadorCliente>,
+    Partial<PortaBriefingFundadorCliente> {
   alterarSituacaoOrganizacao(
     parametros: ParametrosAlterarSituacaoOrganizacaoFundador,
   ): Promise<{ atualizado: boolean; organizacaoId: string; novaSituacao: string }>;
@@ -52,7 +69,10 @@ export interface PortaOperacoesFundadorCliente extends Partial<PortaKanbanFundad
 }
 
 export class ServicoOperacoesFundadorCliente
-  implements PortaOperacoesFundadorCliente, PortaKanbanFundadorCliente
+  implements
+    PortaOperacoesFundadorCliente,
+    PortaKanbanFundadorCliente,
+    PortaBriefingFundadorCliente
 {
   public async alterarSituacaoOrganizacao(
     parametros: ParametrosAlterarSituacaoOrganizacaoFundador,
@@ -175,8 +195,47 @@ export class ServicoOperacoesFundadorCliente
       novoEmail: string;
     };
   }
+
+  public async obterBriefingImplantacao(
+    organizacaoId: string,
+    sinal?: AbortSignal,
+  ): Promise<BriefingImplantacaoFundador | null> {
+    const query = new URLSearchParams({ organizacaoId }).toString();
+    const resposta = await fetch(`/api/fundador/briefing?${query}`, {
+      method: "GET",
+      signal: sinal,
+    });
+
+    if (!resposta.ok) {
+      const erroJson = (await resposta.json().catch(() => null)) as { erro?: string } | null;
+      throw new Error(erroJson?.erro ?? "Não foi possível carregar o briefing de implantação.");
+    }
+
+    const dados = (await resposta.json()) as { briefing: BriefingImplantacaoFundador | null };
+    return dados.briefing;
+  }
+
+  public async salvarBriefingImplantacao(
+    parametros: ParametrosSalvarBriefingImplantacaoFundador,
+  ): Promise<BriefingImplantacaoFundador | null> {
+    const validado = esquemaSalvarBriefingImplantacaoFundador.parse(parametros);
+    const resposta = await fetch("/api/fundador/briefing", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(validado),
+    });
+
+    if (!resposta.ok) {
+      const erroJson = (await resposta.json().catch(() => null)) as { erro?: string } | null;
+      throw new Error(erroJson?.erro ?? "Não foi possível salvar o briefing de implantação.");
+    }
+
+    const dados = (await resposta.json()) as { briefing: BriefingImplantacaoFundador | null };
+    return dados.briefing;
+  }
 }
 
 export const servicoOperacoesFundadorCliente: PortaOperacoesFundadorCliente &
-  PortaKanbanFundadorCliente = new ServicoOperacoesFundadorCliente();
+  PortaKanbanFundadorCliente &
+  PortaBriefingFundadorCliente = new ServicoOperacoesFundadorCliente();
 

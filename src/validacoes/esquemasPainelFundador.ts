@@ -96,3 +96,24 @@ export const esquemaAtualizarEmailProprietarioFundador = z.object({
 export type ParametrosAtualizarEmailProprietarioFundador = z.infer<
   typeof esquemaAtualizarEmailProprietarioFundador
 >;
+
+const campoTextoBriefing = z
+  .string()
+  .max(50000, "O campo excedeu o limite máximo suportado.")
+  .default("");
+
+export const esquemaSalvarBriefingImplantacaoFundador = z.object({
+  organizacaoId: z.string().trim().min(2, "Informe a organização alvo."),
+  sobreNegocio: campoTextoBriefing,
+  conteudoEServicos: campoTextoBriefing,
+  experienciasEAcoes: campoTextoBriefing,
+  identidadeVisualEMateriais: campoTextoBriefing,
+  pendenciasEProximosPassos: campoTextoBriefing,
+  previsaoEntregaData: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Informe uma data válida no formato AAAA-MM-DD.")
+    .nullable()
+    .optional()
+    .transform((valor) => (valor ? valor : null)),
+});

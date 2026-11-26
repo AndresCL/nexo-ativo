@@ -245,6 +245,11 @@ service cloud.firestore {
       allow read, write: if ehFundador();
     }
 
+    match /briefingsImplantacaoFundador/{organizacaoId} {
+      allow read: if ehFundador();
+      allow write: if false;
+    }
+
     // Negação explícita para qualquer outro caminho não mapeado
     match /{document=**} {
       allow read, write: if false;

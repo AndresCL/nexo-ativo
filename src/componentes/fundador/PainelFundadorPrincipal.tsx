@@ -33,6 +33,7 @@ import { GradeCardsMetricasFundador } from "@/componentes/fundador/metricas/Grad
 import { GraficoEvolucaoMrrFundador } from "@/componentes/fundador/metricas/GraficoEvolucaoMrrFundador";
 import { ModalAjustarPlanoFundador } from "@/componentes/fundador/modais/ModalAjustarPlanoFundador";
 import { ModalAlterarSituacaoFundador } from "@/componentes/fundador/modais/ModalAlterarSituacaoFundador";
+import { ModalBriefingImplantacaoFundador } from "@/componentes/fundador/modais/ModalBriefingImplantacaoFundador";
 import { TabelaOrganizacoesFundador } from "@/componentes/fundador/organizacoes/TabelaOrganizacoesFundador";
 import { Botao } from "@/componentes/interface/Botao";
 import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
@@ -67,6 +68,8 @@ export function PainelFundadorPrincipal({
   const [organizacaoPerfil, setOrganizacaoPerfil] =
     useState<ItemVisaoGeralOrganizacaoFundador | null>(null);
   const [organizacaoEmail, setOrganizacaoEmail] =
+    useState<ItemVisaoGeralOrganizacaoFundador | null>(null);
+  const [organizacaoBriefing, setOrganizacaoBriefing] =
     useState<ItemVisaoGeralOrganizacaoFundador | null>(null);
   const [modalCriarAberto, setModalCriarAberto] = useState(false);
   const [organizacaoMensagensId, setOrganizacaoMensagensId] = useState<string | null>(null);
@@ -361,10 +364,32 @@ export function PainelFundadorPrincipal({
         aoMoverEtapa={moverOrganizacaoKanban}
         aoAdicionarMensagem={adicionarMensagemKanban}
         aoAcessarPainel={acessarPainelOrganizacao}
+        aoAbrirBriefing={(org) => setOrganizacaoBriefing(org)}
         aoAbrirAjustePlano={(org) => setOrganizacaoPlano(org)}
         aoAbrirAlterarSituacao={(org) => setOrganizacaoSituacao(org)}
         aoAbrirPerfilPublicidade={(org) => setOrganizacaoPerfil(org)}
       />
+
+      {organizacaoBriefing ? (
+        <ModalBriefingImplantacaoFundador
+          key={organizacaoBriefing.id}
+          organizacao={organizacaoBriefing}
+          servicoBriefing={
+            servicoFundador.obterBriefingImplantacao &&
+            servicoFundador.salvarBriefingImplantacao
+              ? {
+                  obterBriefingImplantacao: servicoFundador.obterBriefingImplantacao.bind(
+                    servicoFundador,
+                  ),
+                  salvarBriefingImplantacao: servicoFundador.salvarBriefingImplantacao.bind(
+                    servicoFundador,
+                  ),
+                }
+              : servicoOperacoesFundadorCliente
+          }
+          aoFechar={() => setOrganizacaoBriefing(null)}
+        />
+      ) : null}
 
       {organizacaoPerfil ? (
         <ModalPerfilPublicidadeFundador
