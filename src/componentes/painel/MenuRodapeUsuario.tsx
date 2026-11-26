@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { User } from "lucide-react";
 import { BotaoEncerrarSessao } from "@/componentes/autenticacao/BotaoEncerrarSessao";
@@ -47,10 +48,13 @@ export function MenuRodapeUsuario({
       >
         <span className="flex w-5 shrink-0 items-center justify-center text-mineral-950">
           {mostrarLogo ? (
-            <img
+            <Image
               ref={referenciaImagem}
               src={urlLogotipoOrganizacao!}
               alt=""
+              width={20}
+              height={20}
+              unoptimized
               aria-hidden="true"
               referrerPolicy="no-referrer"
               onError={() => setErroImagem(true)}

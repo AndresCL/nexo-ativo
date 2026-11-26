@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
 export interface PropriedadesLogoNexoAtivo {
@@ -28,9 +29,11 @@ export function LogoNexoAtivo({
 }: PropriedadesLogoNexoAtivo) {
   return (
     <span className={combinarClasses("inline-flex items-center gap-2.5 select-none", className)}>
-      <img
+      <Image
         src="/logo-nexo-ativo.png"
         alt={exibirTexto ? "" : "Nexo Ativo"}
+        width={36}
+        height={36}
         aria-hidden={exibirTexto ? true : undefined}
         className={combinarClasses(
           "shrink-0 rounded-md object-contain mix-blend-multiply",

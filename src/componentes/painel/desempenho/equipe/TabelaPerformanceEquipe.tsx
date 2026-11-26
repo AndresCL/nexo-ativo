@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink, Plus, UserPlus, Users } from "lucide-react";
 import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
@@ -135,9 +136,12 @@ export function TabelaPerformanceEquipe({
 
                           {/* Avatar ou Inicial */}
                           {item.avatarUrl ? (
-                            <img
+                            <Image
                               src={item.avatarUrl}
                               alt={item.nome}
+                              width={32}
+                              height={32}
+                              unoptimized
                               className="h-8 w-8 rounded-lg object-cover shadow-2xs"
                             />
                           ) : (
