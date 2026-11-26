@@ -376,6 +376,131 @@ export const CATALOGO_ARTIGOS_EDITORIAIS: readonly ArtigoEditorial[] = [
     ctaRotulo: "Criar minha vitrine",
     ctaHref: "/criar-conta",
   },
+  {
+    slug: "por-que-cliques-no-link-da-bio-nao-viram-orcamentos",
+    titulo: "Por que os cliques no seu link da bio não viram orçamentos (e como corrigir)",
+    descricaoSeo:
+      "Descubra por que visitantes clicam no link da bio e saem sem pedir orçamento, e veja como estruturar uma página comercial que transforma atenção em pedidos reais.",
+    resumoCard:
+      "Entenda o que faz potenciais clientes abandonarem seu link em segundos e como guiar cada visita até o pedido de orçamento.",
+    imagemCapa: {
+      url: "/blog/por-que-cliques-no-link-da-bio-nao-viram-orcamentos.jpg",
+      alt: "Empreendedor em mesa de madeira clara segurando o celular ao lado de um caderno aberto e caneta sob luz natural difusa",
+    },
+    cluster: "presenca-comercial",
+    rotuloCluster: "Apresentação Comercial",
+    publicadoEmIso: "2026-11-26",
+    atualizadoEmIso: "2026-11-26",
+    tempoLeituraMinutos: 5,
+    slugsRelacionados: [
+      "o-que-colocar-no-link-comercial-empresas-de-servico",
+      "pedidos-de-orcamento-estruturados-link-da-bio",
+      "apresentar-servicos-portfolio-videos-um-link-celular",
+    ],
+    introducao: [
+      "Muitas empresas de serviço investem tempo criando conteúdo, anunciando ou recebendo indicações, mas esbarram no mesmo gargalo silencioso: as pessoas clicam no link da bio e desaparecem sem mandar uma única mensagem.",
+      "Na maioria das vezes, o problema não está no preço nem na qualidade do seu trabalho. Está na experiência dos primeiros 15 segundos depois do clique no celular — quando o visitante precisa decidir se confia na sua empresa e qual é o próximo passo.",
+    ],
+    secoes: [
+      {
+        subtitulo: "Os 3 gargalos que fazem o visitante fechar a tela",
+        paragrafos: [
+          "Quem chega pelo celular tem pouca paciência e muita distração. Se a página exige esforço para entender o que você faz ou para iniciar o contato, a pessoa adia a decisão — e raramente volta depois.",
+        ],
+        pontosChave: [
+          "Botões soltos sem contexto: uma lista genérica de links não explica o escopo do serviço, não mostra prova visual e obriga o cliente a adivinhar onde clicar.",
+          "Falta de sinal de confiança imediato: sem fotos reais do trabalho, área de atuação clara ou apresentação da equipe, o visitante hesita antes de chamar.",
+          "Salto brusco para uma conversa vazia: jogar a pessoa direto em uma janela em branco do WhatsApp gera atrito para quem ainda não sabe como explicar o que precisa.",
+        ],
+      },
+      {
+        subtitulo: "O que muda quando o link funciona como vitrine comercial",
+        paragrafos: [
+          "Em vez de funcionar apenas como um menu de atalhos, o link principal da empresa precisa responder rapidamente às dúvidas que travam o pedido: qual problema você resolve, para quem atende e como solicitar um orçamento sem complicação.",
+          "Quando o visitante vê os serviços organizados, confere exemplos reais e encontra uma chamada clara para iniciar o atendimento, a taxa de cliques que viram conversa qualificada sobe sem você precisar aumentar o investimento em tráfego.",
+        ],
+        pontosChave: [
+          "Primeira dobra objetiva: o que a empresa faz, onde atende e um botão principal evidente.",
+          "Serviços e portfólio enxutos: poucos itens bem explicados convertem mais do que páginas longas.",
+          "Caminho guiado de pedido: 3 ou 4 escolhas rápidas no celular que transformam curiosidade em solicitação concreta.",
+        ],
+      },
+      {
+        subtitulo: "Como colocar isso no ar hoje sem depender de site complexo",
+        paragrafos: [
+          "Você não precisa esperar meses por um site institucional caro para corrigir esse vazamento de clientes. No Nexo Ativo, você monta em poucos minutos uma página comercial pensada para o celular, reunindo identidade, serviços, portfólio e uma triagem interativa que conduz o visitante até o pedido.",
+          "O resultado é imediato: quem já está clicando no seu link passa a encontrar uma apresentação profissional e um caminho simples para solicitar atendimento — aumentando o aproveitamento de cada visita.",
+        ],
+      },
+    ],
+    conclusao:
+      "Cada clique desperdiçado no link da bio é um cliente que já demonstrou interesse e saiu sem ser atendido. Organizar sua vitrine comercial e guiar o próximo passo é o ajuste mais rápido para transformar visitas em orçamentos reais.",
+    ctaTitulo: "Transforme os cliques do seu link em pedidos reais",
+    ctaDescricao:
+      "Crie sua página comercial no Nexo Ativo em minutos, com serviços claros, visual profissional e triagem pronta para o celular.",
+    ctaRotulo: "Criar minha página gratuita",
+    ctaHref: "/criar-conta",
+  },
+  {
+    slug: "como-responder-quanto-custa-no-whatsapp",
+    titulo: "Como responder “quanto custa?” no WhatsApp sem perder o cliente (nem o seu tempo)",
+    descricaoSeo:
+      "Veja como responder pedidos de preço no WhatsApp de forma consultiva e descubra como evitar mensagens sem contexto usando triagem rápida antes da conversa.",
+    resumoCard:
+      "Roteiro prático para transformar mensagens vagas de preço em atendimentos produtivos — e como resolver esse gargalo antes mesmo da conversa começar.",
+    imagemCapa: {
+      url: "/blog/como-responder-quanto-custa-no-whatsapp.jpg",
+      alt: "Profissional sentado em mesa limpa anotando em um caderno enquanto olha o celular apoiado ao lado de uma caneca sob luz natural neutra",
+    },
+    cluster: "atendimento-whatsapp",
+    rotuloCluster: "Atendimento no WhatsApp",
+    publicadoEmIso: "2026-11-26",
+    atualizadoEmIso: "2026-11-26",
+    tempoLeituraMinutos: 5,
+    slugsRelacionados: [
+      "como-qualificar-clientes-antes-do-whatsapp",
+      "perguntas-antes-de-enviar-orcamento",
+      "pedidos-de-orcamento-estruturados-link-da-bio",
+    ],
+    introducao: [
+      "“Oi, quanto custa?” é provavelmente a mensagem que mais consome energia de quem vende serviços pelo WhatsApp. Se você joga um valor solto sem contexto, o cliente acha caro e some. Se faz um interrogatório longo, a conversa esfria e o atendimento trava.",
+      "O segredo para converter melhor não está em ter uma resposta mágica, mas em conduzir o pedido com leveza — e, principalmente, estruturar a entrada do cliente para que o contexto chegue antes do primeiro “oi”.",
+    ],
+    secoes: [
+      {
+        subtitulo: "Por que passar preço no escuro derruba suas vendas",
+        paragrafos: [
+          "Quando o cliente pergunta o preço sem explicar a necessidade, ele ainda não enxergou diferença entre o seu serviço e a opção mais barata do mercado. Responder apenas com um número reduz toda a conversa a comparação de preço.",
+          "Ao mesmo tempo, responder dezenas de mensagens vagas por dia ocupa a equipe com curiosos enquanto clientes prontos para fechar ficam esperando retorno.",
+        ],
+      },
+      {
+        subtitulo: "Como responder na prática em 3 passos simples",
+        paragrafos: [
+          "Quando a mensagem já chegou sem contexto, evite textos longos ou áudios de dois minutos. Use uma resposta curta que valida o contato e pede apenas o essencial para precificar com precisão:",
+        ],
+        pontosChave: [
+          "1. Acolha e confirme que você resolve aquele tipo de demanda.",
+          "2. Faça no máximo 2 ou 3 perguntas objetivas que realmente mudam o valor (ex.: tipo de serviço, medida/modelo ou prazo).",
+          "3. Informe o próximo passo com clareza: assim que a pessoa responder, você envia a estimativa ou agenda a avaliação.",
+        ],
+      },
+      {
+        subtitulo: "A solução definitiva: receber o contexto antes do WhatsApp",
+        paragrafos: [
+          "Responder melhor ajuda, mas o ganho real de escala acontece quando o cliente já chega ao WhatsApp com essas respostas preenchidas. Em vez de repetir as mesmas perguntas o dia inteiro, você usa uma triagem rápida no link da empresa.",
+          "No Nexo Ativo, você cria esse microfluxo em poucos minutos: o visitante escolhe o serviço e responde 3 ou 4 cliques rápidos no celular, e a sua equipe já recebe a mensagem pronta com nome, necessidade e detalhes essenciais. Você abre a conversa respondendo com precisão desde a primeira mensagem — e fecha mais orçamentos gastando menos tempo.",
+        ],
+      },
+    ],
+    conclusao:
+      "Você não precisa escolher entre atender rápido e qualificar bem. Com uma triagem curta antes do WhatsApp, sua equipe para de responder no escuro e foca energia nos clientes com real intenção de fechar.",
+    ctaTitulo: "Pare de responder “quanto custa?” no escuro",
+    ctaDescricao:
+      "Monte uma triagem rápida no Nexo Ativo e receba cada pedido no WhatsApp já organizado com as informações que você precisa.",
+    ctaRotulo: "Criar minha triagem gratuita",
+    ctaHref: "/criar-conta",
+  },
 ];
 
 export function listarArtigosEditoriais(): readonly ArtigoEditorial[] {

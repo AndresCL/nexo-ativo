@@ -39,6 +39,7 @@ import {
   type PortaOperacoesFundadorCliente,
 } from "@/infraestrutura/fundador/servicoOperacoesFundadorCliente";
 import { GavetaMensagensOrganizacaoFundador } from "@/componentes/fundador/GavetaMensagensOrganizacaoFundador";
+import { ModalAlterarEmailProprietarioFundador } from "@/componentes/fundador/ModalAlterarEmailProprietarioFundador";
 import { ModalCriarOrganizacaoFundador } from "@/componentes/fundador/ModalCriarOrganizacaoFundador";
 import { ModalPerfilPublicidadeFundador } from "@/componentes/fundador/ModalPerfilPublicidadeFundador";
 import { QuadroKanbanOrganizacoesFundador } from "@/componentes/fundador/QuadroKanbanOrganizacoesFundador";
@@ -75,6 +76,8 @@ export function PainelFundadorPrincipal({
   } | null>(null);
 
   const [organizacaoPerfil, setOrganizacaoPerfil] =
+    useState<ItemVisaoGeralOrganizacaoFundador | null>(null);
+  const [organizacaoEmail, setOrganizacaoEmail] =
     useState<ItemVisaoGeralOrganizacaoFundador | null>(null);
   const [modalCriarAberto, setModalCriarAberto] = useState(false);
   const [modoVisaoOrganizacoes, setModoVisaoOrganizacoes] = useState<"kanban" | "tabela">("kanban");
@@ -748,6 +751,18 @@ export function PainelFundadorPrincipal({
                                 >
                                   <span>Perfil de Publicidade</span>
                                 </button>
+
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  onClick={() => {
+                                    setMenuOpcoesAbertoOrgId(null);
+                                    setOrganizacaoEmail(org);
+                                  }}
+                                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-mineral-800 hover:bg-marfim-100"
+                                >
+                                  <span>Trocar E-mail</span>
+                                </button>
                               </div>
                             ) : null}
                           </div>
@@ -855,6 +870,15 @@ export function PainelFundadorPrincipal({
             );
             setOrganizacaoPerfil(null);
           }}
+        />
+      ) : null}
+
+      {organizacaoEmail ? (
+        <ModalAlterarEmailProprietarioFundador
+          organizacao={organizacaoEmail}
+          servicoFundador={servicoFundador}
+          aoFechar={() => setOrganizacaoEmail(null)}
+          aoConcluir={() => setOrganizacaoEmail(null)}
         />
       ) : null}
 

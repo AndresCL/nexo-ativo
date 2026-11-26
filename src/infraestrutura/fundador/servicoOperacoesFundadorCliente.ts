@@ -14,6 +14,8 @@ import { obterServicosClienteFirebase } from "@/infraestrutura/firebase/clienteF
 import {
   esquemaAdicionarMensagemKanbanFundador,
   esquemaAlterarEtapaKanbanFundador,
+  esquemaAtualizarEmailProprietarioFundador,
+  type ParametrosAtualizarEmailProprietarioFundador,
 } from "@/validacoes/esquemasPainelFundador";
 
 export interface PortaKanbanFundadorCliente {
@@ -38,6 +40,15 @@ export interface PortaOperacoesFundadorCliente extends Partial<PortaKanbanFundad
   criarOrganizacaoManual?(
     parametros: ParametrosCriarOrganizacaoPeloFundador,
   ): Promise<ResultadoCriarOrganizacaoPeloFundador>;
+  atualizarEmailProprietarioOrganizacao?(
+    parametros: ParametrosAtualizarEmailProprietarioFundador,
+  ): Promise<{
+    atualizado: boolean;
+    modo: "sem_alteracao" | "email_atualizado" | "titularidade_transferida";
+    organizacaoId: string;
+    uidProprietario: string;
+    novoEmail: string;
+  }>;
 }
 
 export class ServicoOperacoesFundadorCliente
@@ -133,6 +144,36 @@ export class ServicoOperacoesFundadorCliente
 
     const dados = (await resposta.json()) as { mensagem: MensagemKanbanFundador };
     return dados.mensagem;
+  }
+
+  public async atualizarEmailProprietarioOrganizacao(
+    parametros: ParametrosAtualizarEmailProprietarioFundador,
+  ): Promise<{
+    atualizado: boolean;
+    modo: "sem_alteracao" | "email_atualizado" | "titularidade_transferida";
+    organizacaoId: string;
+    uidProprietario: string;
+    novoEmail: string;
+  }> {
+    const validado = esquemaAtualizarEmailProprietarioFundador.parse(parametros);
+    const resposta = await fetch("/api/fundador/email-proprietario", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(validado),
+    });
+
+    if (!resposta.ok) {
+      const erroJson = (await resposta.json().catch(() => null)) as { erro?: string } | null;
+      throw new Error(erroJson?.erro ?? "Não foi possível atualizar o e-mail do proprietário.");
+    }
+
+    return (await resposta.json()) as {
+      atualizado: boolean;
+      modo: "sem_alteracao" | "email_atualizado" | "titularidade_transferida";
+      organizacaoId: string;
+      uidProprietario: string;
+      novoEmail: string;
+    };
   }
 }
 

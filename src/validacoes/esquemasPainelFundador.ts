@@ -87,3 +87,12 @@ export const esquemaCriarOrganizacaoPeloFundador: z.ZodType<ParametrosCriarOrgan
     perfilPublicidade: z.enum(CODIGOS_PERFIL_PUBLICIDADE).optional(),
     vincularFundadorComoAdministrador: z.boolean().optional(),
   });
+
+export const esquemaAtualizarEmailProprietarioFundador = z.object({
+  organizacaoId: z.string().trim().min(2, "Informe a organização alvo."),
+  novoEmail: z.string().trim().toLowerCase().email("Informe um e-mail válido."),
+});
+
+export type ParametrosAtualizarEmailProprietarioFundador = z.infer<
+  typeof esquemaAtualizarEmailProprietarioFundador
+>;
