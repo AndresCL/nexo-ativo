@@ -12,6 +12,7 @@ import type {
 export interface AssinaturaRecorrenteAtiva {
   readonly organizacaoId: string;
   readonly valorMensalCentavos: number;
+  readonly valorLiquidoMensalCentavos?: number;
 }
 
 export interface ResumoOrganizacaoParaMetricas {
@@ -30,6 +31,8 @@ export interface ResultadoMetricasAssinaturaFundador {
   readonly assinaturasInadimplentes: number;
   readonly assinaturasCanceladas: number;
   readonly receitaMensalRecorrenteCentavos: number;
+  readonly receitaMensalRecorrenteLiquidaCentavos: number;
+  readonly taxasAsaasMensaisCentavos: number;
 }
 
 /**
@@ -80,6 +83,7 @@ export function calcularMetricasAssinaturaFundador(
   let assinaturasInadimplentes = 0;
   let assinaturasCanceladas = 0;
   let receitaMensalRecorrenteCentavos = 0;
+  let receitaMensalRecorrenteLiquidaCentavos = 0;
 
   for (const org of organizacoes) {
     totalOrganizacoes += 1;
@@ -101,7 +105,7 @@ export function calcularMetricasAssinaturaFundador(
     ) {
       assinaturasAtivas += 1;
 
-      const valorAssinatura =
+      const valorBrutoAssinatura =
         Number.isFinite(assinaturaAtiva.valorMensalCentavos) &&
         assinaturaAtiva.valorMensalCentavos > 0
           ? Math.round(assinaturaAtiva.valorMensalCentavos)
@@ -109,13 +113,26 @@ export function calcularMetricasAssinaturaFundador(
             ? (CATALOGO_PLANOS_FLUXO[org.planoCodigo]?.mensalidadeCentavos ?? 0)
             : 0;
 
-      receitaMensalRecorrenteCentavos += valorAssinatura;
+      const valorLiquidoAssinatura =
+        typeof assinaturaAtiva.valorLiquidoMensalCentavos === "number" &&
+        Number.isFinite(assinaturaAtiva.valorLiquidoMensalCentavos) &&
+        assinaturaAtiva.valorLiquidoMensalCentavos > 0
+          ? Math.round(assinaturaAtiva.valorLiquidoMensalCentavos)
+          : valorBrutoAssinatura;
+
+      receitaMensalRecorrenteCentavos += valorBrutoAssinatura;
+      receitaMensalRecorrenteLiquidaCentavos += valorLiquidoAssinatura;
     } else if (org.situacaoAssinatura === "inadimplente") {
       assinaturasInadimplentes += 1;
     } else if (org.situacaoAssinatura === "cancelada") {
       assinaturasCanceladas += 1;
     }
   }
+
+  const taxasAsaasMensaisCentavos = Math.max(
+    0,
+    receitaMensalRecorrenteCentavos - receitaMensalRecorrenteLiquidaCentavos,
+  );
 
   return {
     totalOrganizacoes,
@@ -125,6 +142,8 @@ export function calcularMetricasAssinaturaFundador(
     assinaturasInadimplentes,
     assinaturasCanceladas,
     receitaMensalRecorrenteCentavos,
+    receitaMensalRecorrenteLiquidaCentavos,
+    taxasAsaasMensaisCentavos,
   };
 }
 

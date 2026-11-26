@@ -11,6 +11,7 @@ import {
   type AssinaturaRecorrenteAtiva,
   type ResumoOrganizacaoParaMetricas,
 } from "@/dominio/fundador/calculadoraMetricasFundador";
+import { calcularSerieHistoricaMrrMensal } from "@/dominio/fundador/calculadoraHistoricoMrrFundador";
 import {
   CODIGOS_ETAPA_KANBAN_FUNDADOR,
   type AcompanhamentoOrganizacaoFundador,
@@ -21,6 +22,7 @@ import {
 } from "@/dominio/fundador/tiposPainelFundador";
 import { exigirPrivilegioFundador } from "@/dominio/permissoes/autorizadorOrganizacao";
 import { obterServicosAdminFirebase } from "@/infraestrutura/firebase/adminFirebase";
+import { carregarHistoricoMrrServidor } from "@/infraestrutura/fundador/leitorHistoricoMrrServidor";
 
 export interface ContextoPainelFundadorServidor {
   readonly metricas: MetricasOperacionaisFundador;
@@ -117,6 +119,7 @@ export async function carregarContextoPainelFundadorServidor(
   ]);
 
   const assinaturasAtivasPorOrg = new Map<string, AssinaturaRecorrenteAtiva>();
+  const orgsSemLiquidoNaAssinatura = new Set<string>();
   for (const docAssinatura of snapAssinaturasAtivas.docs) {
     const bruto = docAssinatura.data() as Record<string, unknown>;
     const organizacaoId =
@@ -126,11 +129,40 @@ export async function carregarContextoPainelFundadorServidor(
     const valorBruto = Number(bruto.valorMensalCentavos ?? 0);
     const valorMensalCentavos =
       Number.isFinite(valorBruto) && valorBruto > 0 ? Math.round(valorBruto) : 0;
+    const valorLiquidoBruto = Number(bruto.valorLiquidoMensalCentavos ?? 0);
+    const valorLiquidoMensalCentavos =
+      Number.isFinite(valorLiquidoBruto) && valorLiquidoBruto > 0
+        ? Math.round(valorLiquidoBruto)
+        : undefined;
+
+    if (valorLiquidoMensalCentavos === undefined) {
+      orgsSemLiquidoNaAssinatura.add(organizacaoId);
+    }
 
     assinaturasAtivasPorOrg.set(organizacaoId, {
       organizacaoId,
       valorMensalCentavos,
+      ...(valorLiquidoMensalCentavos !== undefined ? { valorLiquidoMensalCentavos } : {}),
     });
+  }
+
+  const idsOrganizacoes = snapOrganizacoes.docs.map((docOrg) => docOrg.id);
+  const { cobrancasRecorrentes, valorLiquidoFallbackPorOrg } = await carregarHistoricoMrrServidor(
+    bancoDadosAdmin,
+    idsOrganizacoes,
+    orgsSemLiquidoNaAssinatura,
+  );
+
+  for (const [orgId, assinatura] of assinaturasAtivasPorOrg.entries()) {
+    if (assinatura.valorLiquidoMensalCentavos === undefined) {
+      const liquidoFallback = valorLiquidoFallbackPorOrg.get(orgId);
+      if (liquidoFallback !== undefined) {
+        assinaturasAtivasPorOrg.set(orgId, {
+          ...assinatura,
+          valorLiquidoMensalCentavos: liquidoFallback,
+        });
+      }
+    }
   }
 
   // Lê consumo mensal de e-mails de solicitações de todas as organizações em lote (sem N+1)
@@ -262,8 +294,16 @@ export async function carregarContextoPainelFundadorServidor(
     assinaturasAtivasPorOrg,
   );
 
+  const historicoMrrMensal = calcularSerieHistoricaMrrMensal({
+    cobrancas: cobrancasRecorrentes,
+    mrrLiquidoAtualCentavos: metricasAssinatura.receitaMensalRecorrenteLiquidaCentavos,
+    mrrBrutoAtualCentavos: metricasAssinatura.receitaMensalRecorrenteCentavos,
+    quantidadeMeses: 6,
+  });
+
   const metricas: MetricasOperacionaisFundador = {
     ...metricasAssinatura,
+    historicoMrrMensal,
     totalSolicitacoesComerciais,
     totalEmailsEnviadosMesAtual,
     emailsSolicitacoesMesAtual,

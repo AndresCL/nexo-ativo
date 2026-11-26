@@ -154,6 +154,7 @@ export interface RegistroAssinaturaAsaas {
   readonly assinaturaAsaasId: string;
   readonly planoCodigo: CodigoPlanoAssinatura;
   readonly valorMensalCentavos: number;
+  readonly valorLiquidoMensalCentavos?: number;
   readonly situacaoAsaas: string;
   readonly situacaoInterna: SituacaoResumoAssinatura;
   readonly urlFaturaOuCheckout?: string;
@@ -172,6 +173,7 @@ export interface CobrancaHistoricoAsaas {
   readonly cobrancaAsaasId: string;
   readonly assinaturaAsaasId?: string;
   readonly valorCentavos: number;
+  readonly valorLiquidoCentavos?: number;
   readonly formaPagamento: FormaPagamentoAsaas;
   readonly situacao: SituacaoCobrancaAsaas;
   readonly dataVencimentoIso: string;

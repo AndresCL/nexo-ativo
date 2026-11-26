@@ -148,12 +148,20 @@ export async function executarProcessamentoWebhookAsaasTransacional(
           transacao.delete(refCobrancaHistorico);
         }
       } else if (refCobrancaHistorico) {
+        const valorLiquidoCentavos =
+          typeof pagamento.netValue === "number" &&
+          Number.isFinite(pagamento.netValue) &&
+          pagamento.netValue > 0
+            ? converterReaisParaCentavosInteiros(pagamento.netValue)
+            : undefined;
+
         const registroCobranca: CobrancaHistoricoAsaas = {
           id: pagamento.id,
           organizacaoId,
           cobrancaAsaasId: pagamento.id,
           ...(pagamento.subscription ? { assinaturaAsaasId: pagamento.subscription } : {}),
           valorCentavos: converterReaisParaCentavosInteiros(pagamento.value),
+          ...(valorLiquidoCentavos !== undefined ? { valorLiquidoCentavos } : {}),
           formaPagamento: (pagamento.billingType as FormaPagamentoAsaas) || "UNDEFINED",
           situacao: situacaoCobranca,
           dataVencimentoIso: pagamento.dueDate,
@@ -229,12 +237,34 @@ export async function executarProcessamentoWebhookAsaasTransacional(
 
     if (pagamento?.subscription) {
       const valorCentavos = converterReaisParaCentavosInteiros(pagamento.value);
+      const valorLiquidoEvento =
+        typeof pagamento.netValue === "number" &&
+        Number.isFinite(pagamento.netValue) &&
+        pagamento.netValue > 0
+          ? converterReaisParaCentavosInteiros(pagamento.netValue)
+          : undefined;
+      const pagamentoLiquidado =
+        pagamento.status === "RECEIVED" || pagamento.status === "CONFIRMED";
+      const valorLiquidoExistente =
+        typeof dadosAssinatura?.valorLiquidoMensalCentavos === "number" &&
+        Number.isFinite(dadosAssinatura.valorLiquidoMensalCentavos) &&
+        dadosAssinatura.valorLiquidoMensalCentavos > 0
+          ? dadosAssinatura.valorLiquidoMensalCentavos
+          : undefined;
+
+      // Prioriza o netValue definitivo de eventos RECEIVED/CONFIRMED; caso ainda não exista, usa o disponível
+      const valorLiquidoMensalCentavos =
+        valorLiquidoEvento !== undefined && (pagamentoLiquidado || valorLiquidoExistente === undefined)
+          ? valorLiquidoEvento
+          : valorLiquidoExistente;
+
       const registroAssinaturaParaSalvar = {
         id: organizacaoId,
         organizacaoId,
         assinaturaAsaasId: pagamento.subscription,
         planoCodigo,
-        valorMensalCentavos: dadosAssinatura?.valorMensalCentavos ?? valorCentavos,
+        valorMensalCentavos: valorCentavos > 0 ? valorCentavos : (dadosAssinatura?.valorMensalCentavos ?? 0),
+        ...(valorLiquidoMensalCentavos !== undefined ? { valorLiquidoMensalCentavos } : {}),
         situacaoAsaas: "ACTIVE",
         situacaoInterna: novaSituacaoAssinatura,
         contratouImplantacaoAssistida: dadosAssinatura?.contratouImplantacaoAssistida ?? false,
@@ -251,7 +281,7 @@ export async function executarProcessamentoWebhookAsaasTransacional(
         organizacaoId,
         assinaturaAsaasId: assinatura.id,
         planoCodigo,
-        valorMensalCentavos: dadosAssinatura?.valorMensalCentavos ?? valorCentavos,
+        valorMensalCentavos: valorCentavos > 0 ? valorCentavos : (dadosAssinatura?.valorMensalCentavos ?? 0),
         situacaoAsaas: assinatura.status,
         situacaoInterna: novaSituacaoAssinatura,
         contratouImplantacaoAssistida: dadosAssinatura?.contratouImplantacaoAssistida ?? false,

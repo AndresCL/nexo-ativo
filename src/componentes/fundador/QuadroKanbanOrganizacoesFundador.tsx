@@ -12,15 +12,27 @@ import {
 } from "lucide-react";
 import { formatarRotuloSituacaoAssinatura } from "@/dominio/fundador/calculadoraMetricasFundador";
 import {
+  CODIGOS_ETAPA_KANBAN_FUNDADOR,
   DESCRITORES_ETAPA_KANBAN_FUNDADOR,
   type EtapaKanbanOrganizacaoFundador,
   type ItemVisaoGeralOrganizacaoFundador,
 } from "@/dominio/fundador/tiposPainelFundador";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 
-const COLUNAS_KANBAN_FUNDADOR = [
-  {
-    etapa: "onboarding" as const,
+const ESTILOS_ETAPA_KANBAN_FUNDADOR: Readonly<
+  Record<
+    EtapaKanbanOrganizacaoFundador,
+    {
+      readonly icone: typeof Rocket;
+      readonly superficie: string;
+      readonly texto: string;
+      readonly distintivo: string;
+      readonly iconeCor: string;
+      readonly destaque: string;
+    }
+  >
+> = {
+  onboarding: {
     icone: Rocket,
     superficie: "border-indigo-200 from-indigo-50/80",
     texto: "text-indigo-900",
@@ -28,17 +40,7 @@ const COLUNAS_KANBAN_FUNDADOR = [
     iconeCor: "bg-indigo-600",
     destaque: "ring-indigo-400",
   },
-  {
-    etapa: "ativo" as const,
-    icone: CheckCircle2,
-    superficie: "border-emerald-200 from-emerald-50/80",
-    texto: "text-emerald-900",
-    distintivo: "bg-emerald-100 text-emerald-900",
-    iconeCor: "bg-emerald-600",
-    destaque: "ring-emerald-400",
-  },
-  {
-    etapa: "atencao" as const,
+  atencao: {
     icone: AlertCircle,
     superficie: "border-amber-200 from-amber-50/80",
     texto: "text-amber-900",
@@ -46,8 +48,15 @@ const COLUNAS_KANBAN_FUNDADOR = [
     iconeCor: "bg-amber-600",
     destaque: "ring-amber-400",
   },
-  {
-    etapa: "inativo" as const,
+  ativo: {
+    icone: CheckCircle2,
+    superficie: "border-emerald-200 from-emerald-50/80",
+    texto: "text-emerald-900",
+    distintivo: "bg-emerald-100 text-emerald-900",
+    iconeCor: "bg-emerald-600",
+    destaque: "ring-emerald-400",
+  },
+  inativo: {
     icone: Archive,
     superficie: "border-marfim-300 from-marfim-100",
     texto: "text-mineral-800",
@@ -55,7 +64,12 @@ const COLUNAS_KANBAN_FUNDADOR = [
     iconeCor: "bg-mineral-600",
     destaque: "ring-mineral-400",
   },
-] as const;
+};
+
+const COLUNAS_KANBAN_FUNDADOR = CODIGOS_ETAPA_KANBAN_FUNDADOR.map((etapa) => ({
+  etapa,
+  ...ESTILOS_ETAPA_KANBAN_FUNDADOR[etapa],
+}));
 
 export interface PropriedadesQuadroKanbanOrganizacoesFundador {
   readonly organizacoes: readonly ItemVisaoGeralOrganizacaoFundador[];

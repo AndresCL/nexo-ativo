@@ -9,8 +9,8 @@ import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicid
 
 export const CODIGOS_ETAPA_KANBAN_FUNDADOR = [
   "onboarding",
-  "ativo",
   "atencao",
+  "ativo",
   "inativo",
 ] as const;
 
@@ -26,19 +26,19 @@ export const DESCRITORES_ETAPA_KANBAN_FUNDADOR: Readonly<
   >
 > = {
   onboarding: {
-    rotulo: "Em Onboarding",
+    rotulo: "Em onboarding",
     descricao: "Implantação e configuração inicial da vitrine",
   },
+  atencao: {
+    rotulo: "Em negociação",
+    descricao: "Acompanhamento comercial, proposta ou renovação",
+  },
   ativo: {
-    rotulo: "Ativo / Saudável",
+    rotulo: "Ativo",
     descricao: "Cliente operando regularmente na plataforma",
   },
-  atencao: {
-    rotulo: "Em Negociação / Atenção",
-    descricao: "Acompanhamento comercial, suporte ou renovação",
-  },
   inativo: {
-    rotulo: "Churn / Inativo",
+    rotulo: "Churn",
     descricao: "Conta pausada, cancelada ou encerrada",
   },
 };
@@ -57,6 +57,16 @@ export interface AcompanhamentoOrganizacaoFundador {
   readonly atualizadoEmIso: string;
 }
 
+export interface PontoHistoricoMrrMensal {
+  readonly anoMes: string; // formato YYYY-MM
+  readonly rotuloMes: string; // ex: "nov/26"
+  readonly mrrLiquidoCentavos: number;
+  readonly mrrBrutoCentavos: number;
+  readonly taxasAsaasCentavos: number;
+  readonly quantidadeCobrancas: number;
+  readonly mesAtual: boolean;
+}
+
 export interface MetricasOperacionaisFundador {
   readonly totalOrganizacoes: number;
   readonly organizacoesAtivas: number;
@@ -64,7 +74,10 @@ export interface MetricasOperacionaisFundador {
   readonly assinaturasAtivas: number;
   readonly assinaturasInadimplentes: number;
   readonly assinaturasCanceladas: number;
-  readonly receitaMensalRecorrenteCentavos: number; // MRR em centavos inteiros
+  readonly receitaMensalRecorrenteCentavos: number; // MRR bruto em centavos inteiros
+  readonly receitaMensalRecorrenteLiquidaCentavos?: number; // MRR líquido (pós-taxas Asaas) em centavos
+  readonly taxasAsaasMensaisCentavos?: number; // Diferença bruto - líquido em centavos
+  readonly historicoMrrMensal?: readonly PontoHistoricoMrrMensal[];
   readonly totalSolicitacoesComerciais: number;
   readonly totalEmailsEnviadosMesAtual?: number;
   readonly emailsSolicitacoesMesAtual?: number;
