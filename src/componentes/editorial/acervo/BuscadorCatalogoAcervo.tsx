@@ -6,7 +6,7 @@ import { Briefcase, Clock, Package } from "lucide-react";
 import { formatarApresentacaoPrecoItem } from "@/dominio/entidades/catalogoConteudo";
 import type { ItemCatalogoFiltravel } from "@/dominio/editorial/filtroCatalogoAcervo";
 import { gerarSugestoesCatalogo } from "@/dominio/editorial/destaqueTextoBusca";
-import { usarValorComDebounce } from "@/ganchos/usarValorComDebounce";
+import { useValorComDebounce } from "@/ganchos/useValorComDebounce";
 import { CampoBuscaCompacto } from "@/componentes/interface/CampoBuscaCompacto";
 import { TextoComDestaqueBusca } from "@/componentes/interface/TextoComDestaqueBusca";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
@@ -28,7 +28,7 @@ export function BuscadorCatalogoAcervo({
   const [aberto, setAberto] = useState(false);
   const [indiceAtivo, setIndiceAtivo] = useState(-1);
 
-  const valorDebounced = usarValorComDebounce(valor, 200);
+  const valorDebounced = useValorComDebounce(valor, 200);
 
   const sugestoes = useMemo(
     () => gerarSugestoesCatalogo(itens, valorDebounced, itens.length),
