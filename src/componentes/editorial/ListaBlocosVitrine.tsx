@@ -30,6 +30,7 @@ import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/ca
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AcaoEquipeVitrine, type ManipuladorAcaoHome } from "./AcaoEquipeVitrine";
 import { BarraRedesSociaisDiscreta } from "./BarraRedesSociaisDiscreta";
+import { BotaoCompartilharVitrine } from "./BotaoCompartilharVitrine";
 import { CabecalhoMarcaDiscreta } from "./IdentidadeETituloEditorial";
 import { ItemAcaoVitrine } from "./ItemAcaoVitrine";
 
@@ -261,6 +262,13 @@ export function ListaBlocosVitrine({
                 tamanho={pagina.tamanhoRedesSociais}
                 alinharCentroNoMobile={false}
                 className="justify-center @5xl:justify-end"
+                acaoFinal={
+                  <BotaoCompartilharVitrine
+                    identificadorPublico={pagina.identificadorPublico}
+                    nomeExibicao={pagina.identidade.nomeExibicao}
+                    subtituloCurto={pagina.identidade.subtituloCurto}
+                  />
+                }
               />
             </div>
           );

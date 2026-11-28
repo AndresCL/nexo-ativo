@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { copiarTextoComAviso } from "@/componentes/interface/notificacoes/copiarTextoComAviso";
+import { compartilharUrlComFallback } from "@/utilitarios/compartilharUrl";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   ArrowUpRight,
@@ -45,7 +45,6 @@ import {
 } from "@/dominio/servicos/geradorVCardProfissional";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { AvatarProfissional } from "./AvatarProfissional";
-import { CamadaMidiaImersiva } from "./CamadaMidiaImersiva";
 import { ExecutorMicrofluxoVisitante } from "./ExecutorMicrofluxoVisitante";
 import { GavetaEditorialPublica, type SecaoAcervoAberta } from "./GavetaEditorialPublica";
 import { BottomSheetPostVitrine } from "./acervo/BottomSheetPostVitrine";
@@ -74,13 +73,11 @@ export function CartaoDigitalProfissionalPublico({
   aoVoltar,
 }: PropriedadesCartaoDigitalProfissionalPublico) {
   const {
-    containerPortal,
     modoPrevia,
     sincronizarHistoricoNavegador,
     registrarEventoTelemetria,
     aoNavegarEmPrevia,
   } = useAmbienteVitrine();
-  const estaContido = containerPortal !== null;
   const [contatoSalvo, setContatoSalvo] = useState(false);
   const [acordeaoAcoesAberto, setAcordeaoAcoesAberto] = useState(true);
   const ultimaVisualizacaoRegistrada = useRef<string | null>(null);
@@ -258,22 +255,11 @@ export function CartaoDigitalProfissionalPublico({
   }, [microfluxosDisponiveis, profissional.id, sincronizarHistoricoNavegador]);
 
   async function handleCompartilhar() {
-    const dadosCompartilhamento = {
-      title: `${profissional.nomeCompleto} — ${paginaOrganizacao.identidade.nomeExibicao}`,
-      text: `${profissional.cargoOuEspecialidade} na ${paginaOrganizacao.identidade.nomeExibicao}. Contato direto:`,
+    await compartilharUrlComFallback({
+      titulo: `${profissional.nomeCompleto} — ${paginaOrganizacao.identidade.nomeExibicao}`,
+      texto: `${profissional.cargoOuEspecialidade} na ${paginaOrganizacao.identidade.nomeExibicao}. Contato direto:`,
       url: urlPublicaCartao,
-    };
-
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share(dadosCompartilhamento);
-        return;
-      } catch (erro) {
-        if (erro instanceof Error && erro.name === "AbortError") return;
-      }
-    }
-
-    await copiarTextoComAviso(urlPublicaCartao);
+    });
   }
 
   function handleSalvarContato() {
@@ -599,18 +585,10 @@ export function CartaoDigitalProfissionalPublico({
       style={variaveisPaleta}
       data-testid="cartao-digital-profissional"
       className={combinarClasses(
-        "relative isolate min-h-dvh overflow-x-hidden overflow-y-auto bg-[var(--editorial-fundo)] text-[var(--editorial-texto)] selection:bg-white selection:text-black",
+        "relative isolate min-h-dvh overflow-x-hidden overflow-y-auto bg-[var(--editorial-fundo)] text-[var(--editorial-texto)] selection:bg-[var(--editorial-texto)] selection:text-[var(--editorial-fundo)]",
         tipografia.classeCorpo,
       )}
     >
-      {/* Camada de Mídia Imersiva da Home */}
-      <CamadaMidiaImersiva
-        midia={paginaOrganizacao.midiaFundo}
-        paletaId={paginaOrganizacao.paletaId}
-        estiloEnquadramento="tela_cheia"
-        className={estaContido ? "absolute inset-0" : "fixed inset-0"}
-      />
-
       {/* Conteúdo Centralizado e Responsivo (Web em 2 colunas com botões na lateral / Mobile fluindo naturalmente) */}
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-between px-4 py-3 sm:px-6 sm:py-4 lg:max-w-6xl xl:max-w-7xl lg:px-12 lg:py-6">
         {/* Cabeçalho Superior com Marca e Ações Rápidas */}
@@ -619,10 +597,10 @@ export function CartaoDigitalProfissionalPublico({
             <button
               type="button"
               onClick={aoVoltar}
-              className="group inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-white/90 transition-colors hover:text-white cursor-pointer"
+              className="group inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-[var(--editorial-texto)]/90 transition-colors hover:text-[var(--editorial-texto)] cursor-pointer"
             >
               <ChevronLeft
-                className="h-4 w-4 sm:h-5 sm:w-5 -ml-1 text-white/70 transition-transform group-hover:-translate-x-0.5 group-hover:text-white"
+                className="h-4 w-4 sm:h-5 sm:w-5 -ml-1 text-[var(--editorial-texto-secundario)] transition-transform group-hover:-translate-x-0.5 group-hover:text-[var(--editorial-texto)]"
                 aria-hidden="true"
               />
               <span className="max-w-[200px] truncate sm:max-w-xs">
@@ -642,10 +620,10 @@ export function CartaoDigitalProfissionalPublico({
                   acaoHomeRotulo: "Acesso à Apresentação da Loja",
                 });
               }}
-              className="group inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-white/90 transition-colors hover:text-white"
+              className="group inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-[var(--editorial-texto)]/90 transition-colors hover:text-[var(--editorial-texto)]"
             >
               <ChevronLeft
-                className="h-4 w-4 sm:h-5 sm:w-5 -ml-1 text-white/70 transition-transform group-hover:-translate-x-0.5 group-hover:text-white"
+                className="h-4 w-4 sm:h-5 sm:w-5 -ml-1 text-[var(--editorial-texto-secundario)] transition-transform group-hover:-translate-x-0.5 group-hover:text-[var(--editorial-texto)]"
                 aria-hidden="true"
               />
               <span className="max-w-[200px] truncate sm:max-w-xs">
@@ -658,25 +636,25 @@ export function CartaoDigitalProfissionalPublico({
             <button
               type="button"
               onClick={handleSalvarContato}
-              className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 cursor-pointer"
+              className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)] text-[var(--editorial-texto)] backdrop-blur-md transition-all hover:opacity-85 active:scale-95 cursor-pointer"
               aria-label="Salvar contato no celular"
               title="Salvar contato na agenda do celular (vCard)"
             >
               {contatoSalvo ? (
-                <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" aria-hidden="true" />
+                <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500" aria-hidden="true" />
               ) : (
-                <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/90" aria-hidden="true" />
+                <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
               )}
             </button>
 
             <button
               type="button"
               onClick={handleCompartilhar}
-              className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 cursor-pointer"
+              className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)] text-[var(--editorial-texto)] backdrop-blur-md transition-all hover:opacity-85 active:scale-95 cursor-pointer"
               aria-label="Compartilhar este cartão"
               title="Compartilhar este cartão"
             >
-              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/90" aria-hidden="true" />
+              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
             </button>
           </div>
         </header>
@@ -771,19 +749,19 @@ export function CartaoDigitalProfissionalPublico({
               <div className="mt-3 space-y-0.5 sm:mt-4 sm:space-y-1">
                 <h1
                   className={combinarClasses(
-                    "text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl",
+                    "text-xl font-bold tracking-tight text-[var(--editorial-texto)] sm:text-2xl lg:text-3xl",
                     tipografia.classeTitulo,
                   )}
                 >
                   {profissional.nomeCompleto}
                 </h1>
 
-                <p className="text-xs font-medium text-white/85 sm:text-sm lg:text-base">
+                <p className="text-xs font-medium text-[var(--editorial-texto-secundario)] sm:text-sm lg:text-base">
                   {profissional.cargoOuEspecialidade}
                 </p>
 
                 {profissional.registroProfissionalOpcional ? (
-                  <p className="text-[11px] text-white/60 sm:text-xs">
+                  <p className="text-[11px] text-[var(--editorial-texto-secundario)]/80 sm:text-xs">
                     {profissional.registroProfissionalOpcional}
                   </p>
                 ) : null}
@@ -792,7 +770,7 @@ export function CartaoDigitalProfissionalPublico({
               {profissional.minibiografia ? (
                 <p
                   className={combinarClasses(
-                    "mx-auto mt-2 max-w-md text-xs leading-relaxed text-white/80 sm:text-sm",
+                    "mx-auto mt-2 max-w-md text-xs leading-relaxed text-[var(--editorial-texto-secundario)] sm:text-sm",
                     (profissional.exibirAcoesVitrineNoCartao ?? true) &&
                       acoesSemDuplicidadeWhatsapp &&
                       acoesSemDuplicidadeWhatsapp.length > 0
@@ -859,9 +837,9 @@ export function CartaoDigitalProfissionalPublico({
                     {profissional.emailContatoOpcional ? (
                       <a
                         href={`mailto:${profissional.emailContatoOpcional}`}
-                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white backdrop-blur-md transition-all hover:border-white/30 hover:bg-white/20 active:scale-[0.99]"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)] px-3 py-2 text-xs font-semibold text-[var(--editorial-texto)] backdrop-blur-md transition-all hover:opacity-90 active:scale-[0.99]"
                       >
-                        <Mail className="h-4 w-4 text-white/80" aria-hidden="true" />
+                        <Mail className="h-4 w-4 text-[var(--editorial-texto-secundario)]" aria-hidden="true" />
                         <span>E-mail</span>
                       </a>
                     ) : null}
@@ -871,9 +849,9 @@ export function CartaoDigitalProfissionalPublico({
                         href={profissional.linkedinOpcional}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white backdrop-blur-md transition-all hover:border-white/30 hover:bg-white/20 active:scale-[0.99]"
+                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)] px-3 py-2 text-xs font-semibold text-[var(--editorial-texto)] backdrop-blur-md transition-all hover:opacity-90 active:scale-[0.99]"
                       >
-                        <ArrowUpRight className="h-4 w-4 text-white/80" aria-hidden="true" />
+                        <ArrowUpRight className="h-4 w-4 text-[var(--editorial-texto-secundario)]" aria-hidden="true" />
                         <span>LinkedIn</span>
                       </a>
                     ) : null}
@@ -884,14 +862,14 @@ export function CartaoDigitalProfissionalPublico({
                         target="_blank"
                         rel="noopener noreferrer"
                         className={combinarClasses(
-                          "inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white backdrop-blur-md transition-all hover:border-white/30 hover:bg-white/20 active:scale-[0.99]",
+                          "inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--editorial-borda)] bg-[var(--editorial-superficie)] px-3 py-2 text-xs font-semibold text-[var(--editorial-texto)] backdrop-blur-md transition-all hover:opacity-90 active:scale-[0.99]",
                           profissional.emailContatoOpcional && profissional.linkedinOpcional
                             ? "col-span-2"
                             : "",
                         )}
                       >
                         <span>Instagram</span>
-                        <ArrowUpRight className="h-4 w-4 text-white/80" aria-hidden="true" />
+                        <ArrowUpRight className="h-4 w-4 text-[var(--editorial-texto-secundario)]" aria-hidden="true" />
                       </a>
                     ) : null}
                   </div>
@@ -940,7 +918,7 @@ export function CartaoDigitalProfissionalPublico({
         {/* Rodapé da Loja no final do conteúdo */}
         <RodapeEditorial
           identidade={paginaOrganizacao.identidade}
-          className="shrink-0 border-t border-white/15 pt-4 sm:pt-6 text-white/70"
+          className="shrink-0 border-t border-[var(--editorial-borda)]/50 pt-4 sm:pt-6 text-[var(--editorial-texto-secundario)]"
         />
       </div>
 

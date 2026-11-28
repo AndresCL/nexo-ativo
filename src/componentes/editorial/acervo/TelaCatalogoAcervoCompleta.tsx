@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowLeft, LayoutGrid, List } from "lucide-react";
 import type { ProdutoCatalogo, ServicoOrganizacao } from "@/dominio/entidades/catalogoConteudo";
 import {
@@ -14,10 +14,10 @@ import {
   filtrarEOrdenarCatalogo,
   type OrdenacaoCatalogoAcervo,
 } from "@/dominio/editorial/filtroCatalogoAcervo";
-import { CampoBuscaCompacto } from "@/componentes/interface/CampoBuscaCompacto";
 import { TrilhaChipsFiltro } from "@/componentes/interface/TrilhaChipsFiltro";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import { TelaSobrepostaLateralEditorial } from "../TelaSobrepostaLateralEditorial";
+import { BuscadorCatalogoAcervo } from "./BuscadorCatalogoAcervo";
 import { CartaoItemAcervoCompacto } from "./CartaoItemAcervoCompacto";
 import { CartaoItemAcervoListaCompacta } from "./CartaoItemAcervoListaCompacta";
 
@@ -46,12 +46,10 @@ export function TelaCatalogoAcervoCompleta({
   aoRetornarFoco,
   aoSelecionarItem,
 }: PropriedadesTelaCatalogoAcervoCompleta) {
-  const [termoBusca, setTermoBusca] = useState("");
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null);
   const [ordenacao, setOrdenacao] = useState<OrdenacaoCatalogoAcervo>("destaque");
   const [modoVisualizacao, setModoVisualizacao] = useState<ModoVisualizacaoCatalogo>("grade");
 
-  const termoBuscaDiferido = useDeferredValue(termoBusca);
   const tipografia = obterDescritorTipografiaEditorial(pagina.tipografiaId);
 
   const titulo =
@@ -78,18 +76,16 @@ export function TelaCatalogoAcervoCompleta({
   const itensFiltrados = useMemo(
     () =>
       filtrarEOrdenarCatalogo(itensBase, {
-        termoBusca: termoBuscaDiferido,
+        termoBusca: "",
         categoriaSelecionada,
         ordenacao,
       }),
-    [itensBase, termoBuscaDiferido, categoriaSelecionada, ordenacao],
+    [itensBase, categoriaSelecionada, ordenacao],
   );
 
-  const possuiFiltroAtivo =
-    termoBusca.trim().length > 0 || categoriaSelecionada !== null || ordenacao !== "destaque";
+  const possuiFiltroAtivo = categoriaSelecionada !== null || ordenacao !== "destaque";
 
   function limparFiltros() {
-    setTermoBusca("");
     setCategoriaSelecionada(null);
     setOrdenacao("destaque");
   }
@@ -185,13 +181,10 @@ export function TelaCatalogoAcervoCompleta({
             </div>
           </div>
 
-          <CampoBuscaCompacto
-            valor={termoBusca}
-            aoAlterar={setTermoBusca}
-            placeholder={
-              tipo === "produtos" ? "Buscar produtos..." : "Buscar serviços..."
-            }
-            ariaLabel={tipo === "produtos" ? "Buscar produtos" : "Buscar serviços"}
+          <BuscadorCatalogoAcervo
+            itens={itensBase}
+            tipo={tipo}
+            aoSelecionarItem={(itemId) => aoSelecionarItem(tipo, itemId)}
           />
 
           <TrilhaChipsFiltro

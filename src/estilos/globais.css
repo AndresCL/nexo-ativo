@@ -29,6 +29,7 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
   }
 
   body {
@@ -49,6 +50,15 @@
     background-position: right 0.65rem center;
     background-size: 0.9rem 0.9rem;
     padding-right: 2.15rem !important;
+  }
+}
+
+/* Evita auto-zoom do iOS Safari ao focar inputs com fonte < 16px sem quebrar acessibilidade/Lighthouse */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
   }
 }
 

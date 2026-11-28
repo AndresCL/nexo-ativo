@@ -16,29 +16,29 @@ interface EscalaIconesRedesSociais {
 }
 
 const ESCALAS_ICON_REDES_SOCIAIS: Readonly<Record<TamanhoRedesSociais, EscalaIconesRedesSociais>> =
-  {
-    pequeno: {
-      icone: "h-4.5 w-4.5",
-      behance: "text-xs",
-      pinterest: "text-[15px]",
-      link: "min-h-11 min-w-11",
-      lista: "gap-1.5",
-    },
-    medio: {
-      icone: "h-6 w-6",
-      behance: "text-sm",
-      pinterest: "text-lg",
-      link: "min-h-11 min-w-11",
-      lista: "gap-2",
-    },
-    grande: {
-      icone: "h-8 w-8",
-      behance: "text-base",
-      pinterest: "text-2xl",
-      link: "min-h-12 min-w-12",
-      lista: "gap-2.5",
-    },
-  };
+{
+  pequeno: {
+    icone: "h-4.5 w-4.5",
+    behance: "text-xs",
+    pinterest: "text-[15px]",
+    link: "min-h-11 min-w-11",
+    lista: "gap-1.5",
+  },
+  medio: {
+    icone: "h-6 w-6",
+    behance: "text-sm",
+    pinterest: "text-lg",
+    link: "min-h-11 min-w-11",
+    lista: "gap-2",
+  },
+  grande: {
+    icone: "h-8 w-8",
+    behance: "text-base",
+    pinterest: "text-2xl",
+    link: "min-h-12 min-w-12",
+    lista: "gap-2.5",
+  },
+};
 
 const NOMES_PADRAO_REDE: Readonly<Record<TipoRedeSocial, string>> = {
   instagram: "Instagram",
@@ -168,6 +168,7 @@ export interface PropriedadesBarraRedesSociaisDiscreta {
   readonly tamanho?: TamanhoRedesSociais;
   readonly alinharCentroNoMobile?: boolean;
   readonly className?: string;
+  readonly acaoFinal?: ReactNode;
 }
 
 export function BarraRedesSociaisDiscreta({
@@ -175,8 +176,9 @@ export function BarraRedesSociaisDiscreta({
   tamanho,
   alinharCentroNoMobile = true,
   className,
+  acaoFinal,
 }: PropriedadesBarraRedesSociaisDiscreta) {
-  if (redes.length === 0) {
+  if (redes.length === 0 && !acaoFinal) {
     return null;
   }
 
@@ -215,6 +217,17 @@ export function BarraRedesSociaisDiscreta({
           </li>
         );
       })}
+      {acaoFinal ? (
+        <>
+          {redes.length > 0 ? (
+            <li
+              aria-hidden="true"
+              className="mx-1.5 h-5 w-[2px] shrink-0 rounded-full bg-[var(--editorial-texto-secundario)]/50"
+            />
+          ) : null}
+          <li>{acaoFinal}</li>
+        </>
+      ) : null}
     </ul>
   );
 }
