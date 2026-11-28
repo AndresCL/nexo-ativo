@@ -37,7 +37,7 @@ export function CartaoItemAcervoCompacto({
       aria-roledescription={modo === "carrossel" ? "slide" : undefined}
       aria-label={`${item.nome} (${indice + 1})`}
       className={combinarClasses(
-        "group flex flex-col justify-between overflow-hidden rounded-2xl border-0 bg-[var(--editorial-superficie)] p-0 text-left shadow-xs transition-all duration-300 hover:shadow-md select-none",
+        "group flex flex-col justify-between overflow-hidden rounded-2xl border border-[var(--editorial-card-acervo-borda,transparent)] bg-[var(--editorial-card-acervo-fundo,var(--editorial-superficie))] p-0 text-left shadow-xs transition-all duration-300 hover:shadow-md select-none",
         modo === "carrossel" ? "w-[72%] sm:w-[75%] shrink-0 snap-start" : "w-full",
       )}
     >
@@ -73,18 +73,18 @@ export function CartaoItemAcervoCompacto({
         {/* Informações Sem Serifa (Moderna) com padding inferior */}
         <div className="flex flex-1 flex-col justify-between p-3">
           <div>
-            <h3 className="line-clamp-2 text-xs font-semibold leading-snug tracking-tight text-[var(--editorial-texto)]">
+            <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug tracking-tight text-[var(--editorial-card-acervo-texto,var(--editorial-texto))]">
               {item.nome}
             </h3>
             {item.prazoOuDuracao ? (
-              <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-[var(--editorial-texto-secundario)]">
+              <p className="mt-1 line-clamp-1 text-[11px] font-normal opacity-75 text-[var(--editorial-card-acervo-preco,var(--editorial-texto-secundario))]">
                 {item.prazoOuDuracao}
               </p>
             ) : null}
           </div>
 
           <div className="mt-2.5 pt-0.5">
-            <span className="text-xs font-bold tracking-tight text-[var(--editorial-texto-secundario)]">
+            <span className="text-xs font-bold tracking-tight text-[var(--editorial-card-acervo-preco,var(--editorial-texto-secundario))]">
               {rotuloPreco}
             </span>
           </div>

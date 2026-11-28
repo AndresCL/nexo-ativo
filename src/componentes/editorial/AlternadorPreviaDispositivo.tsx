@@ -15,6 +15,7 @@ import {
   criarServicoSubmissaoDemonstracao,
   type ValorContextoAmbienteVitrine,
 } from "./contextoAmbienteVitrine";
+import { QuadroEscalonavelSmartphone } from "./QuadroEscalonavelSmartphone";
 import { VitrinePublicaInterativa } from "./VitrinePublicaInterativa";
 
 export type ModoDispositivoPrevia = "mobile";
@@ -119,28 +120,25 @@ export function AlternadorPreviaDispositivo({
         </div>
       ) : null}
 
-      <div className="flex justify-center">
-        {/* Casca externa relative + overflow-hidden funciona como container dos Portais (BottomSheets e Cartão Digital) */}
-        <div
-          ref={setContainerMoldura}
-          data-testid="quadro-previa-dispositivo"
-          data-dispositivo="mobile"
-          className="relative flex aspect-[9/17.5] h-[min(760px,calc(100dvh-4.5rem))] w-auto max-w-[390px] flex-col overflow-hidden rounded-[2.25rem] border-[6px] border-mineral-900 shadow-2xl"
-        >
-          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:thin]">
-            <ContextoAmbienteVitrine.Provider value={valorAmbientePrevia}>
-              <VitrinePublicaInterativa
-                pagina={paginaPrevia}
-                acervo={acervo}
-                servicoSubmissao={servicoSubmissaoDemo}
-                duracaoMinimaLoaderMs={0}
-                alturaContidaPrevia
-                exibirAvaliacoesGoogle={exibirAvaliacoesGoogle}
-              />
-            </ContextoAmbienteVitrine.Provider>
-          </div>
+      {/* Casca externa relative + overflow-hidden funciona como container dos Portais (BottomSheets e Cartão Digital) */}
+      <QuadroEscalonavelSmartphone
+        refMoldura={setContainerMoldura}
+        dataTestId="quadro-previa-dispositivo"
+        dataDispositivo="mobile"
+      >
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+          <ContextoAmbienteVitrine.Provider value={valorAmbientePrevia}>
+            <VitrinePublicaInterativa
+              pagina={paginaPrevia}
+              acervo={acervo}
+              servicoSubmissao={servicoSubmissaoDemo}
+              duracaoMinimaLoaderMs={0}
+              alturaContidaPrevia
+              exibirAvaliacoesGoogle={exibirAvaliacoesGoogle}
+            />
+          </ContextoAmbienteVitrine.Provider>
         </div>
-      </div>
+      </QuadroEscalonavelSmartphone>
     </div>
   );
 }

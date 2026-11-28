@@ -302,9 +302,8 @@ export function GerenciadorCatalogoPainel({
             <div className="grid gap-3 sm:grid-cols-2">
               <CampoFormulario
                 className="rounded-lg border-marfim-200 focus:border-indigo-400 focus:ring-indigo-100"
-                rotulo="Preço"
+                rotulo="Preço (opcional)"
                 prefixoFixo="R$"
-                required
                 disabled={!podeEditarConteudo || publicacao.publicando || salvando}
                 value={precoProdutoTexto}
                 onChange={(e) => setPrecoProdutoTexto(e.target.value)}

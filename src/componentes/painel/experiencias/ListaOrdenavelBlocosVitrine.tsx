@@ -3,7 +3,14 @@
 import type { RefObject } from "react";
 import { Reorder } from "motion/react";
 import { Plus, Search } from "lucide-react";
+import type { LarguraCardVitrine } from "@/dominio/editorial/agrupamentoGridVitrine";
 import type { IdentificadorBlocoSistemaVitrine } from "@/dominio/editorial/ordemBlocosVitrine";
+import type { AnimacaoDestaque } from "@/dominio/microfluxos/animacaoDestaque";
+import {
+  ehDestaqueVisualVitrine,
+  resolverNivelDestaqueVitrine,
+  type ValorExibicaoDestaqueExperiencia,
+} from "@/dominio/microfluxos/nivelDestaqueVitrine";
 import { Botao } from "@/componentes/interface/Botao";
 import type { ItemListaUnificadaVitrine } from "./descritoresTipoAcao";
 import { ItemBlocoListaVitrine } from "./ItemBlocoListaVitrine";
@@ -24,6 +31,12 @@ export interface PropriedadesListaOrdenavelBlocosVitrine {
   readonly aoReordenarPorArraste: (novaOrdemIds: string[]) => void;
   readonly aoMoverItem: (indiceOrigem: number, direcao: -1 | 1) => void;
   readonly aoAlternarVisibilidadeExperiencia: (fluxoId: string) => void;
+  readonly aoAlterarExibicaoDestaqueExperiencia: (
+    fluxoId: string,
+    valor: ValorExibicaoDestaqueExperiencia,
+  ) => void;
+  readonly aoAlterarLarguraExperiencia: (fluxoId: string, largura: LarguraCardVitrine) => void;
+  readonly aoAlterarAnimacaoExperiencia: (fluxoId: string, animacao: AnimacaoDestaque) => void;
   readonly aoAlternarVisibilidadeSistema: (idBloco: IdentificadorBlocoSistemaVitrine) => void;
   readonly aoAlternarFixarMarcaTopo: () => void;
   readonly aoAbrirEditorExperiencia: (fluxoId: string) => void;
@@ -43,6 +56,9 @@ export function ListaOrdenavelBlocosVitrine({
   aoReordenarPorArraste,
   aoMoverItem,
   aoAlternarVisibilidadeExperiencia,
+  aoAlterarExibicaoDestaqueExperiencia,
+  aoAlterarLarguraExperiencia,
+  aoAlterarAnimacaoExperiencia,
   aoAlternarVisibilidadeSistema,
   aoAlternarFixarMarcaTopo,
   aoAbrirEditorExperiencia,
@@ -75,13 +91,17 @@ export function ListaOrdenavelBlocosVitrine({
         `${fluxo.titulo} ${fluxo.rotuloBotaoHome ?? ""} ${fluxo.descricaoCurta}`
           .toLocaleLowerCase("pt-BR")
           .includes(termo);
+      const nivelDestaque = resolverNivelDestaqueVitrine(
+        fluxo.nivelDestaqueHome,
+        fluxo.destaquePrimarioHome,
+      );
       const correspondeSituacao =
         filtroVisibilidade === "todas" ||
         (filtroVisibilidade === "visiveis"
           ? fluxo.ativo
           : filtroVisibilidade === "ocultas"
             ? !fluxo.ativo
-            : fluxo.ativo && fluxo.destaquePrimarioHome);
+            : fluxo.ativo && ehDestaqueVisualVitrine(nivelDestaque));
       return correspondeBusca && correspondeSituacao;
     });
 
@@ -212,6 +232,21 @@ export function ListaOrdenavelBlocosVitrine({
                   item.tipo === "sistema"
                     ? aoAlternarVisibilidadeSistema(item.idBloco)
                     : aoAlternarVisibilidadeExperiencia(item.fluxo.id)
+                }
+                aoAlterarExibicaoDestaque={
+                  item.tipo === "experiencia"
+                    ? (valor) => aoAlterarExibicaoDestaqueExperiencia(item.fluxo.id, valor)
+                    : undefined
+                }
+                aoAlterarLargura={
+                  item.tipo === "experiencia"
+                    ? (largura) => aoAlterarLarguraExperiencia(item.fluxo.id, largura)
+                    : undefined
+                }
+                aoAlterarAnimacao={
+                  item.tipo === "experiencia"
+                    ? (animacao) => aoAlterarAnimacaoExperiencia(item.fluxo.id, animacao)
+                    : undefined
                 }
                 aoAlternarFixarMarcaTopo={
                   item.tipo === "sistema" && item.idBloco === "bloco:marca"

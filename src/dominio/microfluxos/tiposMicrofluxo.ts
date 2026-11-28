@@ -3,6 +3,7 @@ import type { RegraCalculoComercialMicrofluxo } from "../comercial/tiposCalculoC
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
 import type { MidiaItemCatalogo } from "../entidades/catalogoConteudo";
 import type { AnimacaoDestaque } from "./animacaoDestaque";
+import type { NivelDestaqueVitrine } from "./nivelDestaqueVitrine";
 
 export type AncoraPadraoMicrofluxo = string;
 
@@ -146,6 +147,7 @@ export type TipoAcaoVitrine =
   | "microfluxo"
   | "agenda"
   | "publicacao_post"
+  | "cardapio"
   | "link_externo"
   | "secao_produtos"
   | "secao_servicos"
@@ -245,6 +247,7 @@ export interface DefinicaoMicrofluxo {
   readonly tituloSecao?: string;
   readonly iconeBotaoHome?: string;
   readonly destaquePrimarioHome?: boolean;
+  readonly nivelDestaqueHome?: NivelDestaqueVitrine;
   readonly animarBordaDestaque?: boolean;
   readonly animacaoDestaque?: AnimacaoDestaque;
   readonly corBrilhoBorda?: string;

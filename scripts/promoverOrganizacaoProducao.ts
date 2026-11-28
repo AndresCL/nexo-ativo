@@ -25,6 +25,7 @@ import {
   esquemaProjetoPortfolio,
   esquemaServicoOrganizacao,
 } from "../src/validacoes/esquemasCatalogoConteudo";
+import { esquemaCardapioOrganizacao } from "../src/validacoes/esquemasCardapioDigital";
 import { esquemaDefinicaoMicrofluxo } from "../src/validacoes/esquemasMicrofluxo";
 import { esquemaRascunhoConfiguracaoPagina } from "../src/validacoes/esquemaRascunhoPagina";
 import { hidratarRascunhoConfiguracaoPagina } from "../src/dominio/entidades/rascunhoConfiguracaoPagina";
@@ -53,6 +54,7 @@ interface PacoteOrganizacaoEmulador {
     readonly dados: Record<string, unknown>;
   }>;
   readonly microfluxos: ReadonlyArray<{ readonly id: string; readonly dados: Record<string, unknown> }>;
+  readonly cardapios: ReadonlyArray<{ readonly id: string; readonly dados: Record<string, unknown> }>;
   readonly uidProprietarioOrigem?: string;
 }
 
@@ -155,6 +157,7 @@ function extrairPacoteDeFixtureLocal(
     projetosPortfolio,
     profissionais,
     microfluxos,
+    cardapios: [],
   };
 }
 
@@ -191,6 +194,7 @@ async function extrairPacoteDoEmuladorLocal(
       snapPortfolio,
       snapProfissionais,
       snapMicrofluxos,
+      snapCardapios,
     ] = await Promise.all([
       refOrg.get(),
       refOrg.collection("configuracaoPagina").doc("rascunho").get(),
@@ -201,6 +205,7 @@ async function extrairPacoteDoEmuladorLocal(
       refOrg.collection("projetosPortfolio").get(),
       refOrg.collection("profissionais").get(),
       refOrg.collection("microfluxos").get(),
+      refOrg.collection("cardapios").get(),
     ]);
 
     if (!docOrg.exists || !docRascunho.exists) {
@@ -253,6 +258,11 @@ async function extrairPacoteDoEmuladorLocal(
       dados: removerCamposIndefinidosParaFirestore(d.data()),
     }));
 
+    const cardapios = snapCardapios.docs.map((d) => ({
+      id: d.id,
+      dados: removerCamposIndefinidosParaFirestore(esquemaCardapioOrganizacao.parse(d.data())),
+    }));
+
     const membroProprietario = snapMembros.docs.find((d) => d.data().papel === "proprietario");
 
     return {
@@ -266,6 +276,7 @@ async function extrairPacoteDoEmuladorLocal(
       projetosPortfolio,
       profissionais,
       microfluxos,
+      cardapios,
       ...(membroProprietario ? { uidProprietarioOrigem: membroProprietario.id } : {}),
     };
   } finally {
@@ -336,6 +347,7 @@ async function promoverOrganizacaoProducao(): Promise<void> {
   console.info(`  - Portfólio: ${pacote.projetosPortfolio.length}`);
   console.info(`  - Equipe (Profissionais): ${pacote.profissionais.length}`);
   console.info(`  - Experiências (Microfluxos): ${pacote.microfluxos.length}`);
+  console.info(`  - Cardápios digitais: ${pacote.cardapios.length}`);
   console.info(
     `  - Documentos de configuração: ${pacote.configuracoes.map((c) => c.id).join(", ") || "nenhum"}`,
   );
@@ -527,6 +539,9 @@ async function promoverOrganizacaoProducao(): Promise<void> {
     }
     for (const item of pacote.microfluxos) {
       lote.set(refOrg.collection("microfluxos").doc(item.id), item.dados);
+    }
+    for (const item of pacote.cardapios) {
+      lote.set(refOrg.collection("cardapios").doc(item.id), item.dados);
     }
 
     console.info("4. Gravando rascunho e acervo privado limpo no Firestore de produção...");

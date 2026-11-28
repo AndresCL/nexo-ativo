@@ -23,10 +23,15 @@ describe("agrupamentoGridVitrine", () => {
     expect(podeUsarLarguraMetade(criarAcao(), false)).toBe(false);
   });
 
-  it("impede largura 'metade' para destaque primário e seções inline", () => {
+  it("permite largura 'metade' para destaque primário, secundário e terciário, mas impede seções inline", () => {
     const acaoMetade = criarAcao({ larguraCard: "metade" });
-    expect(podeUsarLarguraMetade(acaoMetade, true)).toBe(false);
+    expect(podeUsarLarguraMetade(acaoMetade, true)).toBe(true);
     expect(podeUsarLarguraMetade(acaoMetade, false)).toBe(true);
+    expect(
+      podeUsarLarguraMetade(
+        criarAcao({ larguraCard: "metade", nivelDestaque: "secundario" }),
+      ),
+    ).toBe(true);
 
     expect(
       podeUsarLarguraMetade(
@@ -68,6 +73,26 @@ describe("agrupamentoGridVitrine", () => {
       { tipo: "inteira", idBloco: "exp:c" },
       { tipo: "inteira", idBloco: "exp:whats" },
       { tipo: "inteira", idBloco: "exp:d" },
+    ]);
+  });
+
+  it("não mistura botão 50% com card 50% na mesma linha", () => {
+    const grupos: Record<string, "botao" | "card"> = {
+      "exp:pri": "botao",
+      "exp:sec": "botao",
+      "exp:b3": "botao",
+      "exp:c1": "card",
+      "exp:c2": "card",
+    };
+    const linhas = agruparBlocosEmLinhasVitrine(
+      ["exp:pri", "exp:sec", "exp:b3", "exp:c1", "exp:c2"],
+      (id) => grupos[id] ?? null,
+    );
+
+    expect(linhas).toEqual([
+      { tipo: "par", idsBlocos: ["exp:pri", "exp:sec"], grupo: "botao" },
+      { tipo: "metade_isolada", idBloco: "exp:b3", grupo: "botao" },
+      { tipo: "par", idsBlocos: ["exp:c1", "exp:c2"], grupo: "card" },
     ]);
   });
 });

@@ -50,6 +50,13 @@ const GavetaEditorialPublica = dynamic(
   () => import("./GavetaEditorialPublica").then((mod) => mod.GavetaEditorialPublica),
   { ssr: false },
 );
+const TelaCatalogoAcervoCompleta = dynamic(
+  () =>
+    import("./acervo/TelaCatalogoAcervoCompleta").then(
+      (mod) => mod.TelaCatalogoAcervoCompleta,
+    ),
+  { ssr: false },
+);
 const BottomSheetDetalhesItemAcervo = dynamic(
   () =>
     import("./acervo/BottomSheetDetalhesItemAcervo").then(
@@ -451,6 +458,13 @@ export function VitrinePublicaInterativa({
       return;
     }
 
+    if (acao.tipoDestino === "cardapio" || acao.destino === "#cardapio") {
+      if (typeof window !== "undefined") {
+        window.location.assign(`/${pagina.identificadorPublico}/cardapio`);
+      }
+      return;
+    }
+
     if (acao.tipoDestino === "publicacao_post" || acao.destino.startsWith("#post-")) {
       setMicrofluxoAtivo(null);
       setSecaoAberta(null);
@@ -637,20 +651,51 @@ export function VitrinePublicaInterativa({
 
       <GavetaEditorialPublica
         aoRetornarFoco={() => restaurarFocoAcaoVitrine(acionadorGaveta.current)}
-        aberto={secaoAberta !== null}
+        aberto={secaoAberta === "portfolio" || secaoAberta === "equipe"}
         aoAlterarAbertura={(aberta) => {
           if (!aberta) {
             setSecaoAberta(null);
             setConfiguracaoCtaSecaoAberta(undefined);
           }
         }}
-        secaoAberta={secaoAberta}
+        secaoAberta={
+          secaoAberta === "portfolio" || secaoAberta === "equipe" ? secaoAberta : null
+        }
         tituloPersonalizado={tituloSecaoAberta}
         configuracaoCta={configuracaoCtaGavetaEfetiva}
         pagina={pagina}
         acervo={acervo}
         aoSolicitarExperiencia={abrirExperienciaComContexto}
         aoAbrirCartao={abrirCartao}
+      />
+
+      <TelaCatalogoAcervoCompleta
+        aberto={secaoAberta === "produtos" || secaoAberta === "servicos"}
+        tipo={secaoAberta === "servicos" ? "servicos" : "produtos"}
+        tituloPersonalizado={tituloSecaoAberta}
+        pagina={pagina}
+        produtos={acervo.produtos}
+        servicos={acervo.servicos}
+        aoFechar={() => {
+          setSecaoAberta(null);
+          setConfiguracaoCtaSecaoAberta(undefined);
+        }}
+        aoRetornarFoco={() => restaurarFocoAcaoVitrine(acionadorGaveta.current)}
+        aoSelecionarItem={(tipo, itemId) => {
+          const configuracaoCta =
+            configuracaoCtaGavetaEfetiva ??
+            paginaComAcoesResolvidas.acoesPrincipais.find(
+              (a) => a.tipoDestino === (tipo === "produtos" ? "secao_produtos" : "secao_servicos"),
+            )?.configuracaoCtaAcervo;
+
+          if (tipo === "produtos") {
+            const prod = acervo.produtos.find((p) => p.id === itemId);
+            if (prod) setItemDetalhado({ tipo: "produtos", item: prod, configuracaoCta });
+          } else {
+            const serv = acervo.servicos.find((s) => s.id === itemId);
+            if (serv) setItemDetalhado({ tipo: "servicos", item: serv, configuracaoCta });
+          }
+        }}
       />
 
       {/* Bottom Sheet Clean de Detalhes do Item (Produto ou Serviço) */}

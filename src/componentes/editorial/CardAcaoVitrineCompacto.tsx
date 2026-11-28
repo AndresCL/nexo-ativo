@@ -15,7 +15,7 @@ function ehDestinoExterno(destino: string): boolean {
   return /^https?:\/\//i.test(destino);
 }
 
-/** Card modular compacto (1/2 largura) para composição Bento 2×1 na vitrine. */
+/** Card modular compacto (Card 50%) para experiências padrão (terciário) em grade 2×1. */
 export function CardAcaoVitrineCompacto({
   acao,
   icone,
@@ -60,6 +60,7 @@ export function CardAcaoVitrineCompacto({
         type="button"
         data-acao-home-id={acao.id}
         data-formato-card="metade"
+        data-nivel-destaque="terciario"
         onClick={(evento) => aoAcionarItem(acao, evento.currentTarget)}
         className={classesCard}
       >
@@ -72,6 +73,7 @@ export function CardAcaoVitrineCompacto({
     <a
       href={acao.destino}
       data-formato-card="metade"
+      data-nivel-destaque="terciario"
       {...(externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={classesCard}
     >
@@ -79,4 +81,3 @@ export function CardAcaoVitrineCompacto({
     </a>
   );
 }
-

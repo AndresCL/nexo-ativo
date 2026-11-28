@@ -15,13 +15,7 @@ import type { ProfissionalEquipe } from "@/dominio/entidades/catalogoConteudo";
 import type {
   DefinicaoMicrofluxo,
   EtapaMicrofluxo,
-  TipoAcaoVitrine,
 } from "@/dominio/microfluxos/tiposMicrofluxo";
-import {
-  OPCOES_ANIMACAO_DESTAQUE,
-  resolverAnimacaoDestaque,
-  type AnimacaoDestaque,
-} from "@/dominio/microfluxos/animacaoDestaque";
 import { avaliarIntegridadeGrafoMicrofluxo } from "@/dominio/microfluxos/validadorGrafoMicrofluxo";
 import { CampoFormulario } from "@/componentes/interface/CampoFormulario";
 import { CanvasEditorVisualFluxos } from "../microfluxos/CanvasEditorVisualFluxos";
@@ -31,10 +25,10 @@ import { ConfiguracaoEquipeVitrine } from "../catalogo/ConfiguracaoEquipeVitrine
 import { ConfiguracaoPostExperiencia } from "../catalogo/ConfiguracaoPostExperiencia";
 import { ConfiguracaoAgendaExperiencia } from "../catalogo/ConfiguracaoAgendaExperiencia";
 import { OpcaoOcultarTituloVideosExperiencia } from "../catalogo/OpcaoOcultarTituloVideosExperiencia";
-import { DESCRITORES_TIPO_ACAO } from "./descritoresTipoAcao";
+import { GerenciadorCardapiosPainel } from "../cardapio/GerenciadorCardapiosPainel";
+import { SeletorTipoAcaoVitrine } from "./SeletorTipoAcaoVitrine";
 import { SecaoColecaoAcervoExperiencia } from "./SecaoColecaoAcervoExperiencia";
 import { SecaoConfiguracaoPixExperiencia } from "./SecaoConfiguracaoPixExperiencia";
-import { SeletorLarguraCardVitrine } from "./SeletorLarguraCardVitrine";
 
 export interface PropriedadesEditorExperienciaSelecionada {
   readonly organizacaoId: string;
@@ -48,7 +42,6 @@ export interface PropriedadesEditorExperienciaSelecionada {
   readonly permitePixManual: boolean;
   readonly servicoCatalogo: ServicoCatalogoConteudoPorta;
   readonly aoVoltarParaLista: () => void;
-  readonly aoAlterarExibicao: (valor: string) => void;
   readonly aoSolicitarExclusao: (fluxoId: string) => void;
   readonly aoAtualizarFluxo: (atualizador: (atual: DefinicaoMicrofluxo) => DefinicaoMicrofluxo) => void;
   readonly aoAtualizarEtapa: (
@@ -69,7 +62,6 @@ export function EditorExperienciaSelecionada({
   permitePixManual,
   servicoCatalogo,
   aoVoltarParaLista,
-  aoAlterarExibicao,
   aoSolicitarExclusao,
   aoAtualizarFluxo,
   aoAtualizarEtapa,
@@ -150,66 +142,6 @@ export function EditorExperienciaSelecionada({
             </div>
 
             <div className="flex items-end gap-2.5">
-              <label className="space-y-1 text-xs font-medium text-mineral-700">
-                <span className="block">Exibição</span>
-                <select
-                  aria-label="Exibição"
-                  value={
-                    !fluxoAtual.ativo
-                      ? "oculta"
-                      : fluxoAtual.destaquePrimarioHome
-                        ? "destaque"
-                        : "visivel"
-                  }
-                  onChange={(evento) => aoAlterarExibicao(evento.target.value)}
-                  className="min-h-10 rounded-lg border border-marfim-200 bg-white px-3 text-sm text-mineral-950"
-                >
-                  <option value="oculta">Oculta</option>
-                  <option value="visivel">Visível</option>
-                  <option value="destaque">Em destaque</option>
-                </select>
-              </label>
-
-              <SeletorLarguraCardVitrine
-                tipoAcao={fluxoAtual.tipoAcao}
-                modoExibicaoColecao={fluxoAtual.modoExibicaoColecao}
-                destaquePrimario={fluxoAtual.destaquePrimarioHome === true}
-                valor={fluxoAtual.larguraCardHome}
-                disabled={!podeAlterar}
-                aoAlterar={(larguraCardHome) =>
-                  aoAtualizarFluxo((atual) => ({ ...atual, larguraCardHome }))
-                }
-              />
-
-              {fluxoAtual.destaquePrimarioHome ? (
-                <label className="space-y-1 text-xs font-medium text-mineral-700">
-                  <span className="block">Animação</span>
-                  <select
-                    aria-label="Animação do destaque"
-                    disabled={!podeAlterar}
-                    value={resolverAnimacaoDestaque(
-                      fluxoAtual.animacaoDestaque,
-                      fluxoAtual.animarBordaDestaque,
-                    )}
-                    onChange={(evento) => {
-                      const novaAnimacao = evento.target.value as AnimacaoDestaque;
-                      aoAtualizarFluxo((f) => ({
-                        ...f,
-                        animacaoDestaque: novaAnimacao,
-                        animarBordaDestaque: novaAnimacao === "brilho_interior",
-                      }));
-                    }}
-                    className="min-h-10 rounded-lg border border-marfim-200 bg-white px-3 text-sm text-mineral-950"
-                  >
-                    {OPCOES_ANIMACAO_DESTAQUE.map((opcao) => (
-                      <option key={opcao.valor} value={opcao.valor}>
-                        {opcao.rotulo}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-
               <details key={fluxoAtual.id} className="relative">
                 <summary
                   aria-label="Mais opções da experiência"
@@ -244,16 +176,15 @@ export function EditorExperienciaSelecionada({
               >
                 Tipo de Ação na Vitrine
               </label>
-              <select
+              <SeletorTipoAcaoVitrine
                 id="tipo-acao-vitrine"
-                value={
+                valor={
                   fluxoAtual.tipoAcao === "secao_portfolio"
                     ? "microfluxo"
                     : (fluxoAtual.tipoAcao ?? "microfluxo")
                 }
-                disabled={!podeAlterar}
-                onChange={(e) => {
-                  const novoTipo = e.target.value as TipoAcaoVitrine;
+                desabilitado={!podeAlterar}
+                aoAlterar={(novoTipo) => {
                   aoAtualizarFluxo((atual) => ({
                     ...atual,
                     tipoAcao: novoTipo,
@@ -278,16 +209,7 @@ export function EditorExperienciaSelecionada({
                       : {}),
                   }));
                 }}
-                className="mt-1 w-full rounded-lg border border-marfim-200 bg-white px-2.5 py-1.5 text-xs text-mineral-950 focus:border-indigo-400 focus:outline-none"
-              >
-                {Object.entries(DESCRITORES_TIPO_ACAO)
-                  .filter(([valor]) => valor !== "secao_portfolio")
-                  .map(([valor, descritor]) => (
-                    <option key={valor} value={valor}>
-                      {descritor.rotulo}
-                    </option>
-                  ))}
-              </select>
+              />
               {fluxoAtual.tipoAcao === "secao_videos" ? (
                 <OpcaoOcultarTituloVideosExperiencia organizacaoId={organizacaoId} />
               ) : null}
@@ -385,6 +307,15 @@ export function EditorExperienciaSelecionada({
                 aoAtualizarFluxo((atual) => ({ ...atual, configuracaoAgenda }))
               }
             />
+          ) : null}
+
+          {fluxoAtual.tipoAcao === "cardapio" ? (
+            <div className="pt-2">
+              <GerenciadorCardapiosPainel
+                organizacaoId={organizacaoId}
+                identificadorPublico={identificadorPublico}
+              />
+            </div>
           ) : null}
 
           {fluxoAtual.tipoAcao === "publicacao_post" ? (

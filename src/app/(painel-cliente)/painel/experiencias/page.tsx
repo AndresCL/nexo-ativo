@@ -36,6 +36,7 @@ export default async function PaginaExperienciasPainel() {
       profissionais={contexto.profissionais}
       quantidadeProfissionaisAtivos={contexto.profissionais.filter((p) => p.ativo).length}
       versaoPublicadaInicial={contexto.versaoPublicadaAtual}
+      emailVerificado={sessao.emailVerificado}
       podeEditarConteudo={contexto.podeEditarConteudo}
       podePublicarPagina={contexto.podePublicarPagina}
     />

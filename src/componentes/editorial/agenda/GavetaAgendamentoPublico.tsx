@@ -339,12 +339,8 @@ export function GavetaAgendamentoPublico({
     }
   }
 
-  const classeBotaoPrimario = combinarClasses(
-    "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-40",
-    temaEscuro
-      ? "bg-white text-mineral-950 hover:bg-white/90"
-      : "bg-mineral-950 text-white hover:bg-mineral-800",
-  );
+  const classeBotaoPrimario =
+    "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--editorial-cta-fundo)] px-4 text-sm font-semibold text-[var(--editorial-cta-texto)] transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40";
 
   const rodapeFixo =
     etapa === "selecao" ? (

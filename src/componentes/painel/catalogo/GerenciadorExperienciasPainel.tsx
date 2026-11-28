@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { notificar } from "@/componentes/interface/notificacoes/notificar";
 import { AcoesPublicacaoPagina } from "@/componentes/painel/AcoesPublicacaoPagina";
+import { AlertaPendenciasPublicacao } from "@/componentes/painel/AlertaPendenciasPublicacao";
 import { usePoliticaPublicidade } from "@/componentes/painel/ProvedorPoliticaPublicidade";
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 import type { ServicoCatalogoConteudoPorta } from "@/aplicacao/portas/portasCatalogoConteudo";
@@ -13,7 +14,10 @@ import type {
   ProjetoPortfolio,
   ServicoOrganizacao,
 } from "@/dominio/entidades/catalogoConteudo";
-import type { RascunhoConfiguracaoPagina } from "@/dominio/entidades/rascunhoConfiguracaoPagina";
+import {
+  avaliarProntidaoPublicacaoPagina,
+  type RascunhoConfiguracaoPagina,
+} from "@/dominio/entidades/rascunhoConfiguracaoPagina";
 import {
   resolverPosicaoCabecalhoMarca,
   type PosicaoCabecalhoMarca,
@@ -25,9 +29,12 @@ import {
   resolverOrdemBlocosVitrine,
   type IdentificadorBlocoSistemaVitrine,
 } from "@/dominio/editorial/ordemBlocosVitrine";
+import type { LarguraCardVitrine } from "@/dominio/editorial/agrupamentoGridVitrine";
+import type { AnimacaoDestaque } from "@/dominio/microfluxos/animacaoDestaque";
+import type { ValorExibicaoDestaqueExperiencia } from "@/dominio/microfluxos/nivelDestaqueVitrine";
 import type { DefinicaoMicrofluxo, EtapaMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import {
-  definirDestaqueExclusivoMicrofluxo,
+  definirNivelDestaqueMicrofluxo,
   ordenarMicrofluxosPorPrioridadeEOrdem,
 } from "@/dominio/microfluxos/ordenacaoMicrofluxos";
 import { avaliarIntegridadeGrafoMicrofluxo } from "@/dominio/microfluxos/validadorGrafoMicrofluxo";
@@ -52,6 +59,7 @@ export interface PropriedadesGerenciadorExperienciasPainel {
   readonly microfluxosIniciais: readonly DefinicaoMicrofluxo[];
   readonly rascunhoPaginaInicial?: RascunhoConfiguracaoPagina;
   readonly versaoPublicadaInicial: number | null;
+  readonly emailVerificado?: boolean;
   readonly podeEditarConteudo: boolean;
   readonly podePublicarPagina: boolean;
   readonly servicoCatalogo?: ServicoCatalogoConteudoPorta;
@@ -130,12 +138,20 @@ export function GerenciadorExperienciasPainel({
   microfluxosIniciais,
   rascunhoPaginaInicial,
   versaoPublicadaInicial,
+  emailVerificado = true,
   podeEditarConteudo,
   podePublicarPagina,
   servicoCatalogo = servicoCatalogoConteudoCliente,
 }: PropriedadesGerenciadorExperienciasPainel) {
   const router = useRouter();
   const politicaPublicidade = usePoliticaPublicidade();
+  const pendenciasPublicacao = useMemo(
+    () =>
+      rascunhoPaginaInicial
+        ? avaliarProntidaoPublicacaoPagina(rascunhoPaginaInicial, { emailVerificado })
+        : [],
+    [rascunhoPaginaInicial, emailVerificado],
+  );
   const [microfluxos, setMicrofluxos] = useState<readonly DefinicaoMicrofluxo[]>(() =>
     ordenarMicrofluxosPorPrioridadeEOrdem(microfluxosIniciais),
   );
@@ -174,17 +190,17 @@ export function GerenciadorExperienciasPainel({
     const blocoMarcaItem: Extract<ItemListaUnificadaVitrine, { tipo: "sistema" }> | null =
       marcaConfigurada
         ? {
-            tipo: "sistema",
-            idBloco: "bloco:marca",
-            titulo: rascunhoPaginaInicial?.identidade.nomeExibicao || "Marca (Logo e título)",
-            subtitulo:
-              rascunhoPaginaInicial?.identidade.subtituloCurto ||
-              "Logotipo, nome de exibição e subtítulo",
-            badgeTipo: "Marca",
-            visivel: !blocosSistema.blocosSistemaOcultos.includes("bloco:marca"),
-            abaAparencia: "identidade",
-            fixaNoTopo: marcaNoTopo,
-          }
+          tipo: "sistema",
+          idBloco: "bloco:marca",
+          titulo: rascunhoPaginaInicial?.identidade.nomeExibicao || "Marca (Logo e título)",
+          subtitulo:
+            rascunhoPaginaInicial?.identidade.subtituloCurto ||
+            "Logotipo, nome de exibição e subtítulo",
+          badgeTipo: "Marca",
+          visivel: !blocosSistema.blocosSistemaOcultos.includes("bloco:marca"),
+          abaAparencia: "identidade",
+          fixaNoTopo: marcaNoTopo,
+        }
         : null;
 
     const mapaItens = new Map<string, ItemListaUnificadaVitrine>();
@@ -314,11 +330,13 @@ export function GerenciadorExperienciasPainel({
       lista.map((fluxo) =>
         fluxo.id === fluxoId
           ? {
-              ...fluxo,
-              ativo: !fluxo.ativo,
-              ativoNaHome: !fluxo.ativo,
-              ...(fluxo.ativo ? { destaquePrimarioHome: false } : {}),
-            }
+            ...fluxo,
+            ativo: !fluxo.ativo,
+            ativoNaHome: !fluxo.ativo,
+            ...(fluxo.ativo
+              ? { destaquePrimarioHome: false, nivelDestaqueHome: "terciario" as const }
+              : {}),
+          }
           : fluxo,
       ),
     );
@@ -358,15 +376,40 @@ export function GerenciadorExperienciasPainel({
     });
   }
 
-  function alterarExibicao(valor: string) {
-    if (!podeAlterar || !fluxoAtual) return;
+  function alterarExibicaoDestaqueExperiencia(
+    fluxoId: string,
+    valor: ValorExibicaoDestaqueExperiencia,
+  ) {
+    if (!podeAlterar) return;
+    const estaAtivo = valor !== "oculta";
+    const nivel = estaAtivo ? valor : "terciario";
     const atualizada = microfluxos.map((fluxo) =>
-      fluxo.id === fluxoAtual.id
-        ? { ...fluxo, ativo: valor !== "oculta", ativoNaHome: valor !== "oculta" }
+      fluxo.id === fluxoId
+        ? { ...fluxo, ativo: estaAtivo, ativoNaHome: estaAtivo }
         : fluxo,
     );
-    setMicrofluxos(
-      definirDestaqueExclusivoMicrofluxo(atualizada, fluxoAtual.id, valor === "destaque"),
+    setMicrofluxos(definirNivelDestaqueMicrofluxo(atualizada, fluxoId, nivel));
+  }
+
+  function alterarLarguraExperiencia(fluxoId: string, larguraCardHome: LarguraCardVitrine) {
+    if (!podeAlterar) return;
+    setMicrofluxos((lista) =>
+      lista.map((fluxo) => (fluxo.id === fluxoId ? { ...fluxo, larguraCardHome } : fluxo)),
+    );
+  }
+
+  function alterarAnimacaoExperiencia(fluxoId: string, animacaoDestaque: AnimacaoDestaque) {
+    if (!podeAlterar) return;
+    setMicrofluxos((lista) =>
+      lista.map((fluxo) =>
+        fluxo.id === fluxoId
+          ? {
+              ...fluxo,
+              animacaoDestaque,
+              animarBordaDestaque: animacaoDestaque === "brilho_interior",
+            }
+          : fluxo,
+      ),
     );
   }
 
@@ -466,9 +509,17 @@ export function GerenciadorExperienciasPainel({
           controle={controle}
           identificadorPublico={identificadorPublico}
           exibirSalvarRascunho
+          publicacaoBloqueada={pendenciasPublicacao.length > 0}
+          motivoBloqueioPublicacao={pendenciasPublicacao[0]?.mensagem}
           orientacao="Publicar página salva as alterações pendentes antes de atualizar a vitrine."
         />
       </header>
+
+      <AlertaPendenciasPublicacao
+        pendencias={pendenciasPublicacao}
+        emailVerificado={emailVerificado}
+        exibirAtalhoAparencia
+      />
 
       {fluxoAtual ? (
         <EditorExperienciaSelecionada
@@ -483,7 +534,6 @@ export function GerenciadorExperienciasPainel({
           permitePixManual={politicaPublicidade.permiteEtapaPixManual()}
           servicoCatalogo={servicoCatalogo}
           aoVoltarParaLista={() => setFluxoEmEdicaoId(null)}
-          aoAlterarExibicao={alterarExibicao}
           aoSolicitarExclusao={(id) => setIdFluxoExcluir(id)}
           aoAtualizarFluxo={atualizarFluxoSelecionado}
           aoAtualizarEtapa={atualizarEtapaFluxo}
@@ -518,6 +568,9 @@ export function GerenciadorExperienciasPainel({
             aoReordenarPorArraste={aplicarNovaOrdemBlocos}
             aoMoverItem={moverItem}
             aoAlternarVisibilidadeExperiencia={alternarVisibilidadeExperiencia}
+            aoAlterarExibicaoDestaqueExperiencia={alterarExibicaoDestaqueExperiencia}
+            aoAlterarLarguraExperiencia={alterarLarguraExperiencia}
+            aoAlterarAnimacaoExperiencia={alterarAnimacaoExperiencia}
             aoAlternarVisibilidadeSistema={alternarVisibilidadeSistema}
             aoAlternarFixarMarcaTopo={alternarFixarMarcaTopo}
             aoAbrirEditorExperiencia={(id) => setFluxoEmEdicaoId(id)}

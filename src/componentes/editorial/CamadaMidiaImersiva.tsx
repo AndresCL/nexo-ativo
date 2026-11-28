@@ -136,7 +136,7 @@ export function CamadaMidiaImersiva({
             <video
               ref={videoRef}
               data-testid="video-fundo-editorial"
-              poster={midiaResolvida.urlImagemEstatica}
+              poster={midiaResolvida.urlImagemEstatica || undefined}
               aria-label={midiaResolvida.textoAlternativo}
               autoPlay
               loop

@@ -3,6 +3,10 @@ import {
   resolverAnimacaoDestaque,
   type AnimacaoDestaque,
 } from "../microfluxos/animacaoDestaque";
+import {
+  resolverNivelDestaqueVitrine,
+  type NivelDestaqueVitrine,
+} from "../microfluxos/nivelDestaqueVitrine";
 import type { CodigoPerfilPublicidade } from "../publicidade/tiposPerfilPublicidade";
 import type { ConfiguracaoAvaliacoesGoogle } from "./avaliacoesGoogle";
 import type { PosicionamentoEquipeVitrine } from "../editorial/posicionamentoEquipeVitrine";
@@ -73,6 +77,7 @@ export type TipoDestinoAcaoHome =
   | "microfluxo"
   | "agenda"
   | "publicacao_post"
+  | "cardapio"
   | "secao_produtos"
   | "secao_servicos"
   | "secao_portfolio"
@@ -155,6 +160,7 @@ export interface ItemAcaoHome {
   readonly tipoDestino: TipoDestinoAcaoHome;
   readonly destino: string;
   readonly destaquePrincipal?: boolean;
+  readonly nivelDestaque?: NivelDestaqueVitrine;
   readonly animarBordaDestaque?: boolean;
   readonly animacaoDestaque?: AnimacaoDestaque;
   readonly corBrilhoBorda?: string;
@@ -258,9 +264,9 @@ export function resolverMidiaEfetivaHome(
       (contexto.modoMobile && midia.urlMobileOpcional ? midia.urlMobileOpcional : undefined) ??
       midia.urlPosterVideo ??
       midia.urlMobileOpcional ??
-      midia.urlPrincipal;
+      "";
 
-    if (contexto.movimentoReduzido || !midia.urlPosterVideo) {
+    if (contexto.movimentoReduzido || !midia.urlPrincipal.trim()) {
       return {
         renderizarVideo: false,
         urlImagemEstatica: imagemFallbackSegura,
@@ -345,6 +351,30 @@ export function resolverPaletaEditorialEfetiva(
  * Gera propriedades CSS customizadas para que qualquer composição editorial
  * se adapte à paleta selecionada e respeite eventuais overrides de tokens.
  */
+function resolverVariaveisAcoesSecundarias(
+  paleta: DescritorPaletaEditorial,
+  customizacaoTokens?: CustomizacaoTokensEditorial,
+) {
+  const secundarioFundo = customizacaoTokens?.corSecundarioFundo || paleta.corSecundarioFundo;
+  const secundarioTexto = customizacaoTokens?.corSecundarioTexto || paleta.corSecundarioTexto;
+  const destaqueSecundarioFundo =
+    customizacaoTokens?.corDestaqueSecundarioFundo ||
+    `color-mix(in srgb, ${paleta.corCtaFundo} 16%, ${paleta.corSecundarioFundo})`;
+  const destaqueSecundarioTexto =
+    customizacaoTokens?.corDestaqueSecundarioTexto || paleta.corSecundarioTexto;
+  const destaqueSecundarioBorda =
+    customizacaoTokens?.corDestaqueSecundarioBorda ||
+    `color-mix(in srgb, ${paleta.corCtaFundo} 65%, transparent)`;
+
+  return {
+    secundarioFundo,
+    secundarioTexto,
+    destaqueSecundarioFundo,
+    destaqueSecundarioTexto,
+    destaqueSecundarioBorda,
+  };
+}
+
 export function gerarVariaveisCssPaletaEditorial(
   paletaId: IdentificadorPaletaEditorial,
   corPersonalizadaHex?: string,
@@ -360,8 +390,14 @@ export function gerarVariaveisCssPaletaEditorial(
   const borda = customizacaoTokens?.corBorda || paleta.corBorda;
   const ctaFundo = customizacaoTokens?.corCtaFundo || paleta.corCtaFundo;
   const ctaTexto = customizacaoTokens?.corCtaTexto || paleta.corCtaTexto;
-  const secundarioFundo = customizacaoTokens?.corSecundarioFundo || paleta.corSecundarioFundo;
-  const secundarioTexto = customizacaoTokens?.corSecundarioTexto || paleta.corSecundarioTexto;
+  const ctaBorda = customizacaoTokens?.corCtaBorda || "transparent";
+  const {
+    secundarioFundo,
+    secundarioTexto,
+    destaqueSecundarioFundo,
+    destaqueSecundarioTexto,
+    destaqueSecundarioBorda,
+  } = resolverVariaveisAcoesSecundarias(paleta, customizacaoTokens);
   const logoTitulo =
     customizacaoTokens?.corLogoTitulo ||
     customizacaoTokens?.corTextoPrincipal ||
@@ -398,6 +434,10 @@ export function gerarVariaveisCssPaletaEditorial(
     "--editorial-borda": borda,
     "--editorial-cta-fundo": ctaFundo,
     "--editorial-cta-texto": ctaTexto,
+    "--editorial-cta-borda": ctaBorda,
+    "--editorial-destaque-secundario-fundo": destaqueSecundarioFundo,
+    "--editorial-destaque-secundario-texto": destaqueSecundarioTexto,
+    "--editorial-destaque-secundario-borda": destaqueSecundarioBorda,
     "--editorial-secundario-fundo": secundarioFundo,
     "--editorial-secundario-texto": secundarioTexto,
     "--editorial-logo-titulo": logoTitulo,
@@ -406,6 +446,10 @@ export function gerarVariaveisCssPaletaEditorial(
     "--editorial-equipe-texto": equipeTexto,
     "--editorial-equipe-subtitulo": equipeSubtitulo,
     "--editorial-brilho-borda": brilhoBorda,
+    "--editorial-card-acervo-fundo": customizacaoTokens?.corCardAcervoFundo || superficie,
+    "--editorial-card-acervo-borda": customizacaoTokens?.corCardAcervoBorda || "transparent",
+    "--editorial-card-acervo-texto": customizacaoTokens?.corCardAcervoTexto || texto,
+    "--editorial-card-acervo-preco": customizacaoTokens?.corCardAcervoPreco || subtitulo,
   };
 }
 
@@ -453,10 +497,20 @@ export function gerarVariaveisCssBottomSheetEditorial(
     customizacaoTokens?.corBottomSheetCtaTexto ||
     customizacaoTokens?.corCtaTexto ||
     paleta.corBottomSheetCtaTexto;
-  const secundarioFundo = customizacaoTokens?.corSecundarioFundo || paleta.corSecundarioFundo;
-  const secundarioTexto = customizacaoTokens?.corSecundarioTexto || paleta.corSecundarioTexto;
+  const ctaBorda = customizacaoTokens?.corCtaBorda || "transparent";
+  const {
+    secundarioFundo,
+    secundarioTexto,
+    destaqueSecundarioFundo,
+    destaqueSecundarioTexto,
+    destaqueSecundarioBorda,
+  } = resolverVariaveisAcoesSecundarias(paleta, customizacaoTokens);
   const brilhoBorda =
     customizacaoTokens?.corBrilhoBorda || paleta.corBrilhoBorda || destaque;
+  const fecharFundo =
+    customizacaoTokens?.corBottomSheetFecharFundo || superficie;
+  const fecharTexto =
+    customizacaoTokens?.corBottomSheetFecharTexto || texto;
 
   return {
     "--editorial-fundo": fundo,
@@ -470,9 +524,74 @@ export function gerarVariaveisCssBottomSheetEditorial(
     "--editorial-borda": borda,
     "--editorial-cta-fundo": ctaFundo,
     "--editorial-cta-texto": ctaTexto,
+    "--editorial-cta-borda": ctaBorda,
+    "--editorial-destaque-secundario-fundo": destaqueSecundarioFundo,
+    "--editorial-destaque-secundario-texto": destaqueSecundarioTexto,
+    "--editorial-destaque-secundario-borda": destaqueSecundarioBorda,
     "--editorial-secundario-fundo": secundarioFundo,
     "--editorial-secundario-texto": secundarioTexto,
     "--editorial-brilho-borda": brilhoBorda,
+    "--editorial-bottom-sheet-fechar-fundo": fecharFundo,
+    "--editorial-bottom-sheet-fechar-texto": fecharTexto,
+  };
+}
+
+/**
+ * Gera propriedades CSS customizadas isoladas para a tela cheia do Catálogo ("Ver todos"),
+ * permitindo personalizar fundo, superfícies, bordas e textos independentemente dos
+ * Bottom Sheets e da vitrine principal, com fallback seguro para a paleta/tokens gerais.
+ */
+export function gerarVariaveisCssCatalogoEditorial(
+  paletaId: IdentificadorPaletaEditorial,
+  corPersonalizadaHex?: string,
+  customizacaoTokens?: CustomizacaoTokensEditorial,
+): Readonly<Record<string, string>> {
+  const base = gerarVariaveisCssBottomSheetEditorial(
+    paletaId,
+    corPersonalizadaHex,
+    customizacaoTokens,
+  );
+  const paleta = resolverPaletaEditorialEfetiva(paletaId, corPersonalizadaHex);
+
+  const fundo =
+    customizacaoTokens?.corCatalogoFundo ||
+    customizacaoTokens?.corBottomSheetFundo ||
+    customizacaoTokens?.corFundoPrincipal ||
+    paleta.corBottomSheetFundo;
+  const superficie =
+    customizacaoTokens?.corCatalogoSuperficie ||
+    customizacaoTokens?.corBottomSheetSuperficie ||
+    customizacaoTokens?.corSuperficie ||
+    paleta.corBottomSheetSuperficie;
+  const borda =
+    customizacaoTokens?.corCatalogoBorda ||
+    customizacaoTokens?.corBottomSheetBorda ||
+    customizacaoTokens?.corBorda ||
+    paleta.corBottomSheetBorda;
+  const texto =
+    customizacaoTokens?.corCatalogoTextoPrincipal ||
+    customizacaoTokens?.corBottomSheetTextoPrincipal ||
+    customizacaoTokens?.corTextoPrincipal ||
+    paleta.corBottomSheetTextoPrincipal;
+  const subtitulo =
+    customizacaoTokens?.corCatalogoTextoSecundario ||
+    customizacaoTokens?.corBottomSheetTextoSecundario ||
+    customizacaoTokens?.corTextoSecundario ||
+    paleta.corBottomSheetTextoSecundario;
+
+  return {
+    ...base,
+    "--editorial-fundo": fundo,
+    "--editorial-superficie": superficie,
+    "--editorial-borda": borda,
+    "--editorial-texto": texto,
+    "--editorial-titulo": texto,
+    "--editorial-texto-secundario": subtitulo,
+    "--editorial-subtitulo": subtitulo,
+    "--editorial-card-acervo-fundo": superficie,
+    "--editorial-card-acervo-borda": borda,
+    "--editorial-card-acervo-texto": texto,
+    "--editorial-card-acervo-preco": subtitulo,
   };
 }
 
@@ -549,6 +668,9 @@ export function resolverAcoesVitrineComMicrofluxos(
     } else if (m.tipoAcao === "publicacao_post") {
       tipoDestino = "publicacao_post";
       destino = `#post-${m.id}`;
+    } else if (m.tipoAcao === "cardapio") {
+      tipoDestino = "cardapio";
+      destino = "#cardapio";
     } else if (m.tipoAcao === "secao_produtos") {
       tipoDestino = "secao_produtos";
       destino = "#produtos";
@@ -580,14 +702,24 @@ export function resolverAcoesVitrineComMicrofluxos(
       id: `acao-fluxo-${m.id}`,
       rotulo: m.rotuloBotaoHome?.trim() || acaoExistente?.rotulo?.trim() || m.titulo,
       subtituloDiscreto:
-        m.subtituloBotaoHome?.trim() || acaoExistente?.subtituloDiscreto?.trim() || undefined,
+        m.subtituloBotaoHome !== undefined
+          ? m.subtituloBotaoHome.trim() || undefined
+          : acaoExistente?.subtituloDiscreto?.trim() || undefined,
       tipoDestino,
       ...(tipoDestino.startsWith("secao_")
         ? { tituloSecao: m.tituloSecao?.trim() || undefined }
         : {}),
       destino,
       icone: (m.iconeBotaoHome as TipoIconeAcaoHome) || acaoExistente?.icone || "automatico",
-      destaquePrincipal: m.destaquePrimarioHome ?? acaoExistente?.destaquePrincipal ?? false,
+      destaquePrincipal:
+        resolverNivelDestaqueVitrine(
+          m.nivelDestaqueHome ?? acaoExistente?.nivelDestaque,
+          m.destaquePrimarioHome ?? acaoExistente?.destaquePrincipal,
+        ) === "primario",
+      nivelDestaque: resolverNivelDestaqueVitrine(
+        m.nivelDestaqueHome ?? acaoExistente?.nivelDestaque,
+        m.destaquePrimarioHome ?? acaoExistente?.destaquePrincipal,
+      ),
       animarBordaDestaque: m.animarBordaDestaque ?? acaoExistente?.animarBordaDestaque ?? false,
       animacaoDestaque: resolverAnimacaoDestaque(
         m.animacaoDestaque ?? acaoExistente?.animacaoDestaque,

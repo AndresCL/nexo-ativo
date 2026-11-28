@@ -15,12 +15,19 @@ import {
   PinOff,
 } from "lucide-react";
 import { copiarTextoComAviso } from "@/componentes/interface/notificacoes/copiarTextoComAviso";
+import type { LarguraCardVitrine } from "@/dominio/editorial/agrupamentoGridVitrine";
+import type { AnimacaoDestaque } from "@/dominio/microfluxos/animacaoDestaque";
 import { construirCaminhoExperiencia } from "@/dominio/microfluxos/conclusaoMicrofluxo";
+import {
+  resolverNivelDestaqueVitrine,
+  type ValorExibicaoDestaqueExperiencia,
+} from "@/dominio/microfluxos/nivelDestaqueVitrine";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
 import {
   DESCRITORES_TIPO_ACAO,
   type ItemListaUnificadaVitrine,
 } from "./descritoresTipoAcao";
+import { ControlesRapidosExperienciaLista } from "./ControlesRapidosExperienciaLista";
 import { MenuAcoesMobileBloco, type AcaoMenuMobileBloco } from "./MenuAcoesMobileBloco";
 
 export interface PropriedadesItemBlocoListaVitrine {
@@ -33,6 +40,9 @@ export interface PropriedadesItemBlocoListaVitrine {
   readonly podeDescer: boolean;
   readonly aoMover?: (direcao: -1 | 1) => void;
   readonly aoAlternarVisibilidade: () => void;
+  readonly aoAlterarExibicaoDestaque?: (valor: ValorExibicaoDestaqueExperiencia) => void;
+  readonly aoAlterarLargura?: (largura: LarguraCardVitrine) => void;
+  readonly aoAlterarAnimacao?: (animacao: AnimacaoDestaque) => void;
   readonly aoAbrirEditor?: () => void;
   readonly aoAlternarFixarMarcaTopo?: () => void;
 }
@@ -47,6 +57,9 @@ function ConteudoLinhaBloco({
   podeDescer,
   aoMover,
   aoAlternarVisibilidade,
+  aoAlterarExibicaoDestaque,
+  aoAlterarLargura,
+  aoAlterarAnimacao,
   aoAbrirEditor,
   aoAlternarFixarMarcaTopo,
   aoIniciarArraste,
@@ -254,9 +267,20 @@ function ConteudoLinhaBloco({
 
   const { fluxo } = item;
   const nomeExibicao = fluxo.rotuloBotaoHome?.trim() || fluxo.titulo;
-  const ehDestaque = fluxo.destaquePrimarioHome === true;
+  const nivelDestaque = resolverNivelDestaqueVitrine(
+    fluxo.nivelDestaqueHome,
+    fluxo.destaquePrimarioHome,
+  );
   const tipoAcao = fluxo.tipoAcao ?? "microfluxo";
   const ehMicrofluxo = tipoAcao === "microfluxo";
+
+  const rotuloStatusExperiencia = !fluxo.ativo
+    ? "Oculta"
+    : nivelDestaque === "primario"
+      ? "Destaque primário"
+      : nivelDestaque === "secundario"
+        ? "Destaque secundário"
+        : "Visível";
 
   const acoesMobileExperiencia: AcaoMenuMobileBloco[] = [
     ...(aoAbrirEditor
@@ -270,17 +294,6 @@ function ConteudoLinhaBloco({
         },
       ]
       : []),
-    {
-      id: "visibilidade",
-      rotulo: fluxo.ativo ? "Ocultar na vitrine" : "Mostrar na vitrine",
-      icone: fluxo.ativo ? (
-        <EyeOff className="h-4 w-4" aria-hidden="true" />
-      ) : (
-        <Eye className="h-4 w-4" aria-hidden="true" />
-      ),
-      desabilitado: !podeAlterar,
-      aoExecutar: aoAlternarVisibilidade,
-    },
     ...(aoMover
       ? [
         {
@@ -322,133 +335,134 @@ function ConteudoLinhaBloco({
     <div
       data-testid={`item-bloco-${item.idBloco}`}
       className={combinarClasses(
-        "group flex flex-nowrap items-center justify-between gap-2.5 rounded-xl border bg-white px-3 py-3 shadow-2xs transition-colors sm:gap-3 sm:px-3.5",
+        "group rounded-xl border bg-white px-3 py-3 shadow-2xs transition-colors sm:px-3.5",
         fluxo.ativo
           ? "border-marfim-200 hover:border-indigo-300"
           : "border-dashed border-marfim-300 bg-marfim-50/70 opacity-85",
       )}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
-        <button
-          type="button"
-          disabled={!arrasteHabilitado}
-          onPointerDown={aoIniciarArraste}
-          aria-label={`Arrastar ${nomeExibicao}`}
-          title={
-            arrasteHabilitado ? "Arraste para reordenar" : "Limpe a busca ou filtro para arrastar"
-          }
-          className="flex h-8 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-mineral-400 hover:bg-marfim-100 hover:text-mineral-700 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          <GripVertical className="h-4 w-4" aria-hidden="true" />
-        </button>
-
-        <button
-          type="button"
-          onClick={aoAbrirEditor}
-          className="min-w-0 flex-1 cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-indigo-500"
-        >
-          <div className="flex min-w-0 items-center gap-1.5">
-            {posicaoExibicao !== undefined ? (
-              <span className="shrink-0 text-sm font-semibold tabular-nums text-mineral-950">
-                {posicaoExibicao}º
-              </span>
-            ) : null}
-            <span className="truncate text-sm font-semibold text-mineral-950 group-hover:text-indigo-800">
-              {nomeExibicao}
-            </span>
-          </div>
-          <p className="mt-0.5 truncate text-xs text-mineral-500">
-            {[
-              ehDestaque ? "Em destaque" : fluxo.ativo ? "Visível" : "Oculta",
-              !ehDestaque && fluxo.larguraCardHome === "metade" ? "Card 1/2" : null,
-              ehMicrofluxo
-                ? `${fluxo.etapas.length} etapas`
-                : (DESCRITORES_TIPO_ACAO[tipoAcao]?.iconeBadge ?? "Ação"),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          {fluxo.subtituloBotaoHome ? (
-            <p className="mt-0.5 truncate text-[11px] text-mineral-400">
-              {fluxo.subtituloBotaoHome}
-            </p>
-          ) : null}
-        </button>
-      </div>
-
-      <MenuAcoesMobileBloco tituloBloco={nomeExibicao} acoes={acoesMobileExperiencia} />
-
-      <div className="hidden shrink-0 items-center gap-1 sm:flex">
-        {ehMicrofluxo ? (
+      <div className="flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
           <button
             type="button"
-            aria-label={`Copiar permalink de ${nomeExibicao}`}
-            title={`Copiar link da versão publicada de ${nomeExibicao}`}
-            onClick={() =>
-              void copiarTextoComAviso(
-                new URL(
-                  construirCaminhoExperiencia(identificadorPublico, fluxo.id),
-                  window.location.origin,
-                ).href,
-                "Permalink da experiência copiado.",
-              )
+            disabled={!arrasteHabilitado}
+            onPointerDown={aoIniciarArraste}
+            aria-label={`Arrastar ${nomeExibicao}`}
+            title={
+              arrasteHabilitado ? "Arraste para reordenar" : "Limpe a busca ou filtro para arrastar"
             }
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-marfim-200 bg-white text-mineral-500 transition hover:bg-indigo-50 hover:text-indigo-700"
+            className="flex h-8 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-mineral-400 hover:bg-marfim-100 hover:text-mineral-700 active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+            <GripVertical className="h-4 w-4" aria-hidden="true" />
           </button>
-        ) : null}
 
-        <button
-          type="button"
-          disabled={!podeAlterar}
-          onClick={aoAlternarVisibilidade}
-          aria-label={fluxo.ativo ? `Ocultar ${nomeExibicao}` : `Mostrar ${nomeExibicao}`}
-          title={fluxo.ativo ? "Ocultar na vitrine" : "Mostrar na vitrine"}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-marfim-200 bg-white text-mineral-600 transition hover:bg-marfim-50 hover:text-mineral-950 disabled:opacity-40"
-        >
-          {fluxo.ativo ? (
-            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-          ) : (
-            <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={aoAbrirEditor}
+            className="min-w-0 flex-1 cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-indigo-500"
+          >
+            <div className="flex min-w-0 items-center gap-1.5">
+              {posicaoExibicao !== undefined ? (
+                <span className="shrink-0 text-sm font-semibold tabular-nums text-mineral-950">
+                  {posicaoExibicao}º
+                </span>
+              ) : null}
+              <span className="truncate text-sm font-semibold text-mineral-950 group-hover:text-indigo-800">
+                {nomeExibicao}
+              </span>
+            </div>
+            <p className="mt-0.5 truncate text-xs text-mineral-500">
+              {[
+                rotuloStatusExperiencia,
+                fluxo.larguraCardHome === "metade"
+                  ? nivelDestaque === "primario" || nivelDestaque === "secundario"
+                    ? "50% da linha"
+                    : "Card 50%"
+                  : null,
+                ehMicrofluxo
+                  ? `${fluxo.etapas.length} etapas`
+                  : (DESCRITORES_TIPO_ACAO[tipoAcao]?.iconeBadge ?? "Ação"),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+            {fluxo.subtituloBotaoHome ? (
+              <p className="mt-0.5 truncate text-[11px] text-mineral-400">
+                {fluxo.subtituloBotaoHome}
+              </p>
+            ) : null}
+          </button>
+        </div>
 
-        {aoMover ? (
-          <>
+        <MenuAcoesMobileBloco tituloBloco={nomeExibicao} acoes={acoesMobileExperiencia} />
+
+        <div className="hidden shrink-0 items-center gap-1 sm:flex">
+          {ehMicrofluxo ? (
             <button
               type="button"
-              disabled={!podeSubir}
-              aria-label={`Mover ${nomeExibicao} para cima`}
-              title="Mover para cima"
-              onClick={() => aoMover(-1)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-marfim-200 bg-white text-mineral-600 transition hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-25"
+              aria-label={`Copiar permalink de ${nomeExibicao}`}
+              title={`Copiar link da versão publicada de ${nomeExibicao}`}
+              onClick={() =>
+                void copiarTextoComAviso(
+                  new URL(
+                    construirCaminhoExperiencia(identificadorPublico, fluxo.id),
+                    window.location.origin,
+                  ).href,
+                  "Permalink da experiência copiado.",
+                )
+              }
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-marfim-200 bg-white text-mineral-500 transition hover:bg-indigo-50 hover:text-indigo-700"
             >
-              <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
+              <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
-            <button
-              type="button"
-              disabled={!podeDescer}
-              aria-label={`Mover ${nomeExibicao} para baixo`}
-              title="Mover para baixo"
-              onClick={() => aoMover(1)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-marfim-200 bg-white text-mineral-600 transition hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-25"
-            >
-              <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
-            </button>
-          </>
-        ) : null}
+          ) : null}
 
-        <button
-          type="button"
-          onClick={aoAbrirEditor}
-          aria-label={`Editar ${nomeExibicao}`}
-          className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 text-xs font-semibold text-indigo-800 transition hover:bg-indigo-100"
-        >
-          <span>Editar</span>
-          <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-        </button>
+          {aoMover ? (
+            <>
+              <button
+                type="button"
+                disabled={!podeSubir}
+                aria-label={`Mover ${nomeExibicao} para cima`}
+                title="Mover para cima"
+                onClick={() => aoMover(-1)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-marfim-200 bg-white text-mineral-600 transition hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-25"
+              >
+                <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                disabled={!podeDescer}
+                aria-label={`Mover ${nomeExibicao} para baixo`}
+                title="Mover para baixo"
+                onClick={() => aoMover(1)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-marfim-200 bg-white text-mineral-600 transition hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-25"
+              >
+                <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={aoAbrirEditor}
+            aria-label={`Editar ${nomeExibicao}`}
+            className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 text-xs font-semibold text-indigo-800 transition hover:bg-indigo-100"
+          >
+            <span>Editar</span>
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
+
+      {aoAlterarExibicaoDestaque && aoAlterarLargura && aoAlterarAnimacao ? (
+        <ControlesRapidosExperienciaLista
+          fluxo={fluxo}
+          podeAlterar={podeAlterar}
+          aoAlterarExibicaoDestaque={aoAlterarExibicaoDestaque}
+          aoAlterarLargura={aoAlterarLargura}
+          aoAlterarAnimacao={aoAlterarAnimacao}
+        />
+      ) : null}
     </div>
   );
 }

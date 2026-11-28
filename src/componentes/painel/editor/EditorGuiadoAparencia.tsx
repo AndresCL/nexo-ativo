@@ -1,11 +1,11 @@
 "use client";
 
 import { AcoesPublicacaoPagina } from "@/componentes/painel/AcoesPublicacaoPagina";
+import { AlertaPendenciasPublicacao } from "@/componentes/painel/AlertaPendenciasPublicacao";
 import { usePublicacaoPagina } from "@/ganchos/usePublicacaoPagina";
 
 import { AvisosPublicidade } from "@/componentes/painel/AvisosPublicidade";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { combinarClasses } from "@/utilitarios/combinarClasses";
@@ -22,8 +22,6 @@ import {
   AlternadorMobileEditorPrevia,
   type ModoMobileEditorPrevia,
 } from "@/componentes/painel/AlternadorMobileEditorPrevia";
-import { Botao } from "@/componentes/interface/Botao";
-import { CartaoSuperficie } from "@/componentes/interface/CartaoSuperficie";
 import { NavegacaoAparencia, SecoesFormularioAparencia } from "./SecoesFormularioAparencia";
 import type { PreviaEquipeVitrine } from "@/dominio/editorial/previaEquipeVitrine";
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
@@ -151,11 +149,10 @@ export function EditorGuiadoAparencia({
               </h1>
               <span
                 data-testid="selo-versao-publicada"
-                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  versaoPublicadaAtual !== null
+                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${versaoPublicadaAtual !== null
                     ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
                     : "border border-marfim-200 bg-marfim-50 text-mineral-600"
-                }`}
+                  }`}
               >
                 {versaoPublicadaAtual !== null
                   ? `Publicada · v${versaoPublicadaAtual}`
@@ -172,6 +169,7 @@ export function EditorGuiadoAparencia({
             identificadorPublico={identificadorPublico}
             exibirSalvarRascunho
             publicacaoBloqueada={pendenciasPublicacao.length > 0}
+            motivoBloqueioPublicacao={pendenciasPublicacao[0]?.mensagem}
             orientacao="Publicar página salva as alterações pendentes antes de atualizar a vitrine."
           />
         </div>
@@ -179,31 +177,10 @@ export function EditorGuiadoAparencia({
 
       <AvisosPublicidade areas={["texto_livre", "portfolio"]} />
 
-      {pendenciasPublicacao.length > 0 ? (
-        <CartaoSuperficie
-          preenchimento="compacto"
-          className="rounded-2xl bg-white shadow-xs"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-mineral-950">
-                Conclua antes de publicar sua página:
-              </p>
-              <ul className="list-disc space-y-0.5 pl-4 text-xs text-mineral-800">
-                {pendenciasPublicacao.map((pendencia) => (
-                  <li key={pendencia.codigo}>{pendencia.mensagem}</li>
-                ))}
-              </ul>
-            </div>
-
-            {!emailVerificado ? (
-              <Botao variante="operacional_secundario" tamanho="compacto" comoFilho>
-                <Link href="/verificar-email">Confirmar e-mail</Link>
-              </Botao>
-            ) : null}
-          </div>
-        </CartaoSuperficie>
-      ) : null}
+      <AlertaPendenciasPublicacao
+        pendencias={pendenciasPublicacao}
+        emailVerificado={emailVerificado}
+      />
 
       <AlternadorMobileEditorPrevia
         modoAtivo={modoMobile}

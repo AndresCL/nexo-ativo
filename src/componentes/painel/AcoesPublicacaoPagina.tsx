@@ -11,6 +11,7 @@ export function AcoesPublicacaoPagina({
   identificadorPublico: _identificadorPublico,
   exibirSalvarRascunho = false,
   publicacaoBloqueada = false,
+  motivoBloqueioPublicacao,
   orientacao,
   children,
 }: {
@@ -18,6 +19,7 @@ export function AcoesPublicacaoPagina({
   readonly identificadorPublico: string;
   readonly exibirSalvarRascunho?: boolean;
   readonly publicacaoBloqueada?: boolean;
+  readonly motivoBloqueioPublicacao?: string;
   readonly orientacao?: string;
   readonly children?: ReactNode;
 }) {
@@ -43,6 +45,7 @@ export function AcoesPublicacaoPagina({
           tamanho="compacto"
           className="rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
           disabled={!controle.podePublicar || publicacaoBloqueada}
+          title={publicacaoBloqueada ? motivoBloqueioPublicacao : undefined}
           carregando={controle.publicando}
           textoCarregando={
             controle.salvandoParaPublicar ? "Salvando e publicando..." : "Publicando..."

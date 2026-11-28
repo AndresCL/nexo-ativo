@@ -5,6 +5,7 @@ import { esquemaLimiteAvataresEquipe } from "./esquemaLimiteAvataresEquipe";
 import { esquemaMidiaItemCatalogo } from "./esquemasCatalogoConteudo";
 import type { DefinicaoMicrofluxo, EtapaMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import { VALORES_ANIMACAO_DESTAQUE } from "@/dominio/microfluxos/animacaoDestaque";
+import { NIVEIS_DESTAQUE_VITRINE } from "@/dominio/microfluxos/nivelDestaqueVitrine";
 import { esquemaRegraCalculoComercialMicrofluxo } from "./esquemasCalculoComercial";
 
 export const esquemaConfiguracaoPostVitrine = z.object({
@@ -262,6 +263,7 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
         "microfluxo",
         "agenda",
         "publicacao_post",
+        "cardapio",
         "link_externo",
         "secao_produtos",
         "secao_servicos",
@@ -291,6 +293,7 @@ export const esquemaDefinicaoMicrofluxo: z.ZodType<DefinicaoMicrofluxo, z.ZodTyp
     tituloSecao: z.string().trim().max(100).optional(),
     iconeBotaoHome: z.string().min(1).max(60).optional(),
     destaquePrimarioHome: z.boolean().optional(),
+    nivelDestaqueHome: z.enum(NIVEIS_DESTAQUE_VITRINE).optional(),
     animarBordaDestaque: z.boolean().optional(),
     animacaoDestaque: z.enum(VALORES_ANIMACAO_DESTAQUE).optional(),
     corBrilhoBorda: z.string().optional(),

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { DefinicaoMicrofluxo } from "@/dominio/microfluxos/tiposMicrofluxo";
 import {
   definirDestaqueExclusivoMicrofluxo,
+  definirNivelDestaqueMicrofluxo,
   ordenarMicrofluxosPorPrioridadeEOrdem,
   reordenarPosicaoMicrofluxo,
 } from "@/dominio/microfluxos/ordenacaoMicrofluxos";
@@ -94,5 +95,24 @@ describe("Ordenação e Destaque Visual de Microfluxos", () => {
     expect(comNovoDestaque.map((m) => m.id)).toEqual(["f1", "f2", "f3"]);
     expect(comNovoDestaque[0]?.destaquePrimarioHome).toBe(false);
     expect(comNovoDestaque[2]?.destaquePrimarioHome).toBe(true);
+  });
+
+  it("permite um destaque primário e um secundário simultâneos com unicidade independente", () => {
+    const lista: DefinicaoMicrofluxo[] = [
+      criarMicrofluxoMock("f1", "Item 1", 0, true),
+      criarMicrofluxoMock("f2", "Item 2", 1, false),
+      criarMicrofluxoMock("f3", "Item 3", 2, false),
+    ];
+
+    const comSecundario = definirNivelDestaqueMicrofluxo(lista, "f2", "secundario");
+    expect(comSecundario[0]?.nivelDestaqueHome).toBe("primario");
+    expect(comSecundario[0]?.destaquePrimarioHome).toBe(true);
+    expect(comSecundario[1]?.nivelDestaqueHome).toBe("secundario");
+    expect(comSecundario[1]?.destaquePrimarioHome).toBe(false);
+
+    const trocandoSecundario = definirNivelDestaqueMicrofluxo(comSecundario, "f3", "secundario");
+    expect(trocandoSecundario[0]?.nivelDestaqueHome).toBe("primario");
+    expect(trocandoSecundario[1]?.nivelDestaqueHome).toBe("terciario");
+    expect(trocandoSecundario[2]?.nivelDestaqueHome).toBe("secundario");
   });
 });

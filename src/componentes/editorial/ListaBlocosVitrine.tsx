@@ -17,6 +17,10 @@ import {
   podeUsarLarguraMetade,
 } from "@/dominio/editorial/agrupamentoGridVitrine";
 import {
+  resolverNivelDestaqueVitrine,
+  type NivelDestaqueVitrine,
+} from "@/dominio/microfluxos/nivelDestaqueVitrine";
+import {
   ehAcaoEquipe,
   obterVisibilidadeEquipe,
 } from "@/dominio/editorial/posicionamentoEquipeVitrine";
@@ -98,23 +102,28 @@ export function ListaBlocosVitrine({
         ? "gap-6"
         : "gap-2.5";
 
-  const temDestaqueExplicito = acoesVisiveis.some((a) => a.destaquePrincipal === true);
-  const mapaDestaquePorBloco = new Map<string, boolean>();
+  const temDestaqueExplicito = acoesVisiveis.some(
+    (a) => resolverNivelDestaqueVitrine(a.nivelDestaque, a.destaquePrincipal) === "primario",
+  );
+  const mapaNivelDestaquePorBloco = new Map<string, NivelDestaqueVitrine>();
   let primeiroIndiceAcao = 0;
   for (const idBloco of ordemResolvida) {
     const acao = mapaAcoesPorBloco.get(idBloco);
     if (!acao) continue;
     const indiceAtual = primeiroIndiceAcao++;
-    mapaDestaquePorBloco.set(
-      idBloco,
-      acao.destaquePrincipal ?? (!temDestaqueExplicito && indiceAtual === 0),
-    );
+    const nivelExpl = resolverNivelDestaqueVitrine(acao.nivelDestaque, acao.destaquePrincipal);
+    const nivelResolvido: NivelDestaqueVitrine =
+      !temDestaqueExplicito && nivelExpl === "terciario" && indiceAtual === 0
+        ? "primario"
+        : nivelExpl;
+    mapaNivelDestaquePorBloco.set(idBloco, nivelResolvido);
   }
 
   const linhasVitrine = agruparBlocosEmLinhasVitrine(ordemResolvida, (idBloco) => {
     const acao = mapaAcoesPorBloco.get(idBloco);
-    if (!acao) return false;
-    return podeUsarLarguraMetade(acao, mapaDestaquePorBloco.get(idBloco) === true);
+    if (!acao || !podeUsarLarguraMetade(acao)) return null;
+    const nivel = mapaNivelDestaquePorBloco.get(idBloco) ?? "terciario";
+    return nivel === "primario" || nivel === "secundario" ? "botao" : "card";
   });
 
   return (
@@ -124,25 +133,25 @@ export function ListaBlocosVitrine({
     >
       {previaEquipe
         ? acoesVisiveis
-            .filter(
-              (acao) =>
-                ehAcaoEquipe(acao) &&
-                obterVisibilidadeEquipe(acao.posicionamentoEquipe, "antes_acoes").mobile,
-            )
-            .map((acao) => (
-              <div
-                key={`antes-${acao.id}`}
-                className="mx-auto w-full max-w-sm @5xl:hidden"
-              >
-                <AcaoEquipeVitrine
-                  acao={acao}
-                  previa={previaEquipe}
-                  destaque={acao.destaquePrincipal}
-                  modoFundo={pagina.customizacaoTokens?.modoFundoEquipe}
-                  aoAcionarItem={aoAcionarItem}
-                />
-              </div>
-            ))
+          .filter(
+            (acao) =>
+              ehAcaoEquipe(acao) &&
+              obterVisibilidadeEquipe(acao.posicionamentoEquipe, "antes_acoes").mobile,
+          )
+          .map((acao) => (
+            <div
+              key={`antes-${acao.id}`}
+              className="mx-auto w-full max-w-sm @5xl:hidden"
+            >
+              <AcaoEquipeVitrine
+                acao={acao}
+                previa={previaEquipe}
+                destaque={acao.destaquePrincipal}
+                modoFundo={pagina.customizacaoTokens?.modoFundoEquipe}
+                aoAcionarItem={aoAcionarItem}
+              />
+            </div>
+          ))
         : null}
 
       {linhasVitrine.map((linha) => {
@@ -151,16 +160,21 @@ export function ListaBlocosVitrine({
             <div
               key={linha.idsBlocos.join("__")}
               data-linha-vitrine="par"
-              className="mx-auto grid w-full max-w-sm grid-cols-2 gap-2.5 @5xl:mx-0 @5xl:ml-auto @5xl:max-w-xs"
+              className={combinarClasses(
+                "mx-auto grid w-full max-w-sm grid-cols-2 gap-2.5 @5xl:mx-0 @5xl:ml-auto @5xl:max-w-xs",
+                linha.grupo === "botao" ? "items-start" : "items-stretch",
+              )}
             >
               {linha.idsBlocos.map((idBloco) => {
                 const acao = mapaAcoesPorBloco.get(idBloco);
                 if (!acao) return null;
+                const nivelDestaque = mapaNivelDestaquePorBloco.get(idBloco) ?? "terciario";
                 return (
                   <div key={idBloco} data-bloco-vitrine={idBloco} className="min-w-0">
                     <ItemAcaoVitrine
                       acao={acao}
-                      ehDestaque={false}
+                      ehDestaque={nivelDestaque === "primario"}
+                      nivelDestaque={nivelDestaque}
                       formatoCompacto
                       aoAcionarItem={aoAcionarItem}
                       aoSelecionarItemAcervo={aoSelecionarItemAcervo}
@@ -176,6 +190,39 @@ export function ListaBlocosVitrine({
                   </div>
                 );
               })}
+            </div>
+          );
+        }
+
+        if (linha.tipo === "metade_isolada") {
+          const acao = mapaAcoesPorBloco.get(linha.idBloco);
+          if (!acao) return null;
+          const nivelDestaque = mapaNivelDestaquePorBloco.get(linha.idBloco) ?? "terciario";
+          return (
+            <div
+              key={linha.idBloco}
+              data-linha-vitrine="metade_isolada"
+              data-bloco-vitrine={linha.idBloco}
+              className="mx-auto flex w-full max-w-sm justify-center @5xl:mx-0 @5xl:ml-auto @5xl:max-w-xs"
+            >
+              <div className="w-1/2 min-w-0">
+                <ItemAcaoVitrine
+                  acao={acao}
+                  ehDestaque={nivelDestaque === "primario"}
+                  nivelDestaque={nivelDestaque}
+                  formatoCompacto
+                  aoAcionarItem={aoAcionarItem}
+                  aoSelecionarItemAcervo={aoSelecionarItemAcervo}
+                  previaEquipe={previaEquipe}
+                  modoFundoEquipe={pagina.customizacaoTokens?.modoFundoEquipe}
+                  videosYoutube={videosYoutube}
+                  modoExibicaoVideos={modoExibicaoVideos}
+                  autoplayVideos={autoplayVideos}
+                  ocultarTituloVideos={ocultarTituloVideos}
+                  produtos={produtos}
+                  servicos={servicos}
+                />
+              </div>
             </div>
           );
         }
@@ -208,7 +255,7 @@ export function ListaBlocosVitrine({
 
         if (idBloco === "bloco:redes_sociais") {
           return (
-            <div key={idBloco} className="w-full" data-bloco-vitrine="bloco:redes_sociais">
+            <div key={idBloco} className="mb-6 w-full" data-bloco-vitrine="bloco:redes_sociais">
               <BarraRedesSociaisDiscreta
                 redes={pagina.redesSociais}
                 tamanho={pagina.tamanhoRedesSociais}
@@ -221,7 +268,7 @@ export function ListaBlocosVitrine({
 
         const acao = mapaAcoesPorBloco.get(idBloco);
         if (!acao) return null;
-        const ehDestaque = mapaDestaquePorBloco.get(idBloco) === true;
+        const nivelDestaque = mapaNivelDestaquePorBloco.get(idBloco) ?? "terciario";
 
         return (
           <div
@@ -231,7 +278,8 @@ export function ListaBlocosVitrine({
           >
             <ItemAcaoVitrine
               acao={acao}
-              ehDestaque={ehDestaque}
+              ehDestaque={nivelDestaque === "primario"}
+              nivelDestaque={nivelDestaque}
               aoAcionarItem={aoAcionarItem}
               aoSelecionarItemAcervo={aoSelecionarItemAcervo}
               previaEquipe={previaEquipe}

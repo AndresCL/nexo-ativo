@@ -7,6 +7,7 @@ interface PropriedadesContainerColecaoAcervo<T> {
   readonly itens: readonly T[];
   readonly modo: ModoLayoutAcervo;
   readonly renderizarItem: (item: T, indice: number, modo: ModoLayoutAcervo) => ReactNode;
+  readonly itemFinal?: ReactNode;
   readonly className?: string;
   readonly ariaLabel?: string;
 }
@@ -15,6 +16,7 @@ export function ContainerColecaoAcervo<T>({
   itens,
   modo,
   renderizarItem,
+  itemFinal,
   className,
   ariaLabel,
 }: PropriedadesContainerColecaoAcervo<T>) {
@@ -33,6 +35,7 @@ export function ContainerColecaoAcervo<T>({
         )}
       >
         {itens.map((item, indice) => renderizarItem(item, indice, "carrossel"))}
+        {itemFinal}
       </div>
     );
   }

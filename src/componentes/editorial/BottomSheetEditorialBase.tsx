@@ -225,7 +225,7 @@ export function BottomSheetEditorialBase({
               <DialogoPrimitivo.Close
                 onClick={aoFechar}
                 aria-label={rotuloBotaoFechar}
-                className="absolute top-4 right-4 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-black/15 bg-black/45 text-white shadow-md backdrop-blur-md transition hover:scale-105 active:scale-95 cursor-pointer"
+                className="absolute top-4 right-4 z-40 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[var(--editorial-borda)] bg-[var(--editorial-bottom-sheet-fechar-fundo)] text-[var(--editorial-bottom-sheet-fechar-texto)] shadow-md backdrop-blur-md transition hover:scale-105 active:scale-95"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </DialogoPrimitivo.Close>

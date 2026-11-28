@@ -7,6 +7,7 @@ import { TAMANHOS_CABECALHO_MARCA } from "../dominio/editorial/tamanhoCabecalhoM
 import { TAMANHOS_REDES_SOCIAIS } from "../dominio/editorial/configuracaoRedesSociais";
 import { IDENTIFICADORES_BLOCOS_SISTEMA_VITRINE } from "../dominio/editorial/ordemBlocosVitrine";
 import { VALORES_ANIMACAO_DESTAQUE } from "../dominio/microfluxos/animacaoDestaque";
+import { NIVEIS_DESTAQUE_VITRINE } from "../dominio/microfluxos/nivelDestaqueVitrine";
 import {
   esquemaChamadaEditorial,
   esquemaChamadasEditoriaisAdicionais,
@@ -120,6 +121,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
         "microfluxo",
         "agenda",
         "publicacao_post",
+        "cardapio",
         "secao_produtos",
         "secao_servicos",
         "secao_portfolio",
@@ -131,6 +133,7 @@ export const esquemaRascunhoConfiguracaoPagina: z.ZodType<RascunhoConfiguracaoPa
       ]),
       destino: z.string().trim().min(1, "Informe o destino da ação.").max(500),
       destaquePrincipal: z.boolean().optional(),
+      nivelDestaque: z.enum(NIVEIS_DESTAQUE_VITRINE).optional(),
       animarBordaDestaque: z.boolean().optional(),
       animacaoDestaque: z.enum(VALORES_ANIMACAO_DESTAQUE).optional(),
       corBrilhoBorda: z.string().optional(),

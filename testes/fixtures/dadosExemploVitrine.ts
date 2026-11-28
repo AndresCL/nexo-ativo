@@ -25,6 +25,14 @@ import {
   ACERVO_CARDIM_CASTRO,
   VITRINE_CARDIM_CASTRO,
 } from "./dadosCardimECastroAdvocacia";
+import {
+  ACERVO_LAGOS_RACING,
+  VITRINE_LAGOS_RACING,
+} from "./dadosLagosRacingBikeShop";
+import {
+  ACERVO_THE_CAKE_DREAMS,
+  VITRINE_THE_CAKE_DREAMS,
+} from "./dadosTheCakeDreams";
 
 /**
  * Exemplares editoriais completos para demonstração e conferência local em desenvolvimento
@@ -328,6 +336,8 @@ export const CATALOGO_DEMONSTRACOES_EDITORIAIS: Readonly<Record<string, Conteudo
     nexoativo: VITRINE_NEXOATIVO,
     "pousada-velas-do-forte": VITRINE_POUSADA_VELAS_DO_FORTE,
     cardimecastroadvocacia: VITRINE_CARDIM_CASTRO,
+  lagosracing: VITRINE_LAGOS_RACING,
+  thecakedreams: VITRINE_THE_CAKE_DREAMS,
   };
 
 export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublicoVitrine>> = {
@@ -1066,6 +1076,8 @@ export const CATALOGO_ACERVOS_DEMONSTRACAO: Readonly<Record<string, AcervoPublic
   nexoativo: ACERVO_NEXOATIVO,
   "pousada-velas-do-forte": ACERVO_POUSADA_VELAS_DO_FORTE,
   cardimecastroadvocacia: ACERVO_CARDIM_CASTRO,
+  lagosracing: ACERVO_LAGOS_RACING,
+  thecakedreams: ACERVO_THE_CAKE_DREAMS,
 };
 
 export function buscarDemonstracaoEditorialPorSlug(

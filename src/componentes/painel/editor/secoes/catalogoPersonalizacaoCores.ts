@@ -12,8 +12,10 @@ export type IdentificadorGrupoCorEditorial =
   | "identidade_logo"
   | "base_vitrine"
   | "botoes_acoes"
+  | "cards_acervo_home"
   | "equipe"
-  | "bottom_sheets";
+  | "bottom_sheets"
+  | "catalogo_tela_cheia";
 
 export interface DescritorCampoCorEditorial {
   readonly chave: ChaveCorTokenEditorial;
@@ -98,31 +100,88 @@ export const GRUPOS_PERSONALIZACAO_CORES_EDITORIAL: readonly DescritorGrupoCorEd
   {
     id: "botoes_acoes",
     titulo: "Botões & Ações",
-    descricao: "Cores do botão principal de conversão e dos botões de canais secundários.",
+    descricao:
+      "Cores do botão principal, do botão secundário (com bordas) e dos cards terciários da vitrine.",
     campos: [
       {
         chave: "corCtaFundo",
         rotulo: "Botão principal (Fundo)",
-        descricao: "Fundo da ação principal de conversão",
+        descricao: "Fundo do destaque primário de conversão",
         obterPadrao: (paleta) => paleta.corCtaFundo,
+      },
+      {
+        chave: "corCtaBorda",
+        rotulo: "Botão principal (Borda)",
+        descricao: "Contorno opcional do botão principal",
+        obterPadrao: (paleta, tokens) => tokens?.corCtaFundo || paleta.corCtaFundo,
       },
       {
         chave: "corCtaTexto",
         rotulo: "Botão principal (Texto)",
-        descricao: "Cor do texto dentro do botão principal",
+        descricao: "Cor do texto e ícone do destaque primário",
         obterPadrao: (paleta) => paleta.corCtaTexto,
       },
       {
+        chave: "corDestaqueSecundarioFundo",
+        rotulo: "Botão secundário (Fundo)",
+        descricao: "Fundo do botão de destaque secundário",
+        obterPadrao: (paleta) => paleta.corSecundarioFundo,
+      },
+      {
+        chave: "corDestaqueSecundarioBorda",
+        rotulo: "Botão secundário (Borda)",
+        descricao: "Contorno do botão de destaque secundário",
+        obterPadrao: (paleta) => paleta.corCtaFundo,
+      },
+      {
+        chave: "corDestaqueSecundarioTexto",
+        rotulo: "Botão secundário (Texto)",
+        descricao: "Cor do texto e ícone do botão secundário",
+        obterPadrao: (paleta) => paleta.corSecundarioTexto,
+      },
+      {
         chave: "corSecundarioFundo",
-        rotulo: "Botões Secundários (Fundo)",
-        descricao: "Fundo dos botões de canais secundários",
+        rotulo: "Cards terciários (Fundo)",
+        descricao: "Fundo dos cards padrão (100% e 50%) da vitrine",
         obterPadrao: (paleta) => paleta.corSecundarioFundo,
       },
       {
         chave: "corSecundarioTexto",
-        rotulo: "Botões Secundários (Texto)",
-        descricao: "Texto e ícones dos botões secundários",
+        rotulo: "Cards terciários (Texto)",
+        descricao: "Texto e ícones dos cards padrão da vitrine",
         obterPadrao: (paleta) => paleta.corSecundarioTexto,
+      },
+    ],
+  },
+  {
+    id: "cards_acervo_home",
+    titulo: "Cards de Produtos & Serviços (Home)",
+    descricao:
+      "Cores independentes para os cards compactos de produtos e serviços exibidos na vitrine principal.",
+    campos: [
+      {
+        chave: "corCardAcervoFundo",
+        rotulo: "Fundo do Card",
+        descricao: "Cor de fundo dos cards de produtos e serviços na Home",
+        obterPadrao: (paleta, tokens) => tokens?.corSuperficie || paleta.corSuperficie,
+      },
+      {
+        chave: "corCardAcervoBorda",
+        rotulo: "Borda do Card",
+        descricao: "Contorno opcional dos cards de produtos e serviços na Home",
+        obterPadrao: (paleta, tokens) => tokens?.corBorda || paleta.corBorda,
+      },
+      {
+        chave: "corCardAcervoTexto",
+        rotulo: "Título do Item",
+        descricao: "Cor do nome do produto ou serviço exibido no card",
+        obterPadrao: (paleta, tokens) => tokens?.corTextoPrincipal || paleta.corTextoPrincipal,
+      },
+      {
+        chave: "corCardAcervoPreco",
+        rotulo: "Preço & Apoio",
+        descricao: "Cor do preço e prazo/duração exibidos no card",
+        obterPadrao: (paleta, tokens) => tokens?.corTextoSecundario || paleta.corTextoSecundario,
       },
     ],
   },
@@ -206,6 +265,77 @@ export const GRUPOS_PERSONALIZACAO_CORES_EDITORIAL: readonly DescritorGrupoCorEd
         rotulo: "Botão Principal do Bottom Sheet (Texto)",
         descricao: "Cor do texto dos botões de ação dentro das gavetas",
         obterPadrao: (paleta, tokens) => tokens?.corCtaTexto || paleta.corBottomSheetCtaTexto,
+      },
+      {
+        chave: "corBottomSheetFecharFundo",
+        rotulo: "Botão Fechar do Bottom Sheet (Fundo)",
+        descricao: "Fundo do botão X flutuante para fechar a gaveta",
+        obterPadrao: (paleta, tokens) =>
+          tokens?.corBottomSheetSuperficie ||
+          tokens?.corSuperficie ||
+          paleta.corBottomSheetSuperficie,
+      },
+      {
+        chave: "corBottomSheetFecharTexto",
+        rotulo: "Botão Fechar do Bottom Sheet (Ícone X)",
+        descricao: "Cor do ícone X para fechar a gaveta",
+        obterPadrao: (paleta, tokens) =>
+          tokens?.corBottomSheetTextoPrincipal ||
+          tokens?.corTextoPrincipal ||
+          paleta.corBottomSheetTextoPrincipal,
+      },
+    ],
+  },
+  {
+    id: "catalogo_tela_cheia",
+    titulo: "Catálogo em Tela Cheia (Ver todos)",
+    descricao:
+      "Cores independentes para a tela completa de produtos e serviços com busca, filtros e ordenação.",
+    campos: [
+      {
+        chave: "corCatalogoFundo",
+        rotulo: "Fundo do Catálogo",
+        descricao: "Fundo principal da tela cheia e do cabeçalho fixo",
+        obterPadrao: (paleta, tokens) =>
+          tokens?.corBottomSheetFundo ||
+          tokens?.corFundoPrincipal ||
+          paleta.corBottomSheetFundo,
+      },
+      {
+        chave: "corCatalogoSuperficie",
+        rotulo: "Cartões, Busca & Controles",
+        descricao: "Fundo dos cards, campo de busca, ordenação e chips inativos",
+        obterPadrao: (paleta, tokens) =>
+          tokens?.corBottomSheetSuperficie ||
+          tokens?.corSuperficie ||
+          paleta.corBottomSheetSuperficie,
+      },
+      {
+        chave: "corCatalogoBorda",
+        rotulo: "Bordas & Divisores",
+        descricao: "Linhas do cabeçalho, cartões, busca e filtros",
+        obterPadrao: (paleta, tokens) =>
+          tokens?.corBottomSheetBorda ||
+          tokens?.corBorda ||
+          paleta.corBottomSheetBorda,
+      },
+      {
+        chave: "corCatalogoTextoPrincipal",
+        rotulo: "Textos Principais & Chip Ativo",
+        descricao: "Título, nomes dos itens, preços e destaque do filtro ativo",
+        obterPadrao: (paleta, tokens) =>
+          tokens?.corBottomSheetTextoPrincipal ||
+          tokens?.corTextoPrincipal ||
+          paleta.corBottomSheetTextoPrincipal,
+      },
+      {
+        chave: "corCatalogoTextoSecundario",
+        rotulo: "Textos Secundários",
+        descricao: "Contador, placeholder da busca, resumos e rótulos de apoio",
+        obterPadrao: (paleta, tokens) =>
+          tokens?.corBottomSheetTextoSecundario ||
+          tokens?.corTextoSecundario ||
+          paleta.corBottomSheetTextoSecundario,
       },
     ],
   },

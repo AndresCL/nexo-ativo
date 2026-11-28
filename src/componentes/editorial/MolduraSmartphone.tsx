@@ -31,7 +31,7 @@ export function MolduraSmartphone({
         data-testid={dataTestId}
         data-dispositivo={dataDispositivo}
         className={combinarClasses(
-          "w-full overflow-x-clip sm:overflow-x-hidden sm:overflow-y-auto sm:overscroll-contain sm:max-h-[min(840px,calc(100dvh-3rem))] sm:max-w-[390px] sm:rounded-[2rem] sm:border-4 sm:border-mineral-800 sm:shadow-2xl sm:[scrollbar-width:thin]",
+          "w-full overflow-x-clip sm:bg-mineral-800 sm:overflow-x-hidden sm:overflow-y-auto sm:overscroll-contain sm:max-h-[min(840px,calc(100dvh-3rem))] sm:max-w-[398px] sm:rounded-[2rem] sm:border-4 sm:border-mineral-800 sm:shadow-2xl sm:[scrollbar-width:thin]",
           classNameMoldura,
         )}
       >

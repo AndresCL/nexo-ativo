@@ -65,6 +65,10 @@ export interface CustomizacaoTokensEditorial {
   readonly corBorda?: string;
   readonly corCtaFundo?: string;
   readonly corCtaTexto?: string;
+  readonly corCtaBorda?: string;
+  readonly corDestaqueSecundarioFundo?: string;
+  readonly corDestaqueSecundarioTexto?: string;
+  readonly corDestaqueSecundarioBorda?: string;
   readonly corSecundarioFundo?: string;
   readonly corSecundarioTexto?: string;
   readonly corLogoTitulo?: string;
@@ -80,6 +84,17 @@ export interface CustomizacaoTokensEditorial {
   readonly corBottomSheetDestaque?: string;
   readonly corBottomSheetCtaFundo?: string;
   readonly corBottomSheetCtaTexto?: string;
+  readonly corBottomSheetFecharFundo?: string;
+  readonly corBottomSheetFecharTexto?: string;
+  readonly corCatalogoFundo?: string;
+  readonly corCatalogoSuperficie?: string;
+  readonly corCatalogoBorda?: string;
+  readonly corCatalogoTextoPrincipal?: string;
+  readonly corCatalogoTextoSecundario?: string;
+  readonly corCardAcervoFundo?: string;
+  readonly corCardAcervoBorda?: string;
+  readonly corCardAcervoTexto?: string;
+  readonly corCardAcervoPreco?: string;
   readonly corBrilhoBorda?: string;
 }
 

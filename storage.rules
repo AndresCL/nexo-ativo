@@ -32,6 +32,12 @@ service firebase.storage {
         && request.resource.contentType.matches('video/(mp4|webm)');
     }
 
+    function ehPdfCardapioPermitido() {
+      return request.resource != null
+        && request.resource.size <= 15 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf';
+    }
+
     match /organizacoes/{organizacaoId}/imagens/{nomeArquivo} {
       allow read: if true;
       allow write: if podeGerenciarMidiaOrganizacao(organizacaoId)
@@ -42,6 +48,12 @@ service firebase.storage {
       allow read: if true;
       allow write: if podeGerenciarMidiaOrganizacao(organizacaoId)
         && (request.resource == null || ehVideoPermitido());
+    }
+
+    match /organizacoes/{organizacaoId}/cardapios/{cardapioId}/{nomeArquivo} {
+      allow read: if true;
+      allow write: if podeGerenciarMidiaOrganizacao(organizacaoId)
+        && (request.resource == null || ehImagemPermitida() || ehPdfCardapioPermitido());
     }
 
     match /{allPaths=**} {

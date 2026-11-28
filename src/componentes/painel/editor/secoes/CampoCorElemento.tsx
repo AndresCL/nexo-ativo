@@ -1,17 +1,7 @@
 "use client";
 
 import { RotateCcw } from "lucide-react";
-
-function normalizarHexParaColorInput(valor: string): string {
-  const limpo = valor.trim();
-  if (/^#[0-9a-fA-F]{6}$/.test(limpo)) {
-    return limpo;
-  }
-  if (/^#[0-9a-fA-F]{3}$/.test(limpo)) {
-    return `#${limpo[1]}${limpo[1]}${limpo[2]}${limpo[2]}${limpo[3]}${limpo[3]}`;
-  }
-  return "#ffffff";
-}
+import { SeletorCorComOpacidade } from "@/componentes/interface/SeletorCorComOpacidade";
 
 export interface PropriedadesCampoCorElemento {
   readonly rotulo: string;
@@ -39,22 +29,6 @@ export function CampoCorElemento({
         <p className="text-[11px] text-mineral-500">{descricao}</p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <input
-          type="color"
-          aria-label={`Selecionar cor: ${rotulo}`}
-          disabled={somenteLeitura}
-          value={normalizarHexParaColorInput(valorAtual)}
-          onChange={(e) => aoAlterar(e.target.value)}
-          className="h-7 w-8 cursor-pointer rounded border border-slate-300 bg-transparent p-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-        />
-        <input
-          type="text"
-          aria-label={`Código da cor: ${rotulo}`}
-          disabled={somenteLeitura}
-          value={valorAtual}
-          onChange={(e) => aoAlterar(e.target.value)}
-          className="w-28 rounded border border-slate-300 px-2 py-0.5 font-mono text-[11px] text-mineral-900 focus:border-mineral-950 focus:outline-none disabled:opacity-60"
-        />
         {personalizado ? (
           <button
             type="button"
@@ -62,11 +36,25 @@ export function CampoCorElemento({
             onClick={aoRestaurar}
             title={`Restaurar padrão de ${rotulo}`}
             aria-label={`Restaurar cor padrão: ${rotulo}`}
-            className="inline-flex h-7 w-7 items-center justify-center rounded border border-slate-200 bg-white text-mineral-500 hover:bg-slate-50 hover:text-mineral-900 disabled:opacity-60 cursor-pointer"
+            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-slate-200 bg-white text-mineral-500 hover:bg-slate-50 hover:text-mineral-900 disabled:opacity-60"
           >
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
           </button>
         ) : null}
+        <SeletorCorComOpacidade
+          valor={valorAtual}
+          rotulo={rotulo}
+          somenteLeitura={somenteLeitura}
+          aoAlterar={aoAlterar}
+        />
+        <input
+          type="text"
+          aria-label={`Código da cor: ${rotulo}`}
+          disabled={somenteLeitura}
+          value={valorAtual}
+          onChange={(e) => aoAlterar(e.target.value)}
+          className="w-32 rounded border border-slate-300 px-2 py-0.5 font-mono text-[11px] text-mineral-900 focus:border-mineral-950 focus:outline-none disabled:opacity-60"
+        />
       </div>
     </div>
   );

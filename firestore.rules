@@ -117,6 +117,13 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      match /cardapios/{cardapioId} {
+        allow read: if paginaPublicadaEstaAtiva(organizacaoId) || ehMembroAtivo(organizacaoId) || ehFundador();
+        allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())
+          && mantemOrganizacaoCorreta(organizacaoId);
+        allow delete: if possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador();
+      }
+
       match /microfluxos/{microfluxoId} {
         allow read: if ehMembroAtivo(organizacaoId) || ehFundador();
         allow create, update: if (possuiPapelNaOrganizacao(organizacaoId, ['proprietario', 'administrador']) || ehFundador())

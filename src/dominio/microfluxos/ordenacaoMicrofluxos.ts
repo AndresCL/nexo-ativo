@@ -1,29 +1,51 @@
 import type { DefinicaoMicrofluxo } from "./tiposMicrofluxo";
+import {
+  resolverNivelDestaqueVitrine,
+  type NivelDestaqueVitrine,
+} from "./nivelDestaqueVitrine";
 
 /**
  * Ordena determinística e estavelmente uma lista de microfluxos por `ordemHome`:
- * 1. Garante unicidade do destaque visual (`destaquePrimarioHome === true`), sem alterar a posição.
- * 2. Ordena crescentemente por `ordemHome` (desempate determinístico por `id`).
- * 3. Normaliza as propriedades `ordemHome` para uma sequência contínua (0, 1, 2, ...).
+ * 1. Garante unicidade independente do destaque primário e do destaque secundário, sem alterar a posição.
+ * 2. Mantém `destaquePrimarioHome` sincronizado com `nivelDestaqueHome === "primario"` (retrocompatibilidade).
+ * 3. Ordena crescentemente por `ordemHome` (desempate determinístico por `id`).
+ * 4. Normaliza as propriedades `ordemHome` para uma sequência contínua (0, 1, 2, ...).
  */
 export function ordenarMicrofluxosPorPrioridadeEOrdem(
   microfluxos: readonly DefinicaoMicrofluxo[],
 ): DefinicaoMicrofluxo[] {
-  if (microfluxos.length <= 1) {
-    return microfluxos.map((m, idx) => ({ ...m, ordemHome: idx }));
-  }
+  let primarioEncontrado = false;
+  let secundarioEncontrado = false;
 
-  let destaqueEncontrado = false;
   const normalizados = microfluxos.map((fluxo) => {
-    if (fluxo.destaquePrimarioHome === true) {
-      if (!destaqueEncontrado) {
-        destaqueEncontrado = true;
-        return { ...fluxo, destaquePrimarioHome: true };
+    const nivel = resolverNivelDestaqueVitrine(fluxo.nivelDestaqueHome, fluxo.destaquePrimarioHome);
+
+    if (nivel === "primario") {
+      if (!primarioEncontrado) {
+        primarioEncontrado = true;
+        return { ...fluxo, nivelDestaqueHome: "primario" as const, destaquePrimarioHome: true };
       }
-      return { ...fluxo, destaquePrimarioHome: false };
+      return { ...fluxo, nivelDestaqueHome: "terciario" as const, destaquePrimarioHome: false };
     }
+
+    if (nivel === "secundario") {
+      if (!secundarioEncontrado) {
+        secundarioEncontrado = true;
+        return { ...fluxo, nivelDestaqueHome: "secundario" as const, destaquePrimarioHome: false };
+      }
+      return { ...fluxo, nivelDestaqueHome: "terciario" as const, destaquePrimarioHome: false };
+    }
+
+    if (fluxo.destaquePrimarioHome || fluxo.nivelDestaqueHome !== undefined) {
+      return { ...fluxo, nivelDestaqueHome: "terciario" as const, destaquePrimarioHome: false };
+    }
+
     return fluxo;
   });
+
+  if (normalizados.length <= 1) {
+    return normalizados.map((m, idx) => ({ ...m, ordemHome: idx }));
+  }
 
   normalizados.sort((a, b) => (a.ordemHome ?? 0) - (b.ordemHome ?? 0) || a.id.localeCompare(b.id));
 
@@ -69,6 +91,42 @@ export function reordenarPosicaoMicrofluxo(
 }
 
 /**
+ * Define o nível de destaque de um microfluxo (`primario`, `secundario` ou `terciario`),
+ * garantindo unicidade independente de `primario` e `secundario`, preservando sua posição atual.
+ */
+export function definirNivelDestaqueMicrofluxo(
+  microfluxos: readonly DefinicaoMicrofluxo[],
+  fluxoId: string,
+  nivel: NivelDestaqueVitrine,
+): DefinicaoMicrofluxo[] {
+  const listaAtualizada = microfluxos.map((fluxo) => {
+    if (fluxo.id === fluxoId) {
+      return {
+        ...fluxo,
+        nivelDestaqueHome: nivel,
+        destaquePrimarioHome: nivel === "primario",
+      };
+    }
+
+    const nivelAtual = resolverNivelDestaqueVitrine(
+      fluxo.nivelDestaqueHome,
+      fluxo.destaquePrimarioHome,
+    );
+    if ((nivel === "primario" || nivel === "secundario") && nivelAtual === nivel) {
+      return {
+        ...fluxo,
+        nivelDestaqueHome: "terciario" as const,
+        destaquePrimarioHome: false,
+      };
+    }
+
+    return fluxo;
+  });
+
+  return ordenarMicrofluxosPorPrioridadeEOrdem(listaAtualizada);
+}
+
+/**
  * Define ou remove o destaque visual exclusivo de um microfluxo, preservando sua posição atual.
  */
 export function definirDestaqueExclusivoMicrofluxo(
@@ -76,21 +134,5 @@ export function definirDestaqueExclusivoMicrofluxo(
   fluxoId: string,
   destaque: boolean,
 ): DefinicaoMicrofluxo[] {
-  const listaAtualizada = microfluxos.map((fluxo) => {
-    if (fluxo.id === fluxoId) {
-      return {
-        ...fluxo,
-        destaquePrimarioHome: destaque,
-      };
-    }
-    if (destaque && fluxo.destaquePrimarioHome) {
-      return {
-        ...fluxo,
-        destaquePrimarioHome: false,
-      };
-    }
-    return fluxo;
-  });
-
-  return ordenarMicrofluxosPorPrioridadeEOrdem(listaAtualizada);
+  return definirNivelDestaqueMicrofluxo(microfluxos, fluxoId, destaque ? "primario" : "terciario");
 }

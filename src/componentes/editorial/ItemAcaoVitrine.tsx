@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight, Sparkles, UtensilsCrossed } from "lucide-react";
 import type {
   ItemAcaoHome,
   ModoFundoEquipeEditorial,
@@ -13,6 +13,8 @@ import {
   obterClasseAnimacaoDestaque,
   resolverAnimacaoDestaque,
 } from "@/dominio/microfluxos/animacaoDestaque";
+import type { NivelDestaqueVitrine } from "@/dominio/microfluxos/nivelDestaqueVitrine";
+import { ESTILOS_NIVEL_DESTAQUE_VITRINE } from "./estilosNivelDestaqueVitrine";
 import {
   ehAcaoEquipe,
   obterVisibilidadeEquipe,
@@ -85,6 +87,9 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
       "aria-hidden": true,
     });
   }
+  if (acao.tipoDestino === "cardapio") {
+    return <UtensilsCrossed className="h-4 w-4 shrink-0" aria-hidden="true" />;
+  }
   if (acao.tipoDestino === "agenda") {
     return MAPA_ICONES_POR_ID["agendamento"]?.componente({
       className: "h-4 w-4 shrink-0",
@@ -119,6 +124,7 @@ export function renderizarIconeAcao(acao: ItemAcaoHome): ReactNode {
 export interface PropriedadesItemAcaoVitrine {
   readonly acao: ItemAcaoHome;
   readonly ehDestaque: boolean;
+  readonly nivelDestaque?: NivelDestaqueVitrine;
   readonly formatoCompacto?: boolean;
   readonly aoAcionarItem?: ManipuladorAcaoHome;
   readonly aoSelecionarItemAcervo?: (tipo: "produtos" | "servicos", itemId: string) => void;
@@ -135,6 +141,7 @@ export interface PropriedadesItemAcaoVitrine {
 export function ItemAcaoVitrine({
   acao,
   ehDestaque,
+  nivelDestaque,
   formatoCompacto = false,
   aoAcionarItem,
   aoSelecionarItemAcervo,
@@ -147,6 +154,10 @@ export function ItemAcaoVitrine({
   produtos = [],
   servicos = [],
 }: PropriedadesItemAcaoVitrine) {
+  const nivelResolvido: NivelDestaqueVitrine =
+    nivelDestaque ?? (ehDestaque ? "primario" : "terciario");
+  const ehPrimario = nivelResolvido === "primario";
+  const ehBotaoDestaque = nivelResolvido === "primario" || nivelResolvido === "secundario";
   if (previaEquipe && ehAcaoEquipe(acao)) {
     const visibilidade = obterVisibilidadeEquipe(acao.posicionamentoEquipe, "lista_acoes");
     if (!visibilidade.mobile && !visibilidade.desktop) return null;
@@ -222,7 +233,7 @@ export function ItemAcaoVitrine({
     );
   }
 
-  if (formatoCompacto && !ehDestaque) {
+  if (formatoCompacto && !ehBotaoDestaque) {
     return (
       <CardAcaoVitrineCompacto
         acao={acao}
@@ -232,38 +243,46 @@ export function ItemAcaoVitrine({
     );
   }
 
+  const estiloNivel = ESTILOS_NIVEL_DESTAQUE_VITRINE[nivelResolvido];
   const externo = ehDestinoExterno(acao.destino);
+  const botaoDestaqueCompacto = ehBotaoDestaque && formatoCompacto;
   const classesBaseItem = combinarClasses(
-    "group flex w-full items-center justify-between gap-3 px-5 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--editorial-texto)] hover:scale-[1.01]",
-    ehDestaque
-      ? "h-12 min-h-12 py-2 rounded-full bg-[var(--editorial-cta-fundo)] text-[var(--editorial-cta-texto)] shadow-lg shadow-black/20 hover:opacity-95 justify-center"
-      : "min-h-13 py-3 rounded-xl bg-[var(--editorial-secundario-fundo)] text-[var(--editorial-secundario-texto)] shadow-md backdrop-blur-md",
+    "group flex w-full items-center justify-between transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--editorial-texto)] hover:scale-[1.01]",
+    botaoDestaqueCompacto ? "gap-1.5 px-3" : "gap-3 px-5",
+    estiloNivel.container,
   );
 
   const iconeItem = renderizarIconeAcao(acao);
   const conteudoInterno = (
-    <div className="relative z-10 flex w-full items-center justify-between">
+    <div className="relative z-10 flex w-full min-w-0 items-center justify-between">
       <div
         className={combinarClasses(
-          "flex items-center gap-3",
-          ehDestaque ? "w-full justify-center" : "",
+          "flex min-w-0 items-center",
+          botaoDestaqueCompacto ? "w-full justify-center gap-1.5" : "gap-3",
+          ehBotaoDestaque && !botaoDestaqueCompacto ? "w-full justify-center" : "",
         )}
       >
         {iconeItem ? (
           <div
             className={combinarClasses(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110",
-              ehDestaque
-                ? "rounded-full bg-white/15 text-current"
-                : "bg-black/5 text-current dark:bg-white/10",
+              "flex shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110",
+              botaoDestaqueCompacto ? "h-6 w-6" : "h-8 w-8",
+              estiloNivel.icone,
             )}
           >
             {iconeItem}
           </div>
         ) : null}
 
-        {ehDestaque ? (
-          <span className="truncate text-sm font-semibold tracking-wide">{acao.rotulo}</span>
+        {ehBotaoDestaque ? (
+          <span
+            className={combinarClasses(
+              "truncate font-semibold tracking-wide",
+              botaoDestaqueCompacto ? "text-xs" : "text-sm",
+            )}
+          >
+            {acao.rotulo}
+          </span>
         ) : (
           <span className="flex flex-col items-start">
             <span className="text-sm font-medium tracking-wide">{acao.rotulo}</span>
@@ -276,7 +295,7 @@ export function ItemAcaoVitrine({
         )}
       </div>
 
-      {!ehDestaque ? (
+      {!ehBotaoDestaque ? (
         <ChevronRight
           aria-hidden="true"
           className="h-5 w-5 shrink-0 opacity-70 transition-transform duration-200 group-hover:translate-x-1 group-hover:opacity-100"
@@ -285,18 +304,21 @@ export function ItemAcaoVitrine({
     </div>
   );
 
-  const animacaoDestaque = ehDestaque
+  const animacaoDestaque = ehPrimario
     ? resolverAnimacaoDestaque(acao.animacaoDestaque, acao.animarBordaDestaque)
     : "nenhuma";
   const classesAnimacaoDestaque = obterClasseAnimacaoDestaque(animacaoDestaque);
-  const estiloBrilho = acao.corBrilhoBorda
-    ? ({ "--editorial-brilho-borda": acao.corBrilhoBorda } as CSSProperties)
-    : undefined;
+  const estiloBrilho =
+    ehPrimario && acao.corBrilhoBorda
+      ? ({ "--editorial-brilho-borda": acao.corBrilhoBorda } as CSSProperties)
+      : undefined;
 
   const elementoBotao = aoAcionarItem ? (
     <button
       type="button"
       data-acao-home-id={acao.id}
+      data-nivel-destaque={nivelResolvido}
+      data-formato-card={formatoCompacto ? "metade" : "inteiro"}
       style={estiloBrilho}
       onClick={(evento) => aoAcionarItem(acao, evento.currentTarget)}
       className={combinarClasses(classesBaseItem, classesAnimacaoDestaque)}
@@ -306,6 +328,8 @@ export function ItemAcaoVitrine({
   ) : (
     <a
       href={acao.destino}
+      data-nivel-destaque={nivelResolvido}
+      data-formato-card={formatoCompacto ? "metade" : "inteiro"}
       style={estiloBrilho}
       {...(externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={combinarClasses(classesBaseItem, classesAnimacaoDestaque)}
@@ -314,7 +338,7 @@ export function ItemAcaoVitrine({
     </a>
   );
 
-  if (ehDestaque && acao.subtituloDiscreto) {
+  if (ehBotaoDestaque && acao.subtituloDiscreto) {
     return (
       <div className="flex w-full flex-col items-center gap-1.5">
         {elementoBotao}

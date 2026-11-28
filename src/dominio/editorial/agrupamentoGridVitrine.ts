@@ -3,9 +3,16 @@ import type { ItemAcaoHome } from "../entidades/paginaPublicada";
 export const LARGURAS_CARD_VITRINE = ["inteiro", "metade"] as const;
 export type LarguraCardVitrine = (typeof LARGURAS_CARD_VITRINE)[number];
 
+export type GrupoPareamentoMetadeVitrine = "botao" | "card";
+
 export type LinhaVitrine =
   | { readonly tipo: "inteira"; readonly idBloco: string }
-  | { readonly tipo: "par"; readonly idsBlocos: readonly [string, string] };
+  | { readonly tipo: "metade_isolada"; readonly idBloco: string; readonly grupo: "botao" }
+  | {
+      readonly tipo: "par";
+      readonly idsBlocos: readonly [string, string];
+      readonly grupo?: GrupoPareamentoMetadeVitrine;
+    };
 
 /** Resolve a largura configurada garantindo `"inteiro"` como fallback padrão. */
 export function resolverLarguraCardVitrine(
@@ -34,50 +41,68 @@ export function tipoAcaoSuportaCardMetade(
 
 /**
  * Determina se uma ação da vitrine pode efetivamente ocupar 1/2 largura.
- * Destaques primários e seções inline sempre ocupam largura inteira.
+ * Destaques primários, secundários e cards terciários suportam 1/2 largura
+ * desde que o tipo de ação seja compatível (seções inline continuam inteiras).
  */
 export function podeUsarLarguraMetade(
   acao: ItemAcaoHome,
-  ehDestaque: boolean,
+  _ehDestaque?: boolean,
 ): boolean {
-  if (ehDestaque) return false;
   if (resolverLarguraCardVitrine(acao.larguraCard) !== "metade") return false;
   return tipoAcaoSuportaCardMetade(acao.tipoDestino, acao.modoExibicaoColecao);
 }
 
 /**
  * Agrupa a ordem resolvida de blocos em linhas inteiras ou pares 2×1.
- * Regra anti-buraco: um card `"metade"` sem par consecutivo é promovido
+ * Regra anti-buraco: um bloco `"metade"` sem par consecutivo compatível é promovido
  * automaticamente para linha inteira.
+ * Quando o classificador retorna um grupo (`"botao"` | `"card"`), apenas blocos do
+ * mesmo grupo formam par 2×1 (evitando misturar botão pílula 50% com card 50%).
  */
 export function agruparBlocosEmLinhasVitrine(
   ordemBlocos: readonly string[],
-  ehBlocoMetade: (idBloco: string) => boolean,
+  classificarBlocoMetade: (idBloco: string) => boolean | GrupoPareamentoMetadeVitrine | null,
 ): readonly LinhaVitrine[] {
   const linhas: LinhaVitrine[] = [];
-  let pendenteMetade: string | null = null;
+  let pendente: { idBloco: string; grupo: GrupoPareamentoMetadeVitrine | "generico" } | null = null;
+
+  function encerrarPendente() {
+    if (pendente === null) return;
+    if (pendente.grupo === "botao") {
+      linhas.push({ tipo: "metade_isolada", idBloco: pendente.idBloco, grupo: "botao" });
+    } else {
+      linhas.push({ tipo: "inteira", idBloco: pendente.idBloco });
+    }
+    pendente = null;
+  }
 
   for (const idBloco of ordemBlocos) {
-    if (ehBlocoMetade(idBloco)) {
-      if (pendenteMetade === null) {
-        pendenteMetade = idBloco;
+    const resultado = classificarBlocoMetade(idBloco);
+    const grupoAtual: GrupoPareamentoMetadeVitrine | "generico" | null =
+      resultado === true ? "generico" : resultado === false || resultado === null ? null : resultado;
+
+    if (grupoAtual !== null) {
+      if (pendente === null) {
+        pendente = { idBloco, grupo: grupoAtual };
+      } else if (pendente.grupo === grupoAtual) {
+        linhas.push({
+          tipo: "par",
+          idsBlocos: [pendente.idBloco, idBloco],
+          ...(grupoAtual !== "generico" ? { grupo: grupoAtual } : {}),
+        });
+        pendente = null;
       } else {
-        linhas.push({ tipo: "par", idsBlocos: [pendenteMetade, idBloco] });
-        pendenteMetade = null;
+        encerrarPendente();
+        pendente = { idBloco, grupo: grupoAtual };
       }
       continue;
     }
 
-    if (pendenteMetade !== null) {
-      linhas.push({ tipo: "inteira", idBloco: pendenteMetade });
-      pendenteMetade = null;
-    }
+    encerrarPendente();
     linhas.push({ tipo: "inteira", idBloco });
   }
 
-  if (pendenteMetade !== null) {
-    linhas.push({ tipo: "inteira", idBloco: pendenteMetade });
-  }
+  encerrarPendente();
 
   return linhas;
 }

@@ -53,6 +53,31 @@ describe("Domínio da Página Publicada e SEO", () => {
     expect(resolvida.posicaoObjetoCss).toBe("50% 28%");
   });
 
+  it("deve reproduzir vídeo mesmo sem poster e nunca usar a URL do vídeo como imagem estática", () => {
+    const midiaVideoSemPoster: MidiaFundoEditorial = {
+      tipo: "video",
+      urlPrincipal: "http://127.0.0.1:9199/v0/b/demo-fluxo.firebasestorage.app/o/video.mp4",
+      textoAlternativo: "Vídeo de apresentação em loop.",
+      pontoFocalDesktop: { xPercentual: 50, yPercentual: 50 },
+      intensidadeVeloEscuro: "suave",
+    };
+
+    const resolvidaNormal = resolverMidiaEfetivaHome(midiaVideoSemPoster, {
+      modoMobile: false,
+      movimentoReduzido: false,
+    });
+    expect(resolvidaNormal.renderizarVideo).toBe(true);
+    expect(resolvidaNormal.urlVideo).toBe(midiaVideoSemPoster.urlPrincipal);
+    expect(resolvidaNormal.urlImagemEstatica).toBe("");
+
+    const resolvidaReduzida = resolverMidiaEfetivaHome(midiaVideoSemPoster, {
+      modoMobile: false,
+      movimentoReduzido: true,
+    });
+    expect(resolvidaReduzida.renderizarVideo).toBe(false);
+    expect(resolvidaReduzida.urlImagemEstatica).toBe("");
+  });
+
   it("deve preservar todas as ações válidas sem impor teto artificial e descartar itens vazios", () => {
     const listaExcedente: ItemAcaoHome[] = Array.from({ length: 8 }, (_, indice) => ({
       id: `acao-${indice}`,

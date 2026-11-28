@@ -1,6 +1,7 @@
 "use client";
 
-import { CalendarOff, Clock } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Calendar, CalendarOff, Clock } from "lucide-react";
 import {
   formatarDataCurtaPtBr,
   formatarRotuloFusoHorario,
@@ -60,6 +61,22 @@ export function PassoSelecaoDataHorario({
 }: PropriedadesPassoSelecaoDataHorario) {
   const mapaDias = new Map(diasDisponiveis.map((d) => [d.dataIso, d]));
   const diaAtual = dataSelecionada ? mapaDias.get(dataSelecionada) : undefined;
+  const [visualizacao, setVisualizacao] = useState<"calendario" | "horarios">(() =>
+    horarioSelecionado && diaAtual ? "horarios" : "calendario",
+  );
+
+  const exibirHorarios =
+    visualizacao === "horarios" && !carregando && !erroCarregamento && Boolean(diaAtual);
+
+  function selecionarDiaEAbrirHorarios(dataIso: string) {
+    aoSelecionarData(dataIso);
+    setVisualizacao("horarios");
+  }
+
+  function alterarMesNoCalendario(novoAnoMes: string) {
+    setVisualizacao("calendario");
+    aoAlterarMes(novoAnoMes);
+  }
 
   const periodosAgrupados: Array<{
     readonly periodo: SlotHorarioDisponivel["periodo"];
@@ -73,6 +90,73 @@ export function PassoSelecaoDataHorario({
         periodosAgrupados.push({ periodo, slots: lista });
       }
     }
+  }
+
+  if (exibirHorarios && diaAtual) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setVisualizacao("calendario")}
+            className={combinarClasses(
+              "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition-colors",
+              temaEscuro
+                ? "border-white/15 bg-white/[0.06] text-white hover:bg-white/12"
+                : "border-black/12 bg-black/[0.03] text-current hover:bg-black/[0.07]",
+            )}
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Alterar data</span>
+          </button>
+
+          <span className="inline-flex items-center gap-1 text-[11px] text-[var(--editorial-texto-secundario)]">
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+            {duracaoSlotMinutos} min · {formatarRotuloFusoHorario(fusoHorario)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-[var(--editorial-texto-secundario)]" aria-hidden="true" />
+          <h3 className="text-sm font-semibold">
+            Horários em {formatarDataCurtaPtBr(diaAtual.dataIso)}
+          </h3>
+        </div>
+
+        <div className="space-y-3.5">
+          {periodosAgrupados.map(({ periodo, slots }) => (
+            <div key={periodo} className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--editorial-texto-secundario)]">
+                {ROTULOS_PERIODO[periodo]}
+              </p>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {slots.map((slot) => {
+                  const selecionado = horarioSelecionado?.horarioInicio === slot.horarioInicio;
+                  return (
+                    <button
+                      key={slot.horarioInicio}
+                      type="button"
+                      aria-pressed={selecionado}
+                      onClick={() => aoSelecionarHorario(slot)}
+                      className={combinarClasses(
+                        "flex min-h-11 cursor-pointer items-center justify-center rounded-xl border text-sm font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2",
+                        selecionado
+                          ? "border-[var(--editorial-cta-fundo)] bg-[var(--editorial-cta-fundo)] font-semibold text-[var(--editorial-cta-texto)] shadow-sm"
+                          : temaEscuro
+                            ? "border-white/15 bg-white/[0.04] text-white hover:border-white/35 hover:bg-white/10"
+                            : "border-black/12 bg-black/[0.02] text-current hover:border-black/30 hover:bg-black/[0.06]",
+                      )}
+                    >
+                      {slot.horarioInicio}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -90,8 +174,8 @@ export function PassoSelecaoDataHorario({
           hojeIso={hojeIso}
           variante={temaEscuro ? "editorial_escuro" : "editorial_claro"}
           podeVoltarMes={podeVoltarMes}
-          aoAlterarMes={aoAlterarMes}
-          aoSelecionarData={aoSelecionarData}
+          aoAlterarMes={alterarMesNoCalendario}
+          aoSelecionarData={selecionarDiaEAbrirHorarios}
           obterEstadoDia={(dataIso, pertenceAoMes) => {
             if (!pertenceAoMes) return { desabilitado: true };
             const disponivel = mapaDias.has(dataIso);
@@ -149,66 +233,18 @@ export function PassoSelecaoDataHorario({
           {proximoDiaDisponivelOpcional && !proximoDiaDisponivelOpcional.startsWith(`${anoMes}-`) ? (
             <button
               type="button"
-              onClick={() => aoAlterarMes(proximoDiaDisponivelOpcional.slice(0, 7))}
-              className={combinarClasses(
-                "mt-2 min-h-10 rounded-full px-4 text-xs font-semibold transition-colors",
-                temaEscuro
-                  ? "bg-white text-mineral-950 hover:bg-white/90"
-                  : "bg-mineral-950 text-white hover:bg-mineral-800",
-              )}
+              onClick={() => alterarMesNoCalendario(proximoDiaDisponivelOpcional.slice(0, 7))}
+              className="mt-2 min-h-10 rounded-full bg-[var(--editorial-cta-fundo)] px-4 text-xs font-semibold text-[var(--editorial-cta-texto)] transition-opacity hover:opacity-90"
             >
               Ir para {formatarDataCurtaPtBr(proximoDiaDisponivelOpcional)}
             </button>
           ) : null}
         </div>
-      ) : diaAtual ? (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold">
-              Horários em {formatarDataCurtaPtBr(diaAtual.dataIso)}
-            </h3>
-            <span className="inline-flex items-center gap-1 text-[11px] text-[var(--editorial-texto-secundario)]">
-              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-              {duracaoSlotMinutos} min · {formatarRotuloFusoHorario(fusoHorario)}
-            </span>
-          </div>
-
-          <div className="space-y-3.5">
-            {periodosAgrupados.map(({ periodo, slots }) => (
-              <div key={periodo} className="space-y-2">
-                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--editorial-texto-secundario)]">
-                  {ROTULOS_PERIODO[periodo]}
-                </p>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                  {slots.map((slot) => {
-                    const selecionado = horarioSelecionado?.horarioInicio === slot.horarioInicio;
-                    return (
-                      <button
-                        key={slot.horarioInicio}
-                        type="button"
-                        aria-pressed={selecionado}
-                        onClick={() => aoSelecionarHorario(slot)}
-                        className={combinarClasses(
-                          "flex min-h-11 items-center justify-center rounded-xl border text-sm font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2",
-                          selecionado
-                            ? temaEscuro
-                              ? "border-white bg-white font-semibold text-mineral-950 shadow-sm"
-                              : "border-mineral-950 bg-mineral-950 font-semibold text-white shadow-sm"
-                            : temaEscuro
-                              ? "border-white/15 bg-white/[0.04] text-white hover:border-white/35 hover:bg-white/10"
-                              : "border-black/12 bg-black/[0.02] text-current hover:border-black/30 hover:bg-black/[0.06]",
-                        )}
-                      >
-                        {slot.horarioInicio}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      ) : (
+        <p className="text-center text-xs text-[var(--editorial-texto-secundario)]">
+          Toque em um dia disponível para ver os horários.
+        </p>
+      )}
     </div>
   );
 }

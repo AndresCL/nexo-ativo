@@ -84,6 +84,7 @@ import {
   Zap,
 } from "lucide-react";
 import { IconeWhatsapp } from "@/componentes/interface/IconeWhatsapp";
+import { CATALOGO_ICONES_ACOES_EXTRAS } from "./catalogoIconesEditorialExtras";
 
 export interface ItemCatalogoIcone {
   readonly id: string;
@@ -588,6 +589,7 @@ export const CATALOGO_ICONES_ACOES: readonly ItemCatalogoIcone[] = [
     palavrasChave: ["proximo", "seguir", "seta", "iniciar"],
     componente: (props) => <ArrowRight {...props} />,
   },
+  ...CATALOGO_ICONES_ACOES_EXTRAS,
 ];
 
 export const MAPA_ICONES_POR_ID: Readonly<Record<string, ItemCatalogoIcone>> = Object.fromEntries(

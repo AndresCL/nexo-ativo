@@ -29,15 +29,15 @@ export function HeroLanding() {
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-6">
             <TituloDigitadoHero
-              textoFixo="O microsite que transforma visitas em "
-              textoDigitado="clientes qualificados."
+              textoFixo="Crie o microsite que une visual premium, qualificação de leads e "
+              textoDigitado="métricas em tempo real."
               className="text-4xl leading-[1.08] font-bold tracking-tight text-mineral-950 sm:text-5xl lg:text-[3.25rem]"
             />
 
             <RevelacaoScroll atrasoSegundos={0.08} distanciaY={8}>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-neutral-600 sm:text-lg">
-                Serviços, portfólio, equipe e atendimento guiado em um único link — pronto em
-                minutos.
+                Serviços, portfólio, equipe e atendimento guiado em uma vitrine pensada para
+                converter e mostrar o que realmente gera clientes.
               </p>
             </RevelacaoScroll>
 
